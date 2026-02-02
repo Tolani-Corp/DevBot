@@ -1,0 +1,56 @@
+{
+    "name": "Dropbox Form Inquiry → Lead Database",
+    "description": "Automatically extract, classify, and store leads from Dropbox file uploads or form webhooks",
+    "enabled": true,
+    "trigger": {
+        "service": "inquiry",
+        "event": "form_submission"
+    },
+    "steps": [
+        {
+            "id": "extract_lead",
+            "type": "adapter_action",
+            "params": {
+                "adapter": "inquiry",
+                "action": "extractLeadFromForm",
+                "params": {
+                    "payload": "{{trigger.payload}}",
+                    "source": "dropbox_webhook"
+                }
+            },
+            "output": "lead"
+        },
+        {
+            "id": "classify_intent",
+            "type": "adapter_action",
+            "params": {
+                "adapter": "inquiry",
+                "action": "classifyContent",
+                "params": {
+                    "content": "{{lead.intent}} {{lead.raw.message}}",
+                    "categories": [
+                        "Sales",
+                        "Support",
+                        "Partnership",
+                        "Careers",
+                        "Spam"
+                    ]
+                }
+            },
+            "output": "tags"
+        },
+        {
+            "id": "log_success",
+            "type": "http",
+            "params": {
+                "url": "http://localhost:3000/api/ops/tasks",
+                "method": "POST",
+                "body": {
+                    "title": "New Inquiry: {{lead.name}}",
+                    "description": "Tags: {{tags}}. Message: {{lead.raw.message}}",
+                    "priority": "P2"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  devbot:
+    build: .
+    ports:
+      - "3100:3100"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://devbot:devbot@postgres:5432/devbot
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: node dist/worker.js
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://devbot:devbot@postgres:5432/devbot
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: devbot
+      POSTGRES_PASSWORD: devbot
+      POSTGRES_DB: devbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

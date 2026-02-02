@@ -1,0 +1,35 @@
+{
+  "name": "@tolani-bots/make-sdk",
+  "version": "1.0.0",
+  "description": "Make.com (Core/Pro) integration SDK for Tolani Bots",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "make",
+    "integromat",
+    "automation",
+    "webhook",
+    "tolani-bots"
+  ],
+  "author": "Tolani Corp",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.5",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.9.3",
+    "vitest": "^1.2.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0"
+  }
+}

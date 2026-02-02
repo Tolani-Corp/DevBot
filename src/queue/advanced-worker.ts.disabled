@@ -1,0 +1,349 @@
+import type { Job } from "bullmq";
+import { db } from "@/db";
+import { tasks, auditLogs } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import * as ai from "@/ai/claude";
+// import * as beyond from "@/ai/beyond"; // TODO: Create this module
+import * as git from "@/git/operations";
+import { updateSlackThread } from "@/slack/messages";
+
+export interface TaskData {
+  taskId: string;
+  slackThreadTs: string;
+  slackChannelId: string;
+  description: string;
+  repository?: string;
+  options?: {
+    enableTests?: boolean;
+    enableDocs?: boolean;
+    enableHealthCheck?: boolean;
+    enablePatternAnalysis?: boolean;
+  };
+}
+
+/**
+ * Advanced worker with "Building Beyond" capabilities
+ * Extends basic task execution with proactive analysis, testing, and documentation
+ */
+export async function processAdvancedTask(job: Job<TaskData>): Promise<void> {
+  const { taskId, slackThreadTs, slackChannelId, description, repository, options } = job.data;
+
+  const logAudit = async (action: string, details: unknown) => {
+    await db.insert(auditLogs).values({
+      taskId,
+      action,
+      details: details as Record<string, unknown>,
+    });
+  };
+
+  try {
+    // Step 1: Analyze task (0 → 5%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: "🔍 Analyzing task...",
+      progress: 0,
+    });
+
+    const analysis = await ai.analyzeTask(description, { repository });
+    await logAudit("task_analyzed", analysis);
+
+    await db
+      .update(tasks)
+      .set({
+        status: "processing",
+        progress: 5,
+        aiResponse: JSON.stringify(analysis),
+      })
+      .where(eq(tasks.id, taskId));
+
+    // Step 2: Pattern Analysis (5 → 15%) - BUILDING BEYOND 🚀
+    if (options?.enablePatternAnalysis && analysis.repository) {
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: "🧠 Running cross-project pattern analysis...",
+        progress: 5,
+      });
+
+      const repoFiles = await git.listFiles(analysis.repository);
+      const fileContents: Record<string, string> = {};
+
+      for (const file of repoFiles.slice(0, 20)) {
+        fileContents[file] = await git.readFile(analysis.repository, file);
+      }
+
+      const patterns = await beyond.analyzeCodebasePatterns(
+        [analysis.repository],
+        { [analysis.repository]: fileContents }
+      );
+
+      await logAudit("pattern_analysis", patterns);
+
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: `✨ Pattern insights:\n${patterns.insights.slice(0, 3).map((i) => `• ${i}`).join("\n")}`,
+        progress: 15,
+      });
+    }
+
+    // Step 3: Code Health Check (15 → 25%) - BUILDING BEYOND 🚀
+    if (options?.enableHealthCheck && analysis.repository) {
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: "💊 Running proactive health analysis...",
+        progress: 15,
+      });
+
+      const recentFiles = await git.listFiles(analysis.repository);
+      const fileContents: Record<string, string> = {};
+
+      for (const file of recentFiles.slice(0, 10)) {
+        fileContents[file] = await git.readFile(analysis.repository, file);
+      }
+
+      const health = await beyond.analyzeCodeHealth(
+        analysis.repository,
+        [], // Would fetch from git log
+        fileContents
+      );
+
+      await logAudit("health_analysis", health);
+
+      if (health.healthScore < 70) {
+        await updateSlackThread(slackChannelId, slackThreadTs, {
+          text: `⚠️ Health score: ${health.healthScore}/100\nFound ${health.issues.length} issues to address`,
+          progress: 25,
+        });
+      } else {
+        await updateSlackThread(slackChannelId, slackThreadTs, {
+          text: `✅ Health score: ${health.healthScore}/100 - Looking good!`,
+          progress: 25,
+        });
+      }
+    }
+
+    // Step 4: Read necessary files (25 → 35%)
+    if (!analysis.requiresCodeChange) {
+      // Question answering mode
+      const answer = await ai.answerQuestion(description, {
+        repository: analysis.repository,
+        fileContents: {},
+      });
+
+      await db
+        .update(tasks)
+        .set({
+          status: "completed",
+          progress: 100,
+          aiResponse: answer,
+        })
+        .where(eq(tasks.id, taskId));
+
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: `✅ Answer:\n\n${answer}`,
+        progress: 100,
+      });
+
+      return;
+    }
+
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: `📂 Reading ${analysis.filesNeeded?.length || 0} files...`,
+      progress: 25,
+    });
+
+    const fileContents: Record<string, string> = {};
+    for (const file of analysis.filesNeeded || []) {
+      try {
+        const content = await git.readFile(analysis.repository!, file);
+        fileContents[file] = content;
+      } catch (error) {
+        console.error(`Failed to read ${file}:`, error);
+      }
+    }
+
+    await logAudit("files_read", { files: Object.keys(fileContents) });
+
+    // Step 5: Generate code changes (35 → 50%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: "💻 Generating code changes...",
+      progress: 35,
+    });
+
+    const codeChanges = await ai.generateCodeChanges(analysis.plan, fileContents);
+    await logAudit("code_generated", {
+      filesChanged: codeChanges.changes.length,
+      commitMessage: codeChanges.commitMessage,
+    });
+
+    // Step 6: Auto-generate tests (50 → 60%) - BUILDING BEYOND 🚀
+    let testFiles: Array<{ file: string; content: string }> = [];
+    if (options?.enableTests) {
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: "🧪 Generating tests...",
+        progress: 50,
+      });
+
+      const tests = await beyond.generateTests(fileContents, description);
+      testFiles = tests.tests.map((t) => ({ file: t.file, content: t.content }));
+
+      await logAudit("tests_generated", { testFiles: tests.tests.length });
+
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: `✅ Generated ${testFiles.length} test files`,
+        progress: 60,
+      });
+    }
+
+    // Step 7: Auto-generate documentation (60 → 70%) - BUILDING BEYOND 🚀
+    let docChanges: Record<string, string> = {};
+    if (options?.enableDocs) {
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: "📝 Generating documentation...",
+        progress: 60,
+      });
+
+      const docs = await beyond.generateDocumentation(
+        codeChanges.changes.map((c) => ({ file: c.file, content: c.newContent })),
+        analysis.taskType
+      );
+
+      if (docs.readme) docChanges["README.md"] = docs.readme;
+      if (docs.apiDocs) docChanges["API.md"] = docs.apiDocs;
+      if (docs.migrationGuide) docChanges["MIGRATION.md"] = docs.migrationGuide;
+
+      await logAudit("docs_generated", { files: Object.keys(docChanges) });
+    }
+
+    // Step 8: Create git branch (70 → 75%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: "🌿 Creating git branch...",
+      progress: 70,
+    });
+
+    const branchName = `devbot/task-${taskId}`;
+    await git.createBranch(analysis.repository!, branchName);
+    await logAudit("branch_created", { branch: branchName });
+
+    // Step 9: Apply all changes (75 → 85%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: `✍️ Writing ${codeChanges.changes.length + testFiles.length + Object.keys(docChanges).length} files...`,
+      progress: 75,
+    });
+
+    // Write code changes
+    for (const change of codeChanges.changes) {
+      await git.writeFile(analysis.repository!, change.file, change.newContent);
+    }
+
+    // Write test files
+    for (const test of testFiles) {
+      await git.writeFile(analysis.repository!, test.file, test.content);
+    }
+
+    // Write documentation
+    for (const [file, content] of Object.entries(docChanges)) {
+      await git.writeFile(analysis.repository!, file, content);
+    }
+
+    await logAudit("files_written", {
+      code: codeChanges.changes.length,
+      tests: testFiles.length,
+      docs: Object.keys(docChanges).length,
+    });
+
+    // Step 10: Commit changes (85 → 90%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: "💾 Committing changes...",
+      progress: 85,
+    });
+
+    const commitSha = await git.commitChanges(
+      analysis.repository!,
+      codeChanges.commitMessage,
+      [...codeChanges.changes.map((c) => c.file), ...testFiles.map((t) => t.file), ...Object.keys(docChanges)]
+    );
+
+    await logAudit("commit_created", { sha: commitSha });
+
+    // Step 11: Push to GitHub (90 → 95%)
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: "🚀 Pushing to GitHub...",
+      progress: 90,
+    });
+
+    await git.pushBranch(analysis.repository!, branchName);
+    await logAudit("branch_pushed", { branch: branchName });
+
+    // Step 12: Create pull request (95 → 100%)
+    if (process.env.ENABLE_PR_CREATION === "true") {
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: "📬 Creating pull request...",
+        progress: 95,
+      });
+
+      // Enhanced PR description with insights - BUILDING BEYOND 🚀
+      let enhancedPR = codeChanges.prDescription;
+
+      if (testFiles.length > 0) {
+        enhancedPR += `\n\n## 🧪 Tests Generated\n- ${testFiles.length} test files with comprehensive coverage`;
+      }
+
+      if (Object.keys(docChanges).length > 0) {
+        enhancedPR += `\n\n## 📚 Documentation\n- Updated: ${Object.keys(docChanges).join(", ")}`;
+      }
+
+      const prUrl = await git.createPullRequest(
+        analysis.repository!,
+        branchName,
+        codeChanges.commitMessage,
+        enhancedPR
+      );
+
+      await db
+        .update(tasks)
+        .set({
+          status: "completed",
+          progress: 100,
+          prUrl,
+          commitSha,
+          filesChanged: codeChanges.changes.length + testFiles.length + Object.keys(docChanges).length,
+        })
+        .where(eq(tasks.id, taskId));
+
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: `✅ Task completed!\n\n📝 **Files changed:** ${codeChanges.changes.length}\n🧪 **Tests:** ${testFiles.length}\n📚 **Docs:** ${Object.keys(docChanges).length}\n🔗 **PR:** ${prUrl}`,
+        progress: 100,
+      });
+
+      await logAudit("pr_created", { url: prUrl });
+    } else {
+      await db
+        .update(tasks)
+        .set({
+          status: "completed",
+          progress: 100,
+          commitSha,
+          filesChanged: codeChanges.changes.length,
+        })
+        .where(eq(tasks.id, taskId));
+
+      await updateSlackThread(slackChannelId, slackThreadTs, {
+        text: `✅ Task completed!\n\n📝 **Files changed:** ${codeChanges.changes.length + testFiles.length + Object.keys(docChanges).length}\n🌿 **Branch:** ${branchName}\n💾 **Commit:** ${commitSha}`,
+        progress: 100,
+      });
+    }
+  } catch (error: any) {
+    await logAudit("task_failed", { error: error.message });
+
+    await db
+      .update(tasks)
+      .set({
+        status: "failed",
+        error: error.message,
+      })
+      .where(eq(tasks.id, taskId));
+
+    await updateSlackThread(slackChannelId, slackThreadTs, {
+      text: `❌ Task failed: ${error.message}`,
+      progress: 0,
+    });
+
+    throw error;
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@tolani/devbot",
+  "version": "0.1.0",
+  "description": "Autonomous AI software engineer for Slack - responds to mentions, executes code changes, and creates PRs",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc && tsc-alias",
+    "start": "node dist/index.js",
+    "worker": "tsx watch src/worker.ts",
+    "worker:prod": "node dist/worker.js",
+    "check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@octokit/rest": "^21.0.2",
+    "@slack/bolt": "^4.1.0",
+    "@slack/web-api": "^7.8.0",
+    "bullmq": "^5.34.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.0",
+    "ioredis": "^5.4.2",
+    "nanoid": "^5.0.9",
+    "postgres": "^3.4.8",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "drizzle-kit": "^0.30.0",
+    "prettier": "^3.4.2",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
