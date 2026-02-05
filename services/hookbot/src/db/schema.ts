@@ -72,3 +72,91 @@ export type NewWebhook = typeof webhooks.$inferInsert;
 
 export type Adapter = typeof adapters.$inferSelect;
 export type NewAdapter = typeof adapters.$inferInsert;
+
+// ==========================================
+// OUTREACH MODULE TABLES
+// ==========================================
+
+/**
+ * Campaigns
+ * The container for an outreach effort (e.g. "Cold Outreach Q1")
+ */
+export const campaigns = pgTable('campaigns', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  status: text('status').notNull().default('draft'), // 'draft', 'active', 'paused', 'completed'
+  stats: jsonb('stats').default({ sent: 0, replied: 0, revenue: 0 }),
+  config: jsonb('config').notNull().default({}), // dailyLimit, schedule, etc.
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+/**
+ * Sequences
+ * Ordered list of steps (Email, Delay, Task)
+ */
+export const sequences = pgTable('sequences', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id').references(() => campaigns.id).notNull(),
+  order: integer('order').notNull(), // 0, 1, 2...
+  type: text('type').notNull(), // 'email', 'delay', 'task'
+  config: jsonb('config').default({}), // For delay: { days: 2 } or for task: { type: 'manual_call' }
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+/**
+ * Variants (A/Z Testing)
+ * The specific content versions for a sequence step.
+ * Only applicable if sequence.type === 'email'
+ */
+export const variants = pgTable('variants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sequenceId: uuid('sequence_id').references(() => sequences.id).notNull(),
+  name: text('name').notNull(), // "Subject A", "Funny Intro"
+  content: jsonb('content').notNull(), // { subject: "...", body: "..." }
+  weight: integer('weight').notNull().default(100), // 0-100 probability
+  status: text('status').notNull().default('active'), // 'active', 'paused' (auto-optimized)
+  isControl: boolean('is_control').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+/**
+ * Contacts
+ * The targets of the campaign
+ */
+export const contacts = pgTable('contacts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id').references(() => campaigns.id).notNull(),
+  email: text('email').notNull(),
+  firstName: text('first_name'),
+  lastName: text('last_name'),
+  context: jsonb('context').default({}), // Variables for template replacement
+  status: text('status').notNull().default('pending'), // 'pending', 'active', 'completed', 'bounced', 'replied'
+  currentStep: integer('current_step').default(0),
+  nextActionAt: timestamp('next_action_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+/**
+ * Analytics
+ * Aggregated stats for optimization (Bandit Algorithm data)
+ */
+export const analytics = pgTable('analytics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  variantId: uuid('variant_id').references(() => variants.id).notNull(),
+  sends: integer('sends').default(0),
+  opens: integer('opens').default(0),
+  clicks: integer('clicks').default(0),
+  replies: integer('replies').default(0),
+  bounces: integer('bounces').default(0),
+  lastUpdated: timestamp('last_updated').defaultNow(),
+});
+
+// Type exports
+export type Campaign = typeof campaigns.$inferSelect;
+export type Contact = typeof contacts.$inferSelect;
+export type Variant = typeof variants.$inferSelect;
+export type Sequence = typeof sequences.$inferSelect;
+export type Analytics = typeof analytics.$inferSelect;
+

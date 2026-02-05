@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { ragEngine } from "./rag";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -44,15 +45,27 @@ Respond in JSON format:
   "requiresCodeChange": true | false
 }`;
 
-  const userPrompt = `Task description: ${description}${
-    context?.repository ? `\n\nRepository context: ${context.repository}` : ""
-  }${
-    context?.fileContents
+  let ragContext = "";
+  if (context?.repository) {
+    try {
+      const results = await ragEngine.search(description, context.repository);
+      if (results.length > 0) {
+        ragContext = `\n\nExisting code context (from RAG):\n${results
+          .map((r) => `File: ${r.filePath}\n\`\`\`\n${r.content}\n\`\`\``)
+          .join("\n\n")}`;
+      }
+    } catch (e) {
+      console.warn("RAG search failed", e);
+    }
+  }
+
+  const userPrompt = `Task description: ${description}${context?.repository ? `\n\nRepository context: ${context.repository}` : ""
+    }${ragContext}${context?.fileContents
       ? `\n\nFile contents:\n${Object.entries(context.fileContents)
-          .map(([path, content]) => `\n### ${path}\n\`\`\`\n${content.slice(0, 2000)}\n\`\`\``)
-          .join("\n")}`
+        .map(([path, content]) => `\n### ${path}\n\`\`\`\n${content.slice(0, 2000)}\n\`\`\``)
+        .join("\n")}`
       : ""
-  }`;
+    }`;
 
   const messages: Anthropic.MessageParam[] = [
     ...(context?.previousMessages?.map((m) => ({
@@ -71,7 +84,7 @@ Respond in JSON format:
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  
+
   if (!jsonMatch) {
     throw new Error("AI response did not contain valid JSON");
   }
@@ -129,7 +142,7 @@ Follow best practices:
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  
+
   if (!jsonMatch) {
     throw new Error("AI response did not contain valid JSON");
   }
@@ -150,13 +163,12 @@ Answer the user's question clearly and concisely.
 If code examples would help, include them.
 Use markdown formatting.`;
 
-  const userPrompt = `Question: ${question}${
-    context?.fileContents
+  const userPrompt = `Question: ${question}${context?.fileContents
       ? `\n\nRelevant files:\n${Object.entries(context.fileContents)
-          .map(([path, content]) => `### ${path}\n\`\`\`\n${content.slice(0, 1500)}\n\`\`\``)
-          .join("\n")}`
+        .map(([path, content]) => `### ${path}\n\`\`\`\n${content.slice(0, 1500)}\n\`\`\``)
+        .join("\n")}`
       : ""
-  }`;
+    }`;
 
   const messages: Anthropic.MessageParam[] = [
     ...(context?.previousMessages?.map((m) => ({
