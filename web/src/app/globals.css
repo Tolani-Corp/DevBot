@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* 
+  DevBot Design System 
+  Using OKLCH for vibrant tech/AI aesthetic.
+*/
+
+:root {
+    /* Font Stack */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* DevBot Brand Colors (Purple/Cyan Tilt) */
+    --color-primary: oklch(0.62 0.28 290);
+    /* Electric Purple */
+    --color-secondary: oklch(0.70 0.20 200);
+    /* Cyan */
+    --color-accent: oklch(0.65 0.25 15);
+    /* Hot Coral */
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    --gradient-scifi: linear-gradient(to right, oklch(0.62 0.28 290), oklch(0.70 0.20 200));
+
+    /* Animation */
+    --transition-base: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark Mode (Default) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-page: oklch(0.10 0.01 280);
+        /* Deep Space */
+        --bg-surface: oklch(0.15 0.02 280);
+        --bg-surface-hover: oklch(0.20 0.03 280);
+        --text-primary: oklch(0.98 0 0);
+        --text-secondary: oklch(0.70 0.02 280);
+        --border-subtle: oklch(0.25 0.02 280);
+    }
+}
+
+[data-theme="light"] {
+    --bg-page: oklch(0.98 0.005 280);
+    --bg-surface: oklch(1 0 0);
+    --bg-surface-hover: oklch(0.96 0.01 280);
+    --text-primary: oklch(0.15 0.02 280);
+    --text-secondary: oklch(0.45 0.02 280);
+    --border-subtle: oklch(0.90 0.01 280);
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.text-gradient {
+    background: var(--gradient-scifi);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.surface-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.surface-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(120, 50, 255, 0.2);
+}

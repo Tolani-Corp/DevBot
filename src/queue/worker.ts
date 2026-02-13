@@ -11,7 +11,7 @@ const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", 
   maxRetriesPerRequest: null,
 });
 
-export const taskQueue = new Queue("devbot-tasks", { connection });
+export const taskQueue = new Queue("funbot-tasks", { connection });
 
 type TaskData = {
   taskId: string;
@@ -127,7 +127,7 @@ export async function processTask(job: Job<TaskData>) {
       const codeChanges = await generateCodeChanges(analysis.plan, fileContents);
 
       // Step 5: Create branch
-      const branchName = `devbot/${taskId.slice(0, 8)}`;
+      const branchName = `funbot/${taskId.slice(0, 8)}`;
       await git.createBranch(targetRepo, branchName);
       await logAudit(taskId, "branch_created", { branch: branchName });
 
@@ -232,7 +232,7 @@ export async function processTask(job: Job<TaskData>) {
   }
 }
 
-export const worker = new Worker("devbot-tasks", processTask, {
+export const worker = new Worker("funbot-tasks", processTask, {
   connection,
   concurrency: Number(process.env.MAX_CONCURRENT_TASKS ?? 3),
 });

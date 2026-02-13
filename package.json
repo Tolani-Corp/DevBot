@@ -1,7 +1,7 @@
 {
-  "name": "@tolani/devbot",
+  "name": "@tolani/funbot",
   "version": "0.1.0",
-  "description": "Autonomous AI software engineer for Slack - responds to mentions, executes code changes, and creates PRs",
+  "description": "FunBot - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
   "type": "module",
   "license": "UNLICENSED",
   "private": true,
@@ -22,12 +22,15 @@
     "@slack/bolt": "^4.1.0",
     "@slack/web-api": "^7.8.0",
     "bullmq": "^5.34.0",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.0",
     "glob": "^13.0.1",
     "ioredis": "^5.4.2",
     "nanoid": "^5.0.9",
+    "openai": "^6.19.0",
     "postgres": "^3.4.8",
+    "twitter-api-v2": "^1.29.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

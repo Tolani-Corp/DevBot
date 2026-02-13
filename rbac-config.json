@@ -1,0 +1,210 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-13T00:00:00Z",
+  "source": "DevBot (funbot) - Single Source of Truth",
+  "roles": {
+    "admin": {
+      "displayName": "Administrator",
+      "description": "Full platform management, user management, moderation, analytics",
+      "tier": "enterprise",
+      "permissions": [
+        "manage:users",
+        "manage:content",
+        "manage:moderation",
+        "manage:settings",
+        "view:analytics",
+        "manage:ai",
+        "view:logs",
+        "manage:rbac",
+        "manage:billing",
+        "access:admin-dashboard"
+      ],
+      "entraIdRole": "admin"
+    },
+    "creator": {
+      "displayName": "Content Creator",
+      "description": "Create and manage video content, view analytics, earn revenue",
+      "tier": "pro",
+      "permissions": [
+        "upload:videos",
+        "edit:own-videos",
+        "delete:own-videos",
+        "view:analytics",
+        "earn:revenue",
+        "manage:profile",
+        "access:creator-studio"
+      ],
+      "entraIdRole": "creator"
+    },
+    "moderator": {
+      "displayName": "Content Moderator",
+      "description": "Manage reports, moderate content, enforce community guidelines",
+      "tier": "standard",
+      "permissions": [
+        "manage:reports",
+        "moderate:content",
+        "ban:users",
+        "view:queue",
+        "delete:content",
+        "leave:feedback",
+        "access:moderation-dashboard"
+      ],
+      "entraIdRole": "moderator"
+    },
+    "user": {
+      "displayName": "Regular User",
+      "description": "Basic access, view content, limited uploads",
+      "tier": "basic",
+      "permissions": [
+        "view:content",
+        "upload:limited",
+        "comment:content",
+        "view:profile",
+        "manage:own-profile"
+      ],
+      "entraIdRole": "user"
+    }
+  },
+  "permissions": {
+    "manage:users": {
+      "description": "Create, update, delete user accounts",
+      "level": "critical",
+      "requiredRoles": ["admin"]
+    },
+    "manage:content": {
+      "description": "Manage all platform content",
+      "level": "high",
+      "requiredRoles": ["admin"]
+    },
+    "manage:moderation": {
+      "description": "Manage moderation policies and rules",
+      "level": "high",
+      "requiredRoles": ["admin"]
+    },
+    "manage:settings": {
+      "description": "Manage platform settings and configuration",
+      "level": "high",
+      "requiredRoles": ["admin"]
+    },
+    "view:analytics": {
+      "description": "View platform analytics and metrics",
+      "level": "medium",
+      "requiredRoles": ["admin", "creator", "moderator"]
+    },
+    "manage:ai": {
+      "description": "Manage AI services and content analysis",
+      "level": "critical",
+      "requiredRoles": ["admin"]
+    },
+    "view:logs": {
+      "description": "View system logs and audit trails",
+      "level": "critical",
+      "requiredRoles": ["admin"]
+    },
+    "manage:rbac": {
+      "description": "Manage role-based access control (admin only)",
+      "level": "critical",
+      "requiredRoles": ["admin"],
+      "note": "Controlled by DevBot (funbot) as source of truth"
+    },
+    "upload:videos": {
+      "description": "Upload video content",
+      "level": "high",
+      "requiredRoles": ["creator"]
+    },
+    "edit:own-videos": {
+      "description": "Edit own video content",
+      "level": "medium",
+      "requiredRoles": ["creator"]
+    },
+    "delete:own-videos": {
+      "description": "Delete own video content",
+      "level": "medium",
+      "requiredRoles": ["creator"]
+    },
+    "earn:revenue": {
+      "description": "Participate in revenue sharing",
+      "level": "medium",
+      "requiredRoles": ["creator"]
+    },
+    "moderate:content": {
+      "description": "Moderate user-generated content",
+      "level": "high",
+      "requiredRoles": ["moderator"]
+    },
+    "ban:users": {
+      "description": "Ban users from platform",
+      "level": "high",
+      "requiredRoles": ["moderator", "admin"]
+    },
+    "view:content": {
+      "description": "View platform content",
+      "level": "low",
+      "requiredRoles": ["user", "creator", "moderator", "admin"]
+    }
+  },
+  "hierarchyRules": {
+    "admin": {
+      "precedence": 4,
+      "inherits": ["moderator", "creator", "user"],
+      "canAssign": ["admin", "moderator", "creator", "user"]
+    },
+    "moderator": {
+      "precedence": 3,
+      "inherits": ["user"],
+      "canAssign": ["user"]
+    },
+    "creator": {
+      "precedence": 2,
+      "inherits": ["user"],
+      "canAssign": []
+    },
+    "user": {
+      "precedence": 1,
+      "inherits": [],
+      "canAssign": []
+    }
+  },
+  "enforcementRules": [
+    {
+      "rule": "No user can assign higher-tier roles than their own",
+      "enforced": true
+    },
+    {
+      "rule": "Admin changes require audit logging",
+      "enforced": true
+    },
+    {
+      "rule": "Role assignments expire after 90 days unless renewed",
+      "enforced": false,
+      "note": "Feature in development"
+    },
+    {
+      "rule": "Sensitive operations require Entra ID MFA",
+      "enforced": true
+    }
+  ],
+  "auditLog": {
+    "enabled": true,
+    "retention": "2 years",
+    "trackingItems": [
+      "role_assignment",
+      "role_removal",
+      "permission_changes",
+      "policy_updates"
+    ]
+  },
+  "metadata": {
+    "maintainedBy": "DevBot (funbot)",
+    "nextReview": "2026-03-13",
+    "lastReviewedBy": "system",
+    "approvalRequired": true,
+    "changeLog": [
+      {
+        "date": "2026-02-13",
+        "change": "Initial RBAC configuration created",
+        "approvedBy": "funbot"
+      }
+    ]
+  }
+}

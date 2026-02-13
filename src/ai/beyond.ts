@@ -29,7 +29,7 @@ export async function analyzeTask(
   plan: string;
   requiresCodeChange: boolean;
 }> {
-  const systemPrompt = `You are DevBot, an autonomous AI software engineer.
+  const systemPrompt = `You are FunBot, an autonomous AI software engineer.
 Analyze the user's request and determine:
 1. Task type (bug_fix, feature, question, review, refactor)
 2. Which repository it relates to (if mentioned or inferable)
@@ -96,7 +96,7 @@ export async function generateCodeChanges(
   commitMessage: string;
   prDescription: string;
 }> {
-  const systemPrompt = `You are DevBot, an autonomous AI software engineer.
+  const systemPrompt = `You are FunBot, an autonomous AI software engineer.
 Given a plan and file contents, generate the exact code changes needed.
 
 Respond in JSON format:
@@ -149,7 +149,7 @@ export async function answerQuestion(
     previousMessages?: Message[];
   }
 ): Promise<string> {
-  const systemPrompt = `You are DevBot, an AI software engineer assistant.
+  const systemPrompt = `You are FunBot, an AI software engineer assistant.
 Answer the user's question clearly and concisely.
 If code examples would help, include them.
 Use markdown formatting.`;
@@ -205,7 +205,7 @@ export async function analyzeCodebasePatterns(
   }>;
   insights: string[];
 }> {
-  const systemPrompt = `You are DevBot's pattern analysis engine.
+  const systemPrompt = `You are FunBot's pattern analysis engine.
 Analyze code across multiple repositories to identify:
 1. Recurring patterns (validation, error handling, auth, API design, state management)
 2. Inconsistencies that should be standardized
@@ -285,7 +285,7 @@ export async function analyzeCodeHealth(
     performanceImpact?: string;
   };
 }> {
-  const systemPrompt = `You are DevBot's proactive health analyzer.
+  const systemPrompt = `You are FunBot's proactive health analyzer.
 Scan recent code changes for potential issues:
 - Security vulnerabilities (exposed secrets, injection risks)
 - Performance problems (inefficient queries, memory leaks)
@@ -351,7 +351,7 @@ export async function prioritizeTasks(
   }>;
   insights: string[];
 }> {
-  const systemPrompt = `You are DevBot's task prioritization engine.
+  const systemPrompt = `You are FunBot's task prioritization engine.
 Analyze tasks and context to assign priority levels:
 - P0: Critical (security, major outages, affects >80% users)
 - P1: High (bugs, important features, affects >50% users)
@@ -405,7 +405,7 @@ export async function generateTests(
   }>;
   recommendations: string[];
 }> {
-  const systemPrompt = `You are DevBot's test generation engine.
+  const systemPrompt = `You are FunBot's test generation engine.
 Generate comprehensive test suites:
 - Unit tests for individual functions
 - Integration tests for API endpoints
@@ -460,7 +460,7 @@ export async function generateInfrastructure(
   deploymentSteps: string[];
   estimatedCost?: string;
 }> {
-  const systemPrompt = `You are DevBot's infrastructure generation engine.
+  const systemPrompt = `You are FunBot's infrastructure generation engine.
 Generate production-ready infrastructure code:
 - Dockerfile (multi-stage builds)
 - docker-compose.yml
@@ -512,7 +512,7 @@ export async function generateDocumentation(
   migrationGuide?: string; // Migration guide for breaking changes
   inlineComments: Record<string, string[]>; // Comments to add to specific files
 }> {
-  const systemPrompt = `You are DevBot's documentation generator.
+  const systemPrompt = `You are FunBot's documentation generator.
 Create clear, comprehensive documentation:
 - Update README.md with new features
 - Generate API docs (endpoints, parameters, examples)

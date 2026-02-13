@@ -27,7 +27,7 @@ export async function sendAlert(message: string): Promise<void> {
   try {
     await app.client.chat.postMessage({
       channel: alertChannel,
-      text: `🚨 *DevBot Alert*\n${message}`,
+      text: `🚨 *FunBot Alert*\n${message}`,
     });
   } catch (error) {
     console.error("Failed to send alert:", error);

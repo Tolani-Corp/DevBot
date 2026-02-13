@@ -26,7 +26,7 @@ export async function analyzeTask(
   plan: string;
   requiresCodeChange: boolean;
 }> {
-  const systemPrompt = `You are DevBot, an autonomous AI software engineer.
+  const systemPrompt = `You are FunBot, an autonomous AI software engineer.
 Analyze the user's request and determine:
 1. Task type (bug_fix, feature, question, review, refactor)
 2. Which repository it relates to (if mentioned or inferable)
@@ -105,7 +105,7 @@ export async function generateCodeChanges(
   commitMessage: string;
   prDescription: string;
 }> {
-  const systemPrompt = `You are DevBot, an autonomous AI software engineer.
+  const systemPrompt = `You are FunBot, an autonomous AI software engineer.
 Given a plan and file contents, generate the exact code changes needed.
 
 Respond in JSON format:
@@ -158,7 +158,7 @@ export async function answerQuestion(
     previousMessages?: Message[];
   }
 ): Promise<string> {
-  const systemPrompt = `You are DevBot, an AI software engineer assistant.
+  const systemPrompt = `You are FunBot, an AI software engineer assistant.
 Answer the user's question clearly and concisely.
 If code examples would help, include them.
 Use markdown formatting.`;

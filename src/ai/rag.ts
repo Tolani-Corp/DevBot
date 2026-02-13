@@ -4,9 +4,10 @@ import OpenAI from "openai";
 import { eq, sql, cosineDistance, desc, gt, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI only if key is present to avoid crash on startup
+const openai = process.env.OPENAI_API_KEY
+    ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    : null;
 
 const EMBEDDING_MODEL = "text-embedding-3-small";
 
@@ -15,11 +16,20 @@ export class RAGEngine {
      * Generates embedding for a given text
      */
     async generateEmbedding(text: string): Promise<number[]> {
-        const response = await openai.embeddings.create({
-            model: EMBEDDING_MODEL,
-            input: text.replace(/\n/g, " "),
-        });
-        return response.data[0].embedding;
+        if (!openai) {
+            console.warn("RAG: OPENAI_API_KEY not found, skipping embedding generation.");
+            return [];
+        }
+        try {
+            const response = await openai.embeddings.create({
+                model: EMBEDDING_MODEL,
+                input: text.replace(/\n/g, " "),
+            });
+            return response.data[0].embedding;
+        } catch (error) {
+            console.error("RAG: Embedding generation failed", error);
+            return [];
+        }
     }
 
     /**
@@ -61,12 +71,14 @@ export class RAGEngine {
         // 4. Generate embeddings and store
         for (const [index, chunk] of chunks.entries()) {
             const embedding = await this.generateEmbedding(chunk);
-            await db.insert(documentEmbeddings).values({
-                documentId: docId,
-                chunkIndex: index,
-                content: chunk,
-                embedding,
-            });
+            if (embedding.length > 0) {
+                await db.insert(documentEmbeddings).values({
+                    documentId: docId,
+                    chunkIndex: index,
+                    content: chunk,
+                    embedding,
+                });
+            }
         }
 
         return docId;
@@ -77,6 +89,9 @@ export class RAGEngine {
      */
     async search(query: string, repository: string, limit = 5) {
         const queryEmbedding = await this.generateEmbedding(query);
+        if (queryEmbedding.length === 0) {
+            return [];
+        }
 
         // Cosine distance: 1 - cosine_similarity. Smaller is better.
         // We want top matches, so order by distance asc.

@@ -18,7 +18,7 @@ export const app = new App({
   logLevel: LogLevel.INFO,
 });
 
-const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@DevBot";
+const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot";
 
 // Listen for app mentions
 app.event("app_mention", async ({ event, say }) => {
@@ -159,7 +159,7 @@ app.command("/devbot-status", async ({ command, ack, say }) => {
       .limit(10);
 
     if (userTasks.length === 0) {
-      await say("No tasks found. Tag @DevBot to get started!");
+      await say("No tasks found. Tag @FunBot to get started!");
       return;
     }
 
@@ -188,18 +188,18 @@ app.command("/devbot-status", async ({ command, ack, say }) => {
 app.command("/devbot-help", async ({ ack, say }) => {
   await ack();
 
-  const helpText = `🤖 **DevBot - Autonomous AI Software Engineer**
+  const helpText = `🤖 **FunBot - Autonomous AI Software Engineer**
 
 **How to use:**
-• Tag \`@DevBot\` in any channel with your request
+• Tag \`@FunBot\` in any channel with your request
 • I'll respond in a thread with updates
 • I can fix bugs, add features, review code, and answer questions
 
 **Examples:**
-• \`@DevBot fix the authentication bug in HookTravel\`
-• \`@DevBot add rate limiting to the API in repo TolaniLabs\`
-• \`@DevBot explain how the session key registry works\`
-• \`@DevBot review the recent changes in dashboard.tsx\`
+• \`@FunBot fix the authentication bug in HookTravel\`
+• \`@FunBot add rate limiting to the API in repo TolaniLabs\`
+• \`@FunBot explain how the session key registry works\`
+• \`@FunBot review the recent changes in dashboard.tsx\`
 
 **Commands:**
 • \`/devbot-status\` - See your recent tasks
