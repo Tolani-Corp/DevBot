@@ -1,4 +1,4 @@
-import { App, BlockAction, ButtonAction } from "@slack/bolt";
+import { App } from "@slack/bolt";
 import { db } from "@/db";
 import { workspaces } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -41,6 +41,9 @@ export function registerInteractiveHandlers(app: App) {
 
   // Rename: "Rename Bot" button
   app.action("rename_bot_button", handleRenameBotButton);
+  
+  // Rename: Modal submission
+  app.view("rename_bot_modal", handleRenameBotModalSubmission);
 
   // Task approval buttons
   app.action("approve_code_changes", handleApproveCodeChanges);
@@ -129,7 +132,7 @@ async function handleChooseNameButton({
   client,
 }: {
   ack: any;
-  body: BlockAction<ButtonAction>;
+  body: any;
   client: any;
 }) {
   await ack();
@@ -369,6 +372,46 @@ async function handleRenameBotButton({ ack, body, client }: any) {
         team_id: teamId,
       }),
     },
+  });
+}
+
+/**
+ * Handle rename bot modal submission
+ */
+async function handleRenameBotModalSubmission({ ack, view, client }: any) {
+  await ack();
+
+  const newName = view.state.values.name_input.bot_name.value;
+  const metadata = JSON.parse(view.private_metadata);
+  const { team_id: teamId, channel_id: channelId } = metadata;
+
+  if (!newName || !teamId) return;
+
+  // Update bot name
+  await updateBotName(
+    {
+      platformType: "slack",
+      teamId,
+    },
+    newName
+  );
+
+  // Send confirmation message to channel
+  await client.chat.postMessage({
+    channel: channelId,
+    text: getNameConfirmationMessage(newName),
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `🎉 *Perfect! From now on, you can call me ${newName}.*\n\nYou can mention me anytime with @${newName.replace(
+            /\s+/g,
+            ""
+          )} and I'll help you with your development tasks.`,
+        },
+      },
+    ],
   });
 }
 

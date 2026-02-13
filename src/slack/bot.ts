@@ -20,6 +20,10 @@ import {
   getNameConfirmationMessage,
   getHelpMessage,
 } from "@/services/onboarding";
+import {
+  registerInteractiveHandlers,
+  getOnboardingBlocks,
+} from "./interactive";
 
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -27,6 +31,9 @@ export const app = new App({
   socketMode: true,
   logLevel: LogLevel.INFO,
 });
+
+// Register interactive component handlers (buttons, modals, select menus)
+registerInteractiveHandlers(app);
 
 const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot";
 
@@ -56,9 +63,11 @@ app.event("app_mention", async ({ event, say, client }) => {
         teamId,
       });
       
+      // Use interactive onboarding with buttons and dropdowns
       await say({
         thread_ts: event.ts,
-        text: getOnboardingMessage(),
+        text: getOnboardingMessage(), // Fallback text for notifications
+        ...getOnboardingBlocks(), // Interactive UI blocks
       });
       return;
     }
@@ -69,11 +78,45 @@ app.event("app_mention", async ({ event, say, client }) => {
       teamId,
     });
 
-    // Check for rename command
+    // Check for rename command - show interactive rename option
     if (text.toLowerCase().includes("rename bot") || text.toLowerCase().includes("change name")) {
       await say({
         thread_ts: event.ts,
-        text: `Sure! What would you like to call me instead of **${botName}**? Just reply with your preferred name.`,
+        text: `Sure! What would you like to call me instead of **${botName}**?`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `Sure! What would you like to call me instead of **${botName}**?`,
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "✏️ Choose New Name",
+                  emoji: true,
+                },
+                style: "primary",
+                action_id: "rename_bot_button",
+                value: "rename",
+              },
+            ],
+          },
+          {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: "Or just reply with your preferred name in this thread.",
+              },
+            ],
+          },
+        ],
       });
       return;
     }
@@ -148,7 +191,7 @@ app.event("message", async ({ event, say, client }) => {
   }
 
   try {
-    const text = (event as { text?: string }).text ?? "";
+    const messageText = (event as { text?: string }).text ?? "";
     
     // Get team info for workspace management
     const teamInfo = await client.team.info();
@@ -166,7 +209,7 @@ app.event("message", async ({ event, say, client }) => {
     });
 
     if (requiresOnboarding) {
-      const customName = text.trim();
+      const customName = messageText.trim();
       
       // Validate name
       if (customName && customName.length > 0 && customName.length <= 50) {
@@ -209,7 +252,7 @@ app.event("message", async ({ event, say, client }) => {
     if (
       lastBotMessage?.text?.includes("What would you like to call me instead of")
     ) {
-      const customName = text.trim();
+      const customName = messageText.trim();
       
       if (customName && customName.length > 0 && customName.length <= 50) {
         await updateBotName(
@@ -232,14 +275,13 @@ app.event("message", async ({ event, say, client }) => {
       }
       return;
     }
-    const text = (event as { text?: string }).text ?? "";
 
     // Check if DevBot was mentioned in the thread
-    if (!text.includes(DEVBOT_MENTION) && !text.includes("<@")) {
+    if (!messageText.includes(DEVBOT_MENTION) && !messageText.includes("<@")) {
       return;
     }
 
-    const cleanText = text.replace(/<@[A-Z0-9]+>/g, "").trim();
+    const cleanText = messageText.replace(/<@[A-Z0-9]+>/g, "").trim();
 
     // Find existing conversation
     const [conversation] = await db
