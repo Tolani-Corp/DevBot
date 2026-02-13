@@ -10,7 +10,8 @@ DevBot is an AI-powered software engineer that responds to Slack mentions, auton
 
 ## 🎯 Core Features
 
-- **Slack Integration** - Tag `@DevBot` in any channel or thread
+- **🎨 Bot Personalization** - "Hi, I'm DevBot, but you can call me whatever you like!" - Customize bot name on first use
+- **Slack Integration** - Tag `@DevBot` (or your custom name) in any channel or thread
 - **Autonomous Execution** - Analyzes tasks, reads files, generates code, commits changes
 - **GitHub Integration** - Creates branches, commits, and pull requests automatically
 - **In-Thread Updates** - Real-time progress reporting in Slack threads
@@ -141,6 +142,39 @@ ALLOWED_REPOS=TolaniLabs,hook-travel,listo-platform
 ---
 
 ## 📖 Usage
+
+### 🎨 First-Time Setup: Personalize Your Bot
+
+When you first mention DevBot, you'll get a friendly introduction:
+
+```
+You: @DevBot
+DevBot: 👋 Hi, I'm DevBot, but you can call me whatever you like!
+
+I'm your autonomous AI software engineer. I can help you with:
+• 🐛 Bug fixes and debugging
+• ✨ New feature implementation
+• 📝 Code reviews and suggestions
+• 💬 Questions about your codebase
+• 🔄 Automated pull requests
+
+What would you like to call me?
+You can keep "DevBot" or choose a custom name (like Debo, CodeBuddy, Builder, etc.)
+
+You: Debo
+Debo: 🎉 Perfect! From now on, you can call me Debo.
+You can mention me anytime with @Debo and I'll help you with your development tasks.
+```
+
+**Rename Anytime:**
+```
+@Debo rename bot
+Debo: What would you like to call me instead of Debo?
+You: CodeWizard
+CodeWizard: 🎉 Perfect! From now on, you can call me CodeWizard.
+```
+
+📖 **Full personalization guide:** [DEVBOT_PERSONALIZATION_GUIDE.md](./DEVBOT_PERSONALIZATION_GUIDE.md)
 
 ### Basic Examples
 
