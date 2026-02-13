@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBot Demo - See AI Development in Action</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0066CC;
+        }
+
+        .logo span {
+            color: #00CC66;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Hero Video Section */
+        .hero-video {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .video-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #0066CC 0%, #00CC66 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .video-placeholder:hover {
+            transform: scale(1.02);
+        }
+
+        .play-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .video-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* Video Info */
+        .video-info {
+            margin-top: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-description {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .video-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0066CC;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: #0066CC;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: #00CC66;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,204,102,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border: 2px solid white;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #0066CC;
+        }
+
+        /* Additional Videos Section */
+        .videos-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+
+        .videos-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #0066CC;
+            margin-bottom: 3rem;
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .video-thumbnail {
+            height: 180px;
+            background: linear-gradient(45deg, #0066CC, #00CC66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .video-duration-small {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+
+        .video-content {
+            padding: 1.5rem;
+        }
+
+        .video-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0066CC;
+        }
+
+        .video-card-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .video-card-link {
+            color: #00CC66;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .video-card-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Features Preview */
+        .features-preview {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .features-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #0066CC;
+            margin-bottom: 1rem;
+        }
+
+        .features-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0066CC;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo span {
+            color: #00CC66;
+        }
+
+        .footer-tagline {
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #00CC66;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #555;
+            padding-top: 1rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .video-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div>
+                <div class="logo">Dev<span>Bot</span></div>
+                <div class="tagline">AI-Powered Development Assistant</div>
+            </div>
+            <div class="tagline">A Tolani Labs Product</div>
+        </div>
+    </header>
+
+    <!-- Hero Video Section -->
+    <section class="hero-video">
+        <div class="container">
+            <div class="video-wrapper">
+                <div class="video-placeholder" onclick="playVideo()">
+                    <div class="play-icon">▶</div>
+                    <div class="video-title">DevBot Demo: Build Complete Features with AI</div>
+                    <div class="video-subtitle">See how 6 AI agents coordinate to deliver production-ready code</div>
+                    <div class="video-duration">3:00</div>
+                </div>
+            </div>
+
+            <div class="video-info">
+                <p class="video-description">
+                    Watch DevBot transform development in real-time. From a simple Slack message to a complete,
+                    tested, and documented feature - all in minutes, not days.
+                </p>
+
+                <div class="video-stats">
+                    <div class="stat">
+                        <div class="stat-number">Frontend</div>
+                        <div class="stat-label">React Components</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Backend</div>
+                        <div class="stat-label">REST API + Auth</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Testing</div>
+                        <div class="stat-label">95% Coverage</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Security</div>
+                        <div class="stat-label">OWASP Compliant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Experience DevBot Today</h2>
+            <p class="cta-subtitle">
+                Join thousands of developers who ship 3x faster with AI assistance
+            </p>
+
+            <div class="cta-buttons">
+                <a href="#" class="btn-primary">Start Free Trial</a>
+                <a href="#" class="btn-secondary">Schedule Demo</a>
+            </div>
+
+            <p style="margin-top: 1.5rem; opacity: 0.8; font-size: 0.9rem;">
+                14 days free • No credit card required • Cancel anytime
+            </p>
+        </div>
+    </section>
+
+    <!-- Additional Videos Section -->
+    <section class="videos-section">
+        <div class="container">
+            <h2 class="videos-title">More DevBot Videos</h2>
+
+            <div class="videos-grid">
+                <div class="video-card">
+                    <div class="video-thumbnail">
+                        🎬
+                        <div class="video-duration-small">2:00</div>
+                    </div>
+                    <div class="video-content">
+                        <div class="video-card-title">Customer Success Story</div>
+                        <div class="video-card-desc">
+                            How TechCorp reduced development time by 70% with DevBot
+                        </div>
+                        <a href="#" class="video-card-link">Watch Now →</a>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <div class="video-thumbnail">
+                        💡
+                        <div class="video-duration-small">1:30</div>
+                    </div>
+                    <div class="video-content">
+                        <div class="video-card-title">How DevBot Works</div>
+                        <div class="video-card-desc">
+                            Simple explanation of our 6 AI agent architecture
+                        </div>
+                        <a href="#" class="video-card-link">Watch Now →</a>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <div class="video-thumbnail">
+                        💰
+                        <div class="video-duration-small">0:45</div>
+                    </div>
+                    <div class="video-content">
+                        <div class="video-card-title">ROI Calculator</div>
+                        <div class="video-card-desc">
+                            See how DevBot saves $262K annually per team
+                        </div>
+                        <a href="#" class="video-card-link">Watch Now →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Preview -->
+    <section class="features-preview">
+        <div class="container">
+            <h2 class="features-title">Why DevBot?</h2>
+            <p class="features-subtitle">
+                The only AI development assistant with specialized agents that coordinate
+                to deliver complete, production-ready features
+            </p>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">6 Specialized AI Agents</div>
+                    <div class="feature-desc">
+                        Frontend, Backend, DevOps, Security, QA, and Coordinator
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🔧</div>
+                    <div class="feature-title">Any Tech Stack</div>
+                    <div class="feature-desc">
+                        React, Node.js, Python, AWS - DevBot adapts to your tools
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-title">Multi-Platform</div>
+                    <div class="feature-desc">
+                        Slack, VSCode, GitHub, CLI - works wherever you work
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">5x ROI</div>
+                    <div class="feature-desc">
+                        $50K investment returns $262K annually in savings
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Dev<span>Bot</span></div>
+            <div class="footer-tagline">AI-Powered Development Assistant</div>
+
+            <div class="footer-links">
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">Documentation</a>
+                <a href="#">Support</a>
+                <a href="#">About Tolani Labs</a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Tolani Labs | A Tolani Corp Ecosystem Member</p>
+                <p style="margin-top: 0.5rem;">DevBot - Transform Development with AI</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function playVideo() {
+            // Simulate video play
+            const videoElement = document.querySelector('.video-placeholder');
+            videoElement.innerHTML = `
+                <div style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                    🎬 <br><br>
+                    <strong>DevBot Demo Video Playing</strong><br><br>
+                    <small>This would be the actual embedded video from our marketing content</small>
+                </div>
+            `;
+
+            // Add close button
+            setTimeout(() => {
+                const closeButton = document.createElement('button');
+                closeButton.innerHTML = '✕';
+                closeButton.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(0,0,0,0.7);
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 30px;
+                    height: 30px;
+                    cursor: pointer;
+                    font-size: 16px;
+                `;
+                closeButton.onclick = () => location.reload();
+                videoElement.appendChild(closeButton);
+            }, 1000);
+        }
+
+        // Add some interactive elements
+        document.querySelectorAll('.video-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('.video-card-title').textContent;
+                alert(`🎬 Playing: ${title}\n\nThis would load the actual video from our marketing content library.`);
+            });
+        });
+    </script>
+</body>
+</html>

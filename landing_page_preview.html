@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBot - AI-Powered Development Assistant | Tolani Labs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #0066CC 0%, #00CC66 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #00CC66;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .cta-button {
+            background: #00CC66;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #0066CC 0%, #00CC66 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00CC66;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Video Section */
+        .video-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .video-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 450px;
+            background: linear-gradient(45deg, #0066CC, #00CC66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .video-caption {
+            text-align: center;
+            margin-top: 1rem;
+            color: #666;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .demo-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .demo-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-card h3 {
+            margin-bottom: 1rem;
+            color: #0066CC;
+        }
+
+        /* Testimonial Section */
+        .testimonial-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .testimonial {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .testimonial-quote {
+            font-size: 1.3rem;
+            font-style: italic;
+            margin-bottom: 2rem;
+            color: #555;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: #0066CC;
+        }
+
+        .testimonial-role {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #00CC66;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .faq-item {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 2rem;
+        }
+
+        .faq-question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0066CC;
+            cursor: pointer;
+        }
+
+        .faq-answer {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #0066CC 0%, #00CC66 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-primary {
+            background: white;
+            color: #0066CC;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border: 2px solid white;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .cta-secondary:hover {
+            background: white;
+            color: #0066CC;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            padding: 40px 0 20px;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #00CC66;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #00CC66;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #555;
+            padding-top: 1rem;
+            color: #ccc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Dev<span>Bot</span></div>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <a href="#cta" class="cta-button">Start Free Trial</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Write Goals, Not Code</h1>
+            <p>DevBot transforms every developer into an architect with AI-powered development assistance</p>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">3x</div>
+                    <div class="stat-label">Faster Development</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">80%</div>
+                    <div class="stat-label">Fewer Bugs</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$262K</div>
+                    <div class="stat-label">Annual Savings</div>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="#cta" class="cta-primary">Start Free Trial</a>
+                <a href="#demo" class="cta-secondary">Watch Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="video-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; color: #0066CC;">See DevBot in Action</h2>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="play-button">▶</div>
+                    <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;">
+                        <strong>DevBot Demo Video</strong><br>
+                        <small>3 minutes • Real workflow showcase</small>
+                    </div>
+                </div>
+            </div>
+
+            <p class="video-caption">
+                Watch how DevBot's 6 specialized AI agents coordinate to build complete features from a single request
+            </p>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 1rem; color: #0066CC;">How DevBot Works</h2>
+            <p style="text-align: center; margin-bottom: 3rem; color: #666; max-width: 600px; margin-left: auto; margin-right: auto;">
+                One simple request triggers a coordinated AI response across multiple specialized agents
+            </p>
+
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <div class="demo-icon">💬</div>
+                    <h3>You Request</h3>
+                    <p>"@DevBot build user dashboard with charts"</p>
+                </div>
+
+                <div class="demo-card">
+                    <div class="demo-icon">🤖</div>
+                    <h3>AI Agents Coordinate</h3>
+                    <p>Frontend + Backend + QA + Security agents work together</p>
+                </div>
+
+                <div class="demo-card">
+                    <div class="demo-icon">✅</div>
+                    <h3>Complete Solution</h3>
+                    <p>React components, API, tests, and documentation ready</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 1rem; color: #0066CC;">Why Choose DevBot?</h2>
+            <p style="text-align: center; margin-bottom: 3rem; color: #666;">
+                The only AI assistant with specialized agents for complete development workflows
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>6 AI Agents</h3>
+                    <p>Frontend, Backend, DevOps, Security, QA, and Coordinator agents</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Any Tech Stack</h3>
+                    <p>React, Node.js, Python, AWS, Azure - DevBot adapts to your tools</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multi-Platform</h3>
+                    <p>Works in Slack, VSCode, GitHub, CLI, and more</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Enterprise Security</h3>
+                    <p>SOC 2 compliant with self-hosted options</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>5x ROI</h3>
+                    <p>$50K investment returns $262K annually</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Production Ready</h3>
+                    <p>95% test coverage, security audits, documentation included</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section class="testimonial-section">
+        <div class="container">
+            <div class="testimonial">
+                <blockquote class="testimonial-quote">
+                    "DevBot doesn't just write code - it architects solutions. Our team went from shipping features weekly to daily, with zero production bugs. It's like having a staff engineer for every developer."
+                </blockquote>
+                <div class="testimonial-author">Sarah Chen</div>
+                <div class="testimonial-role">Senior Developer at TechCorp</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; color: #0066CC;">Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">What is DevBot?</div>
+                <div class="faq-answer">
+                    DevBot is an AI-powered development assistant that uses 6 specialized agents to generate complete, production-ready code from simple requests. Instead of manually writing code, developers describe what they want to build.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How much does DevBot cost?</div>
+                <div class="faq-answer">
+                    DevBot offers flexible pricing: Starter ($50/dev/month), Professional ($150/dev/month with all features), and Enterprise (custom pricing). 14-day free trial available.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is my code secure?</div>
+                <div class="faq-answer">
+                    Yes! DevBot uses enterprise-grade security: no code storage, encrypted communications, SOC 2 compliance, and self-hosted options for sensitive environments.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can DevBot handle large codebases?</div>
+                <div class="faq-answer">
+                    Absolutely. DevBot analyzes your entire codebase, understands patterns, and generates code that fits your architecture. It works with monorepos, microservices, and enterprise-scale applications.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What platforms does DevBot support?</div>
+                <div class="faq-answer">
+                    DevBot works wherever developers work: Slack, Discord, VSCode, Cursor, JetBrains IDEs, GitHub, GitLab, CLI, and more. One DevBot instance, unlimited platforms.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="cta" class="cta-section">
+        <div class="container">
+            <h2>Ready to Transform Your Development?</h2>
+            <p>Join thousands of developers who ship faster, build better, and focus on what matters</p>
+
+            <div class="cta-buttons">
+                <a href="#" class="cta-primary">Start Free 14-Day Trial</a>
+                <a href="#demo" class="cta-secondary">Watch Full Demo</a>
+            </div>
+
+            <p style="margin-top: 2rem; opacity: 0.8; font-size: 0.9rem;">
+                No credit card required • Cancel anytime • Enterprise options available
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#">Security</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Tolani Labs</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Security</a></li>
+                        <li><a href="#">Compliance</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Tolani Labs. All rights reserved. | A Tolani Corp Ecosystem Member</p>
+                <p style="margin-top: 0.5rem;">
+                    <a href="#" style="color: #00CC66; text-decoration: none;">DevBot</a> -
+                    AI-Powered Development Assistant
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple FAQ toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isVisible = answer.style.display === 'block';
+                answer.style.display = isVisible ? 'none' : 'block';
+            });
+        });
+
+        // Video play button interaction
+        document.querySelector('.play-button').addEventListener('click', () => {
+            alert('🎬 Video would play here!\n\nThis demonstrates the hero video integration from our marketing content.');
+        });
+    </script>
+</body>
+</html>
