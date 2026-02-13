@@ -94,3 +94,37 @@ export const documentEmbeddings = pgTable("document_embeddings", {
 
 export type Document = typeof documents.$inferSelect;
 export type DocumentEmbedding = typeof documentEmbeddings.$inferSelect;
+
+// Workspace preferences for customization
+export const workspaces = pgTable("workspaces", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  
+  // Platform identifiers
+  slackTeamId: text("slack_team_id").unique(),
+  discordGuildId: text("discord_guild_id").unique(),
+  platformType: text("platform_type").notNull(), // "slack", "discord", "vscode", etc.
+  
+  // Customization
+  botName: text("bot_name").notNull().default("DevBot"), // Custom name for the bot
+  botMention: text("bot_mention"), // Custom mention handle like "@Debo"
+  
+  // Onboarding
+  onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  
+  // Settings
+  settings: jsonb("settings").$type<{
+    autoRespond?: boolean;
+    notificationPreferences?: string[];
+    defaultRepository?: string;
+    theme?: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type Workspace = typeof workspaces.$inferSelect;
+export type NewWorkspace = typeof workspaces.$inferInsert;

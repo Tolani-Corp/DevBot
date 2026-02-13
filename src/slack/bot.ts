@@ -10,6 +10,16 @@ import {
   formatTaskForSlack,
   parsePriority,
 } from "@/integrations/clickup";
+import {
+  needsOnboarding,
+  ensureWorkspace,
+  completeOnboarding,
+  getBotName,
+  updateBotName,
+  getOnboardingMessage,
+  getNameConfirmationMessage,
+  getHelpMessage,
+} from "@/services/onboarding";
 
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -21,14 +31,57 @@ export const app = new App({
 const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot";
 
 // Listen for app mentions
-app.event("app_mention", async ({ event, say }) => {
+app.event("app_mention", async ({ event, say, client }) => {
   try {
     const text = event.text.replace(/<@[A-Z0-9]+>/g, "").trim();
+    
+    // Get team info for workspace management
+    const teamInfo = await client.team.info();
+    const teamId = teamInfo.team?.id;
+    
+    if (!teamId) {
+      console.error("Could not get team ID");
+      return;
+    }
+
+    // Check if onboarding is needed
+    const requiresOnboarding = await needsOnboarding({
+      platformType: "slack",
+      teamId,
+    });
+
+    if (requiresOnboarding) {
+      await ensureWorkspace({
+        platformType: "slack",
+        teamId,
+      });
+      
+      await say({
+        thread_ts: event.ts,
+        text: getOnboardingMessage(),
+      });
+      return;
+    }
+
+    // Get custom bot name for this workspace
+    const botName = await getBotName({
+      platformType: "slack",
+      teamId,
+    });
+
+    // Check for rename command
+    if (text.toLowerCase().includes("rename bot") || text.toLowerCase().includes("change name")) {
+      await say({
+        thread_ts: event.ts,
+        text: `Sure! What would you like to call me instead of **${botName}**? Just reply with your preferred name.`,
+      });
+      return;
+    }
 
     if (!text) {
       await say({
         thread_ts: event.ts,
-        text: "👋 Hi! Tag me with a description of what you need:\n• Bug fixes\n• New features\n• Code reviews\n• Questions about the codebase",
+        text: getHelpMessage(botName),
       });
       return;
     }
@@ -83,7 +136,7 @@ app.event("app_mention", async ({ event, say }) => {
 });
 
 // Listen for messages in threads
-app.event("message", async ({ event, say }) => {
+app.event("message", async ({ event, say, client }) => {
   // Only process messages in threads
   if (!("thread_ts" in event) || !event.thread_ts) {
     return;
@@ -95,6 +148,90 @@ app.event("message", async ({ event, say }) => {
   }
 
   try {
+    const text = (event as { text?: string }).text ?? "";
+    
+    // Get team info for workspace management
+    const teamInfo = await client.team.info();
+    const teamId = teamInfo.team?.id;
+    
+    if (!teamId) {
+      console.error("Could not get team ID");
+      return;
+    }
+
+    // Check if this is an onboarding response
+    const requiresOnboarding = await needsOnboarding({
+      platformType: "slack",
+      teamId,
+    });
+
+    if (requiresOnboarding) {
+      const customName = text.trim();
+      
+      // Validate name
+      if (customName && customName.length > 0 && customName.length <= 50) {
+        const finalName = customName.toLowerCase().includes("keep") ? "DevBot" : customName;
+        
+        await completeOnboarding(
+          {
+            platformType: "slack",
+            teamId,
+          },
+          finalName
+        );
+        
+        await say({
+          thread_ts: event.thread_ts,
+          text: getNameConfirmationMessage(finalName),
+        });
+      } else {
+        await say({
+          thread_ts: event.thread_ts,
+          text: "Please provide a valid name (1-50 characters) or say 'keep DevBot' to use the default name.",
+        });
+      }
+      return;
+    }
+
+    // Check if this is a rename response in an existing thread
+    // Look for the last bot message in the thread
+    const botUserId = (await client.auth.test()).user_id;
+    const threadMessages = await client.conversations.replies({
+      channel: (event as { channel: string }).channel,
+      ts: event.thread_ts,
+      limit: 10,
+    });
+
+    const lastBotMessage = threadMessages.messages
+      ?.reverse()
+      .find((msg) => msg.user === botUserId);
+
+    if (
+      lastBotMessage?.text?.includes("What would you like to call me instead of")
+    ) {
+      const customName = text.trim();
+      
+      if (customName && customName.length > 0 && customName.length <= 50) {
+        await updateBotName(
+          {
+            platformType: "slack",
+            teamId,
+          },
+          customName
+        );
+        
+        await say({
+          thread_ts: event.thread_ts,
+          text: getNameConfirmationMessage(customName),
+        });
+      } else {
+        await say({
+          thread_ts: event.thread_ts,
+          text: "Please provide a valid name (1-50 characters).",
+        });
+      }
+      return;
+    }
     const text = (event as { text?: string }).text ?? "";
 
     // Check if DevBot was mentioned in the thread
