@@ -56,6 +56,16 @@ export function Sidebar({ className }: { className?: string }) {
                             <div className="h-6 w-6 rounded-full bg-gray-500" /> {/* Avatar Placeholder */}
                             User Profile
                         </Link>
+                        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                            <a
+                                href="https://tolanilabs.io"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-zinc-500 hover:text-cyan-500 transition-colors italic flex items-center gap-1"
+                            >
+                                Built by <span className="font-bold">Tolani Labs</span>
+                            </a>
+                        </div>
                     </li>
                 </ul>
             </nav>
