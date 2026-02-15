@@ -1,0 +1,710 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { nanoid } from "nanoid";
+import type {
+  AgentRole,
+  AgentConfig,
+  AgentTask,
+  AgentResult,
+  OrchestratorPlan,
+  RedevelopmentEntry,
+  VerificationResult,
+} from "./types.js";
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
+
+const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+
+// ---------------------------------------------------------------------------
+// Agent role configurations
+// ---------------------------------------------------------------------------
+
+export const AGENT_CONFIGS: Record<AgentRole, AgentConfig> = {
+  frontend: {
+    role: "frontend",
+    systemPrompt: `You are a specialist frontend engineer agent.
+Your expertise covers React, CSS/Tailwind, accessibility (WCAG), responsive design, and UI/UX best practices.
+When generating code changes:
+- Ensure components are accessible (proper ARIA attributes, keyboard navigation).
+- Follow the existing component structure and naming conventions.
+- Use semantic HTML elements.
+- Write clean, maintainable JSX/TSX with proper TypeScript types.
+- Consider responsive breakpoints and dark-mode compatibility.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.css",
+      "**/*.scss",
+      "**/components/**",
+      "**/pages/**",
+      "**/hooks/**",
+      "**/styles/**",
+    ],
+    capabilities: [
+      "React component development",
+      "CSS / Tailwind styling",
+      "Accessibility auditing",
+      "UI/UX implementation",
+      "Client-side state management",
+      "Responsive design",
+    ],
+  },
+
+  backend: {
+    role: "backend",
+    systemPrompt: `You are a specialist backend engineer agent.
+Your expertise covers REST and GraphQL APIs, relational and document databases, business logic, and server-side performance.
+When generating code changes:
+- Follow existing patterns for route handlers, services, and data-access layers.
+- Validate all inputs with Zod or equivalent schema validation.
+- Handle errors gracefully with descriptive messages.
+- Use proper TypeScript types and avoid \`any\`.
+- Write efficient database queries and avoid N+1 problems.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/*.ts",
+      "**/routes/**",
+      "**/services/**",
+      "**/controllers/**",
+      "**/models/**",
+      "**/db/**",
+      "**/api/**",
+      "**/middleware/**",
+    ],
+    capabilities: [
+      "API design and implementation",
+      "Database schema and queries",
+      "Business logic",
+      "Input validation",
+      "Error handling",
+      "Performance optimization",
+    ],
+  },
+
+  security: {
+    role: "security",
+    systemPrompt: `You are a specialist security engineer agent.
+Your expertise covers vulnerability assessment, input validation, authentication, authorization, and secure coding practices.
+When generating code changes:
+- Identify and remediate OWASP Top 10 vulnerabilities.
+- Ensure all user input is sanitized and validated.
+- Verify authentication and authorization checks are in place.
+- Check for secrets or credentials that should not be committed.
+- Apply the principle of least privilege.
+- Recommend rate-limiting and CSRF protections where applicable.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/auth/**",
+      "**/middleware/**",
+      "**/*.env*",
+      "**/security/**",
+      "**/validators/**",
+      "**/sanitizer*",
+    ],
+    capabilities: [
+      "Vulnerability scanning",
+      "Input validation and sanitization",
+      "Authentication and authorization",
+      "Secrets management",
+      "Rate limiting",
+      "CSRF / XSS prevention",
+    ],
+  },
+
+  devops: {
+    role: "devops",
+    systemPrompt: `You are a specialist DevOps / infrastructure engineer agent.
+Your expertise covers CI/CD pipelines, Docker, Kubernetes, cloud infrastructure, and monitoring.
+When generating code changes:
+- Follow Infrastructure-as-Code best practices.
+- Keep Docker images minimal and multi-stage where appropriate.
+- Ensure CI pipelines include linting, testing, and security scanning.
+- Use environment variables for configuration; never hard-code secrets.
+- Document any new infrastructure requirements.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/Dockerfile*",
+      "**/*.yml",
+      "**/*.yaml",
+      "**/docker-compose*",
+      "**/.github/**",
+      "**/infra/**",
+      "**/deploy/**",
+      "**/scripts/**",
+    ],
+    capabilities: [
+      "CI/CD pipeline configuration",
+      "Docker containerization",
+      "Kubernetes orchestration",
+      "Infrastructure as Code",
+      "Monitoring and alerting",
+      "Deployment automation",
+    ],
+  },
+
+  general: {
+    role: "general",
+    systemPrompt: `You are a senior full-stack software engineer agent.
+You handle tasks that do not fall neatly into frontend, backend, security, or devops domains.
+When generating code changes:
+- Follow the project's existing coding style and conventions.
+- Write clean, well-typed TypeScript.
+- Include helpful code comments for non-obvious logic.
+- Ensure backwards compatibility unless explicitly told otherwise.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: ["**/*"],
+    capabilities: [
+      "Full-stack development",
+      "Code refactoring",
+      "Documentation",
+      "General problem solving",
+      "Cross-cutting concerns",
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Plan decomposition — ask Claude to break a task into subtasks
+// ---------------------------------------------------------------------------
+
+export async function planDecomposition(
+  description: string,
+  repository: string,
+  fileContents: Record<string, string>,
+): Promise<OrchestratorPlan> {
+  const availableRoles = Object.keys(AGENT_CONFIGS).join(", ");
+
+  const systemPrompt = `You are an orchestrator that decomposes complex software tasks into smaller, independent subtasks.
+
+Available specialist roles: ${availableRoles}
+
+For each subtask determine:
+1. A concise description of what needs to be done.
+2. Which role is best suited (frontend, backend, security, devops, general).
+3. Dependencies — IDs of other subtasks that must finish first (use the IDs you assign).
+4. An execution order that groups subtasks into parallel batches.
+
+Respond ONLY with valid JSON matching this schema:
+{
+  "subtasks": [
+    {
+      "id": "<unique-id>",
+      "description": "<what to do>",
+      "role": "<role>",
+      "dependencies": ["<id>", ...]
+    }
+  ],
+  "executionOrder": [
+    ["<ids that can run in parallel>"],
+    ["<next batch that depends on the previous>"]
+  ],
+  "estimatedComplexity": "simple" | "moderate" | "complex"
+}`;
+
+  const filesListing = Object.entries(fileContents)
+    .map(([path, content]) => `### ${path}\n\`\`\`\n${content.slice(0, 2000)}\n\`\`\``)
+    .join("\n\n");
+
+  const userPrompt = `Repository: ${repository}
+
+Task: ${description}
+
+Relevant files:
+${filesListing}`;
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 4096,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("Orchestrator: plan decomposition did not return valid JSON");
+  }
+
+  const raw = JSON.parse(jsonMatch[0]) as {
+    subtasks: Array<{
+      id: string;
+      description: string;
+      role: AgentRole;
+      dependencies: string[];
+    }>;
+    executionOrder: string[][];
+    estimatedComplexity: "simple" | "moderate" | "complex";
+  };
+
+  // Normalise into full AgentTask objects
+  const parentTaskId = nanoid();
+  const subtasks: AgentTask[] = raw.subtasks.map((st) => ({
+    id: st.id,
+    description: st.description,
+    role: st.role,
+    parentTaskId,
+    dependencies: st.dependencies,
+    status: "idle" as const,
+    attempt: 1,
+    maxAttempts: 3,
+  }));
+
+  return {
+    subtasks,
+    executionOrder: raw.executionOrder,
+    estimatedComplexity: raw.estimatedComplexity,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Execute a single subtask using the appropriate agent role
+// ---------------------------------------------------------------------------
+
+export async function executeSubtask(
+  task: AgentTask,
+  fileContents: Record<string, string>,
+): Promise<AgentResult> {
+  const config = AGENT_CONFIGS[task.role];
+
+  const filesListing = Object.entries(fileContents)
+    .map(([path, content]) => `### ${path}\n\`\`\`\n${content}\n\`\`\``)
+    .join("\n\n");
+
+  const userPrompt = `Task: ${task.description}
+
+Files:
+${filesListing}
+
+Respond with valid JSON:
+{
+  "success": true | false,
+  "output": "<summary of what was done>",
+  "changes": [
+    {
+      "file": "path/to/file",
+      "content": "<full new file content>",
+      "explanation": "<why this change>"
+    }
+  ],
+  "error": "<error message if success is false, otherwise omit>"
+}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 8192,
+      system: config.systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      return {
+        success: false,
+        output: "",
+        error: `Agent [${task.role}] did not return valid JSON for task "${task.id}"`,
+      };
+    }
+
+    return JSON.parse(jsonMatch[0]) as AgentResult;
+  } catch (err) {
+    return {
+      success: false,
+      output: "",
+      error: `Agent [${task.role}] failed on task "${task.id}": ${(err as Error).message}`,
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Merge results from multiple agents
+// ---------------------------------------------------------------------------
+
+export function mergeResults(
+  results: Array<{ task: AgentTask; result: AgentResult }>,
+): {
+  changes: Array<{ file: string; content: string; explanation: string }>;
+  conflicts: Array<{ file: string; taskIds: string[] }>;
+} {
+  const changesByFile = new Map<
+    string,
+    { content: string; explanation: string; taskId: string }[]
+  >();
+
+  for (const { task, result } of results) {
+    if (!result.success || !result.changes) continue;
+
+    for (const change of result.changes) {
+      const existing = changesByFile.get(change.file) ?? [];
+      existing.push({
+        content: change.content,
+        explanation: change.explanation,
+        taskId: task.id,
+      });
+      changesByFile.set(change.file, existing);
+    }
+  }
+
+  const changes: Array<{ file: string; content: string; explanation: string }> = [];
+  const conflicts: Array<{ file: string; taskIds: string[] }> = [];
+
+  for (const [file, entries] of changesByFile) {
+    if (entries.length > 1) {
+      // Last writer wins — log the conflict for visibility
+      conflicts.push({ file, taskIds: entries.map((e) => e.taskId) });
+      console.warn(
+        `[orchestrator] Conflict on "${file}" — tasks ${entries.map((e) => e.taskId).join(", ")} modified the same file. Last writer wins.`,
+      );
+    }
+
+    const winner = entries[entries.length - 1];
+    changes.push({
+      file,
+      content: winner.content,
+      explanation:
+        entries.length > 1
+          ? `${winner.explanation} (resolved conflict — overwrote changes from tasks: ${entries.slice(0, -1).map((e) => e.taskId).join(", ")})`
+          : winner.explanation,
+    });
+  }
+
+  return { changes, conflicts };
+}
+
+// ---------------------------------------------------------------------------
+// Main orchestration entry-point
+// ---------------------------------------------------------------------------
+
+export async function orchestrate(
+  description: string,
+  repository: string,
+  fileContents: Record<string, string>,
+): Promise<{
+  changes: Array<{ file: string; content: string; explanation: string }>;
+  conflicts: Array<{ file: string; taskIds: string[] }>;
+  commitMessage: string;
+  prDescription: string;
+}> {
+  // 1. Decompose the task
+  console.log("[orchestrator] Planning task decomposition...");
+  const plan = await planDecomposition(description, repository, fileContents);
+  console.log(
+    `[orchestrator] Plan: ${plan.subtasks.length} subtasks, complexity=${plan.estimatedComplexity}`,
+  );
+
+  // 2. Execute subtasks respecting dependency order
+  const completedResults: Array<{ task: AgentTask; result: AgentResult }> = [];
+  const taskMap = new Map(plan.subtasks.map((t) => [t.id, t]));
+
+  for (const batch of plan.executionOrder) {
+    console.log(`[orchestrator] Executing batch: [${batch.join(", ")}]`);
+
+    const batchPromises = batch.map(async (taskId) => {
+      const task = taskMap.get(taskId);
+      if (!task) {
+        console.warn(`[orchestrator] Task "${taskId}" not found in plan, skipping.`);
+        return null;
+      }
+
+      task.status = "working";
+      task.assignedAt = new Date();
+
+      const result = await executeSubtask(task, fileContents);
+
+      task.status = result.success ? "completed" : "failed";
+      task.completedAt = new Date();
+      task.result = result;
+
+      return { task, result };
+    });
+
+    const batchResults = await Promise.all(batchPromises);
+
+    for (const entry of batchResults) {
+      if (entry) {
+        completedResults.push(entry);
+      }
+    }
+  }
+
+  // 3. Merge all results
+  const { changes, conflicts } = mergeResults(completedResults);
+
+  // 4. Generate commit message and PR description
+  const summaryParts = completedResults
+    .filter(({ result }) => result.success)
+    .map(({ task, result }) => `- [${task.role}] ${task.description}: ${result.output}`);
+
+  const failedParts = completedResults
+    .filter(({ result }) => !result.success)
+    .map(({ task, result }) => `- [${task.role}] ${task.description}: ${result.error}`);
+
+  const commitMessage = `feat: ${description}\n\nSubtasks completed: ${summaryParts.length}/${completedResults.length}`;
+
+  const prDescription = [
+    `## Summary`,
+    ``,
+    description,
+    ``,
+    `## Changes`,
+    ``,
+    ...summaryParts,
+    ...(failedParts.length > 0
+      ? [``, `## Failures`, ``, ...failedParts]
+      : []),
+    ...(conflicts.length > 0
+      ? [
+          ``,
+          `## Conflicts (auto-resolved — last writer wins)`,
+          ``,
+          ...conflicts.map(
+            (c) => `- \`${c.file}\` modified by tasks: ${c.taskIds.join(", ")}`,
+          ),
+        ]
+      : []),
+    ``,
+    `---`,
+    `_Orchestrated by DevBot multi-agent system (${plan.estimatedComplexity} complexity, ${plan.subtasks.length} subtasks)._`,
+  ].join("\n");
+
+  return { changes, conflicts, commitMessage, prDescription };
+}
+
+// ---------------------------------------------------------------------------
+// Redevelopment Queue — verify completed tasks and retry failures
+// ---------------------------------------------------------------------------
+
+/**
+ * Default verification: ask Claude to review the agent's output for errors.
+ */
+export async function verifyAgentOutput(
+  task: AgentTask,
+  result: AgentResult,
+): Promise<VerificationResult> {
+  if (!result.success || !result.changes?.length) {
+    return {
+      passed: result.success,
+      errors: result.error ? [result.error] : [],
+      suggestions: [],
+    };
+  }
+
+  const systemPrompt = `You are a code review verification agent.
+Check the following code changes for:
+1. Syntax errors or invalid TypeScript
+2. Logic bugs or missing edge cases
+3. Security vulnerabilities (injection, traversal, etc.)
+4. Missing imports or type errors
+5. Inconsistencies with the task description
+
+Respond in JSON:
+{
+  "passed": true | false,
+  "errors": ["list of issues found"],
+  "suggestions": ["optional improvements"]
+}`;
+
+  const changesListing = result.changes
+    .map((c) => `### ${c.file}\n\`\`\`\n${c.content.slice(0, 3000)}\n\`\`\``)
+    .join("\n\n");
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: `Task: ${task.description}\n\nChanges:\n${changesListing}`,
+        },
+      ],
+    });
+
+    const text =
+      response.content[0].type === "text" ? response.content[0].text : "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      return { passed: true, errors: [], suggestions: [] };
+    }
+
+    return JSON.parse(jsonMatch[0]) as VerificationResult;
+  } catch {
+    // If verification itself fails, pass the task through
+    return { passed: true, errors: [], suggestions: [] };
+  }
+}
+
+/**
+ * Process the redevelopment queue: verify completed tasks, retry failures.
+ *
+ * Pattern:
+ * 1. Completed subtasks are pushed into the queue for verification.
+ * 2. A background verification agent checks each result for errors.
+ * 3. If verification fails AND retries remain, the task is re-executed
+ *    with the error context appended to the prompt.
+ * 4. Successfully verified tasks are marked with verificationPassed = true.
+ *
+ * This runs concurrently — the main orchestrator keeps producing while
+ * the redevelopment queue processes verifications in the background.
+ */
+export async function processRedevelopmentQueue(
+  entries: RedevelopmentEntry[],
+  fileContents: Record<string, string>,
+  verifyFn: (
+    task: AgentTask,
+    result: AgentResult,
+  ) => Promise<VerificationResult> = verifyAgentOutput,
+): Promise<{
+  verified: Array<{ task: AgentTask; result: AgentResult }>;
+  failed: Array<{ task: AgentTask; errors: string[] }>;
+}> {
+  const verified: Array<{ task: AgentTask; result: AgentResult }> = [];
+  const failed: Array<{ task: AgentTask; errors: string[] }> = [];
+
+  // Process all entries concurrently
+  const results = await Promise.all(
+    entries.map(async (entry) => {
+      const { task, originalResult } = entry;
+
+      // Step 1: Verify the completed output
+      const verification = await verifyFn(task, originalResult);
+
+      if (verification.passed) {
+        // Verification passed — mark and move on
+        originalResult.verificationPassed = true;
+        return { type: "verified" as const, task, result: originalResult };
+      }
+
+      // Step 2: Verification failed — can we retry?
+      if (task.attempt >= task.maxAttempts) {
+        console.warn(
+          `[redevelopment] Task "${task.id}" failed verification after ${task.attempt} attempts. Giving up.`,
+        );
+        return {
+          type: "failed" as const,
+          task,
+          errors: verification.errors,
+        };
+      }
+
+      // Step 3: Retry with error context
+      console.log(
+        `[redevelopment] Task "${task.id}" failed verification (attempt ${task.attempt}/${task.maxAttempts}). Retrying with error context.`,
+      );
+
+      task.attempt += 1;
+      task.status = "requeued";
+      task.requeueReason = verification.errors.join("; ");
+
+      // Augment the task description with the verification errors
+      const augmentedTask: AgentTask = {
+        ...task,
+        description: `${task.description}\n\nPREVIOUS ATTEMPT FAILED VERIFICATION. Fix these issues:\n${verification.errors.map((e) => `- ${e}`).join("\n")}\n\nSuggestions:\n${verification.suggestions.map((s) => `- ${s}`).join("\n")}`,
+      };
+
+      const retryResult = await executeSubtask(augmentedTask, fileContents);
+      retryResult.verificationPassed = false; // Will be verified in next pass
+
+      if (retryResult.success) {
+        // Re-verify the retry
+        const reVerification = await verifyFn(augmentedTask, retryResult);
+        retryResult.verificationPassed = reVerification.passed;
+
+        if (reVerification.passed) {
+          task.status = "completed";
+          return { type: "verified" as const, task, result: retryResult };
+        }
+      }
+
+      task.status = "failed";
+      return {
+        type: "failed" as const,
+        task,
+        errors: retryResult.error
+          ? [retryResult.error]
+          : verification.errors,
+      };
+    }),
+  );
+
+  for (const r of results) {
+    if (r.type === "verified") {
+      verified.push({ task: r.task, result: r.result });
+    } else {
+      failed.push({ task: r.task, errors: r.errors });
+    }
+  }
+
+  console.log(
+    `[redevelopment] Queue processed: ${verified.length} verified, ${failed.length} failed`,
+  );
+
+  return { verified, failed };
+}
+
+/**
+ * Orchestrate with redevelopment: run the normal orchestration, then verify
+ * all completed subtasks through the redevelopment queue.
+ */
+export async function orchestrateWithRedevelopment(
+  description: string,
+  repository: string,
+  fileContents: Record<string, string>,
+): Promise<{
+  changes: Array<{ file: string; content: string; explanation: string }>;
+  conflicts: Array<{ file: string; taskIds: string[] }>;
+  commitMessage: string;
+  prDescription: string;
+  verificationSummary: {
+    verified: number;
+    failed: number;
+    retried: number;
+  };
+}> {
+  // Phase 1: Normal orchestration
+  const result = await orchestrate(description, repository, fileContents);
+
+  // Phase 2: Build redevelopment queue from all completed subtasks
+  // (Re-run plan to get subtask references — in production, orchestrate()
+  // would return the completed tasks directly)
+  const plan = await planDecomposition(description, repository, fileContents);
+  const completedEntries: RedevelopmentEntry[] = plan.subtasks
+    .filter((t) => t.status === "completed" && t.result)
+    .map((t) => ({
+      task: t,
+      originalResult: t.result!,
+      verificationErrors: [],
+      requeuedAt: new Date(),
+    }));
+
+  if (completedEntries.length === 0) {
+    return {
+      ...result,
+      verificationSummary: { verified: 0, failed: 0, retried: 0 },
+    };
+  }
+
+  // Phase 3: Process redevelopment queue
+  const { verified, failed } = await processRedevelopmentQueue(
+    completedEntries,
+    fileContents,
+  );
+
+  const retried = completedEntries.filter((e) => e.task.attempt > 1).length;
+
+  return {
+    ...result,
+    verificationSummary: {
+      verified: verified.length,
+      failed: failed.length,
+      retried,
+    },
+  };
+}

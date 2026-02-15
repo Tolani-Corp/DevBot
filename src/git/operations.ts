@@ -1,7 +1,9 @@
 import { Octokit } from "@octokit/rest";
 import fs from "fs/promises";
 import path from "path";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
+import { sanitizeBranchName, sanitizeFilePath } from "@/middleware/sanitizer";
+import { validateCommitMessage } from "@/middleware/validators";
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -10,10 +12,22 @@ const octokit = new Octokit({
 const GITHUB_ORG = process.env.GITHUB_ORG ?? "Tolani-Corp";
 const WORKSPACE_ROOT = process.env.WORKSPACE_ROOT ?? process.cwd();
 
+/**
+ * Run a git command safely using execFileSync with array arguments.
+ * Prevents shell injection by never passing through a shell.
+ */
+function git(repoPath: string, args: string[]): string {
+  return execFileSync("git", args, {
+    cwd: repoPath,
+    stdio: "pipe",
+    encoding: "utf-8",
+    timeout: 30_000,
+  }).trim();
+}
+
 export async function readFile(repo: string, filePath: string): Promise<string> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  const fullPath = path.join(repoPath, filePath);
-  
+  const fullPath = sanitizeFilePath(repo, filePath);
+
   try {
     return await fs.readFile(fullPath, "utf-8");
   } catch (error) {
@@ -26,9 +40,8 @@ export async function writeFile(
   filePath: string,
   content: string
 ): Promise<void> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  const fullPath = path.join(repoPath, filePath);
-  
+  const fullPath = sanitizeFilePath(repo, filePath);
+
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
   await fs.writeFile(fullPath, content, "utf-8");
 }
@@ -37,9 +50,8 @@ export async function listFiles(
   repo: string,
   dirPath: string = "."
 ): Promise<string[]> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  const fullPath = path.join(repoPath, dirPath);
-  
+  const fullPath = sanitizeFilePath(repo, dirPath);
+
   try {
     const entries = await fs.readdir(fullPath, { withFileTypes: true });
     return entries.map((e) => (e.isDirectory() ? `${e.name}/` : e.name));
@@ -53,14 +65,16 @@ export async function createBranch(
   branchName: string,
   baseBranch: string = "main"
 ): Promise<void> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  
+  const repoPath = path.resolve(WORKSPACE_ROOT, repo);
+  const safeBranch = sanitizeBranchName(branchName);
+  const safeBase = sanitizeBranchName(baseBranch);
+
   try {
-    execSync(`git checkout ${baseBranch}`, { cwd: repoPath, stdio: "pipe" });
-    execSync(`git pull origin ${baseBranch}`, { cwd: repoPath, stdio: "pipe" });
-    execSync(`git checkout -b ${branchName}`, { cwd: repoPath, stdio: "pipe" });
+    git(repoPath, ["checkout", safeBase]);
+    git(repoPath, ["pull", "origin", safeBase]);
+    git(repoPath, ["checkout", "-b", safeBranch]);
   } catch (error) {
-    throw new Error(`Failed to create branch ${branchName}: ${error}`);
+    throw new Error(`Failed to create branch ${safeBranch}: ${error}`);
   }
 }
 
@@ -69,32 +83,32 @@ export async function commitChanges(
   message: string,
   files: string[]
 ): Promise<string> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  
+  const repoPath = path.resolve(WORKSPACE_ROOT, repo);
+  const safeMessage = validateCommitMessage(message);
+
   try {
     for (const file of files) {
-      execSync(`git add "${file}"`, { cwd: repoPath, stdio: "pipe" });
+      // Validate each file path stays within repo
+      sanitizeFilePath(repo, file);
+      git(repoPath, ["add", "--", file]);
     }
-    
-    execSync(`git commit -m "${message}"`, { cwd: repoPath, stdio: "pipe" });
-    
-    const sha = execSync(`git rev-parse HEAD`, { cwd: repoPath, stdio: "pipe" })
-      .toString()
-      .trim();
-    
-    return sha;
+
+    git(repoPath, ["commit", "-m", safeMessage]);
+
+    return git(repoPath, ["rev-parse", "HEAD"]);
   } catch (error) {
     throw new Error(`Failed to commit changes: ${error}`);
   }
 }
 
 export async function pushBranch(repo: string, branchName: string): Promise<void> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  
+  const repoPath = path.resolve(WORKSPACE_ROOT, repo);
+  const safeBranch = sanitizeBranchName(branchName);
+
   try {
-    execSync(`git push origin ${branchName}`, { cwd: repoPath, stdio: "pipe" });
+    git(repoPath, ["push", "origin", safeBranch]);
   } catch (error) {
-    throw new Error(`Failed to push branch ${branchName}: ${error}`);
+    throw new Error(`Failed to push branch ${safeBranch}: ${error}`);
   }
 }
 
@@ -114,7 +128,7 @@ export async function createPullRequest(
       head,
       base,
     });
-    
+
     return response.data.html_url;
   } catch (error) {
     throw new Error(`Failed to create PR: ${error}`);
@@ -122,12 +136,10 @@ export async function createPullRequest(
 }
 
 export async function getCurrentBranch(repo: string): Promise<string> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  
+  const repoPath = path.resolve(WORKSPACE_ROOT, repo);
+
   try {
-    return execSync(`git branch --show-current`, { cwd: repoPath, stdio: "pipe" })
-      .toString()
-      .trim();
+    return git(repoPath, ["branch", "--show-current"]);
   } catch (error) {
     throw new Error(`Failed to get current branch: ${error}`);
   }
@@ -137,18 +149,13 @@ export async function searchFiles(
   repo: string,
   pattern: string
 ): Promise<string[]> {
-  const repoPath = path.join(WORKSPACE_ROOT, repo);
-  
+  const repoPath = path.resolve(WORKSPACE_ROOT, repo);
+
   try {
-    const result = execSync(`git ls-files | grep -i "${pattern}"`, {
-      cwd: repoPath,
-      stdio: "pipe",
-    })
-      .toString()
-      .trim();
-    
+    // Use git ls-files with glob pattern instead of piping through shell
+    const result = git(repoPath, ["ls-files", `*${pattern}*`]);
     return result ? result.split("\n") : [];
-  } catch (error) {
+  } catch {
     // No matches
     return [];
   }
