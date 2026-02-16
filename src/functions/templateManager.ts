@@ -7,10 +7,38 @@
  * component templates and generate code based on stored designs.
  */
 
-import { db } from '@/database';
-import { templates, templateVersions } from '@/database/schema';
+import { db } from '@/db';
+import { templates, templateVersions } from '@/database/schema-templates';
 import { eq, and, like, desc } from 'drizzle-orm';
-import { generateCompletion } from '@/ai/claude';
+import { answerQuestion } from '@/ai/claude';
+
+// ============================================================================
+// INTERNAL HELPERS
+// ============================================================================
+
+type TemplateRow = typeof templates.$inferSelect;
+
+/** Convert a raw DB row into a typed Component. */
+function rowToComponent(r: TemplateRow): Component {
+  const parseCol = <T>(v: unknown, fallback: T): T => {
+    if (typeof v === 'string') return JSON.parse(v) as T;
+    return (v ?? fallback) as T;
+  };
+  return {
+    id: r.id,
+    name: r.name,
+    category: r.category as Component['category'],
+    description: r.description,
+    code: r.code,
+    props: parseCol<Record<string, string>>(r.props, {}),
+    demoData: r.demoData != null ? parseCol<Record<string, unknown>>(r.demoData, {}) : undefined,
+    dependencies: parseCol<string[]>(r.dependencies, []),
+    version: r.version,
+    tags: parseCol<string[]>(r.tags, []),
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  };
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -111,26 +139,12 @@ export async function storeTemplate(component: Omit<Component, 'id' | 'createdAt
  * Retrieve a template by ID
  */
 export async function getTemplate(id: string): Promise<Component | null> {
-  const result = await db.query.templates.findFirst({
-    where: eq(templates.id, id),
-  });
+  const rows = await db.select().from(templates).where(eq(templates.id, id)).limit(1);
+  const result = rows[0];
 
   if (!result) return null;
 
-  return {
-    id: result.id,
-    name: result.name,
-    category: result.category,
-    description: result.description,
-    code: result.code,
-    props: JSON.parse(result.props),
-    demoData: result.demoData ? JSON.parse(result.demoData) : undefined,
-    dependencies: JSON.parse(result.dependencies),
-    version: result.version,
-    tags: JSON.parse(result.tags),
-    createdAt: result.createdAt,
-    updatedAt: result.updatedAt,
-  };
+  return rowToComponent(result);
 }
 
 /**
@@ -155,52 +169,25 @@ export async function searchTemplates(
 
   const where = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-  const results = await db.query.templates.findMany({
-    where,
-    orderBy: desc(templates.createdAt),
-  });
+  const results = where
+    ? await db.select().from(templates).where(where).orderBy(desc(templates.createdAt))
+    : await db.select().from(templates).orderBy(desc(templates.createdAt));
 
-  return results
-    .filter(r => !tags || tags.some(tag => JSON.parse(r.tags).includes(tag)))
-    .map(r => ({
-      id: r.id,
-      name: r.name,
-      category: r.category,
-      description: r.description,
-      code: r.code,
-      props: JSON.parse(r.props),
-      demoData: r.demoData ? JSON.parse(r.demoData) : undefined,
-      dependencies: JSON.parse(r.dependencies),
-      version: r.version,
-      tags: JSON.parse(r.tags),
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
+  const components = results.map(rowToComponent);
+  return tags
+    ? components.filter(c => tags.some(tag => c.tags.includes(tag)))
+    : components;
 }
 
 /**
  * List all available templates by category
  */
 export async function listTemplatesByCategory(category: string): Promise<Component[]> {
-  const results = await db.query.templates.findMany({
-    where: eq(templates.category, category as any),
-    orderBy: desc(templates.createdAt),
-  });
+  const results = await db.select().from(templates)
+    .where(eq(templates.category, category as Component['category']))
+    .orderBy(desc(templates.createdAt));
 
-  return results.map(r => ({
-    id: r.id,
-    name: r.name,
-    category: r.category,
-    description: r.description,
-    code: r.code,
-    props: JSON.parse(r.props),
-    demoData: r.demoData ? JSON.parse(r.demoData) : undefined,
-    dependencies: JSON.parse(r.dependencies),
-    version: r.version,
-    tags: JSON.parse(r.tags),
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-  }));
+  return results.map(rowToComponent);
 }
 
 // ============================================================================
@@ -240,9 +227,7 @@ export async function customizeTemplate(
     Use the same component name and props interface.
   `;
 
-  const customizedCode = await generateCompletion(customizationPrompt, {
-    maxTokens: 3000,
-  });
+  const customizedCode = await answerQuestion(customizationPrompt);
 
   const changelog = [
     request.changes.colors && `Updated colors: ${JSON.stringify(request.changes.colors)}`,
@@ -311,9 +296,7 @@ export async function generateForStack(
     rust: 'Rust',
   };
 
-  const convertedCode = await generateCompletion(conversionPrompt, {
-    maxTokens: 4000,
-  });
+  const convertedCode = await answerQuestion(conversionPrompt);
 
   return {
     code: convertedCode,
@@ -329,45 +312,28 @@ export async function generateForStack(
  * Suggest best templates for a given use case
  */
 export async function suggestTemplates(useCase: string): Promise<Component[]> {
-  const allTemplates = await db.query.templates.findMany({
-    orderBy: desc(templates.createdAt),
-  });
+  const allTemplates = await db.select().from(templates).orderBy(desc(templates.createdAt));
 
   const suggestionPrompt = `
     User wants to build: "${useCase}"
     
     Available templates:
-    ${allTemplates.map(t => `- ${t.name} (${t.category}): ${t.description}`).join('\n')}
+    ${allTemplates.map((t: TemplateRow) => `- ${t.name} (${t.category}): ${t.description}`).join('\n')}
     
     Which 3-5 templates would best help with this use case?
     Return only the template names, one per line, in order of relevance.
   `;
 
-  const suggestions = await generateCompletion(suggestionPrompt, {
-    maxTokens: 500,
-  });
+  const suggestions = await answerQuestion(suggestionPrompt);
 
   const suggestionNames = suggestions
     .split('\n')
-    .map(s => s.trim().replace(/^\d+\.\s*/, ''))
+    .map((s: string) => s.trim().replace(/^\d+\.\s*/, ''))
     .filter(Boolean);
 
   return allTemplates
-    .filter(t => suggestionNames.some(name => t.name.toLowerCase().includes(name.toLowerCase())))
-    .map(r => ({
-      id: r.id,
-      name: r.name,
-      category: r.category,
-      description: r.description,
-      code: r.code,
-      props: JSON.parse(r.props),
-      demoData: r.demoData ? JSON.parse(r.demoData) : undefined,
-      dependencies: JSON.parse(r.dependencies),
-      version: r.version,
-      tags: JSON.parse(r.tags),
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
+    .filter((t: TemplateRow) => suggestionNames.some((name: string) => t.name.toLowerCase().includes(name.toLowerCase())))
+    .map(rowToComponent);
 }
 
 /**
@@ -398,9 +364,7 @@ export async function generatePage(
     Return only the complete page code.
   `;
 
-  const pageCode = await generateCompletion(pagePrompt, {
-    maxTokens: 5000,
-  });
+  const pageCode = await answerQuestion(pagePrompt);
 
   const fileName = pageName
     .toLowerCase()
@@ -467,10 +431,9 @@ export async function updateTemplate(
 export async function getTemplateHistory(
   componentId: string
 ): Promise<ComponentVersion[]> {
-  const results = await db.query.templateVersions.findMany({
-    where: eq(templateVersions.componentId, componentId),
-    orderBy: desc(templateVersions.createdAt),
-  });
+  const results = await db.select().from(templateVersions)
+    .where(eq(templateVersions.componentId, componentId))
+    .orderBy(desc(templateVersions.createdAt));
 
   return results as ComponentVersion[];
 }
@@ -483,28 +446,15 @@ export async function getTemplateHistory(
  * Export all templates as JSON for backup
  */
 export async function exportAllTemplates(): Promise<Record<string, Component[]>> {
-  const allTemplates = await db.query.templates.findMany();
+  const allTemplates = await db.select().from(templates);
 
   const grouped: Record<string, Component[]> = {};
 
-  allTemplates.forEach(t => {
+  allTemplates.forEach((t: TemplateRow) => {
     const category = t.category;
     if (!grouped[category]) grouped[category] = [];
 
-    grouped[category].push({
-      id: t.id,
-      name: t.name,
-      category: t.category,
-      description: t.description,
-      code: t.code,
-      props: JSON.parse(t.props),
-      demoData: t.demoData ? JSON.parse(t.demoData) : undefined,
-      dependencies: JSON.parse(t.dependencies),
-      version: t.version,
-      tags: JSON.parse(t.tags),
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-    });
+    grouped[category]!.push(rowToComponent(t));
   });
 
   return grouped;
@@ -518,12 +468,12 @@ export async function getTemplateStats(): Promise<{
   byCategory: Record<string, number>;
   lastUpdated: Date | null;
 }> {
-  const allTemplates = await db.query.templates.findMany();
+  const allTemplates = await db.select().from(templates);
 
   const byCategory: Record<string, number> = {};
   let lastUpdated: Date | null = null;
 
-  allTemplates.forEach(t => {
+  allTemplates.forEach((t: TemplateRow) => {
     byCategory[t.category] = (byCategory[t.category] || 0) + 1;
     if (!lastUpdated || t.updatedAt > lastUpdated) {
       lastUpdated = t.updatedAt;

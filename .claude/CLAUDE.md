@@ -1,5 +1,10 @@
 # DevBot - Autonomous AI Software Engineer
 
+## Quick Links
+
+- Workflow rules: see [AGENTS.md](./AGENTS.md)
+- Learned patterns: see [LEARNED.md](./LEARNED.md)
+
 ## Project Overview
 DevBot (branded as FunBot) is a Slack/Discord-integrated autonomous AI software engineer that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
 

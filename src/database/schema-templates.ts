@@ -11,6 +11,8 @@ import {
   timestamp,
   json,
   uuid,
+  boolean,
+  integer,
   index,
 } from 'drizzle-orm/pg-core';
 
