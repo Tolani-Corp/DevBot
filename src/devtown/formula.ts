@@ -126,6 +126,8 @@ const ROLE_SYMBOLS: Record<AgentRole, string> = {
   backend: "Ba",
   security: "Se",
   devops: "Dv",
+  "arb-runner": "Ar",
+  media: "Md",
   general: "Gn",
 };
 

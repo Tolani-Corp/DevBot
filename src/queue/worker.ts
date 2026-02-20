@@ -6,6 +6,15 @@ import { eq } from "drizzle-orm";
 import { analyzeTask, generateCodeChanges, answerQuestion } from "@/ai/claude";
 import * as git from "@/git/operations";
 import { updateSlackThread } from "@/slack/messages";
+import {
+  buildBranchName,
+  prefixCommitMessage,
+  buildPrTitle,
+  buildPrDescription,
+  linkPrToClickUp,
+  syncStatusFromGitEvent,
+  getTask as getClickUpTask,
+} from "@/integrations/clickup";
 
 const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
   maxRetriesPerRequest: null,
@@ -19,6 +28,7 @@ type TaskData = {
   slackChannelId: string;
   description: string;
   repository?: string;
+  clickUpTaskId?: string;
 };
 
 async function updateTaskStatus(
@@ -47,14 +57,23 @@ async function logAudit(taskId: string, action: string, details: Record<string, 
 }
 
 export async function processTask(job: Job<TaskData>) {
-  const { taskId, slackThreadTs, slackChannelId, description, repository } = job.data;
+  const { taskId, slackThreadTs, slackChannelId, description, repository, clickUpTaskId } = job.data;
+
+  // Fetch task to get userId for cost tracking
+  const [taskRecord] = await db.select().from(tasks).where(eq(tasks.id, taskId));
+  const userId = taskRecord?.slackUserId ?? "unknown";
 
   try {
     // Step 1: Analyze task
     await updateTaskStatus(taskId, "analyzing", 10);
     await updateSlackThread(slackChannelId, slackThreadTs, "🔍 Analyzing your request...");
 
-    const analysis = await analyzeTask(description, { repository });
+    const analysis = await analyzeTask(description, { 
+      repository, 
+      userId, 
+      workspaceId: slackChannelId,
+      filesContents: {}
+    });
 
     await logAudit(taskId, "task_analyzed", { analysis });
     await updateTaskStatus(taskId, "analyzing", 25, {
@@ -87,6 +106,8 @@ export async function processTask(job: Job<TaskData>) {
       const answer = await answerQuestion(description, {
         repository: targetRepo,
         fileContents,
+        userId,
+        workspaceId: slackChannelId
       });
 
       await updateTaskStatus(taskId, "completed", 100, {
@@ -124,12 +145,24 @@ export async function processTask(job: Job<TaskData>) {
       await updateTaskStatus(taskId, "working", 60);
       await updateSlackThread(slackChannelId, slackThreadTs, "✏️ Generating code changes...");
 
-      const codeChanges = await generateCodeChanges(analysis.plan, fileContents);
+      const codeChanges = await generateCodeChanges(
+        analysis.plan, 
+        fileContents,
+        userId,
+        slackChannelId
+      );
 
-      // Step 5: Create branch
-      const branchName = `funbot/${taskId.slice(0, 8)}`;
+      // Step 5: Create branch (include ClickUp task ID when available)
+      const branchName = clickUpTaskId
+        ? buildBranchName(clickUpTaskId, taskId)
+        : `funbot/${taskId.slice(0, 8)}`;
       await git.createBranch(targetRepo, branchName);
-      await logAudit(taskId, "branch_created", { branch: branchName });
+      await logAudit(taskId, "branch_created", { branch: branchName, clickUpTaskId });
+
+      // Sync ClickUp status → "in progress"
+      if (clickUpTaskId) {
+        await syncStatusFromGitEvent(clickUpTaskId, "branch_created");
+      }
 
       await updateTaskStatus(taskId, "working", 70);
       await updateSlackThread(
@@ -157,14 +190,18 @@ export async function processTask(job: Job<TaskData>) {
         `📝 Modified ${changedFiles.length} file(s):\n${changedFiles.map((f) => `• \`${f}\``).join("\n")}`
       );
 
-      // Step 7: Commit changes
+      // Step 7: Commit changes (embed ClickUp task ID in commit message)
+      const finalCommitMessage = clickUpTaskId
+        ? prefixCommitMessage(clickUpTaskId, codeChanges.commitMessage)
+        : codeChanges.commitMessage;
+
       const commitSha = await git.commitChanges(
         targetRepo,
-        codeChanges.commitMessage,
+        finalCommitMessage,
         changedFiles
       );
 
-      await logAudit(taskId, "git_commit", { sha: commitSha, message: codeChanges.commitMessage });
+      await logAudit(taskId, "git_commit", { sha: commitSha, message: finalCommitMessage, clickUpTaskId });
       await updateTaskStatus(taskId, "working", 85, { commitSha });
 
       // Step 8: Push branch
@@ -175,22 +212,49 @@ export async function processTask(job: Job<TaskData>) {
         `✅ Pushed commit \`${commitSha.slice(0, 7)}\``
       );
 
-      // Step 9: Create PR
+      // Step 9: Create PR (link ClickUp task ID in title + body)
       if (process.env.ENABLE_AUTO_PR === "true") {
         await updateTaskStatus(taskId, "working", 95);
 
+        // Fetch ClickUp task URL for the PR body link
+        let clickUpTaskUrl: string | undefined;
+        if (clickUpTaskId) {
+          try {
+            const cuTask = await getClickUpTask(clickUpTaskId);
+            clickUpTaskUrl = cuTask.url;
+          } catch {
+            // Non-fatal: continue without the URL
+          }
+        }
+
+        const prTitle = clickUpTaskId
+          ? buildPrTitle(clickUpTaskId, codeChanges.commitMessage)
+          : codeChanges.commitMessage;
+
+        const prBody = clickUpTaskId
+          ? buildPrDescription(clickUpTaskId, codeChanges.prDescription, clickUpTaskUrl)
+          : codeChanges.prDescription;
+
         const prUrl = await git.createPullRequest(
           targetRepo,
-          codeChanges.commitMessage,
-          codeChanges.prDescription,
+          prTitle,
+          prBody,
           branchName
         );
 
-        await logAudit(taskId, "pr_created", { prUrl });
+        await logAudit(taskId, "pr_created", { prUrl, clickUpTaskId });
         await updateTaskStatus(taskId, "completed", 100, {
           prUrl,
           completedAt: new Date(),
         });
+
+        // Bidirectional link: post PR URL back to ClickUp task
+        if (clickUpTaskId) {
+          await syncStatusFromGitEvent(clickUpTaskId, "pr_created");
+          await linkPrToClickUp(clickUpTaskId, prUrl, commitSha).catch((err) =>
+            console.warn(`[clickup] Failed to link PR to CU-${clickUpTaskId}:`, err)
+          );
+        }
 
         await updateSlackThread(
           slackChannelId,

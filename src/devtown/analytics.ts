@@ -173,6 +173,8 @@ export class AnalyticsEngine {
       backend: 0,
       security: 0,
       devops: 0,
+      "arb-runner": 0,
+      media: 0,
       general: 0,
     };
 
@@ -632,7 +634,7 @@ export class AnalyticsEngine {
       avgSuccessRate: 0,
       avgCompletionTimeMs: 0,
       totalLinesChanged: 0,
-      polecatsByRole: { frontend: 0, backend: 0, security: 0, devops: 0, general: 0 },
+      polecatsByRole: { frontend: 0, backend: 0, security: 0, "arb-runner": 0, devops: 0, media: 0, general: 0 },
       polecatsByStatus: { healthy: 0, degraded: 0, failing: 0 },
     };
   }

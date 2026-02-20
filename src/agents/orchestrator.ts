@@ -1,5 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { nanoid } from "nanoid";
+import {
+  prefixCommitMessage as clickupPrefixCommit,
+  buildPrDescription as clickupBuildPrDesc,
+} from "@/integrations/clickup";
+import { executeArbTask } from "./specialists/jr.js";
+import { executeMediaTask } from "./specialists/media.js";
 import type {
   AgentRole,
   AgentConfig,
@@ -163,6 +169,40 @@ Respond ONLY with valid JSON matching the expected schema.`,
       "Cross-cutting concerns",
     ],
   },
+
+  "arb-runner": {
+    role: "arb-runner",
+    systemPrompt: "You are JR, the specialized Arb Runner agent using browser automation to execute bets.",
+    filePatterns: [],
+    capabilities: ["browser-automation", "bet-execution", "arb-filling"],
+  },
+
+  media: {
+    role: "media",
+    systemPrompt: `You are a specialized media processing agent.
+Your expertise covers video editing, FFmpeg, and media platform integration.
+When generating code changes or executing tasks:
+- Use the available MCP tools to process media files.
+- Ensure output paths are valid and accessible.
+- Consult the MIT Video Productions guidelines (available via MCP resources) for professional standards on remote capture, lower thirds, captions, and webcast promotion to ensure accuracy and optimization.
+  - file:///platform_directory/mit_guidelines/remote_capture_guidelines.md
+  - file:///platform_directory/mit_guidelines/lower_thirds_specifications.md
+  - file:///platform_directory/mit_guidelines/captions_tip_sheet.md
+  - file:///platform_directory/mit_guidelines/webcast_promotion_tips.md
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/*.mp4",
+      "**/*.mov",
+      "**/*.avi",
+      "**/media/**",
+      "**/video/**",
+    ],
+    capabilities: [
+      "Video clipping and editing",
+      "FFmpeg processing",
+      "Media platform integration",
+    ],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -267,6 +307,14 @@ export async function executeSubtask(
   task: AgentTask,
   fileContents: Record<string, string>,
 ): Promise<AgentResult> {
+  if (task.role === "arb-runner") {
+    return await executeArbTask(task);
+  }
+
+  if (task.role === "media") {
+    return await executeMediaTask(task);
+  }
+
   const config = AGENT_CONFIGS[task.role];
 
   const filesListing = Object.entries(fileContents)
@@ -384,6 +432,7 @@ export async function orchestrate(
   description: string,
   repository: string,
   fileContents: Record<string, string>,
+  options?: { clickUpTaskId?: string },
 ): Promise<{
   changes: Array<{ file: string; content: string; explanation: string }>;
   conflicts: Array<{ file: string; taskIds: string[] }>;
@@ -472,7 +521,16 @@ export async function orchestrate(
     `_Orchestrated by DevBot multi-agent system (${plan.estimatedComplexity} complexity, ${plan.subtasks.length} subtasks)._`,
   ].join("\n");
 
-  return { changes, conflicts, commitMessage, prDescription };
+  // Embed ClickUp task reference if provided
+  const cuId = options?.clickUpTaskId;
+  const finalCommitMessage = cuId
+    ? clickupPrefixCommit(cuId, commitMessage)
+    : commitMessage;
+  const finalPrDescription = cuId
+    ? clickupBuildPrDesc(cuId, prDescription)
+    : prDescription;
+
+  return { changes, conflicts, commitMessage: finalCommitMessage, prDescription: finalPrDescription };
 }
 
 // ---------------------------------------------------------------------------
@@ -657,6 +715,7 @@ export async function orchestrateWithRedevelopment(
   description: string,
   repository: string,
   fileContents: Record<string, string>,
+  options?: { clickUpTaskId?: string },
 ): Promise<{
   changes: Array<{ file: string; content: string; explanation: string }>;
   conflicts: Array<{ file: string; taskIds: string[] }>;
@@ -669,7 +728,7 @@ export async function orchestrateWithRedevelopment(
   };
 }> {
   // Phase 1: Normal orchestration
-  const result = await orchestrate(description, repository, fileContents);
+  const result = await orchestrate(description, repository, fileContents, options);
 
   // Phase 2: Build redevelopment queue from all completed subtasks
   // (Re-run plan to get subtask references — in production, orchestrate()

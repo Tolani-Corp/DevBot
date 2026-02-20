@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ragEngine } from "./rag";
+import { costTracker } from "@/services/cost-service";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -17,7 +18,9 @@ export async function analyzeTask(
   context?: {
     repository?: string;
     previousMessages?: Message[];
-    fileContents?: Record<string, string>;
+    filesContents: Record<string, string>;
+    userId?: string;
+    workspaceId?: string;
   }
 ): Promise<{
   taskType: "bug_fix" | "feature" | "question" | "review" | "refactor";
@@ -60,9 +63,9 @@ Respond in JSON format:
   }
 
   const userPrompt = `Task description: ${description}${context?.repository ? `\n\nRepository context: ${context.repository}` : ""
-    }${ragContext}${context?.fileContents
-      ? `\n\nFile contents:\n${Object.entries(context.fileContents)
-        .map(([path, content]) => `\n### ${path}\n\`\`\`\n${content.slice(0, 2000)}\n\`\`\``)
+}${ragContext}${context?.filesContents
+      ? `\n\nFile contents:\n${Object.entries(context.filesContents)
+          .map(([path, content]) => `\n### ${path}\n\`\`\`\n${(content as string).slice(0, 2000)}\n\`\`\``)
         .join("\n")}`
       : ""
     }`;
@@ -94,7 +97,9 @@ Respond in JSON format:
 
 export async function generateCodeChanges(
   plan: string,
-  fileContents: Record<string, string>
+  fileContents: Record<string, string>,
+  userId: string = "system",
+  workspaceId: string = "system"
 ): Promise<{
   changes: Array<{
     file: string;
@@ -139,7 +144,13 @@ Follow best practices:
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
-
+  if (response.usage) {
+    costTracker.track(userId, workspaceId, {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model: MODEL,
+    }).catch(console.error);
+  }
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
 
@@ -156,6 +167,8 @@ export async function answerQuestion(
     repository?: string;
     fileContents?: Record<string, string>;
     previousMessages?: Message[];
+    userId?: string;
+    workspaceId?: string;
   }
 ): Promise<string> {
   const systemPrompt = `You are FunBot, an AI software engineer assistant.
@@ -184,6 +197,14 @@ Use markdown formatting.`;
     system: systemPrompt,
     messages,
   });
+
+  if (response.usage && context?.userId) {
+    costTracker.track(context.userId, context.workspaceId ?? "unknown", {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model: MODEL,
+    }).catch(console.error);
+  }
 
   return response.content[0].type === "text" ? response.content[0].text : "";
 }

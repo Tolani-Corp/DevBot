@@ -682,7 +682,7 @@ export class CLLMEngine {
     const requeuedBeads = 0;
 
     const byRole: Record<AgentRole, number> = {
-      frontend: 0, backend: 0, security: 0, devops: 0, general: 0,
+      frontend: 0, backend: 0, security: 0, devops: 0, "arb-runner": 0, media: 0, general: 0,
     };
 
     for (const convoy of convoys) {

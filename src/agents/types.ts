@@ -1,4 +1,11 @@
-export type AgentRole = "frontend" | "backend" | "security" | "devops" | "general";
+export type AgentRole =
+  | "frontend"
+  | "backend"
+  | "security"
+  | "devops"
+  | "arb-runner"
+  | "media"
+  | "general";
 
 export type AgentStatus = "idle" | "working" | "completed" | "failed" | "requeued";
 
