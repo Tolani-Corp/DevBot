@@ -1,3 +1,8 @@
+import type { ProbabilityDistribution, ConfidenceScore } from "@/reasoning/probability.js";
+import type { ImageContext } from "@/multimodal/vision.js";
+import type { AudioContext } from "@/multimodal/audio.js";
+import type { DocumentContext } from "@/multimodal/documents.js";
+
 export type AgentRole =
   | "frontend"
   | "backend"
@@ -8,6 +13,8 @@ export type AgentRole =
   | "general";
 
 export type AgentStatus = "idle" | "working" | "completed" | "failed" | "requeued";
+
+export type ComplexityLevel = "trivial" | "simple" | "moderate" | "complex" | "critical";
 
 export interface AgentTask {
   id: string;
@@ -22,6 +29,14 @@ export interface AgentTask {
   attempt: number; // Track retry attempts
   maxAttempts: number;
   requeueReason?: string;
+  // Multi-modal context (Frontier-class feature)
+  imageContext?: ImageContext[];
+  audioContext?: AudioContext[];
+  documentContext?: DocumentContext[];
+  // Probabilistic decision-making fields
+  estimatedComplexity?: ProbabilityDistribution<ComplexityLevel>;
+  confidenceThreshold?: number; // Minimum confidence to proceed without extra verification (default: 0.5)
+  agentMatchConfidence?: ConfidenceScore; // How well-matched is the selected agent?
 }
 
 export interface AgentResult {
@@ -34,6 +49,14 @@ export interface AgentResult {
   }>;
   error?: string;
   verificationPassed?: boolean; // Set after redevelopment verification
+  confidence?: ConfidenceScore; // Confidence in the result quality
+  requiresVerification?: boolean; // Auto-set based on low confidence
+  guardrailResults?: Array<{
+    guardrailId: string;
+    status: "passed" | "failed" | "warning" | "skipped";
+    severity: "block" | "warn" | "info";
+    message: string;
+  }>;
 }
 
 export interface AgentConfig {

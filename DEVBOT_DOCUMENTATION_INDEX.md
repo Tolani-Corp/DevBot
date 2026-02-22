@@ -67,6 +67,8 @@ Start here → [DEVBOT_MEMORY_SYSTEM.md](./DEVBOT_MEMORY_SYSTEM.md)
 | Document | Purpose | Audience |
 |----------|---------|----------|
 | [DEVBOT_SECURITY_GUIDE.md](./DEVBOT_SECURITY_GUIDE.md) | **[NEW] Production security hardening** | Security, DevOps |
+| [DEVBOT_PENTEST_GUIDE.md](./DEVBOT_PENTEST_GUIDE.md) | **✅ Kali-powered penetration testing** | Security, DevOps |
+| [PENTEST_QUICK_REFERENCE.md](./PENTEST_QUICK_REFERENCE.md) | **Quick command reference for pentesting** | All users |
 | [RBAC-SOURCE-OF-TRUTH.md](./RBAC-SOURCE-OF-TRUTH.md) | Role-based access control | Architects |
 | [rbac-config.json](./rbac-config.json) | RBAC configuration | DevOps |
 

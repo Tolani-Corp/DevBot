@@ -31,7 +31,7 @@ DevBot is an AI-powered software engineer that responds to Slack mentions, auton
 ### Phase 3: Automated Quality
 - **🧪 Auto-Generated Tests** - Unit, integration, and edge case coverage
 - **📝 Living Documentation** - Auto-updates README, API docs, migration guides
-- **🔒 Security Scanning** - Detects secrets, injection risks, vulnerabilities
+- **✅ 🔒 Security Scanning** - Detects secrets, injection risks, vulnerabilities (Kali-powered pentest suite)
 - **⚡ Performance Monitoring** - Identifies slow queries and memory leaks
 
 ### Phase 4: DevOps Automation (Coming Soon)

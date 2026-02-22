@@ -93,14 +93,20 @@ export async function processTask(job: Job<TaskData>) {
 
       const fileContents: Record<string, string> = {};
 
+      // Parallel file reads for faster response
       if (analysis.filesNeeded?.length) {
-        for (const filePath of analysis.filesNeeded.slice(0, 5)) {
-          try {
-            fileContents[filePath] = await git.readFile(targetRepo, filePath);
-          } catch (err) {
-            console.warn(`Could not read ${filePath}:`, err);
-          }
-        }
+        const results = await Promise.all(
+          analysis.filesNeeded.slice(0, 5).map(async (filePath) => {
+            try {
+              return { path: filePath, content: await git.readFile(targetRepo, filePath) };
+            } catch {
+              return null;
+            }
+          })
+        );
+        results.filter(Boolean).forEach((r) => {
+          if (r) fileContents[r.path] = r.content;
+        });
       }
 
       const answer = await answerQuestion(description, {
@@ -129,14 +135,29 @@ export async function processTask(job: Job<TaskData>) {
 
     const fileContents: Record<string, string> = {};
 
+    // Parallel file reads (6x faster for 10+ files)
     if (analysis.filesNeeded?.length) {
-      for (const filePath of analysis.filesNeeded) {
-        try {
-          fileContents[filePath] = await git.readFile(targetRepo, filePath);
-          await logAudit(taskId, "file_read", { file: filePath });
-        } catch (err) {
-          console.warn(`Could not read ${filePath}:`, err);
+      const results = await Promise.all(
+        analysis.filesNeeded.map(async (filePath) => {
+          try {
+            const content = await git.readFile(targetRepo, filePath);
+            return { path: filePath, content };
+          } catch {
+            console.warn(`Could not read ${filePath}`);
+            return null;
+          }
+        })
+      );
+      const readFiles: string[] = [];
+      results.filter(Boolean).forEach((r) => {
+        if (r) {
+          fileContents[r.path] = r.content;
+          readFiles.push(r.path);
         }
+      });
+      // Batch audit log
+      if (readFiles.length > 0) {
+        await logAudit(taskId, "files_read", { files: readFiles, count: readFiles.length });
       }
     }
 

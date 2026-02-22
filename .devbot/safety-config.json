@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DevBot Safety Configuration",
+  "description": "Enterprise-grade safety guardrails configuration",
+  "guardrails": {
+    "code-review": {
+      "enabled": true,
+      "severity": "warn",
+      "options": {
+        "reviewAllFiles": false,
+        "focusOnSecurityAndBugs": true,
+        "maxIssuesBeforeBlock": 5
+      }
+    },
+    "secret-scanner": {
+      "enabled": true,
+      "severity": "block",
+      "options": {
+        "customPatterns": [],
+        "excludeFiles": [
+          "**/*.test.ts",
+          "**/*.spec.ts",
+          "**/fixtures/**"
+        ]
+      }
+    },
+    "dependency-audit": {
+      "enabled": true,
+      "severity": "warn",
+      "options": {
+        "blockCritical": true,
+        "blockHigh": false,
+        "skipDevDependencies": false
+      }
+    },
+    "breaking-changes": {
+      "enabled": true,
+      "severity": "warn",
+      "options": {
+        "checkExportsOnly": true,
+        "ignorePrivateFunctions": true
+      }
+    },
+    "performance": {
+      "enabled": true,
+      "severity": "warn",
+      "options": {
+        "checkNestedLoops": true,
+        "checkDatabaseOps": true,
+        "checkSyncOperations": true
+      }
+    },
+    "compliance": {
+      "enabled": true,
+      "severity": "warn",
+      "options": {
+        "regulations": ["GDPR", "SOC2", "CCPA"],
+        "requireAuditLogging": true,
+        "requireEncryption": true
+      }
+    }
+  },
+  "rollback": {
+    "enabled": true,
+    "autoRollbackOnCritical": true,
+    "createCheckpoints": true,
+    "options": {
+      "checkpointBeforeCommit": true,
+      "retentionDays": 30,
+      "createSafetyBranch": true
+    }
+  },
+  "sandbox": {
+    "enabled": false,
+    "dockerImage": "node:22-alpine",
+    "resourceLimits": {
+      "cpuPercent": 50,
+      "memoryMb": 512,
+      "timeoutSeconds": 60
+    },
+    "networkIsolation": true,
+    "options": {
+      "mountWorkspace": false,
+      "allowNetworkForTests": true
+    }
+  },
+  "perRepoOverrides": {
+    "example-repo": {
+      "guardrails": {
+        "secret-scanner": {
+          "severity": "warn"
+        }
+      }
+    }
+  }
+}

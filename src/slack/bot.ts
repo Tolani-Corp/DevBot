@@ -9,6 +9,7 @@ import {
   updateTask as updateClickUpTask,
   formatTaskForSlack,
   parsePriority,
+  extractClickUpId,
 } from "@/integrations/clickup";
 import {
   needsOnboarding,
@@ -133,6 +134,9 @@ app.event("app_mention", async ({ event, say, client }) => {
     const repoMatch = text.match(/(?:in|for|repo:?)\s+([a-zA-Z0-9_-]+)/i);
     const repository = repoMatch?.[1];
 
+    // Extract ClickUp task ID if referenced (CU-xxx, #xxx, or clickup:xxx)
+    const clickUpTaskId = extractClickUpId(text);
+
     // Create task in database
     const [task] = await db
       .insert(tasks)
@@ -143,15 +147,22 @@ app.event("app_mention", async ({ event, say, client }) => {
         taskType: "pending",
         description: text,
         repository,
+        clickUpTaskId,
         status: "pending",
         progress: 0,
       })
       .returning();
 
     // Acknowledge receipt
+    const ackParts = [`🤖 Got it! Working on this task...`, ``, `Task ID: \`${task.id}\``];
+    if (clickUpTaskId) {
+      ackParts.push(`ClickUp: \`CU-${clickUpTaskId}\``);
+    }
+    ackParts.push(`I'll update you here as I make progress.`);
+
     await say({
       thread_ts: event.ts,
-      text: `🤖 Got it! Working on this task...\n\nTask ID: \`${task.id}\`\nI'll update you here as I make progress.`,
+      text: ackParts.join("\n"),
     });
 
     // Queue the task
@@ -161,6 +172,7 @@ app.event("app_mention", async ({ event, say, client }) => {
       slackChannelId: event.channel,
       description: text,
       repository,
+      clickUpTaskId,
     });
 
     // Save conversation context
@@ -383,6 +395,7 @@ app.command("/devbot-help", async ({ ack, say }) => {
 **Commands:**
 • \`/devbot-status\` - See your recent tasks
 • \`/devbot-help\` - Show this help message
+• \`/pentest <target>\` - Security & vulnerability scanning
 • \`/clickup-create\` - Create a ClickUp task
 • \`/clickup-tasks\` - List your ClickUp tasks
 • \`/clickup-update\` - Update a ClickUp task status
@@ -393,6 +406,7 @@ app.command("/devbot-help", async ({ ack, say }) => {
 ✅ Create commits and PRs
 ✅ Answer technical questions
 ✅ Review code for issues
+✅ Run security scans (pentest)
 ✅ Manage ClickUp tasks
 
 **Repositories I have access to:**
@@ -462,5 +476,133 @@ app.command("/clickup-update", async ({ command, ack, say }) => {
   } catch (error) {
     console.error("ClickUp update error:", error);
     await say(`❌ Failed to update task: ${error}`);
+  }
+});
+
+// Pentest command - security scanning and vulnerability assessment
+app.command("/pentest", async ({ command, ack, say, client }) => {
+  await ack();
+
+  const parts = command.text.trim().split(/\s+/);
+  if (parts.length === 0 || !parts[0]) {
+    await say({
+      text: "🔒 DevBot Security Scanner",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "*🔒 DevBot Security Scanner*\n\nRun penetration tests and security scans on authorized targets.",
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "*Usage:*\n`/pentest <target> [--type=scan_type] [--repo=owner/repo]`",
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "*Scan Types:*\n• `full` - Complete security assessment (default)\n• `dependency-audit` - Check for vulnerable dependencies\n• `secret-scan` - Detect leaked credentials\n• `web-security` - HTTP security headers & TLS\n• `port-scan` - Network port enumeration",
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "*Examples:*\n• `/pentest freakme.fun`\n• `/pentest freakme.fun --type=web-security`\n• `/pentest freakme.fun --type=dependency-audit --repo=Tolani-Corp/freakme.fun`",
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: "⚠️ Only scan targets you have explicit authorization to test",
+            },
+          ],
+        },
+      ],
+    });
+    return;
+  }
+
+  const target = parts[0];
+  let scanType: "full" | "dependency-audit" | "secret-scan" | "web-security" | "port-scan" = "full";
+  let repository: string | undefined;
+
+  // Parse flags
+  for (const part of parts.slice(1)) {
+    if (part.startsWith("--type=")) {
+      const type = part.replace("--type=", "");
+      if (["full", "dependency-audit", "secret-scan", "web-security", "port-scan"].includes(type)) {
+        scanType = type as typeof scanType;
+      }
+    }
+    if (part.startsWith("--repo=")) {
+      repository = part.replace("--repo=", "");
+    }
+  }
+
+  try {
+    // Get team info for authorization tracking
+    const teamInfo = await client.team.info();
+    const teamId = teamInfo.team?.id;
+
+    if (!teamId) {
+      await say("❌ Could not verify workspace - pentest aborted");
+      return;
+    }
+
+    // Import pentest service dynamically to avoid circular deps
+    const { runPentestScan, formatReportForSlack, postReportAsGitHubIssue } = await import("@/services/pentest");
+
+    // Send initial acknowledgment
+    await say({
+      text: `🔒 Starting ${scanType} scan on \`${target}\`...`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `🔒 *Security Scan Initiated*\n\n*Target:* \`${target}\`\n*Type:* ${scanType}\n*Status:* Running...`,
+          },
+        },
+      ],
+    });
+
+    // Run the scan
+    const report = await runPentestScan(target, scanType, {
+      authorized: true, // Slack command implies user authorization
+      repository,
+      repoPath: repository ? `/tmp/${repository.replace("/", "-")}` : undefined,
+    });
+
+    // Format and send results
+    const blocks = formatReportForSlack(report);
+    await say({
+      text: `✅ Scan complete - Risk: ${report.summary.riskRating.toUpperCase()}`,
+      blocks,
+    });
+
+    // If critical/high findings and we have a repo, offer to create GitHub issue
+    if (repository && (report.summary.criticalCount > 0 || report.summary.highCount > 0)) {
+      const [owner, repo] = repository.split("/");
+      try {
+        const issueUrl = await postReportAsGitHubIssue(owner, repo, report);
+        await say({
+          text: `📋 Created security issue: ${issueUrl}`,
+          thread_ts: command.ts,
+        });
+      } catch (error) {
+        console.error("Failed to create GitHub issue:", error);
+      }
+    }
+  } catch (error) {
+    console.error("Pentest command error:", error);
+    await say(`❌ Scan failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 });

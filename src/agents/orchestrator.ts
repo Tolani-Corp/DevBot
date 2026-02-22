@@ -6,6 +6,13 @@ import {
 } from "@/integrations/clickup";
 import { executeArbTask } from "./specialists/jr.js";
 import { executeMediaTask } from "./specialists/media.js";
+import { TraceCapture } from "@/reasoning/trace.js";
+import {
+  estimateTaskComplexity,
+  estimateAgentCapability,
+  type AgentCapability,
+} from "@/reasoning/probability.js";
+import { UncertaintyQuantifier } from "@/reasoning/uncertainty.js";
 import type {
   AgentRole,
   AgentConfig,
@@ -15,12 +22,78 @@ import type {
   RedevelopmentEntry,
   VerificationResult,
 } from "./types.js";
+import { GuardrailRegistry, loadSafetyConfig } from "@/safety/guardrails";
+import { CodeReviewGuardrail } from "@/safety/guardrails/code-review";
+import { SecretScannerGuardrail } from "@/safety/guardrails/secret-scanner";
+import { DependencyAuditGuardrail } from "@/safety/guardrails/dependency-audit";
+import { BreakingChangesGuardrail } from "@/safety/guardrails/breaking-changes";
+import { PerformanceGuardrail } from "@/safety/guardrails/performance";
+import { ComplianceGuardrail } from "@/safety/guardrails/compliance";
+import { RollbackManager } from "@/safety/rollback";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+
+// Uncertainty quantifier singleton
+const uncertaintyQuantifier = new UncertaintyQuantifier();
+
+// ---------------------------------------------------------------------------
+// Safety system initialization
+// ---------------------------------------------------------------------------
+
+let guardrailRegistry: GuardrailRegistry | null = null;
+let rollbackManager: RollbackManager | null = null;
+
+/**
+ * Initialize the safety system with guardrails and rollback manager.
+ */
+export function initializeSafetySystem(): void {
+  if (guardrailRegistry) {
+    return; // Already initialized
+  }
+
+  const config = loadSafetyConfig();
+  guardrailRegistry = new GuardrailRegistry(config);
+  rollbackManager = new RollbackManager();
+
+  // Register all guardrails
+  guardrailRegistry.register(new CodeReviewGuardrail());
+  guardrailRegistry.register(new SecretScannerGuardrail());
+  guardrailRegistry.register(new DependencyAuditGuardrail());
+  guardrailRegistry.register(new BreakingChangesGuardrail());
+  guardrailRegistry.register(new PerformanceGuardrail());
+  guardrailRegistry.register(new ComplianceGuardrail());
+
+  // Load checkpoint history
+  rollbackManager.loadCheckpoints().catch((error) => {
+    console.warn("[safety] Failed to load checkpoints:", error);
+  });
+
+  console.log("[safety] Guardrail system initialized");
+}
+
+/**
+ * Get the guardrail registry (initializes if needed).
+ */
+export function getGuardrailRegistry(): GuardrailRegistry {
+  if (!guardrailRegistry) {
+    initializeSafetySystem();
+  }
+  return guardrailRegistry!;
+}
+
+/**
+ * Get the rollback manager (initializes if needed).
+ */
+export function getRollbackManager(): RollbackManager {
+  if (!rollbackManager) {
+    initializeSafetySystem();
+  }
+  return rollbackManager!;
+}
 
 // ---------------------------------------------------------------------------
 // Agent role configurations
@@ -213,7 +286,11 @@ export async function planDecomposition(
   description: string,
   repository: string,
   fileContents: Record<string, string>,
+  trace?: TraceCapture,
 ): Promise<OrchestratorPlan> {
+  trace?.thought(`Breaking down task: "${description}" for repository: ${repository}`);
+  trace?.thought(`Analyzing ${Object.keys(fileContents).length} files for context`);
+  
   const availableRoles = Object.keys(AGENT_CONFIGS).join(", ");
 
   const systemPrompt = `You are an orchestrator that decomposes complex software tasks into smaller, independent subtasks.
@@ -253,7 +330,7 @@ Task: ${description}
 
 Relevant files:
 ${filesListing}`;
-
+  trace?.action("Requesting plan decomposition from Claude", { metadata: { model: MODEL } });
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 4096,
@@ -265,8 +342,11 @@ ${filesListing}`;
   const jsonMatch = text.match(/\{[\s\S]*\}/);
 
   if (!jsonMatch) {
+    trace?.observation("Failed to parse plan decomposition response");
     throw new Error("Orchestrator: plan decomposition did not return valid JSON");
   }
+
+  trace?.observation("Received plan decomposition from Claude");
 
   const raw = JSON.parse(jsonMatch[0]) as {
     subtasks: Array<{
@@ -278,19 +358,40 @@ ${filesListing}`;
     executionOrder: string[][];
     estimatedComplexity: "simple" | "moderate" | "complex";
   };
+  
+  trace?.reflection(
+    `Plan created with ${raw.subtasks.length} subtasks, complexity: ${raw.estimatedComplexity}`,
+    { 
+      confidence: raw.estimatedComplexity === "simple" ? 0.9 : raw.estimatedComplexity === "moderate" ? 0.7 : 0.5,
+      metadata: { subtaskCount: raw.subtasks.length, complexity: raw.estimatedComplexity }
+    }
+  );
 
   // Normalise into full AgentTask objects
   const parentTaskId = nanoid();
-  const subtasks: AgentTask[] = raw.subtasks.map((st) => ({
-    id: st.id,
-    description: st.description,
-    role: st.role,
-    parentTaskId,
-    dependencies: st.dependencies,
-    status: "idle" as const,
-    attempt: 1,
-    maxAttempts: 3,
-  }));
+  const subtasks: AgentTask[] = raw.subtasks.map((st) => {
+    // Estimate task complexity using probabilistic reasoning
+    const filesAffected = st.dependencies.length > 0
+      ? Object.keys(fileContents).filter((path) =>
+          path.toLowerCase().includes(st.description.toLowerCase().split(" ")[0]),
+        )
+      : [];
+
+    const complexityDist = estimateTaskComplexity(st.description, filesAffected);
+
+    return {
+      id: st.id,
+      description: st.description,
+      role: st.role,
+      parentTaskId,
+      dependencies: st.dependencies,
+      status: "idle" as const,
+      attempt: 1,
+      maxAttempts: 3,
+      estimatedComplexity: complexityDist,
+      confidenceThreshold: 0.5, // Default threshold
+    };
+  });
 
   return {
     subtasks,
@@ -303,19 +404,56 @@ ${filesListing}`;
 // Execute a single subtask using the appropriate agent role
 // ---------------------------------------------------------------------------
 
+/**
+ * Convert AgentConfig to AgentCapability format for probabilistic selection.
+ */
+function toAgentCapability(role: AgentRole, config: AgentConfig): AgentCapability {
+  return {
+    role,
+    capabilities: config.capabilities,
+    filePatterns: config.filePatterns,
+  };
+}
+
 export async function executeSubtask(
   task: AgentTask,
   fileContents: Record<string, string>,
+  trace?: TraceCapture,
 ): Promise<AgentResult> {
+  trace?.thought(`Executing subtask: ${task.description}`, { metadata: { role: task.role, taskId: task.id } });
+  
   if (task.role === "arb-runner") {
+    trace?.action("Delegating to ARB runner specialist");
     return await executeArbTask(task);
   }
 
   if (task.role === "media") {
+    trace?.action("Delegating to media specialist");
     return await executeMediaTask(task);
   }
 
   const config = AGENT_CONFIGS[task.role];
+
+  // Calculate agent-task match confidence using probabilistic reasoning
+  const filesAffected = Object.keys(fileContents);
+  const agentCapability = toAgentCapability(task.role, config);
+  const matchConfidence = estimateAgentCapability(
+    agentCapability,
+    task.description,
+    filesAffected,
+  );
+
+  // Store confidence for analysis
+  task.agentMatchConfidence = matchConfidence;
+
+  trace?.thought(
+    `Agent-task match confidence: ${matchConfidence.value.toFixed(2)}`,
+    { metadata: { sources: matchConfidence.sources } },
+  );
+
+  console.log(
+    `[orchestrator] Executing task "${task.id}" with agent ${task.role} (confidence: ${matchConfidence.value.toFixed(2)}, sources: ${matchConfidence.sources.join(", ")})`,
+  );
 
   const filesListing = Object.entries(fileContents)
     .map(([path, content]) => `### ${path}\n\`\`\`\n${content}\n\`\`\``)
@@ -341,6 +479,8 @@ Respond with valid JSON:
 }`;
 
   try {
+    trace?.action(`Requesting execution from ${task.role} agent`, { metadata: { model: MODEL } });
+    
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 8192,
@@ -352,19 +492,58 @@ Respond with valid JSON:
     const jsonMatch = text.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
+      trace?.observation("Agent did not return valid JSON");
       return {
         success: false,
         output: "",
         error: `Agent [${task.role}] did not return valid JSON for task "${task.id}"`,
+        confidence: { value: 0.1, calibration: { expectedAccuracy: 0.1, sampleSize: 0 }, sources: ["invalid-output"] },
+        requiresVerification: true,
       };
     }
 
-    return JSON.parse(jsonMatch[0]) as AgentResult;
+    const result = JSON.parse(jsonMatch[0]) as AgentResult;
+
+    // Add confidence scoring to result
+    // If agent match confidence is low, mark for verification
+    const resultConfidence = matchConfidence.value;
+    const confidenceThreshold = task.confidenceThreshold ?? 0.5;
+
+    result.confidence = {
+      value: resultConfidence,
+      calibration: matchConfidence.calibration,
+      sources: [...matchConfidence.sources, "agent-match"],
+    };
+
+    // Assess risk using uncertainty quantifier
+    const complexityEntropy = task.estimatedComplexity?.entropy() ?? 0;
+    const riskAssessment = uncertaintyQuantifier.assessRisk(result.confidence, complexityEntropy);
+
+    result.requiresVerification = riskAssessment.requiresVerification;
+
+    if (result.requiresVerification) {
+      trace?.thought(`Marked for verification: ${riskAssessment.reasoning}`);
+      console.log(
+        `[orchestrator] Task "${task.id}" marked for verification: ${riskAssessment.reasoning}`,
+      );
+    }
+
+    trace?.observation(
+      result.success 
+        ? `Agent completed successfully: ${result.output}` 
+        : `Agent failed: ${result.error}`,
+      { metadata: { success: result.success, changesCount: result.changes?.length || 0, confidence: result.confidence.value } }
+    );
+    
+    return result;
   } catch (err) {
+    trace?.observation(`Agent execution threw error: ${(err as Error).message}`);
     return {
       success: false,
       output: "",
       error: `Agent [${task.role}] failed on task "${task.id}": ${(err as Error).message}`,
+      confidence: { value: 0.0, calibration: { expectedAccuracy: 0.0, sampleSize: 0 }, sources: ["error"] },
+      requiresVerification: true,
     };
   }
 }
@@ -438,6 +617,8 @@ export async function orchestrate(
   conflicts: Array<{ file: string; taskIds: string[] }>;
   commitMessage: string;
   prDescription: string;
+  plan: OrchestratorPlan;
+  completedTasks: Array<{ task: AgentTask; result: AgentResult }>;
 }> {
   // 1. Decompose the task
   console.log("[orchestrator] Planning task decomposition...");
@@ -530,7 +711,7 @@ export async function orchestrate(
     ? clickupBuildPrDesc(cuId, prDescription)
     : prDescription;
 
-  return { changes, conflicts, commitMessage: finalCommitMessage, prDescription: finalPrDescription };
+  return { changes, conflicts, commitMessage: finalCommitMessage, prDescription: finalPrDescription, plan, completedTasks: completedResults };
 }
 
 // ---------------------------------------------------------------------------
@@ -539,18 +720,72 @@ export async function orchestrate(
 
 /**
  * Default verification: ask Claude to review the agent's output for errors.
+ * Now also runs post-execution guardrails.
  */
 export async function verifyAgentOutput(
   task: AgentTask,
   result: AgentResult,
+  trace?: TraceCapture,
 ): Promise<VerificationResult> {
+  trace?.thought(`Verifying output for task: ${task.description}`);
+  
   if (!result.success || !result.changes?.length) {
+    trace?.observation("Skipping verification - task failed or has no changes");
     return {
       passed: result.success,
       errors: result.error ? [result.error] : [],
       suggestions: [],
     };
   }
+  
+  trace?.action(`Requesting verification for ${result.changes.length} file changes`);
+
+  // ---------------------------------------------------------------------------
+  // Run post-execution guardrails
+  // ---------------------------------------------------------------------------
+  const registry = getGuardrailRegistry();
+  const guardrailContext = {
+    task,
+    result,
+    repository: "", // Set by caller if needed
+    fileContents: {},
+  };
+
+  const guardrailResults = await registry.runPostExecution(guardrailContext);
+  
+  // Store guardrail results in the agent result
+  result.guardrailResults = guardrailResults.results.map((r) => ({
+    guardrailId: r.guardrailId,
+    status: r.status,
+    severity: r.severity,
+    message: r.message,
+  }));
+
+  if (guardrailResults.shouldBlock) {
+    trace?.observation(
+      `Guardrails blocked execution: ${guardrailResults.results.filter((r) => r.status === "failed").length} critical issues`,
+    );
+
+    const errors = guardrailResults.results
+      .filter((r) => r.status === "failed")
+      .flatMap((r) => [r.message, ...(r.details || [])]);
+
+    return {
+      passed: false,
+      errors,
+      suggestions: guardrailResults.results.flatMap((r) => r.suggestions || []),
+    };
+  }
+
+  // Log warnings
+  const warnings = guardrailResults.results.filter((r) => r.status === "warning");
+  if (warnings.length > 0) {
+    trace?.observation(`Guardrail warnings: ${warnings.map((w) => w.message).join("; ")}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Continue with AI verification
+  // ---------------------------------------------------------------------------
 
   const systemPrompt = `You are a code review verification agent.
 Check the following code changes for:
@@ -589,11 +824,27 @@ Respond in JSON:
     const jsonMatch = text.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
+      trace?.observation("Verification response not parseable - assuming pass");
       return { passed: true, errors: [], suggestions: [] };
     }
 
-    return JSON.parse(jsonMatch[0]) as VerificationResult;
+    const verificationResult = JSON.parse(jsonMatch[0]) as VerificationResult;
+    trace?.reflection(
+      verificationResult.passed 
+        ? `Verification passed with ${verificationResult.suggestions.length} suggestions` 
+        : `Verification failed with ${verificationResult.errors.length} errors`,
+      { 
+        confidence: verificationResult.passed ? 0.85 : 0.95,
+        metadata: { 
+          errorCount: verificationResult.errors.length, 
+          suggestionCount: verificationResult.suggestions.length 
+        }
+      }
+    );
+    
+    return verificationResult;
   } catch {
+    trace?.observation("Verification threw error - passing task through");
     // If verification itself fails, pass the task through
     return { passed: true, errors: [], suggestions: [] };
   }
@@ -727,18 +978,15 @@ export async function orchestrateWithRedevelopment(
     retried: number;
   };
 }> {
-  // Phase 1: Normal orchestration
+  // Phase 1: Normal orchestration (now returns plan and completedTasks)
   const result = await orchestrate(description, repository, fileContents, options);
 
-  // Phase 2: Build redevelopment queue from all completed subtasks
-  // (Re-run plan to get subtask references — in production, orchestrate()
-  // would return the completed tasks directly)
-  const plan = await planDecomposition(description, repository, fileContents);
-  const completedEntries: RedevelopmentEntry[] = plan.subtasks
-    .filter((t) => t.status === "completed" && t.result)
-    .map((t) => ({
-      task: t,
-      originalResult: t.result!,
+  // Phase 2: Build redevelopment queue from completed subtasks (no duplicate API call!)
+  const completedEntries: RedevelopmentEntry[] = result.completedTasks
+    .filter(({ result: r }) => r.success)
+    .map(({ task, result: r }) => ({
+      task,
+      originalResult: r,
       verificationErrors: [],
       requeuedAt: new Date(),
     }));

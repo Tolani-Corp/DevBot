@@ -1,3 +1,7 @@
+// Initialize tracing FIRST - before any SDK imports
+import { initTracing, shutdownTracing } from "./tracing";
+initTracing("devbot-agents");
+
 import "dotenv/config";
 import { app } from "./slack/bot";
 
@@ -25,12 +29,37 @@ async function main() {
     console.log(`⚠️ DISCORD_TOKEN not found, skipping Discord integration`);
   }
 
+  // Start WebSocket Server
+  const wsPort = Number(process.env.WS_PORT ?? 8080);
+  console.log(`📡 Starting WebSocket Server on port ${wsPort}...`);
+  try {
+    const { startWebSocketServer } = await import('./websocket');
+    startWebSocketServer(wsPort);
+    console.log(`🚀 DevBot WebSocket streaming enabled`);
+  } catch (error) {
+    console.error(`❌ Failed to start WebSocket Server:`, error);
+  }
+
   console.log(`🤖 Mention trigger: ${process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot"}`);
   console.log(`📂 Workspace: ${process.env.WORKSPACE_ROOT ?? process.cwd()}`);
   console.log(`🔧 Allowed repos: ${process.env.ALLOWED_REPOS ?? "*"}`);
 }
 
-main().catch((error) => {
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("\nShutting down FunBot...");
+  await shutdownTracing();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  console.log("\nShutting down FunBot...");
+  await shutdownTracing();
+  process.exit(0);
+});
+
+main().catch(async (error) => {
   console.error("Failed to start FunBot:", error);
+  await shutdownTracing();
   process.exit(1);
 });

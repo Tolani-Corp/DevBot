@@ -1,0 +1,2290 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link " Bookmakers " [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+          - generic [ref=e8]: Bookmakers
+          - generic [ref=e9]: 
+      - listitem [ref=e10]:
+        - link " Countries " [ref=e11] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e12]: 
+          - generic [ref=e13]: Countries
+          - generic [ref=e14]: 
+      - listitem [ref=e15]:
+        - link " Crypto Bookmakers NEW" [ref=e16] [cursor=pointer]:
+          - /url: /bookmakers/cryptocurrency-bookmakers.php
+          - generic [ref=e17]: 
+          - generic [ref=e18]: Crypto Bookmakers
+          - generic [ref=e19]: NEW
+      - listitem [ref=e20]:
+        - link " Reviews " [ref=e21] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e22]: 
+          - generic [ref=e23]: Reviews
+          - generic [ref=e24]: 
+      - listitem [ref=e25]:
+        - link " Ratings " [ref=e26] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e27]: 
+          - generic [ref=e28]: Ratings
+          - generic [ref=e29]: 
+      - listitem [ref=e30]:
+        - link " Bonuses " [ref=e31] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e32]: 
+          - generic [ref=e33]: Bonuses
+          - generic [ref=e34]: 
+      - listitem [ref=e35]:
+        - link " Other lists " [ref=e36] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e37]: 
+          - generic [ref=e38]: Other lists
+          - generic [ref=e39]: 
+        - list [ref=e40]:
+          - listitem [ref=e41]:
+            - link "Owners" [ref=e42] [cursor=pointer]:
+              - /url: /owners/
+          - listitem [ref=e43]:
+            - link "Licences" [ref=e44] [cursor=pointer]:
+              - /url: /licences/
+          - listitem [ref=e45]:
+            - link "Languages" [ref=e46] [cursor=pointer]:
+              - /url: /languages/
+          - listitem [ref=e47]:
+            - link "Currencies" [ref=e48] [cursor=pointer]:
+              - /url: /currencies/
+          - listitem [ref=e49]:
+            - link "Cryptocurrencies" [ref=e50] [cursor=pointer]:
+              - /url: /cryptocurrencies/
+          - listitem [ref=e51]:
+            - link "Payment options" [ref=e52] [cursor=pointer]:
+              - /url: /deposit-options/
+          - listitem [ref=e53]:
+            - link "Sports" [ref=e54] [cursor=pointer]:
+              - /url: /sports/
+          - listitem [ref=e55]:
+            - link "Odds formats" [ref=e56] [cursor=pointer]:
+              - /url: /odds-format/
+          - listitem [ref=e57]:
+            - link "Betting margins" [ref=e58] [cursor=pointer]:
+              - /url: /betting-margins/
+      - listitem [ref=e59]:
+        - link " Comments" [ref=e60] [cursor=pointer]:
+          - /url: /comments.php
+          - generic [ref=e61]: 
+          - generic [ref=e62]: Comments
+      - listitem [ref=e63]:
+        - link " News " [ref=e65] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e66]: 
+          - generic [ref=e67]: News
+          - generic [ref=e68]: 
+      - listitem [ref=e69]:
+        - link " Global list" [ref=e70] [cursor=pointer]:
+          - /url: /completelist.php
+          - generic [ref=e71]: 
+          - generic [ref=e72]: Global list
+      - listitem [ref=e73]:
+        - link "United States United States" [ref=e74] [cursor=pointer]:
+          - /url: /countries/us.php
+          - img "United States" [ref=e75]
+          - generic [ref=e76]: United States
+      - listitem: 
+      - listitem: 
+    - generic [ref=e77]:
+      - link "" [ref=e78] [cursor=pointer]:
+        - /url: /contact-us/
+        - generic [ref=e79]: 
+      - link "" [ref=e80] [cursor=pointer]:
+        - /url: /visit.php?soc=twitter
+        - generic [ref=e81]: 
+      - link "" [ref=e82] [cursor=pointer]:
+        - /url: /visit.php?soc=instagram
+        - generic [ref=e83]: 
+      - link "Missing bookmaker?" [ref=e84] [cursor=pointer]:
+        - /url: /contact-us/missing-bookmaker.php
+  - generic [ref=e85]:
+    - text: 
+    - link "Top 100 Bookmakers" [ref=e87] [cursor=pointer]:
+      - /url: /
+      - img "Top 100 Bookmakers" [ref=e88]
+    - text:  
+    - generic [ref=e92]:
+      - textbox "Search bookmakers..." [ref=e93]
+      - text: 
+    - link "Database of Online Bookmakers" [ref=e95] [cursor=pointer]:
+      - /url: /
+      - img "Database of Online Bookmakers" [ref=e96]
+  - generic [ref=e97]:
+    - generic [ref=e98]:
+      - generic [ref=e99]:
+        - text: "You are here:"
+        - generic [ref=e100]:
+          - link "Home" [ref=e101] [cursor=pointer]:
+            - /url: /
+          - text: ">"
+          - link "Payment Options" [ref=e102] [cursor=pointer]:
+            - /url: /deposit-options/
+      - generic [ref=e104]:
+        - text: "Total figures:"
+        - link "1002 " [ref=e105] [cursor=pointer]:
+          - /url: /completelist.php
+          - text: "1002"
+          - generic [ref=e106]: 
+        - text: •
+        - link "20515 " [ref=e107] [cursor=pointer]:
+          - /url: /rating.php
+          - text: "20515"
+          - generic [ref=e108]: 
+        - text: •
+        - link "3568 " [ref=e109] [cursor=pointer]:
+          - /url: /comments.php
+          - text: "3568"
+          - generic [ref=e110]: 
+        - text: •
+        - link "1553 " [ref=e111] [cursor=pointer]:
+          - /url: /
+          - text: "1553"
+          - generic [ref=e112]: 
+    - generic [ref=e114]:
+      - heading "User Poll" [level=2] [ref=e116]
+      - generic [ref=e117]:
+        - text: Where do you bet?
+        - generic [ref=e119]: 
+      - generic [ref=e121]:
+        - combobox [ref=e122] [cursor=pointer]:
+          - option "- select bookmaker -" [selected]
+          - option "10bet"
+          - option "10bet.com"
+          - option "10CRIC"
+          - option "1957bet"
+          - option "1RED"
+          - option "1redbet"
+          - option "1win"
+          - option "1xBet"
+          - option "1xBit"
+          - option "20Bet"
+          - option "21bets"
+          - option "21bets.io"
+          - option "21LuckyBet"
+          - option "22BET"
+          - option "247Bet"
+          - option "24Bettle"
+          - option "2UP.io"
+          - option "31bet"
+          - option "32Red"
+          - option "368bet"
+          - option "3et"
+          - option "500.casino"
+          - option "500.com"
+          - option "7bet"
+          - option "7bets"
+          - option "888 Sport"
+          - option "8888"
+          - option "888Bet Mozambique"
+          - option "888Bet Tanzania"
+          - option "888starz.bet"
+          - option "96"
+          - option "9Club"
+          - option "A McLean Bookmakers"
+          - option "A360.bet"
+          - option "AbuKing"
+          - option "AccessBET"
+          - option "Acebet"
+          - option "Action247"
+          - option "Adjarabet"
+          - option "Admiral"
+          - option "Afropari"
+          - option "AK BETS"
+          - option "Alfobet"
+          - option "All British Casino"
+          - option "Allbet"
+          - option "AllSpins"
+          - option "Alphawin"
+          - option "Amunra"
+          - option "Aposta.La"
+          - option "Appuesta"
+          - option "Arcanebet"
+          - option "ArcticBet"
+          - option "Asianconnect"
+          - option "Asianodds"
+          - option "Astekbet"
+          - option "ATG"
+          - option "Avabet"
+          - option "b-Bets"
+          - option "B9casino"
+          - option "Backhouse bet"
+          - option "Badshahcric"
+          - option "Bahigo"
+          - option "Bahisbey"
+          - option "Baji"
+          - option "BalkanBet"
+          - option "BallyBet"
+          - option "Bangbet"
+          - option "Bankonbet"
+          - option "BassBet"
+          - option "BataviaBets"
+          - option "Batery"
+          - option "Batery.win"
+          - option "BC.Game"
+          - option "Bdmbet"
+          - option "Beef"
+          - option "Beonbet"
+          - option "Best Bookies"
+          - option "Bet Live"
+          - option "Bet On Alfa"
+          - option "Bet UK"
+          - option "bet-at-home"
+          - option "Bet-Football"
+          - option "BET-IBC"
+          - option "Bet.co.za"
+          - option "Bet.era"
+          - option "bet.me"
+          - option "Bet25"
+          - option "Bet25.com"
+          - option "bet365"
+          - option "bet7"
+          - option "Bet777"
+          - option "BET99"
+          - option "Bet9ja"
+          - option "BetAlice"
+          - option "BetAmerica"
+          - option "Betandreas"
+          - option "Betandyou"
+          - option "Betano"
+          - option "BetAnsells"
+          - option "Betarno"
+          - option "BetBeast"
+          - option "Betbird"
+          - option "BetBlast"
+          - option "Betboo"
+          - option "BetBoom"
+          - option "Betboro"
+          - option "Betcenter"
+          - option "Betcha.pa"
+          - option "Betchip"
+          - option "BetCity"
+          - option "BetCity.nl"
+          - option "BetClic"
+          - option "BetConnect"
+          - option "Betcris"
+          - option "Betdaq"
+          - option "BetDeluxe"
+          - option "Betdex"
+          - option "betDukes"
+          - option "BetElite"
+          - option "Beteum"
+          - option "Betfair"
+          - option "BETFAN"
+          - option "Betfinal"
+          - option "betFIRST"
+          - option "BetFlag"
+          - option "BetFM"
+          - option "Betfred"
+          - option "BetFury"
+          - option "BetGoodwin"
+          - option "BetGRW"
+          - option "Bethall"
+          - option "Bethard"
+          - option "Betibet"
+          - option "Betico"
+          - option "Betify"
+          - option "Betika"
+          - option "BetInAsia"
+          - option "Betinia"
+          - option "Betitaly"
+          - option "BetJam"
+          - option "Betjili"
+          - option "BetJordan"
+          - option "BetKing"
+          - option "betkwiff"
+          - option "Betlabel"
+          - option "Betland"
+          - option "Betlive"
+          - option "BetMatch"
+          - option "Betmaze"
+          - option "BetMGM"
+          - option "BetMorph"
+          - option "Betmotion"
+          - option "Betnacional"
+          - option "BetNeptune"
+          - option "Betnero"
+          - option "BetNFlix"
+          - option "Betnjet"
+          - option "Betnuvo"
+          - option "Betobet"
+          - option "Betole"
+          - option "BetOlimp"
+          - option "Betongame"
+          - option "Betorspin"
+          - option "Betory"
+          - option "BetOspin"
+          - option "Betovo"
+          - option "Betpanda.io"
+          - option "BetPari"
+          - option "betPARX"
+          - option "BetPas"
+          - option "betPawa"
+          - option "BetPoint"
+          - option "BetPremium"
+          - option "BetRebels"
+          - option "Betreels"
+          - option "Betrino"
+          - option "Betriot"
+          - option "BetRivers.NET"
+          - option "Betroad"
+          - option "Betroller"
+          - option "Bets10"
+          - option "Bets24"
+          - option "Betsafe"
+          - option "BetSala"
+          - option "Betsamigo"
+          - option "Betsio"
+          - option "Betsmove"
+          - option "Betspino"
+          - option "Betss"
+          - option "Betssen"
+          - option "Betsson"
+          - option "BetSteve"
+          - option "BetStorm"
+          - option "Betstro"
+          - option "Betsul"
+          - option "Betswap.gg"
+          - option "BetTarget"
+          - option "Betters"
+          - option "Betti"
+          - option "Betting.co.zm"
+          - option "BetTom"
+          - option "BetVictor"
+          - option "Betway"
+          - option "betwin360"
+          - option "BetWinner"
+          - option "BetWright"
+          - option "BetXchange"
+          - option "Betxsure"
+          - option "Betzino"
+          - option "BFB247"
+          - option "Big5Casino"
+          - option "BiggerZ"
+          - option "bilbet"
+          - option "Billionairespin"
+          - option "Bilyoner"
+          - option "Bingoal"
+          - option "Binobet"
+          - option "Bitdreams"
+          - option "Bitsler"
+          - option "BizBet"
+          - option "BK8"
+          - option "BK8.io"
+          - option "Blaze"
+          - option "Blitz"
+          - option "Bluechip"
+          - option "Bluefox Casino"
+          - option "BoaBet"
+          - option "Bodog"
+          - option "Bola228"
+          - option "Bons"
+          - option "Bookielink"
+          - option "Boom Bet"
+          - option "Boomerang"
+          - option "Boomerang-Bet"
+          - option "Boomerang-Casino"
+          - option "Borawin"
+          - option "Borgata Online"
+          - option "Boxbet"
+          - option "Boylesports"
+          - option "Brazino777"
+          - option "BresBet"
+          - option "Brokerstorm"
+          - option "Bumbet"
+          - option "Bwanabet"
+          - option "bwin"
+          - option "Bzeebet"
+          - option "Caliente"
+          - option "Campeonbet"
+          - option "CampoBet"
+          - option "Casa Pariurilor"
+          - option "CasaBet"
+          - option "Cashpoint"
+          - option "Cashwin"
+          - option "casibom"
+          - option "Casimpo"
+          - option "Casinado"
+          - option "Casinia"
+          - option "Casino GranMadrid Online"
+          - option "Casino Infinity"
+          - option "Casino Portugal"
+          - option "Casino Sieger"
+          - option "Casino-X Sports"
+          - option "CasinoAndYou"
+          - option "CasinoCasino"
+          - option "CasinoJoy"
+          - option "Casinok"
+          - option "CasinoKings"
+          - option "CasinoLab"
+          - option "Casinolo"
+          - option "CasinoMega"
+          - option "CasinoWinner"
+          - option "Casobet"
+          - option "Casperbets"
+          - option "Casumo"
+          - option "CaZeus"
+          - option "Cazimbo"
+          - option "Cbet"
+          - option "Celsius Casino"
+          - option "Chacha.bet"
+          - option "Champion Bet"
+          - option "Chance"
+          - option "Chasebet"
+          - option "Chezacash"
+          - option "Chips.gg"
+          - option "Chipstars.bet"
+          - option "Circus"
+          - option "Cloudbet"
+          - option "CMD368"
+          - option "Codere"
+          - option "CoinCasino"
+          - option "Coinplay"
+          - option "Coins.game"
+          - option "Coldbet"
+          - option "Colossus Bets"
+          - option "ComeOn!"
+          - option "Conquestador"
+          - option "Coolbet"
+          - option "Coolzino"
+          - option "CopyBet"
+          - option "Coral"
+          - option "CorgiBet"
+          - option "Cosmobet"
+          - option "Crashino"
+          - option "Crocobet"
+          - option "CrownSlots"
+          - option "Crypto Games"
+          - option "CryptoLeo"
+          - option "Cryptorino"
+          - option "Crystalbet"
+          - option "Cybet"
+          - option "Cyprus Sporting Clubs"
+          - option "Dachbet"
+          - option "Dafabet"
+          - option "Danske Spil Oddset"
+          - option "Davegas"
+          - option "Dazard"
+          - option "DAZN Bet"
+          - option "Dazzle Casino"
+          - option "Dexsport"
+          - option "DiceBet"
+          - option "DinamoBet"
+          - option "Discasino"
+          - option "DogsFortune"
+          - option "DolfWin"
+          - option "DomusBet"
+          - option "DoubleBet"
+          - option "DOXXbet"
+          - option "DraftKings"
+          - option "DragonBet"
+          - option "Dragonia"
+          - option "Dreamplay"
+          - option "Drip Casino"
+          - option "Duelbits"
+          - option "DuoBetz"
+          - option "Dynobet"
+          - option "e-stave"
+          - option "E2bet"
+          - option "Easybet.co.za"
+          - option "Easybet.net"
+          - option "ebingo"
+          - option "efbet"
+          - option "Elitebet Australia"
+          - option "EmirBet"
+          - option "Empirecitybets"
+          - option "Enjoy4bet"
+          - option "Epicbet"
+          - option "ESC Online"
+          - option "Esportiva.bet"
+          - option "EstrelaBet"
+          - option "eTipos"
+          - option "eTopaz"
+          - option "ETOTO"
+          - option "Eurobet"
+          - option "Eurotierce"
+          - option "Evobet"
+          - option "Excitewin"
+          - option "ExclusiveBet"
+          - option "Expekt"
+          - option "F12.bet"
+          - option "FairPari"
+          - option "Fairspin"
+          - option "FanDuel"
+          - option "Fanobet"
+          - option "FanTeam"
+          - option "Fast Slots"
+          - option "Fastbet"
+          - option "FastPari"
+          - option "FatPirate"
+          - option "Favbet"
+          - option "FDJ"
+          - option "Feelingbet"
+          - option "Felicebet"
+          - option "Felixspin"
+          - option "FEZbet"
+          - option "FirstBet"
+          - option "Flagman"
+          - option "Flappy Casino"
+          - option "FoggyBet"
+          - option "Fonbet"
+          - option "Fonbet.com"
+          - option "Football Pools"
+          - option "forBET"
+          - option "Fortebet"
+          - option "Fortuna"
+          - option "FortuneJack"
+          - option "FortunePlay"
+          - option "Fragabet"
+          - option "Frank Sports"
+          - option "Freshbet"
+          - option "FruityKing"
+          - option "Frumzi"
+          - option "Fun Casino"
+          - option "Funbet"
+          - option "FunkyJackpot"
+          - option "FunPari"
+          - option "Gal Sport Betting"
+          - option "GalacticBets"
+          - option "Galera.bet"
+          - option "Gambloria"
+          - option "Gamdom"
+          - option "Gamebookers"
+          - option "Gamix"
+          - option "Gana777"
+          - option "Ganabet"
+          - option "Gatobet"
+          - option "Gbets"
+          - option "GemBet"
+          - option "Gentleman Jim"
+          - option "Genybet"
+          - option "Genzobet"
+          - option "Germania"
+          - option "Gets Bet"
+          - option "GGBet"
+          - option "Giocodigitale"
+          - option "God of Casino"
+          - option "Godofcoins"
+          - option "Gol + Pas"
+          - option "GoldBet"
+          - option "Golden Bahis"
+          - option "Golden Palace Sports"
+          - option "Golden Panda"
+          - option "Golden Star Sport"
+          - option "Goldenbet"
+          - option "GoldenVegas"
+          - option "GoldPari"
+          - option "Goldpot"
+          - option "Goldspin"
+          - option "Granawin"
+          - option "Grandwin"
+          - option "Gransino"
+          - option "GREATwin"
+          - option "Grosvenor Casinos"
+          - option "GuineeGames"
+          - option "GunsBet"
+          - option "Guts"
+          - option "Hajper"
+          - option "Harakabet"
+          - option "Hard Rock Sportsbook"
+          - option "Harry’s"
+          - option "helabet"
+          - option "HeroSpin"
+          - option "Hespsibahis"
+          - option "Hexabet"
+          - option "Heybets"
+          - option "HeySpin"
+          - option "highbet"
+          - option "Hititbet"
+          - option "HKJC"
+          - option "HoliganBet"
+          - option "Hollywood Races"
+          - option "Hollywoodbets"
+          - option "Hopa"
+          - option "Horuscasino"
+          - option "Hot.bet"
+          - option "Housebets"
+          - option "Hovarda"
+          - option "HPIbet"
+          - option "HPYBET"
+          - option "Hyper Casino"
+          - option "ibet"
+          - option "iBet789"
+          - option "ibetin"
+          - option "iddaa"
+          - option "Imajbet"
+          - option "Immerion"
+          - option "Inbet"
+          - option "Indibet"
+          - option "Inkabet"
+          - option "Instabet"
+          - option "Instant Casino"
+          - option "InterBahis"
+          - option "Interbet"
+          - option "Interbet.co.za"
+          - option "Interwetten"
+          - option "Irwin"
+          - option "ivibet"
+          - option "Izibet"
+          - option "Izzi Casino"
+          - option "J8de"
+          - option "JaaBet"
+          - option "Jabulabets"
+          - option "Jackbit"
+          - option "Jackpot Mobile Casino"
+          - option "JackpotBet"
+          - option "JackpotcityCasino"
+          - option "Jackpotter"
+          - option "Jacktop"
+          - option "JeffBet"
+          - option "JET"
+          - option "Jettbet"
+          - option "JOKERBET.es"
+          - option "Juegging"
+          - option "Jupi casino"
+          - option "Justbit"
+          - option "JVSpinbet"
+          - option "K9Win"
+          - option "Karamba"
+          - option "Ken Howells Sports Betting"
+          - option "Kikobet"
+          - option "Kingmaker"
+          - option "Kirolbet"
+          - option "Klikki Kasino"
+          - option "Kokobet"
+          - option "Kryptosino"
+          - option "kwiff"
+          - option "KwikBet"
+          - option "Ladbrokes"
+          - option "Lamabet"
+          - option "Lapilanders"
+          - option "Lazybar"
+          - option "Leader-Bet"
+          - option "Lebull"
+          - option "Legiano"
+          - option "LEGZO"
+          - option "Leon Bets"
+          - option "Letou"
+          - option "LEX"
+          - option "LibraBet"
+          - option "Liga Stavok"
+          - option "Lil.bet"
+          - option "LiliBet"
+          - option "Linebet"
+          - option "LiveBet"
+          - option "LiveScore Bet"
+          - option "Loteria Nationala"
+          - option "Loterie Romande"
+          - option "Lottoland"
+          - option "Lottomatica"
+          - option "LSbet"
+          - option "Luckcity"
+          - option "Luckia"
+          - option "Luckster"
+          - option "Lucky Bird Casino"
+          - option "Lucky Block"
+          - option "Lucky Star"
+          - option "Luckybet"
+          - option "Luckybull"
+          - option "LuckyHunter"
+          - option "LuckyMate"
+          - option "LuckyProCasino"
+          - option "LuckyVibe"
+          - option "Lucys Casino"
+          - option "Lunubet"
+          - option "LV BET"
+          - option "Lyrabet"
+          - option "M-Bet"
+          - option "Macau Slot"
+          - option "MadMarket"
+          - option "Magic Betting"
+          - option "MagicRed"
+          - option "Magius"
+          - option "Malina"
+          - option "Mansion88"
+          - option "Marathonbet"
+          - option "Marca Apuestas"
+          - option "Marsbet"
+          - option "Marshalls World of Sport"
+          - option "Martin"
+          - option "MarvelBet"
+          - option "Matchbook"
+          - option "MaxBet.ro"
+          - option "MaxBet.rs"
+          - option "Maxline"
+          - option "Mazaplay"
+          - option "MBet"
+          - option "McBookie"
+          - option "Mega Dice"
+          - option "Megabet Plus"
+          - option "Megapari"
+          - option "MegApuesta"
+          - option "MELbet"
+          - option "Memocasino"
+          - option "MercuryBet"
+          - option "Meridianbet"
+          - option "Meridianbet.co.tz"
+          - option "Merkur Bets"
+          - option "MerkurXtip"
+          - option "MetaBetting"
+          - option "Metgaming"
+          - option "Midas Luck"
+          - option "Midnite"
+          - option "Miki Casino"
+          - option "Misli"
+          - option "MobilBahis"
+          - option "MobileBet"
+          - option "MobileWins"
+          - option "MogoBet"
+          - option "Monkey Tilt"
+          - option "MONRO"
+          - option "Monster Casino"
+          - option "Mozzart"
+          - option "Mr Bet"
+          - option "Mr Green"
+          - option "mr.play"
+          - option "MrBit"
+          - option "MrPacho"
+          - option "MrPunter"
+          - option "MrRex"
+          - option "MSL"
+          - option "MSport"
+          - option "MultiBet"
+          - option "Mundoapostas"
+          - option "Mystake"
+          - option "MyWinners"
+          - option "Mzansibet"
+          - option "N1bet"
+          - option "NairaBet"
+          - option "Napoleon Games"
+          - option "Neds"
+          - option "Needforslots"
+          - option "Neospin"
+          - option "NeptunePlay"
+          - option "Nesine"
+          - option "NetBet"
+          - option "Nextbet"
+          - option "Ngs Bahis"
+          - option "Nike"
+          - option "NineCasino"
+          - option "Ninlay"
+          - option "Nitrobet"
+          - option "No Bonus Casino"
+          - option "NordicBet"
+          - option "Norsk Tipping"
+          - option "NorthStarBets"
+          - option "Nossa Aposta"
+          - option "NovaJackpot"
+          - option "Novibet"
+          - option "NRG"
+          - option "Nucleonbet"
+          - option "OdeonBet"
+          - option "Odibets"
+          - option "Off Track Betting"
+          - option "OgaBet"
+          - option "OhMySpins"
+          - option "OhMyZino"
+          - option "Olabet"
+          - option "Ole7.io"
+          - option "Oley"
+          - option "Olimp"
+          - option "OlyBet"
+          - option "Olympusbet"
+          - option "Opabet"
+          - option "Oppa888"
+          - option "Optibet"
+          - option "Orbit Exchange"
+          - option "Orobet"
+          - option "Oscarspin"
+          - option "Ostlers Racing"
+          - option "OVaccess"
+          - option "Paddy Power"
+          - option "Paf"
+          - option "PaidBet"
+          - option "Palmerbet"
+          - option "PalmsBet"
+          - option "PalmsGold"
+          - option "PantherBet"
+          - option "Parimatch"
+          - option "Parimatch.co.uk"
+          - option "PariPesa"
+          - option "Paripulse"
+          - option "partypoker"
+          - option "Paston"
+          - option "Pferdewetten"
+          - option "Picklebet"
+          - option "Pin-up"
+          - option "Pinnacle"
+          - option "Pinnbet"
+          - option "PinterBet"
+          - option "PIWI247"
+          - option "pixbet"
+          - option "Placard"
+          - option "PlaceBet"
+          - option "Planbet"
+          - option "Planet Sport Bet"
+          - option "PlanetOfBets"
+          - option "planetwin365"
+          - option "Play Fast Casino"
+          - option "PlayaBets"
+          - option "Playbet"
+          - option "Playbet.io"
+          - option "PlayBonds"
+          - option "Playdash"
+          - option "Playfina"
+          - option "Playjonny"
+          - option "PlayUp"
+          - option "PlayZilla"
+          - option "PMU"
+          - option "PokerStars Sports"
+          - option "PoleStar Casino"
+          - option "Posido"
+          - option "Powbet"
+          - option "PowerPlay"
+          - option "PowerUp Casino"
+          - option "Premier"
+          - option "Premier Kladionica"
+          - option "PremierBet"
+          - option "PremiumTradings"
+          - option "PricedUp"
+          - option "Prontobet"
+          - option "Prva Sportska Kladionica"
+          - option "PUB Casino"
+          - option "PublicWin"
+          - option "Pulibet"
+          - option "Punterz"
+          - option "Puntit"
+          - option "PuppyBet"
+          - option "PureBets"
+          - option "PushBet"
+          - option "PZBuk"
+          - option "Q88Bets"
+          - option "Qbet"
+          - option "QuickBet"
+          - option "QuiGioco"
+          - option "QuinnBet"
+          - option "Rabona"
+          - option "RaceBets"
+          - option "Racecards.bet"
+          - option "Rainbet"
+          - option "Rajabets"
+          - option "RakeBit"
+          - option "Razed"
+          - option "Red Dice"
+          - option "RedAxePlay"
+          - option "RedMileBets"
+          - option "RedStar"
+          - option "Rembrandt"
+          - option "RETABet"
+          - option "Revolution Casino"
+          - option "Rhino.bet"
+          - option "RichRoyal"
+          - option "Rikstoto"
+          - option "Riobet"
+          - option "Rise of Bets"
+          - option "RitzoBet"
+          - option "Rivalry"
+          - option "Robocat"
+          - option "Roby Casino"
+          - option "RocketPlay"
+          - option "Rocketpot"
+          - option "Rockyspin"
+          - option "RojaBet"
+          - option "Rollbit"
+          - option "Rolletto"
+          - option "Rollino"
+          - option "Romancasino"
+          - option "Roobet"
+          - option "Rooster.bet"
+          - option "Roulettino"
+          - option "Royal Game"
+          - option "RoyalistPlay"
+          - option "RoySpins"
+          - option "RTBet"
+          - option "RUbet"
+          - option "Ruby Bet"
+          - option "Rushbet"
+          - option "Sagaspins"
+          - option "Sahara Games"
+          - option "Samba Slots"
+          - option "SapphireBet"
+          - option "SaratogaBets"
+          - option "Satbet"
+          - option "Satsport"
+          - option "SATSport247"
+          - option "Savibet"
+          - option "Savoy Betting"
+          - option "Sazkabet"
+          - option "SBbet"
+          - option "SBOBET"
+          - option "SBOTOP"
+          - option "Scarawins"
+          - option "Scommettendo"
+          - option "Scooore"
+          - option "Sekabet"
+          - option "Sesame"
+          - option "Sgcasino"
+          - option "Shuffle"
+          - option "Silverplay"
+          - option "Singapore Pools"
+          - option "Sirwin"
+          - option "Sisal"
+          - option "SixSigmaSports"
+          - option "SkillBet"
+          - option "Sky Bet"
+          - option "Slotexo"
+          - option "Slotimo"
+          - option "Slots Hammer"
+          - option "SlotsPalace"
+          - option "SlotV"
+          - option "Smarkets"
+          - option "Snabbare"
+          - option "Snai"
+          - option "Snatch Casino"
+          - option "Soccabet"
+          - option "SoccerShop"
+          - option "Sol Casino"
+          - option "Solverde.pt"
+          - option "Space Casino"
+          - option "Spassino"
+          - option "SpeedyBet"
+          - option "Spelet"
+          - option "Spellwin"
+          - option "Spinanga"
+          - option "SpinBet"
+          - option "Spinbetter"
+          - option "Spinfest"
+          - option "SpiNight"
+          - option "Spinit"
+          - option "Spinoli"
+          - option "SpinPlatinum"
+          - option "Spinrollz"
+          - option "SpinzWin"
+          - option "Sportaza"
+          - option "sportbet"
+          - option "Sporting Index"
+          - option "Sportingbet"
+          - option "SportingBull"
+          - option "Sportium"
+          - option "SportLife"
+          - option "Sportmarket"
+          - option "Sports Interaction"
+          - option "Sportsbet.io"
+          - option "SportsBroker"
+          - option "Sportuna"
+          - option "SportyBet"
+          - option "Spreadex"
+          - option "Stake"
+          - option "Stanleybet"
+          - option "STAR BET"
+          - option "Starcasinosport"
+          - option "STARDA"
+          - option "StarSports"
+          - option "Stevenhills"
+          - option "Stoiximan"
+          - option "Strendus"
+          - option "STSbet"
+          - option "Sultanbet"
+          - option "SunBet"
+          - option "Supabets"
+          - option "Superbahis"
+          - option "Superbet"
+          - option "Supermatch"
+          - option "SuperSport"
+          - option "SuperSportBet"
+          - option "Surebet247"
+          - option "Svenplay"
+          - option "Svenskaspel Oddset"
+          - option "Swifty Sports"
+          - option "Swiper"
+          - option "Swisslos"
+          - option "Synot Tip"
+          - option "Tab Gold"
+          - option "TAB.co.nz"
+          - option "TAB.com.au"
+          - option "TABtouch"
+          - option "Talismania"
+          - option "TangoBet"
+          - option "Te Apuesto"
+          - option "Tempobet"
+          - option "Tennisi"
+          - option "tether.bet"
+          - option "TG.Casino"
+          - option "The Online Casino"
+          - option "The Red Lion"
+          - option "thepools"
+          - option "Thrill"
+          - option "Thunderpick"
+          - option "Tic Tac Bets"
+          - option "Tikicasino"
+          - option "TikiTaka"
+          - option "Tip-Top"
+          - option "Tipico"
+          - option "Tipobet365"
+          - option "tipp3"
+          - option "TippmixPro"
+          - option "Tipsport"
+          - option "Tiptorro"
+          - option "tipwin"
+          - option "TonyBet"
+          - option "Top-Bet"
+          - option "TOPsport"
+          - option "TopSport.com.au"
+          - option "Tornadobet"
+          - option "TOTALbet"
+          - option "Tote"
+          - option "TOTO"
+          - option "Trbet"
+          - option "Treasurespins"
+          - option "Trino Casino"
+          - option "TrivelaBet"
+          - option "Trust Dice"
+          - option "Tubetgol"
+          - option "Turbo Wins"
+          - option "Tuskcasino"
+          - option "Tuttur"
+          - option "TVG"
+          - option "TwinsBet"
+          - option "TwinSpires"
+          - option "Ubet.kz"
+          - option "Ultrapari"
+          - option "Unibet"
+          - option "Uzbekbet"
+          - option "V9BET"
+          - option "Vavada"
+          - option "Vave"
+          - option "VegasHero"
+          - option "Vegasland"
+          - option "VegasMobileCasino"
+          - option "VegasParadise"
+          - option "Vegazcasino"
+          - option "Veikkaus Pitkäveto"
+          - option "Velobet"
+          - option "Vemabet"
+          - option "Versus"
+          - option "VertBet"
+          - option "Vevobahis"
+          - option "VibroBet"
+          - option "Vicbet"
+          - option "Vicibet"
+          - option "Vierklee Sportwetten"
+          - option "Vikingluck"
+          - option "VinciTu"
+          - option "VIP-IBC"
+          - option "Viperwin"
+          - option "Virgin Bet"
+          - option "Vivatbet"
+          - option "VOdds"
+          - option "Volcano"
+          - option "Waddibet"
+          - option "Wallacebet"
+          - option "WasafiBet"
+          - option "Wazamba"
+          - option "WazBee"
+          - option "WE88"
+          - option "Weiss"
+          - option "Welle"
+          - option "WeltBet"
+          - option "WettArena"
+          - option "Wettigo"
+          - option "Wettstar Pferdewetten"
+          - option "WickedBet"
+          - option "Wild.io"
+          - option "WildRobin"
+          - option "Wildsino"
+          - option "WillBet"
+          - option "William Hill"
+          - option "Win Casino"
+          - option "win2day"
+          - option "Winamax"
+          - option "Winbet"
+          - option "Winissimo"
+          - option "Winline"
+          - option "winmasters"
+          - option "Winner.co.il"
+          - option "Winner.mx"
+          - option "Winner.ro"
+          - option "WinnersBet"
+          - option "Winnerz"
+          - option "Winolot"
+          - option "WinRolla"
+          - option "Winsane"
+          - option "Winsmania"
+          - option "WinSpirit"
+          - option "Wintopia"
+          - option "WinWinBet"
+          - option "Winz.io"
+          - option "Winzap"
+          - option "Wonaco"
+          - option "Wonderluck"
+          - option "Woocasino"
+          - option "World Sports Betting"
+          - option "World Star Betting"
+          - option "Wplay.co"
+          - option "WSM Casino"
+          - option "WWin"
+          - option "WynnBET"
+          - option "Xlivebet"
+          - option "Xtraspin"
+          - option "Yajuego"
+          - option "Yas.bet"
+          - option "ybets"
+          - option "YesPlay"
+          - option "Yeti Casino"
+          - option "Yohoho.bet"
+          - option "Yonibet"
+          - option "YoSports"
+          - option "Yourwin24"
+          - option "Youwin"
+          - option "YoyoSpins"
+          - option "Yugibet"
+          - option "Yuugado"
+          - option "Zamba"
+          - option "ZanziBet"
+          - option "Zarbet"
+          - option "ZEbet"
+          - option "Zenbetting"
+          - option "Zenit"
+          - option "Zenit Bet"
+          - option "Zetbet"
+          - option "ZeusWin"
+          - option "Zodiacbet"
+          - option "Zotabet"
+        - button "Vote" [ref=e123] [cursor=pointer]
+      - generic [ref=e124]:
+        - generic "A chart." [ref=e128]:
+          - img "A chart." [ref=e129]:
+            - generic [ref=e145]:
+              - generic [ref=e148]: 2099 votes
+              - generic [ref=e152]: 1595 votes
+              - generic [ref=e157]: 686 votes
+              - generic [ref=e162]: 674 votes
+              - generic [ref=e167]: 664votes
+          - generic "A tabular representation of the data in the chart." [ref=e169]:
+            - table [ref=e170]:
+              - rowgroup [ref=e171]:
+                - row "Bookmaker Number of votes" [ref=e172]:
+                  - columnheader "Bookmaker" [ref=e173]
+                  - columnheader "Number of votes" [ref=e174]
+              - rowgroup [ref=e175]:
+                - row "bet365 2,099" [ref=e176]:
+                  - cell "bet365" [ref=e177]
+                  - cell "2,099" [ref=e178]
+                - row "10bet 1,595" [ref=e179]:
+                  - cell "10bet" [ref=e180]
+                  - cell "1,595" [ref=e181]
+                - row "Betfair 686" [ref=e182]:
+                  - cell "Betfair" [ref=e183]
+                  - cell "686" [ref=e184]
+                - row "Pinnacle 674" [ref=e185]:
+                  - cell "Pinnacle" [ref=e186]
+                  - cell "674" [ref=e187]
+                - row "1xBet 664" [ref=e188]:
+                  - cell "1xBet" [ref=e189]
+                  - cell "664" [ref=e190]
+        - list [ref=e192]:
+          - listitem [ref=e193]:
+            - link "bet365" [ref=e195] [cursor=pointer]:
+              - /url: /visit.php?id=878&v=5
+          - listitem [ref=e196]:
+            - link "10bet" [ref=e198] [cursor=pointer]:
+              - /url: /visit.php?id=4&v=5
+          - listitem [ref=e199]:
+            - link "Betfair" [ref=e201] [cursor=pointer]:
+              - /url: /visit.php?id=815&v=5
+          - listitem [ref=e202]:
+            - link "Pinnacle" [ref=e204] [cursor=pointer]:
+              - /url: /visit.php?id=560&v=5
+          - listitem [ref=e205]:
+            - link "1xBet" [ref=e207] [cursor=pointer]:
+              - /url: /visit.php?id=16&v=5
+        - generic [ref=e208]:
+          - text: "Total:"
+          - link "24633" [ref=e209] [cursor=pointer]:
+            - /url: /where-to-bet/
+          - text: votes
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - text: What is your favourite
+          - text: mobile bookmaker?
+        - generic [ref=e213]: 
+      - generic [ref=e215]:
+        - combobox [ref=e216] [cursor=pointer]:
+          - option "- select bookmaker -" [selected]
+          - option "10bet"
+          - option "1xBet"
+          - option "22BET"
+          - option "888 Sport"
+          - option "bet-at-home"
+          - option "bet365"
+          - option "Betano"
+          - option "Betboro"
+          - option "BetClic"
+          - option "Betdaq"
+          - option "Betfair"
+          - option "Betfinal"
+          - option "Betfred"
+          - option "Bethard"
+          - option "Bets10"
+          - option "Betsafe"
+          - option "Betsson"
+          - option "BetVictor"
+          - option "Betway"
+          - option "BetWinner"
+          - option "Boylesports"
+          - option "bwin"
+          - option "Campeonbet"
+          - option "Cashpoint"
+          - option "Cbet"
+          - option "ComeOn!"
+          - option "Coral"
+          - option "Dafabet"
+          - option "Evobet"
+          - option "Expekt"
+          - option "Favbet"
+          - option "Fonbet"
+          - option "Gamebookers"
+          - option "Goalbet"
+          - option "Guts"
+          - option "Interwetten"
+          - option "Ladbrokes"
+          - option "Leon Bets"
+          - option "LiveBet"
+          - option "LV BET"
+          - option "Marathonbet"
+          - option "Matchbook"
+          - option "MELbet"
+          - option "MobileBet"
+          - option "NetBet"
+          - option "NordicBet"
+          - option "Novibet"
+          - option "OlyBet"
+          - option "Optibet"
+          - option "Paddy Power"
+          - option "Paf"
+          - option "Parimatch"
+          - option "Pin-up"
+          - option "Pinnacle"
+          - option "PokerStars Sports"
+          - option "RaceBets"
+          - option "ReloadBet"
+          - option "Rivalo"
+          - option "SBOBET"
+          - option "Sky Bet"
+          - option "Smarkets"
+          - option "Sportingbet"
+          - option "Sports Interaction"
+          - option "Spreadex"
+          - option "Tipbet"
+          - option "Tipico"
+          - option "Titanbet"
+          - option "TonyBet"
+          - option "Unibet"
+          - option "William Hill"
+          - option "winmasters"
+        - button "Vote" [ref=e217] [cursor=pointer]
+      - generic [ref=e218]:
+        - generic "A chart." [ref=e771]:
+          - img "A chart." [ref=e223]:
+            - generic [ref=e235]:
+              - generic [ref=e238]: 371 votes
+              - generic [ref=e242]: 300 votes
+              - generic [ref=e246]: 290 votes
+              - generic [ref=e250]: 244 votes
+              - generic [ref=e254]: 198votes
+          - generic "A tabular representation of the data in the chart." [ref=e772]:
+            - table [ref=e773]:
+              - rowgroup [ref=e774]:
+                - row "Bookmaker Number of votes" [ref=e775]:
+                  - columnheader "Bookmaker" [ref=e776]
+                  - columnheader "Number of votes" [ref=e777]
+              - rowgroup [ref=e778]:
+                - row "bet365 371" [ref=e779]:
+                  - cell "bet365" [ref=e780]
+                  - cell "371" [ref=e781]
+                - row "Betfair 300" [ref=e782]:
+                  - cell "Betfair" [ref=e783]
+                  - cell "300" [ref=e784]
+                - row "NetBet 290" [ref=e785]:
+                  - cell "NetBet" [ref=e786]
+                  - cell "290" [ref=e787]
+                - row "Marathonbet 244" [ref=e788]:
+                  - cell "Marathonbet" [ref=e789]
+                  - cell "244" [ref=e790]
+                - row "1xBet 198" [ref=e791]:
+                  - cell "1xBet" [ref=e792]
+                  - cell "198" [ref=e793]
+        - list [ref=e257]:
+          - listitem [ref=e258]:
+            - link "bet365" [ref=e260] [cursor=pointer]:
+              - /url: /visit.php?id=878&v=5
+          - listitem [ref=e261]:
+            - link "Betfair" [ref=e263] [cursor=pointer]:
+              - /url: /visit.php?id=815&v=5
+          - listitem [ref=e264]:
+            - link "NetBet" [ref=e266] [cursor=pointer]:
+              - /url: /visit.php?id=1087&v=5
+          - listitem [ref=e267]:
+            - link "Marathonbet" [ref=e269] [cursor=pointer]:
+              - /url: /visit.php?id=464&v=5
+          - listitem [ref=e270]:
+            - link "1xBet" [ref=e272] [cursor=pointer]:
+              - /url: /visit.php?id=16&v=5
+        - generic [ref=e273]:
+          - text: "Total:"
+          - link "6948" [ref=e274] [cursor=pointer]:
+            - /url: /mobile-bookmakers/
+          - text: votes
+    - generic [ref=e276]:
+      - heading "Rate Your Bookmaker" [level=2] [ref=e278]
+      - generic [ref=e280]:
+        - combobox [ref=e281] [cursor=pointer]:
+          - option "- select bookmaker -" [selected]
+          - option "Loading..."
+        - generic [ref=e282]:
+          - generic "5 stars" [ref=e283] [cursor=pointer]: 
+          - generic "4 stars" [ref=e284] [cursor=pointer]: 
+          - generic "3 stars" [ref=e285] [cursor=pointer]: 
+          - generic "2 stars" [ref=e286] [cursor=pointer]: 
+          - generic "1 star" [ref=e287] [cursor=pointer]: 
+        - textbox "Type your comment here (optional). All comments are moderated to avoid spam; suspicious or automated contributions will be deleted." [ref=e289]:
+          - /placeholder: "Type your comment here (optional).\nAll comments are moderated to avoid spam; suspicious or automated contributions will be deleted."
+        - button "RATE" [ref=e291] [cursor=pointer]
+    - generic [ref=e293]:
+      - heading "Filter Bookmakers" [level=2] [ref=e295]
+      - generic [ref=e296]:
+        - generic [ref=e297]:
+          - generic [ref=e298]:
+            - text: Licence
+            - generic [ref=e300]: 
+          - combobox [ref=e301] [cursor=pointer]:
+            - option "- no preferences -" [selected]
+            - option "Aland Islands"
+            - option "Alderney"
+            - option "Angola"
+            - option "Anjouan"
+            - option "Antigua and Barbuda"
+            - option "Arizona (United States)"
+            - option "Armenia"
+            - option "Australia"
+            - option "Austria"
+            - option "Azerbaijan"
+            - option "Belarus"
+            - option "Belgium"
+            - option "Belize"
+            - option "Bosnia and Herzegovina"
+            - option "Brazil"
+            - option "Bulgaria"
+            - option "Cagayan Economic Zone Authority (Philippines)"
+            - option "Cameroon"
+            - option "Colombia"
+            - option "Colorado (United States)"
+            - option "Connecticut (United States)"
+            - option "Costa Rica"
+            - option "Croatia"
+            - option "Curacao"
+            - option "Cyprus"
+            - option "Czech Republic"
+            - option "Delaware (United States)"
+            - option "Democratic Republic of Congo"
+            - option "Denmark"
+            - option "Eastern Cape (South Africa)"
+            - option "Estonia"
+            - option "Finland"
+            - option "France"
+            - option "Gauteng (South Africa)"
+            - option "Georgia"
+            - option "Germany"
+            - option "Ghana"
+            - option "Gibraltar"
+            - option "Greece"
+            - option "Hong Kong"
+            - option "Hungary"
+            - option "Illinois (United States)"
+            - option "Indiana (United States)"
+            - option "Iowa (United States)"
+            - option "Ireland"
+            - option "Isle of Man"
+            - option "Israel"
+            - option "Italy"
+            - option "Ivory Coast"
+            - option "Jersey"
+            - option "Kahnawake"
+            - option "Kansas (United States)"
+            - option "Kazakhstan"
+            - option "Kentucky (United States)"
+            - option "Kenya"
+            - option "Kwazulu-Natal (South Africa)"
+            - option "Latvia"
+            - option "Limpopo (South Africa)"
+            - option "Lithuania"
+            - option "Louisiana (United States)"
+            - option "Malawi"
+            - option "Malta"
+            - option "Maryland (United States)"
+            - option "Massachusetts (United States)"
+            - option "Mauritius"
+            - option "Mexico"
+            - option "Michigan (United States)"
+            - option "Moldova"
+            - option "Montenegro"
+            - option "Mozambique"
+            - option "Mpumalanga (South Africa)"
+            - option "Namibia"
+            - option "Netherlands"
+            - option "Nevada (United States)"
+            - option "New Jersey (United States)"
+            - option "New York (United States)"
+            - option "New Zealand"
+            - option "Nigeria"
+            - option "North Dakota (United States)"
+            - option "North Macedonia"
+            - option "Norway"
+            - option "Ohio (United States)"
+            - option "Ontario (Canada)"
+            - option "Oregon (United States)"
+            - option "Panama"
+            - option "Paraguay"
+            - option "Pennsylvania (United States)"
+            - option "Peru"
+            - option "Philippines"
+            - option "Poland"
+            - option "Portugal"
+            - option "Province of Tucumán (Argentina)"
+            - option "Romania"
+            - option "Russia"
+            - option "Senegal"
+            - option "Serbia"
+            - option "Sierra Leone"
+            - option "Singapore"
+            - option "Slovakia"
+            - option "Slovenia"
+            - option "Spain"
+            - option "Sweden"
+            - option "Switzerland"
+            - option "Tanzania"
+            - option "Tennessee (United States)"
+            - option "Tobique"
+            - option "Turkey"
+            - option "Uganda"
+            - option "Ukraine"
+            - option "United Kingdom"
+            - option "Uruguay"
+            - option "Virginia (United States)"
+            - option "Western Cape (South Africa)"
+            - option "Zambia"
+          - generic [ref=e302]:
+            - text: Language
+            - generic [ref=e304]: 
+          - combobox [ref=e305] [cursor=pointer]:
+            - option "- no preferences -" [selected]
+            - option "Albanian"
+            - option "Arabic"
+            - option "Armenian"
+            - option "Azerbaijani"
+            - option "Belarusian"
+            - option "Bengali"
+            - option "Bosnian"
+            - option "Bulgarian"
+            - option "Burmese"
+            - option "Chinese"
+            - option "Croatian"
+            - option "Czech"
+            - option "Danish"
+            - option "Dutch"
+            - option "English"
+            - option "Estonian"
+            - option "Farsi"
+            - option "Filipino"
+            - option "Finnish"
+            - option "French"
+            - option "Georgian"
+            - option "German"
+            - option "Greek"
+            - option "Hebrew"
+            - option "Hindi"
+            - option "Hungarian"
+            - option "Icelandic"
+            - option "Indonesian"
+            - option "Italian"
+            - option "Japanese"
+            - option "Kazakh"
+            - option "Korean"
+            - option "Kurdish"
+            - option "Latvian"
+            - option "Lithuanian"
+            - option "Macedonian"
+            - option "Malay"
+            - option "Mongolian"
+            - option "Montenegrin"
+            - option "Norwegian"
+            - option "Polish"
+            - option "Portuguese"
+            - option "Romanian"
+            - option "Russian"
+            - option "Serbian"
+            - option "Slovak"
+            - option "Slovenian"
+            - option "Spanish"
+            - option "Swahili"
+            - option "Swedish"
+            - option "Tajik"
+            - option "Thai"
+            - option "Turkish"
+            - option "Ukrainian"
+            - option "Uzbek"
+            - option "Vietnamese"
+        - generic [ref=e306]:
+          - generic [ref=e307]:
+            - text: Currency
+            - generic [ref=e309]: 
+          - combobox [ref=e310] [cursor=pointer]:
+            - option "- no preferences -" [selected]
+            - option "American Dollar"
+            - option "Argentinian Peso"
+            - option "Armenian Dram"
+            - option "Australian Dollar"
+            - option "Azerbaijani Manat"
+            - option "Belarusian Ruble"
+            - option "Bosnia and Herzegovina Mark"
+            - option "Brazilian Real"
+            - option "British Pound"
+            - option "Canadian Dollar"
+            - option "Central African Franc"
+            - option "Chilean Peso"
+            - option "Chinese Renminbi"
+            - option "Colombian Peso"
+            - option "Czech Koruna"
+            - option "Danish Krone"
+            - option "Euro"
+            - option "Georgian Lari"
+            - option "Ghanaian Cedi"
+            - option "Hong Kong Dollar"
+            - option "Hungarian Forint"
+            - option "Icelandic Krona"
+            - option "Indian Rupee"
+            - option "Indonesian Rupiah"
+            - option "Japanese Yen"
+            - option "Kazakhstani Tenge"
+            - option "Kenyan Shilling"
+            - option "Kyrgyzstani Som"
+            - option "Macedonian Denar"
+            - option "Malaysian Ringgit"
+            - option "Mexican Peso"
+            - option "Moldovan Leu"
+            - option "New Zealand Dollar"
+            - option "Nigerian Naira"
+            - option "Norwegian Krone"
+            - option "Peruvian Sol"
+            - option "Phillipine Peso"
+            - option "Polish Zloty"
+            - option "Romanian Leu"
+            - option "Russian Ruble"
+            - option "Serbian Dinar"
+            - option "Singapore Dollar"
+            - option "South African Rand"
+            - option "South Korean Won"
+            - option "Swedish Krona"
+            - option "Swiss Franc"
+            - option "Taiwan Dollar"
+            - option "Tajikistani Somoni"
+            - option "Thai Baht"
+            - option "Turkish Lira"
+            - option "Turkmenistani Manat"
+            - option "Ugandan Shilling"
+            - option "Ukrainian Hryvnia"
+            - option "Uzbekistani Som"
+            - option "Venezuelan Bolivar"
+            - option "Vietnamese Dong"
+            - option "West African CFA franc"
+          - generic [ref=e311]:
+            - text: Payment option
+            - generic [ref=e313]: 
+          - combobox [ref=e314] [cursor=pointer]:
+            - option "- no preferences -" [selected]
+            - option "Abaqoos"
+            - option "Alfa-Bank"
+            - option "Apple Pay"
+            - option "Astropay"
+            - option "Bank Transfer"
+            - option "Boleto"
+            - option "BPAY"
+            - option "Bradesco"
+            - option "Caixa"
+            - option "Cheque"
+            - option "Citadel"
+            - option "ClickandBuy"
+            - option "Dankort"
+            - option "Diners Club"
+            - option "eCheck"
+            - option "ecoPayz"
+            - option "EntroPay"
+            - option "eps"
+            - option "Euteller"
+            - option "Flexepin"
+            - option "giropay"
+            - option "GPay"
+            - option "iDeal"
+            - option "iDebit"
+            - option "INOVAPAY"
+            - option "InstaDebit"
+            - option "Instant Wire Transfer"
+            - option "Interac"
+            - option "Itau"
+            - option "Jeton"
+            - option "Local Bank Transfer"
+            - option "Maestro"
+            - option "MasterCard"
+            - option "MisterCash"
+            - option "Moneta.ru"
+            - option "Money Transfer"
+            - option "MuchBetter"
+            - option "Multibanco"
+            - option "Neosurf"
+            - option "Neteller"
+            - option "Nordea"
+            - option "OXXO"
+            - option "Pay4Fun"
+            - option "PayPal"
+            - option "paysafecard"
+            - option "Perfect Money"
+            - option "Poli"
+            - option "Przelewy24"
+            - option "QIWI"
+            - option "Rapid Transfer"
+            - option "Santander"
+            - option "SEB"
+            - option "SEPA"
+            - option "Skrill"
+            - option "Sofort"
+            - option "Solo"
+            - option "STICPAY"
+            - option "Swedbank"
+            - option "Switch"
+            - option "Todito Cash"
+            - option "Trustly"
+            - option "Visa"
+            - option "Visa Debit"
+            - option "Visa Delta"
+            - option "Visa Electron"
+            - option "WebMoney"
+            - option "Yandex Money"
+            - option "Zimpler"
+        - button "Filter" [ref=e316] [cursor=pointer]
+    - link "Stay in control - GambleAware.org" [ref=e319] [cursor=pointer]:
+      - /url: https://www.gambleaware.org/
+      - img "Stay in control - GambleAware.org" [ref=e320]
+    - table "Bookmaker Payment Options 68 payment options" [ref=e323]:
+      - caption [ref=e324]:
+        - heading "Bookmaker Payment Options" [level=1] [ref=e326]
+        - generic [ref=e329]: 68 payment options
+      - rowgroup [ref=e330]:
+        - row "1 Abaqoos Go there" [ref=e331]:
+          - cell "1" [ref=e332]:
+            - generic [ref=e333]: "1"
+          - cell "Abaqoos Go there" [ref=e334]:
+            - link "Abaqoos" [ref=e335] [cursor=pointer]:
+              - /url: /deposit-options/abaqoos.php
+            - link "Go there" [ref=e336] [cursor=pointer]:
+              - /url: /deposit-options/abaqoos.php
+        - row "2 Alfa-Bank Go there" [ref=e337]:
+          - cell "2" [ref=e338]:
+            - generic [ref=e339]: "2"
+          - cell "Alfa-Bank Go there" [ref=e340]:
+            - link "Alfa-Bank" [ref=e341] [cursor=pointer]:
+              - /url: /deposit-options/alfa-bank.php
+            - link "Go there" [ref=e342] [cursor=pointer]:
+              - /url: /deposit-options/alfa-bank.php
+        - row "3 Apple Pay Go there" [ref=e343]:
+          - cell "3" [ref=e344]:
+            - generic [ref=e345]: "3"
+          - cell "Apple Pay Go there" [ref=e346]:
+            - link "Apple Pay" [ref=e347] [cursor=pointer]:
+              - /url: /deposit-options/apple-pay.php
+            - link "Go there" [ref=e348] [cursor=pointer]:
+              - /url: /deposit-options/apple-pay.php
+        - row "4 Astropay Go there" [ref=e349]:
+          - cell "4" [ref=e350]:
+            - generic [ref=e351]: "4"
+          - cell "Astropay Go there" [ref=e352]:
+            - link "Astropay" [ref=e353] [cursor=pointer]:
+              - /url: /deposit-options/astropay.php
+            - link "Go there" [ref=e354] [cursor=pointer]:
+              - /url: /deposit-options/astropay.php
+        - row "5 Bank Transfer Go there" [ref=e355]:
+          - cell "5" [ref=e356]:
+            - generic [ref=e357]: "5"
+          - cell "Bank Transfer Go there" [ref=e358]:
+            - link "Bank Transfer" [ref=e359] [cursor=pointer]:
+              - /url: /deposit-options/bank-transfer.php
+            - link "Go there" [ref=e360] [cursor=pointer]:
+              - /url: /deposit-options/bank-transfer.php
+        - row "6 Boleto Go there" [ref=e361]:
+          - cell "6" [ref=e362]:
+            - generic [ref=e363]: "6"
+          - cell "Boleto Go there" [ref=e364]:
+            - link "Boleto" [ref=e365] [cursor=pointer]:
+              - /url: /deposit-options/boleto.php
+            - link "Go there" [ref=e366] [cursor=pointer]:
+              - /url: /deposit-options/boleto.php
+        - row "7 BPAY Go there" [ref=e367]:
+          - cell "7" [ref=e368]:
+            - generic [ref=e369]: "7"
+          - cell "BPAY Go there" [ref=e370]:
+            - link "BPAY" [ref=e371] [cursor=pointer]:
+              - /url: /deposit-options/bpay.php
+            - link "Go there" [ref=e372] [cursor=pointer]:
+              - /url: /deposit-options/bpay.php
+        - row "8 Bradesco Go there" [ref=e373]:
+          - cell "8" [ref=e374]:
+            - generic [ref=e375]: "8"
+          - cell "Bradesco Go there" [ref=e376]:
+            - link "Bradesco" [ref=e377] [cursor=pointer]:
+              - /url: /deposit-options/bradesco.php
+            - link "Go there" [ref=e378] [cursor=pointer]:
+              - /url: /deposit-options/bradesco.php
+        - row "9 Caixa Go there" [ref=e379]:
+          - cell "9" [ref=e380]:
+            - generic [ref=e381]: "9"
+          - cell "Caixa Go there" [ref=e382]:
+            - link "Caixa" [ref=e383] [cursor=pointer]:
+              - /url: /deposit-options/caixa.php
+            - link "Go there" [ref=e384] [cursor=pointer]:
+              - /url: /deposit-options/caixa.php
+        - row "10 Cheque Go there" [ref=e385]:
+          - cell "10" [ref=e386]:
+            - generic [ref=e387]: "10"
+          - cell "Cheque Go there" [ref=e388]:
+            - link "Cheque" [ref=e389] [cursor=pointer]:
+              - /url: /deposit-options/cheque.php
+            - link "Go there" [ref=e390] [cursor=pointer]:
+              - /url: /deposit-options/cheque.php
+        - row "11 Citadel Go there" [ref=e391]:
+          - cell "11" [ref=e392]:
+            - generic [ref=e393]: "11"
+          - cell "Citadel Go there" [ref=e394]:
+            - link "Citadel" [ref=e395] [cursor=pointer]:
+              - /url: /deposit-options/citadel.php
+            - link "Go there" [ref=e396] [cursor=pointer]:
+              - /url: /deposit-options/citadel.php
+        - row "12 ClickandBuy Go there" [ref=e397]:
+          - cell "12" [ref=e398]:
+            - generic [ref=e399]: "12"
+          - cell "ClickandBuy Go there" [ref=e400]:
+            - link "ClickandBuy" [ref=e401] [cursor=pointer]:
+              - /url: /deposit-options/clickandbuy.php
+            - link "Go there" [ref=e402] [cursor=pointer]:
+              - /url: /deposit-options/clickandbuy.php
+        - row "13 Dankort Go there" [ref=e403]:
+          - cell "13" [ref=e404]:
+            - generic [ref=e405]: "13"
+          - cell "Dankort Go there" [ref=e406]:
+            - link "Dankort" [ref=e407] [cursor=pointer]:
+              - /url: /deposit-options/dankort.php
+            - link "Go there" [ref=e408] [cursor=pointer]:
+              - /url: /deposit-options/dankort.php
+        - row "14 Diners Club Go there" [ref=e409]:
+          - cell "14" [ref=e410]:
+            - generic [ref=e411]: "14"
+          - cell "Diners Club Go there" [ref=e412]:
+            - link "Diners Club" [ref=e413] [cursor=pointer]:
+              - /url: /deposit-options/diners-club.php
+            - link "Go there" [ref=e414] [cursor=pointer]:
+              - /url: /deposit-options/diners-club.php
+        - row "15 eCheck Go there" [ref=e415]:
+          - cell "15" [ref=e416]:
+            - generic [ref=e417]: "15"
+          - cell "eCheck Go there" [ref=e418]:
+            - link "eCheck" [ref=e419] [cursor=pointer]:
+              - /url: /deposit-options/echeck.php
+            - link "Go there" [ref=e420] [cursor=pointer]:
+              - /url: /deposit-options/echeck.php
+        - row "16 ecoPayz Go there" [ref=e421]:
+          - cell "16" [ref=e422]:
+            - generic [ref=e423]: "16"
+          - cell "ecoPayz Go there" [ref=e424]:
+            - link "ecoPayz" [ref=e425] [cursor=pointer]:
+              - /url: /deposit-options/ecopayz.php
+            - link "Go there" [ref=e426] [cursor=pointer]:
+              - /url: /deposit-options/ecopayz.php
+        - row "17 EntroPay Go there" [ref=e427]:
+          - cell "17" [ref=e428]:
+            - generic [ref=e429]: "17"
+          - cell "EntroPay Go there" [ref=e430]:
+            - link "EntroPay" [ref=e431] [cursor=pointer]:
+              - /url: /deposit-options/entropay.php
+            - link "Go there" [ref=e432] [cursor=pointer]:
+              - /url: /deposit-options/entropay.php
+        - row "18 eps Go there" [ref=e433]:
+          - cell "18" [ref=e434]:
+            - generic [ref=e435]: "18"
+          - cell "eps Go there" [ref=e436]:
+            - link "eps" [ref=e437] [cursor=pointer]:
+              - /url: /deposit-options/eps.php
+            - link "Go there" [ref=e438] [cursor=pointer]:
+              - /url: /deposit-options/eps.php
+        - row "19 Euteller Go there" [ref=e439]:
+          - cell "19" [ref=e440]:
+            - generic [ref=e441]: "19"
+          - cell "Euteller Go there" [ref=e442]:
+            - link "Euteller" [ref=e443] [cursor=pointer]:
+              - /url: /deposit-options/euteller.php
+            - link "Go there" [ref=e444] [cursor=pointer]:
+              - /url: /deposit-options/euteller.php
+        - row "20 Flexepin Go there" [ref=e445]:
+          - cell "20" [ref=e446]:
+            - generic [ref=e447]: "20"
+          - cell "Flexepin Go there" [ref=e448]:
+            - link "Flexepin" [ref=e449] [cursor=pointer]:
+              - /url: /deposit-options/flexepin.php
+            - link "Go there" [ref=e450] [cursor=pointer]:
+              - /url: /deposit-options/flexepin.php
+        - row "21 giropay Go there" [ref=e451]:
+          - cell "21" [ref=e452]:
+            - generic [ref=e453]: "21"
+          - cell "giropay Go there" [ref=e454]:
+            - link "giropay" [ref=e455] [cursor=pointer]:
+              - /url: /deposit-options/giropay.php
+            - link "Go there" [ref=e456] [cursor=pointer]:
+              - /url: /deposit-options/giropay.php
+        - row "22 GPay Go there" [ref=e457]:
+          - cell "22" [ref=e458]:
+            - generic [ref=e459]: "22"
+          - cell "GPay Go there" [ref=e460]:
+            - link "GPay" [ref=e461] [cursor=pointer]:
+              - /url: /deposit-options/gpay.php
+            - link "Go there" [ref=e462] [cursor=pointer]:
+              - /url: /deposit-options/gpay.php
+        - row "23 iDeal Go there" [ref=e463]:
+          - cell "23" [ref=e464]:
+            - generic [ref=e465]: "23"
+          - cell "iDeal Go there" [ref=e466]:
+            - link "iDeal" [ref=e467] [cursor=pointer]:
+              - /url: /deposit-options/ideal.php
+            - link "Go there" [ref=e468] [cursor=pointer]:
+              - /url: /deposit-options/ideal.php
+        - row "24 iDebit Go there" [ref=e469]:
+          - cell "24" [ref=e470]:
+            - generic [ref=e471]: "24"
+          - cell "iDebit Go there" [ref=e472]:
+            - link "iDebit" [ref=e473] [cursor=pointer]:
+              - /url: /deposit-options/idebit.php
+            - link "Go there" [ref=e474] [cursor=pointer]:
+              - /url: /deposit-options/idebit.php
+        - row "25 INOVAPAY Go there" [ref=e475]:
+          - cell "25" [ref=e476]:
+            - generic [ref=e477]: "25"
+          - cell "INOVAPAY Go there" [ref=e478]:
+            - link "INOVAPAY" [ref=e479] [cursor=pointer]:
+              - /url: /deposit-options/inovapay.php
+            - link "Go there" [ref=e480] [cursor=pointer]:
+              - /url: /deposit-options/inovapay.php
+        - row "26 InstaDebit Go there" [ref=e481]:
+          - cell "26" [ref=e482]:
+            - generic [ref=e483]: "26"
+          - cell "InstaDebit Go there" [ref=e484]:
+            - link "InstaDebit" [ref=e485] [cursor=pointer]:
+              - /url: /deposit-options/instadebit.php
+            - link "Go there" [ref=e486] [cursor=pointer]:
+              - /url: /deposit-options/instadebit.php
+        - row "27 Instant Wire Transfer Go there" [ref=e487]:
+          - cell "27" [ref=e488]:
+            - generic [ref=e489]: "27"
+          - cell "Instant Wire Transfer Go there" [ref=e490]:
+            - link "Instant Wire Transfer" [ref=e491] [cursor=pointer]:
+              - /url: /deposit-options/instant-wire-transfer.php
+            - link "Go there" [ref=e492] [cursor=pointer]:
+              - /url: /deposit-options/instant-wire-transfer.php
+        - row "28 Interac Go there" [ref=e493]:
+          - cell "28" [ref=e494]:
+            - generic [ref=e495]: "28"
+          - cell "Interac Go there" [ref=e496]:
+            - link "Interac" [ref=e497] [cursor=pointer]:
+              - /url: /deposit-options/interac.php
+            - link "Go there" [ref=e498] [cursor=pointer]:
+              - /url: /deposit-options/interac.php
+        - row "29 Itau Go there" [ref=e499]:
+          - cell "29" [ref=e500]:
+            - generic [ref=e501]: "29"
+          - cell "Itau Go there" [ref=e502]:
+            - link "Itau" [ref=e503] [cursor=pointer]:
+              - /url: /deposit-options/itau.php
+            - link "Go there" [ref=e504] [cursor=pointer]:
+              - /url: /deposit-options/itau.php
+        - row "30 Jeton Go there" [ref=e505]:
+          - cell "30" [ref=e506]:
+            - generic [ref=e507]: "30"
+          - cell "Jeton Go there" [ref=e508]:
+            - link "Jeton" [ref=e509] [cursor=pointer]:
+              - /url: /deposit-options/jeton.php
+            - link "Go there" [ref=e510] [cursor=pointer]:
+              - /url: /deposit-options/jeton.php
+        - row "31 Local Bank Transfer Go there" [ref=e511]:
+          - cell "31" [ref=e512]:
+            - generic [ref=e513]: "31"
+          - cell "Local Bank Transfer Go there" [ref=e514]:
+            - link "Local Bank Transfer" [ref=e515] [cursor=pointer]:
+              - /url: /deposit-options/local-bank-transfer.php
+            - link "Go there" [ref=e516] [cursor=pointer]:
+              - /url: /deposit-options/local-bank-transfer.php
+        - row "32 Maestro Go there" [ref=e517]:
+          - cell "32" [ref=e518]:
+            - generic [ref=e519]: "32"
+          - cell "Maestro Go there" [ref=e520]:
+            - link "Maestro" [ref=e521] [cursor=pointer]:
+              - /url: /deposit-options/maestro.php
+            - link "Go there" [ref=e522] [cursor=pointer]:
+              - /url: /deposit-options/maestro.php
+        - row "33 MasterCard Go there" [ref=e523]:
+          - cell "33" [ref=e524]:
+            - generic [ref=e525]: "33"
+          - cell "MasterCard Go there" [ref=e526]:
+            - link "MasterCard" [ref=e527] [cursor=pointer]:
+              - /url: /deposit-options/mastercard.php
+            - link "Go there" [ref=e528] [cursor=pointer]:
+              - /url: /deposit-options/mastercard.php
+        - row "34 MisterCash Go there" [ref=e529]:
+          - cell "34" [ref=e530]:
+            - generic [ref=e531]: "34"
+          - cell "MisterCash Go there" [ref=e532]:
+            - link "MisterCash" [ref=e533] [cursor=pointer]:
+              - /url: /deposit-options/mistercash.php
+            - link "Go there" [ref=e534] [cursor=pointer]:
+              - /url: /deposit-options/mistercash.php
+        - row "35 Moneta.ru Go there" [ref=e535]:
+          - cell "35" [ref=e536]:
+            - generic [ref=e537]: "35"
+          - cell "Moneta.ru Go there" [ref=e538]:
+            - link "Moneta.ru" [ref=e539] [cursor=pointer]:
+              - /url: /deposit-options/moneta-ru.php
+            - link "Go there" [ref=e540] [cursor=pointer]:
+              - /url: /deposit-options/moneta-ru.php
+        - row "36 Money Transfer Go there" [ref=e541]:
+          - cell "36" [ref=e542]:
+            - generic [ref=e543]: "36"
+          - cell "Money Transfer Go there" [ref=e544]:
+            - link "Money Transfer" [ref=e545] [cursor=pointer]:
+              - /url: /deposit-options/money-transfer.php
+            - link "Go there" [ref=e546] [cursor=pointer]:
+              - /url: /deposit-options/money-transfer.php
+        - row "37 MuchBetter Go there" [ref=e547]:
+          - cell "37" [ref=e548]:
+            - generic [ref=e549]: "37"
+          - cell "MuchBetter Go there" [ref=e550]:
+            - link "MuchBetter" [ref=e551] [cursor=pointer]:
+              - /url: /deposit-options/muchbetter.php
+            - link "Go there" [ref=e552] [cursor=pointer]:
+              - /url: /deposit-options/muchbetter.php
+        - row "38 Multibanco Go there" [ref=e553]:
+          - cell "38" [ref=e554]:
+            - generic [ref=e555]: "38"
+          - cell "Multibanco Go there" [ref=e556]:
+            - link "Multibanco" [ref=e557] [cursor=pointer]:
+              - /url: /deposit-options/multibanco.php
+            - link "Go there" [ref=e558] [cursor=pointer]:
+              - /url: /deposit-options/multibanco.php
+        - row "39 Neosurf Go there" [ref=e559]:
+          - cell "39" [ref=e560]:
+            - generic [ref=e561]: "39"
+          - cell "Neosurf Go there" [ref=e562]:
+            - link "Neosurf" [ref=e563] [cursor=pointer]:
+              - /url: /deposit-options/neosurf.php
+            - link "Go there" [ref=e564] [cursor=pointer]:
+              - /url: /deposit-options/neosurf.php
+        - row "40 Neteller Go there" [ref=e565]:
+          - cell "40" [ref=e566]:
+            - generic [ref=e567]: "40"
+          - cell "Neteller Go there" [ref=e568]:
+            - link "Neteller" [ref=e569] [cursor=pointer]:
+              - /url: /deposit-options/neteller.php
+            - link "Go there" [ref=e570] [cursor=pointer]:
+              - /url: /deposit-options/neteller.php
+        - row "41 Nordea Go there" [ref=e571]:
+          - cell "41" [ref=e572]:
+            - generic [ref=e573]: "41"
+          - cell "Nordea Go there" [ref=e574]:
+            - link "Nordea" [ref=e575] [cursor=pointer]:
+              - /url: /deposit-options/nordea.php
+            - link "Go there" [ref=e576] [cursor=pointer]:
+              - /url: /deposit-options/nordea.php
+        - row "42 OXXO Go there" [ref=e577]:
+          - cell "42" [ref=e578]:
+            - generic [ref=e579]: "42"
+          - cell "OXXO Go there" [ref=e580]:
+            - link "OXXO" [ref=e581] [cursor=pointer]:
+              - /url: /deposit-options/oxxo.php
+            - link "Go there" [ref=e582] [cursor=pointer]:
+              - /url: /deposit-options/oxxo.php
+        - row "43 Pay4Fun Go there" [ref=e583]:
+          - cell "43" [ref=e584]:
+            - generic [ref=e585]: "43"
+          - cell "Pay4Fun Go there" [ref=e586]:
+            - link "Pay4Fun" [ref=e587] [cursor=pointer]:
+              - /url: /deposit-options/pay4fun.php
+            - link "Go there" [ref=e588] [cursor=pointer]:
+              - /url: /deposit-options/pay4fun.php
+        - row "44 PayPal Go there" [ref=e589]:
+          - cell "44" [ref=e590]:
+            - generic [ref=e591]: "44"
+          - cell "PayPal Go there" [ref=e592]:
+            - link "PayPal" [ref=e593] [cursor=pointer]:
+              - /url: /deposit-options/paypal.php
+            - link "Go there" [ref=e594] [cursor=pointer]:
+              - /url: /deposit-options/paypal.php
+        - row "45 paysafecard Go there" [ref=e595]:
+          - cell "45" [ref=e596]:
+            - generic [ref=e597]: "45"
+          - cell "paysafecard Go there" [ref=e598]:
+            - link "paysafecard" [ref=e599] [cursor=pointer]:
+              - /url: /deposit-options/paysafecard.php
+            - link "Go there" [ref=e600] [cursor=pointer]:
+              - /url: /deposit-options/paysafecard.php
+        - row "46 Perfect Money Go there" [ref=e601]:
+          - cell "46" [ref=e602]:
+            - generic [ref=e603]: "46"
+          - cell "Perfect Money Go there" [ref=e604]:
+            - link "Perfect Money" [ref=e605] [cursor=pointer]:
+              - /url: /deposit-options/perfect-money.php
+            - link "Go there" [ref=e606] [cursor=pointer]:
+              - /url: /deposit-options/perfect-money.php
+        - row "47 Poli Go there" [ref=e607]:
+          - cell "47" [ref=e608]:
+            - generic [ref=e609]: "47"
+          - cell "Poli Go there" [ref=e610]:
+            - link "Poli" [ref=e611] [cursor=pointer]:
+              - /url: /deposit-options/poli.php
+            - link "Go there" [ref=e612] [cursor=pointer]:
+              - /url: /deposit-options/poli.php
+        - row "48 Przelewy24 Go there" [ref=e613]:
+          - cell "48" [ref=e614]:
+            - generic [ref=e615]: "48"
+          - cell "Przelewy24 Go there" [ref=e616]:
+            - link "Przelewy24" [ref=e617] [cursor=pointer]:
+              - /url: /deposit-options/przelewy24.php
+            - link "Go there" [ref=e618] [cursor=pointer]:
+              - /url: /deposit-options/przelewy24.php
+        - row "49 QIWI Go there" [ref=e619]:
+          - cell "49" [ref=e620]:
+            - generic [ref=e621]: "49"
+          - cell "QIWI Go there" [ref=e622]:
+            - link "QIWI" [ref=e623] [cursor=pointer]:
+              - /url: /deposit-options/qiwi.php
+            - link "Go there" [ref=e624] [cursor=pointer]:
+              - /url: /deposit-options/qiwi.php
+        - row "50 Rapid Transfer Go there" [ref=e625]:
+          - cell "50" [ref=e626]:
+            - generic [ref=e627]: "50"
+          - cell "Rapid Transfer Go there" [ref=e628]:
+            - link "Rapid Transfer" [ref=e629] [cursor=pointer]:
+              - /url: /deposit-options/rapid-transfer.php
+            - link "Go there" [ref=e630] [cursor=pointer]:
+              - /url: /deposit-options/rapid-transfer.php
+        - row "51 Santander Go there" [ref=e631]:
+          - cell "51" [ref=e632]:
+            - generic [ref=e633]: "51"
+          - cell "Santander Go there" [ref=e634]:
+            - link "Santander" [ref=e635] [cursor=pointer]:
+              - /url: /deposit-options/santander.php
+            - link "Go there" [ref=e636] [cursor=pointer]:
+              - /url: /deposit-options/santander.php
+        - row "52 SEB Go there" [ref=e637]:
+          - cell "52" [ref=e638]:
+            - generic [ref=e639]: "52"
+          - cell "SEB Go there" [ref=e640]:
+            - link "SEB" [ref=e641] [cursor=pointer]:
+              - /url: /deposit-options/seb.php
+            - link "Go there" [ref=e642] [cursor=pointer]:
+              - /url: /deposit-options/seb.php
+        - row "53 SEPA Go there" [ref=e643]:
+          - cell "53" [ref=e644]:
+            - generic [ref=e645]: "53"
+          - cell "SEPA Go there" [ref=e646]:
+            - link "SEPA" [ref=e647] [cursor=pointer]:
+              - /url: /deposit-options/sepa.php
+            - link "Go there" [ref=e648] [cursor=pointer]:
+              - /url: /deposit-options/sepa.php
+        - row "54 Skrill Go there" [ref=e649]:
+          - cell "54" [ref=e650]:
+            - generic [ref=e651]: "54"
+          - cell "Skrill Go there" [ref=e652]:
+            - link "Skrill" [ref=e653] [cursor=pointer]:
+              - /url: /deposit-options/skrill.php
+            - link "Go there" [ref=e654] [cursor=pointer]:
+              - /url: /deposit-options/skrill.php
+        - row "55 Sofort Go there" [ref=e655]:
+          - cell "55" [ref=e656]:
+            - generic [ref=e657]: "55"
+          - cell "Sofort Go there" [ref=e658]:
+            - link "Sofort" [ref=e659] [cursor=pointer]:
+              - /url: /deposit-options/sofortuberweisung.php
+            - link "Go there" [ref=e660] [cursor=pointer]:
+              - /url: /deposit-options/sofortuberweisung.php
+        - row "56 Solo Go there" [ref=e661]:
+          - cell "56" [ref=e662]:
+            - generic [ref=e663]: "56"
+          - cell "Solo Go there" [ref=e664]:
+            - link "Solo" [ref=e665] [cursor=pointer]:
+              - /url: /deposit-options/solo.php
+            - link "Go there" [ref=e666] [cursor=pointer]:
+              - /url: /deposit-options/solo.php
+        - row "57 STICPAY Go there" [ref=e667]:
+          - cell "57" [ref=e668]:
+            - generic [ref=e669]: "57"
+          - cell "STICPAY Go there" [ref=e670]:
+            - link "STICPAY" [ref=e671] [cursor=pointer]:
+              - /url: /deposit-options/sticpay.php
+            - link "Go there" [ref=e672] [cursor=pointer]:
+              - /url: /deposit-options/sticpay.php
+        - row "58 Swedbank Go there" [ref=e673]:
+          - cell "58" [ref=e674]:
+            - generic [ref=e675]: "58"
+          - cell "Swedbank Go there" [ref=e676]:
+            - link "Swedbank" [ref=e677] [cursor=pointer]:
+              - /url: /deposit-options/swedbank.php
+            - link "Go there" [ref=e678] [cursor=pointer]:
+              - /url: /deposit-options/swedbank.php
+        - row "59 Switch Go there" [ref=e679]:
+          - cell "59" [ref=e680]:
+            - generic [ref=e681]: "59"
+          - cell "Switch Go there" [ref=e682]:
+            - link "Switch" [ref=e683] [cursor=pointer]:
+              - /url: /deposit-options/switch.php
+            - link "Go there" [ref=e684] [cursor=pointer]:
+              - /url: /deposit-options/switch.php
+        - row "60 Todito Cash Go there" [ref=e685]:
+          - cell "60" [ref=e686]:
+            - generic [ref=e687]: "60"
+          - cell "Todito Cash Go there" [ref=e688]:
+            - link "Todito Cash" [ref=e689] [cursor=pointer]:
+              - /url: /deposit-options/todito-cash.php
+            - link "Go there" [ref=e690] [cursor=pointer]:
+              - /url: /deposit-options/todito-cash.php
+        - row "61 Trustly Go there" [ref=e691]:
+          - cell "61" [ref=e692]:
+            - generic [ref=e693]: "61"
+          - cell "Trustly Go there" [ref=e694]:
+            - link "Trustly" [ref=e695] [cursor=pointer]:
+              - /url: /deposit-options/trustly.php
+            - link "Go there" [ref=e696] [cursor=pointer]:
+              - /url: /deposit-options/trustly.php
+        - row "62 Visa Go there" [ref=e697]:
+          - cell "62" [ref=e698]:
+            - generic [ref=e699]: "62"
+          - cell "Visa Go there" [ref=e700]:
+            - link "Visa" [ref=e701] [cursor=pointer]:
+              - /url: /deposit-options/visa.php
+            - link "Go there" [ref=e702] [cursor=pointer]:
+              - /url: /deposit-options/visa.php
+        - row "63 Visa Debit Go there" [ref=e703]:
+          - cell "63" [ref=e704]:
+            - generic [ref=e705]: "63"
+          - cell "Visa Debit Go there" [ref=e706]:
+            - link "Visa Debit" [ref=e707] [cursor=pointer]:
+              - /url: /deposit-options/visa-debit.php
+            - link "Go there" [ref=e708] [cursor=pointer]:
+              - /url: /deposit-options/visa-debit.php
+        - row "64 Visa Delta Go there" [ref=e709]:
+          - cell "64" [ref=e710]:
+            - generic [ref=e711]: "64"
+          - cell "Visa Delta Go there" [ref=e712]:
+            - link "Visa Delta" [ref=e713] [cursor=pointer]:
+              - /url: /deposit-options/visa-delta.php
+            - link "Go there" [ref=e714] [cursor=pointer]:
+              - /url: /deposit-options/visa-delta.php
+        - row "65 Visa Electron Go there" [ref=e715]:
+          - cell "65" [ref=e716]:
+            - generic [ref=e717]: "65"
+          - cell "Visa Electron Go there" [ref=e718]:
+            - link "Visa Electron" [ref=e719] [cursor=pointer]:
+              - /url: /deposit-options/visa-electron.php
+            - link "Go there" [ref=e720] [cursor=pointer]:
+              - /url: /deposit-options/visa-electron.php
+        - row "66 WebMoney Go there" [ref=e721]:
+          - cell "66" [ref=e722]:
+            - generic [ref=e723]: "66"
+          - cell "WebMoney Go there" [ref=e724]:
+            - link "WebMoney" [ref=e725] [cursor=pointer]:
+              - /url: /deposit-options/webmoney.php
+            - link "Go there" [ref=e726] [cursor=pointer]:
+              - /url: /deposit-options/webmoney.php
+        - row "67 Yandex Money Go there" [ref=e727]:
+          - cell "67" [ref=e728]:
+            - generic [ref=e729]: "67"
+          - cell "Yandex Money Go there" [ref=e730]:
+            - link "Yandex Money" [ref=e731] [cursor=pointer]:
+              - /url: /deposit-options/yandex-money.php
+            - link "Go there" [ref=e732] [cursor=pointer]:
+              - /url: /deposit-options/yandex-money.php
+        - row "68 Zimpler Go there" [ref=e733]:
+          - cell "68" [ref=e734]:
+            - generic [ref=e735]: "68"
+          - cell "Zimpler Go there" [ref=e736]:
+            - link "Zimpler" [ref=e737] [cursor=pointer]:
+              - /url: /deposit-options/zimpler.php
+            - link "Go there" [ref=e738] [cursor=pointer]:
+              - /url: /deposit-options/zimpler.php
+    - generic [ref=e740]:
+      - link "Contact Us" [ref=e742] [cursor=pointer]:
+        - /url: /contact-us/
+      - generic [ref=e743]:
+        - text: "|"
+        - link "Terms of Use" [ref=e744] [cursor=pointer]:
+          - /url: /terms/
+      - generic [ref=e745]:
+        - text: "|"
+        - link "Privacy Policy" [ref=e746] [cursor=pointer]:
+          - /url: /privacy-policy/
+      - generic [ref=e747]:
+        - text: "|"
+        - link "Resources" [ref=e748] [cursor=pointer]:
+          - /url: /resources/
+      - generic [ref=e749]:
+        - text: "|"
+        - link "Betting Guide" [ref=e750] [cursor=pointer]:
+          - /url: /betting-guide/
+      - generic [ref=e751]:
+        - text: "|"
+        - link "Submit a complaint" [ref=e752] [cursor=pointer]:
+          - /url: /betting-guide/how-to-make-a-complaint-against-a-bookmaker.php
+      - generic [ref=e753]:
+        - text: "|"
+        - link "Sitemap" [ref=e754] [cursor=pointer]:
+          - /url: /sitemap/
+      - generic [ref=e755]:
+        - generic [ref=e756]:
+          - link "GAMSTOP.co.uk" [ref=e757] [cursor=pointer]:
+            - /url: https://www.gamstop.co.uk/
+          - text: "|"
+        - link "GambleAware.org Time to Think" [ref=e759] [cursor=pointer]:
+          - /url: https://www.gambleaware.org/
+          - img "GambleAware.org"
+          - img "Time to Think"
+        - generic [ref=e760]:
+          - text: "|"
+          - link "Gamble responsibly" [ref=e761] [cursor=pointer]:
+            - /url: /gambling-problems/
+      - generic [ref=e762]:
+        - text: This site is protected by reCAPTCHA and the Google
+        - link "Privacy Policy" [ref=e763] [cursor=pointer]:
+          - /url: https://policies.google.com/privacy
+        - text: and
+        - link "Terms of Service" [ref=e764] [cursor=pointer]:
+          - /url: https://policies.google.com/terms
+        - text: apply.
+      - generic [ref=e765]: © 2006-2026 Top 100 Bookmakers
+  - generic [ref=e766]:
+    - generic [ref=e767]:
+      - text: By using the Top 100 Bookmakers website you consent that first-party and third-party cookies may be placed on your device, in accordance with the
+      - link "Cookie Policy" [ref=e768] [cursor=pointer]:
+        - /url: /privacy-policy/#cookie_policy
+      - text: .
+    - generic [ref=e770] [cursor=pointer]: OK
+  - text: 

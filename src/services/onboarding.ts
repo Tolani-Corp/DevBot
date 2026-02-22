@@ -165,6 +165,12 @@ export function getHelpMessage(botName: string): string {
 • "@${botName.replace(/\s+/g, "")} fix the login bug in user-service"
 • "@${botName.replace(/\s+/g, "")} add dark mode to the dashboard"
 • "@${botName.replace(/\s+/g, "")} review this PR for security issues"
+• "@${botName.replace(/\s+/g, "")} scan freakme.fun for security vulnerabilities"
+
+**Security & Pentesting:**
+• Use \`/pentest <target>\` for vulnerability scans
+• Supports dependency audits, secret detection, web security checks
+• Powered by Kali Linux pentesting knowledge base
 
 Want to change my name? Just say "rename bot" and I'll help you customize it!`;
 }

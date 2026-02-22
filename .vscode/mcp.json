@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "kali-pentest": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/../freakme.fun/mcp-pentest/dist/index.js"
+      ]
+    }
+  }
+}

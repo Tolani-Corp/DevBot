@@ -39,3 +39,8 @@ When Claude makes a mistake and gets corrected, the lesson goes here.
 ## Archived Patterns
 
 (Move patterns here when they become second nature or are superseded)
+
+### 2026-02-19 - Operations: PowerShell Here-Strings Escaping
+**Mistake:** Used interpolated here-strings (`@" ... "@`) in PowerShell to overwrite a TypeScript file containing backticks and template literals, causing syntax errors (`console.error(\[WS]...` and `\${var}`).
+**Correction:** Use literal here-strings (`@' ... '@`) when writing code content to files via PowerShell to prevent variable expansion and escape character interpretation.
+**Rule:** Always prefer `create_file` tool for full file creation. If using `run_in_terminal` to write file content, strictly use single-quoted here-strings (`@' ... '@`).

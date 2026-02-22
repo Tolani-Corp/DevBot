@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "DevBot Multi-Modal Configuration",
+  "description": "Configuration for vision, audio, and document analysis capabilities",
+  "type": "object",
+  "properties": {
+    "vision": {
+      "type": "object",
+      "description": "Vision analysis configuration (Claude Vision, GPT-4V, etc.)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable vision analysis capabilities"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["claude", "openai", "azure-vision", "custom"],
+          "default": "claude",
+          "description": "Vision API provider"
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "API key for vision provider (use environment variable in production)"
+        },
+        "apiEndpoint": {
+          "type": "string",
+          "description": "Custom API endpoint (optional)"
+        },
+        "maxImageSize": {
+          "type": "number",
+          "default": 5242880,
+          "description": "Maximum image size in bytes (default: 5MB)"
+        },
+        "supportedFormats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["png", "jpg", "jpeg", "webp", "gif"]
+          },
+          "default": ["png", "jpg", "webp"]
+        },
+        "features": {
+          "type": "object",
+          "properties": {
+            "uiAnalysis": {
+              "type": "boolean",
+              "default": true,
+              "description": "Analyze UI screenshots for bugs and issues"
+            },
+            "accessibilityScanning": {
+              "type": "boolean",
+              "default": true,
+              "description": "Scan for WCAG compliance"
+            },
+            "designComparison": {
+              "type": "boolean",
+              "default": true,
+              "description": "Compare designs with implementations"
+            },
+            "ocr": {
+              "type": "boolean",
+              "default": true,
+              "description": "Extract text from images"
+            },
+            "errorScreenshotAnalysis": {
+              "type": "boolean",
+              "default": true,
+              "description": "Analyze error screenshots for diagnostics"
+            }
+          }
+        }
+      },
+      "required": ["enabled", "provider"]
+    },
+    "audio": {
+      "type": "object",
+      "description": "Audio analysis configuration (Whisper, Azure Speech, etc.)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable audio analysis capabilities"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["whisper", "azure-speech", "google-speech", "custom"],
+          "default": "whisper",
+          "description": "Audio API provider"
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "API key for audio provider (use environment variable in production)"
+        },
+        "apiEndpoint": {
+          "type": "string",
+          "description": "Custom API endpoint (optional)"
+        },
+        "maxAudioDuration": {
+          "type": "number",
+          "default": 600,
+          "description": "Maximum audio duration in seconds (default: 10 minutes)"
+        },
+        "maxAudioSize": {
+          "type": "number",
+          "default": 26214400,
+          "description": "Maximum audio size in bytes (default: 25MB)"
+        },
+        "supportedFormats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["mp3", "wav", "ogg", "m4a", "webm", "flac"]
+          },
+          "default": ["mp3", "wav", "ogg", "m4a"]
+        },
+        "features": {
+          "type": "object",
+          "properties": {
+            "transcription": {
+              "type": "boolean",
+              "default": true,
+              "description": "Speech-to-text transcription"
+            },
+            "codeReviewAnalysis": {
+              "type": "boolean",
+              "default": true,
+              "description": "Analyze code review audio"
+            },
+            "actionItemExtraction": {
+              "type": "boolean",
+              "default": true,
+              "description": "Extract action items from meetings"
+            },
+            "sentimentAnalysis": {
+              "type": "boolean",
+              "default": false,
+              "description": "Analyze sentiment in audio"
+            },
+            "speakerDiarization": {
+              "type": "boolean",
+              "default": false,
+              "description": "Identify different speakers"
+            },
+            "textToSpeech": {
+              "type": "boolean",
+              "default": false,
+              "description": "Generate audio reports"
+            }
+          }
+        }
+      },
+      "required": ["enabled", "provider"]
+    },
+    "documents": {
+      "type": "object",
+      "description": "Document analysis configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable document analysis capabilities"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["claude", "gpt4v", "azure-document-intelligence", "custom"],
+          "default": "claude",
+          "description": "Document API provider"
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "API key for document provider (use environment variable in production)"
+        },
+        "apiEndpoint": {
+          "type": "string",
+          "description": "Custom API endpoint (optional)"
+        },
+        "maxDocumentSize": {
+          "type": "number",
+          "default": 10485760,
+          "description": "Maximum document size in bytes (default: 10MB)"
+        },
+        "maxPageCount": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum pages to process per document"
+        },
+        "supportedFormats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["pdf", "docx", "xlsx", "pptx", "txt", "md"]
+          },
+          "default": ["pdf", "docx", "xlsx"]
+        },
+        "features": {
+          "type": "object",
+          "properties": {
+            "pdfAnalysis": {
+              "type": "boolean",
+              "default": true,
+              "description": "Analyze PDF documents"
+            },
+            "excelAnalysis": {
+              "type": "boolean",
+              "default": true,
+              "description": "Analyze Excel spreadsheets for data models"
+            },
+            "diagramParsing": {
+              "type": "boolean",
+              "default": true,
+              "description": "Parse architecture diagrams"
+            },
+            "requirementExtraction": {
+              "type": "boolean",
+              "default": true,
+              "description": "Extract structured requirements"
+            },
+            "documentComparison": {
+              "type": "boolean",
+              "default": false,
+              "description": "Compare document versions"
+            }
+          }
+        }
+      },
+      "required": ["enabled", "provider"]
+    },
+    "contextFusion": {
+      "type": "object",
+      "description": "Multi-modal context fusion settings",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable context fusion across modalities"
+        },
+        "maxContextTokens": {
+          "type": "number",
+          "default": 100000,
+          "description": "Maximum tokens for combined context"
+        },
+        "modalityPriorities": {
+          "type": "object",
+          "description": "Default priority weights for different task types",
+          "properties": {
+            "code-review": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "number", "default": 1.0 },
+                "vision": { "type": "number", "default": 0.3 },
+                "audio": { "type": "number", "default": 0.4 },
+                "document": { "type": "number", "default": 0.2 }
+              }
+            },
+            "bug-fix": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "number", "default": 1.0 },
+                "vision": { "type": "number", "default": 0.6 },
+                "audio": { "type": "number", "default": 0.2 },
+                "document": { "type": "number", "default": 0.1 }
+              }
+            },
+            "feature": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "number", "default": 1.0 },
+                "vision": { "type": "number", "default": 0.4 },
+                "audio": { "type": "number", "default": 0.3 },
+                "document": { "type": "number", "default": 0.8 }
+              }
+            },
+            "design-review": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "number", "default": 0.7 },
+                "vision": { "type": "number", "default": 0.9 },
+                "audio": { "type": "number", "default": 0.3 },
+                "document": { "type": "number", "default": 0.5 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "description": "Storage configuration for multi-modal assets",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["local", "s3", "azure-blob", "gcs"],
+          "default": "local",
+          "description": "Storage provider for images, audio, documents"
+        },
+        "localPath": {
+          "type": "string",
+          "default": "./data/multimodal",
+          "description": "Local storage path"
+        },
+        "bucket": {
+          "type": "string",
+          "description": "S3/GCS bucket or Azure container name"
+        },
+        "region": {
+          "type": "string",
+          "description": "Cloud provider region"
+        },
+        "retentionDays": {
+          "type": "number",
+          "default": 30,
+          "description": "Days to retain multi-modal assets"
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "description": "Security settings for multi-modal processing",
+      "properties": {
+        "scanUploads": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scan uploaded files for malware"
+        },
+        "allowedMimeTypes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [
+            "image/png",
+            "image/jpeg",
+            "image/webp",
+            "audio/mpeg",
+            "audio/wav",
+            "application/pdf"
+          ]
+        },
+        "sanitizeFilenames": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sanitize uploaded filenames"
+        },
+        "encryptAtRest": {
+          "type": "boolean",
+          "default": false,
+          "description": "Encrypt stored multi-modal assets"
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "logAnalysisCalls": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log all API calls to vision/audio/document providers"
+        },
+        "logResults": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log analysis results (may contain sensitive data)"
+        },
+        "metricsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Track multi-modal usage metrics"
+        }
+      }
+    }
+  },
+  "required": ["vision", "audio", "documents"]
+}
