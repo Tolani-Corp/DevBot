@@ -1,0 +1,563 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "natt-skills-catalog.json",
+  "description": "NATT Ghost Agent — Baseline and Additional Skills Capabilities Catalog",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-22",
+  "source": "DevBot src/agents/natt-skills.ts + natt.ts",
+
+  "missionTypes": [
+    "web-app",
+    "html-analysis",
+    "api-recon",
+    "network-recon",
+    "osint",
+    "auth-testing",
+    "platform-detection",
+    "code-analysis",
+    "full-ghost"
+  ],
+
+  "ghostModes": {
+    "passive": {
+      "description": "Read-only recon. Zero writes, no auth probes.",
+      "rateLimit": "none",
+      "detectabilityRisk": "minimal",
+      "requiresAuthProof": false
+    },
+    "stealth": {
+      "description": "Low-impact probes. Rate-limited, single-try vectors, randomized delays.",
+      "rateLimit": "800–2400ms between requests",
+      "detectabilityRisk": "low",
+      "requiresAuthProof": false
+    },
+    "active": {
+      "description": "Full test suite. Multi-payload sends, auth bypass probes, fuzzing.",
+      "rateLimit": "respects server 429 + exponential backoff",
+      "detectabilityRisk": "moderate",
+      "requiresAuthProof": true
+    }
+  },
+
+  "baseline": {
+    "description": "Skills available in all NATT installations out of the box.",
+    "skillGroups": [
+      {
+        "id": "password-analysis",
+        "name": "Password Analysis",
+        "module": "natt-skills.ts",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "hash-identification",
+            "name": "Hash Identification",
+            "function": "identifyHash(hash)",
+            "description": "Identifies hash type from format: MD5, SHA-1, SHA-256, SHA-512, NTLM, LM, bcrypt, argon2, scrypt, PBKDF2, WordPress, Drupal, Unix crypt.",
+            "inputs": ["hash string"],
+            "outputs": ["identifiedAs[]", "confidence", "crackability", "crackabilityReason", "hashcatMode", "johnMode", "securityAssessment"],
+            "supportedTypes": ["md5", "sha1", "sha256", "sha512", "ntlm", "lm", "bcrypt", "argon2", "scrypt", "pbkdf2", "sha1-salted", "md5-salted", "mysql-4.1+", "wordpress", "drupal", "unix-crypt"]
+          },
+          {
+            "id": "password-policy-assessment",
+            "name": "Password Policy Assessment",
+            "function": "assessPasswordPolicy(signals)",
+            "description": "Evaluates password policy strength from observable signals: min length, complexity, history, rotation, MFA.",
+            "inputs": ["policy signals object"],
+            "outputs": ["score (0–100)", "grade (A-F)", "findings[]", "recommendations[]"]
+          },
+          {
+            "id": "default-credential-lookup",
+            "name": "Default Credential Lookup",
+            "function": "checkDefaultCredentials(serviceName)",
+            "description": "Looks up known default credentials for 40+ services: routers, CMS platforms, databases, IoT devices.",
+            "inputs": ["service name string"],
+            "outputs": ["credential pairs[]", "source", "severity"]
+          },
+          {
+            "id": "credential-stuffing-surface",
+            "name": "Credential Stuffing Surface Analysis",
+            "function": "analyzeCredentialExposure(url, html, headers)",
+            "description": "Identifies credential exposure vectors: credentials in URL, Basic Auth, HTTP transport, HSTS absence, autocomplete.",
+            "inputs": ["url", "html string", "response headers"],
+            "outputs": ["vectors[]", "overallRisk", "recommendations[]"]
+          }
+        ]
+      },
+
+      {
+        "id": "secrets-detection",
+        "name": "Secrets Detection",
+        "module": "natt-skills.ts",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "secret-pattern-scan",
+            "name": "80+ Secret Pattern Scan",
+            "function": "scanContentForSecrets(content, options)",
+            "description": "Scans any text content against 80+ compiled regex patterns for API keys, tokens, certificates, and credentials.",
+            "patternCategories": [
+              "aws-access-key", "aws-secret-key", "aws-session-token",
+              "gcp-service-account", "gcp-api-key",
+              "azure-connection-string", "azure-sas-token",
+              "github-pat", "github-oauth",
+              "stripe-secret", "stripe-publishable",
+              "twilio-account-sid", "twilio-auth-token",
+              "sendgrid-api-key",
+              "jwt-secret", "jwt-token",
+              "private-key-pem", "certificate-pem",
+              "slack-token", "slack-webhook",
+              "discord-token", "discord-webhook",
+              "mailgun-api-key", "mailchimp-api-key",
+              "heroku-api-key",
+              "npm-token", "pypi-token",
+              "database-connection-string",
+              "generic-password", "generic-api-key", "generic-token"
+            ],
+            "inputs": ["content string (any format)"],
+            "outputs": ["SecretScanResult[]", "severity", "patternName", "matchedValue (redacted)", "location"]
+          },
+          {
+            "id": "shannon-entropy",
+            "name": "Shannon Entropy Analysis",
+            "function": "shannonEntropy(str) + isLikelySecret(value)",
+            "description": "Calculates information entropy of a string. Values > 4.0 bits/char with length > 16 are flagged as likely secrets. Catches secrets that don't match known patterns.",
+            "inputs": ["string value"],
+            "outputs": ["entropy (float)", "isLikelySecret (boolean)"],
+            "threshold": { "minEntropy": 4.0, "minLength": 16 }
+          },
+          {
+            "id": "secrets-to-findings",
+            "name": "Secrets → NATT Findings Converter",
+            "function": "secretsToNATTFindings(results)",
+            "description": "Converts raw secret scan results into structured NATTFinding objects with OWASP categorization, CVSS scoring, and remediation steps.",
+            "inputs": ["SecretScanResult[]"],
+            "outputs": ["NATTFinding[]"]
+          }
+        ]
+      },
+
+      {
+        "id": "jwt-analysis",
+        "name": "JWT Analysis",
+        "module": "natt-skills.ts",
+        "ghostModes": ["passive", "stealth"],
+        "skills": [
+          {
+            "id": "jwt-decode-audit",
+            "name": "JWT Structure Audit",
+            "function": "analyzeJWT(token)",
+            "description": "Decodes JWT (no verification), audits algorithm, claims, expiry, issuer, and identifies known weakness vectors.",
+            "inputs": ["JWT string"],
+            "outputs": ["header", "payload", "algorithm", "issues[]", "riskLevel", "recommendations[]"],
+            "detectedIssues": [
+              "algorithm: none",
+              "algorithm: HS256 with likely public key (RS256 confusion surface)",
+              "expired token",
+              "missing exp claim",
+              "missing iss/aud claims",
+              "kid claim present (injection surface)",
+              "weak secret indicators"
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "auth-bypass-research",
+        "name": "Auth Bypass Research",
+        "module": "natt-skills.ts",
+        "ghostModes": ["stealth", "active"],
+        "requiresAuthProof": true,
+        "skills": [
+          {
+            "id": "auth-bypass-catalog",
+            "name": "Auth Bypass Vector Catalog",
+            "function": "getRelevantAuthBypasses(context)",
+            "description": "Returns relevant auth bypass vectors filtered by context. Each vector includes test steps, payloads, and remediation.",
+            "vectorCategories": ["jwt", "oauth", "session", "http-auth", "password-reset", "mfa", "sql-auth"],
+            "vectors": [
+              "JWT Algorithm Confusion (RS256 → HS256)",
+              "JWT None Algorithm",
+              "OAuth Redirect URI Manipulation",
+              "OAuth PKCE Bypass",
+              "Session Fixation",
+              "Password Reset Token Predictability",
+              "HTTP Basic Auth Brute Force",
+              "SQL Auth Bypass (Classic Patterns)",
+              "MFA Bypass via Response Manipulation"
+            ],
+            "inputs": ["context: 'jwt' | 'oauth' | 'session' | 'all'"],
+            "outputs": ["AuthBypassVector[]"]
+          }
+        ]
+      }
+    ]
+  },
+
+  "additional": {
+    "description": "Extended capabilities beyond baseline — applied domain skills, future expansion slots, and third-party integrations.",
+    "skillGroups": [
+      {
+        "id": "scraping-fetching",
+        "name": "Scraping & Fetching",
+        "status": "available",
+        "ghostModes": ["passive", "stealth"],
+        "skills": [
+          {
+            "id": "tech-fingerprint",
+            "name": "Technology Fingerprinting",
+            "description": "Identifies frontend framework, backend, CDN, WAF from headers + HTML meta patterns.",
+            "missionTypes": ["web-app", "platform-detection"],
+            "signals": ["X-Powered-By", "Server header", "cookie names", "script bundle names", "HTML meta generator"]
+          },
+          {
+            "id": "sitemap-enumeration",
+            "name": "Sitemap & robots.txt Enumeration",
+            "description": "Fetches /sitemap.xml, /sitemap_index.xml, /robots.txt — builds full URL tree and identifies disallowed paths.",
+            "missionTypes": ["web-app", "osint"]
+          },
+          {
+            "id": "error-page-fingerprint",
+            "name": "Error Page Fingerprinting",
+            "description": "Probes with malformed requests to extract version numbers, stack traces, config paths from error responses.",
+            "missionTypes": ["web-app", "api-recon"]
+          },
+          {
+            "id": "cookie-surface-map",
+            "name": "Cookie Surface Map",
+            "description": "Documents all Set-Cookie headers, flags missing HttpOnly/Secure/SameSite attributes.",
+            "missionTypes": ["web-app", "auth-testing"]
+          },
+          {
+            "id": "og-tag-harvest",
+            "name": "OG Tag & Social Metadata Harvest",
+            "description": "Extracts og:*, twitter:card, schema.org markup for brand and content recon.",
+            "missionTypes": ["osint", "web-app"]
+          }
+        ]
+      },
+
+      {
+        "id": "html-analysis",
+        "name": "HTML Analysis",
+        "status": "available",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "csp-audit",
+            "name": "CSP Policy Audit",
+            "description": "Parses Content-Security-Policy header/meta, flags unsafe-inline, unsafe-eval, wildcard origins, missing directives.",
+            "missionTypes": ["html-analysis", "web-app"]
+          },
+          {
+            "id": "dom-xss-surface",
+            "name": "DOM XSS Sink Map",
+            "description": "Identifies innerHTML, document.write, eval(), setTimeout(string), location.assign(string) sinks in inline scripts.",
+            "missionTypes": ["html-analysis", "web-app"]
+          },
+          {
+            "id": "form-intelligence",
+            "name": "Form Intelligence Gathering",
+            "description": "Extracts all form elements, action/method, hidden inputs, CSRF token presence, autocomplete posture.",
+            "missionTypes": ["html-analysis", "auth-testing"]
+          },
+          {
+            "id": "sri-audit",
+            "name": "Subresource Integrity Audit",
+            "description": "Checks all third-party scripts/stylesheets for integrity= attribute presence and hash correctness.",
+            "missionTypes": ["html-analysis", "web-app"]
+          },
+          {
+            "id": "iframe-sandbox-audit",
+            "name": "iFrame Sandbox Audit",
+            "description": "Flags unscoped iframe embeds, missing sandbox attribute, allow-scripts without isolation.",
+            "missionTypes": ["html-analysis"]
+          }
+        ]
+      },
+
+      {
+        "id": "api-recon",
+        "name": "API Recon",
+        "status": "available",
+        "ghostModes": ["passive", "stealth", "active"],
+        "skills": [
+          {
+            "id": "cors-misconfiguration",
+            "name": "CORS Misconfiguration Test",
+            "description": "Sends crafted Origin headers, checks ACAO:* combined with Allow-Credentials:true.",
+            "missionTypes": ["api-recon", "web-app"]
+          },
+          {
+            "id": "graphql-introspection",
+            "name": "GraphQL Introspection Probe",
+            "description": "Sends __schema query to map full schema if introspection is enabled.",
+            "missionTypes": ["api-recon"]
+          },
+          {
+            "id": "mass-assignment-probe",
+            "name": "Mass Assignment Probe",
+            "description": "Sends extra fields in POST/PUT bodies (role, admin, isActive) — checks if silently accepted.",
+            "missionTypes": ["api-recon", "auth-testing"],
+            "ghostMode": "active"
+          },
+          {
+            "id": "http-method-override",
+            "name": "HTTP Method Override Recon",
+            "description": "Tests X-HTTP-Method-Override, X-Method-Override, _method param for PUT/DELETE escalation.",
+            "missionTypes": ["api-recon"]
+          },
+          {
+            "id": "shadow-api-discovery",
+            "name": "Shadow & Legacy API Discovery",
+            "description": "Probes /v0, /v2, /internal, /admin, /debug, /swagger, /openapi.json for undocumented surfaces.",
+            "missionTypes": ["api-recon", "osint"]
+          }
+        ]
+      },
+
+      {
+        "id": "network-recon",
+        "name": "Network Recon",
+        "status": "available",
+        "ghostModes": ["passive", "stealth"],
+        "skills": [
+          {
+            "id": "ssl-tls-audit",
+            "name": "SSL/TLS Posture Audit",
+            "description": "Protocol version support, cipher suite weakness, cert expiry, chain validation flags.",
+            "missionTypes": ["network-recon", "web-app"]
+          },
+          {
+            "id": "http-security-headers",
+            "name": "HTTP Security Headers Audit",
+            "description": "HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy completeness check.",
+            "missionTypes": ["network-recon", "web-app"]
+          },
+          {
+            "id": "cdn-waf-detection",
+            "name": "CDN/WAF Detection",
+            "description": "Identifies Cloudflare, AWS CloudFront, Fastly, Akamai from headers and IP range patterns.",
+            "missionTypes": ["network-recon", "platform-detection"]
+          },
+          {
+            "id": "banner-grab-interpretation",
+            "name": "Banner Grab Interpretation",
+            "description": "Parses service banners to extract version numbers, flags EOL software, suggests CVE correlation.",
+            "missionTypes": ["network-recon"]
+          }
+        ]
+      },
+
+      {
+        "id": "media-scaffolding",
+        "name": "Media Scaffolding",
+        "status": "available",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "file-upload-audit",
+            "name": "File Upload Security Audit",
+            "description": "MIME type bypass, double extension, null byte injection, path traversal in filenames.",
+            "missionTypes": ["web-app", "code-analysis"]
+          },
+          {
+            "id": "svg-xss-vector",
+            "name": "SVG XSS Vector Analysis",
+            "description": "Analyzes SVG content for embedded script, foreignObject, xlink:href XSS vectors.",
+            "missionTypes": ["html-analysis", "web-app"]
+          },
+          {
+            "id": "media-cdn-config",
+            "name": "Media CDN Configuration Audit",
+            "description": "Hotlinking exposure, signed URL enforcement, CORS on media origin, segment URL predictability for HLS/DASH.",
+            "missionTypes": ["web-app", "network-recon"]
+          },
+          {
+            "id": "imagemagick-ffmpeg-injection",
+            "name": "Media Processing Injection Risk",
+            "description": "Identifies ImageMagick policy bypass, FFmpeg argument injection via unsanitized filenames.",
+            "missionTypes": ["code-analysis", "web-app"]
+          },
+          {
+            "id": "exif-metadata-exposure",
+            "name": "Image/PDF Metadata Exposure",
+            "description": "EXIF/IPTC GPS coordinates, camera info, author, creation software, internal paths in uploaded media.",
+            "missionTypes": ["osint", "web-app"]
+          },
+          {
+            "id": "natt-pptx-report",
+            "name": "NATT PPTX Report Generator",
+            "description": "Generates a 10-slide PowerPoint mission brief from vault data: cover, exec summary, mission matrix, findings, top vulns, attack chain diagram, lateral movement map, timeline, remediation table, appendix.",
+            "module": "natt-report.ts",
+            "missionTypes": ["full-ghost"],
+            "outputs": ["path", "filename", "buffer (Slack-ready)", "slideCount", "missionCount", "findingCount", "dateRange"]
+          }
+        ]
+      },
+
+      {
+        "id": "osint-domain",
+        "name": "OSINT & Domain Recon",
+        "status": "available",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "subdomain-enum",
+            "name": "Subdomain Enumeration",
+            "description": "Certificate transparency logs (crt.sh), DNS brute via wordlist, NSEC zone walking.",
+            "missionTypes": ["osint"]
+          },
+          {
+            "id": "dns-intelligence",
+            "name": "DNS Intelligence",
+            "description": "A, AAAA, MX, TXT, SPF, DKIM, DMARC record analysis — mail spoofing posture determination.",
+            "missionTypes": ["osint", "network-recon"]
+          },
+          {
+            "id": "google-dork-gen",
+            "name": "Google Dork Generation",
+            "description": "Generates targeted site:, filetype:, inurl:, intitle: dorks for the target domain.",
+            "missionTypes": ["osint"]
+          },
+          {
+            "id": "whois-footprint",
+            "name": "WHOIS Footprint Mapping",
+            "description": "Registrar, registration date, name server, RDAP data — covers org infrastructure footprint.",
+            "missionTypes": ["osint"]
+          },
+          {
+            "id": "cert-transparency",
+            "name": "Certificate Transparency",
+            "description": "Pulls all issued certs for domain — reveals internal subdomains, wildcard usage, historical infra.",
+            "missionTypes": ["osint"]
+          }
+        ]
+      },
+
+      {
+        "id": "scheduling-delivery",
+        "name": "Scheduling & Delivery",
+        "status": "available",
+        "ghostModes": ["passive"],
+        "skills": [
+          {
+            "id": "cron-scheduler",
+            "name": "BullMQ Cron Scheduler",
+            "description": "Schedule recurring NATT reports with full cadence control: hourly/daily/weekly/biweekly/monthly/custom. Persisted in .natt/cron/schedules.json.",
+            "module": "natt-report-cron.ts",
+            "cadences": ["hourly", "daily", "weekly", "biweekly", "monthly", "custom"],
+            "windows": ["last-24h", "last-7-days", "last-30-days", "last-month", "mtd", "ytd", "custom"],
+            "slackCommands": ["/natt-cron add", "/natt-cron list", "/natt-cron pause", "/natt-cron resume", "/natt-cron delete", "/natt-cron health", "/natt-cron run-now"]
+          },
+          {
+            "id": "vault-archive",
+            "name": "Mission Vault Archive",
+            "description": "Persistent JSON storage of all missions in .natt/vault/. Queryable by date range, operator, severity, mission type.",
+            "module": "natt-vault.ts",
+            "queryMethods": ["listVaultMissionsInRange(from, to)", "getVaultMission(id)", "archiveMission(mission)"]
+          }
+        ]
+      },
+
+      {
+        "id": "future-expansion",
+        "name": "Future / Pluggable Skill Slots",
+        "status": "planned",
+        "description": "Capability slots reserved for future NATT skill modules. Implement as separate TypeScript modules under src/agents/natt-skills-*.ts.",
+        "skills": [
+          {
+            "id": "nuclei-integration",
+            "name": "Nuclei Template Runner",
+            "status": "planned",
+            "description": "Run community Nuclei templates against authorized targets. Returns structured findings mapped to NATT finding schema.",
+            "missionTypes": ["web-app", "api-recon", "network-recon"]
+          },
+          {
+            "id": "shodan-lookup",
+            "name": "Shodan / Censys Integration",
+            "status": "planned",
+            "description": "Query Shodan/Censys APIs for target org's internet-facing asset inventory. Requires API keys in vault.",
+            "missionTypes": ["osint", "network-recon"]
+          },
+          {
+            "id": "llm-prompt-injection",
+            "name": "LLM Prompt Injection Testing",
+            "status": "planned",
+            "description": "Probes AI-powered features (chatbots, summarizers) for prompt injection, data exfil, jailbreak vectors.",
+            "missionTypes": ["web-app", "api-recon"]
+          },
+          {
+            "id": "dependency-cve-correlation",
+            "name": "Live CVE Correlation",
+            "status": "planned",
+            "description": "Queries NVD/OSV APIs for dependencies found in package.json/requirements.txt. Returns exploitability score + PoC links.",
+            "missionTypes": ["code-analysis"]
+          },
+          {
+            "id": "cloud-misconfiguration",
+            "name": "Cloud Misconfiguration Scan",
+            "status": "planned",
+            "description": "S3 bucket public access, Azure Storage anonymous blob, GCS public bucket enumeration for authorized cloud assets.",
+            "missionTypes": ["network-recon", "osint"]
+          },
+          {
+            "id": "mobile-api-recon",
+            "name": "Mobile App API Recon",
+            "status": "planned",
+            "description": "Extracts endpoints, secrets, and cert-pinning posture from APK/IPA strings and decompiled output.",
+            "missionTypes": ["api-recon", "code-analysis"]
+          },
+          {
+            "id": "rag-knowledge-base",
+            "name": "RAG-Enhanced Mission Context",
+            "status": "planned",
+            "description": "Embeds prior mission findings into vector store for semantic retrieval during new assessments. Cross-mission pattern recognition.",
+            "module": "ai/rag.ts (existing)"
+          }
+        ]
+      }
+    ]
+  },
+
+  "findingCategories": [
+    "injection", "broken-auth", "sensitive-data", "xxe",
+    "broken-access-control", "security-misconfiguration", "xss",
+    "insecure-deserialization", "vulnerable-components", "logging-monitoring",
+    "csrf", "ssrf", "open-redirect", "information-disclosure",
+    "api-weakness", "network-exposure", "cryptography", "idor",
+    "business-logic", "html-injection", "dom-vulnerability"
+  ],
+
+  "findingSeverities": ["critical", "high", "medium", "low", "info"],
+
+  "roeStatuses": ["authorized", "unauthorized", "pending-approval", "expired"],
+
+  "slackCommands": {
+    "missions": [
+      "@DevBot natt passive-recon <url>",
+      "@DevBot natt stealth-recon <url>",
+      "@DevBot natt html-analysis <url-or-paste>",
+      "@DevBot natt api-recon <url>",
+      "@DevBot natt auth-test <url>",
+      "@DevBot natt osint <domain>",
+      "@DevBot natt code-scan <repo-or-path>",
+      "@DevBot natt full-ghost <url>"
+    ],
+    "reports": [
+      "/natt-report",
+      "@DevBot natt-report last-30-days",
+      "@DevBot natt-report --from 2026-01-01 --to 2026-01-31",
+      "@DevBot natt-report --operator <slack-user-id>"
+    ],
+    "cron": [
+      "/natt-cron add",
+      "/natt-cron list",
+      "/natt-cron pause <id>",
+      "/natt-cron resume <id>",
+      "/natt-cron delete <id>",
+      "/natt-cron health",
+      "/natt-cron run-now <id>"
+    ]
+  }
+}
