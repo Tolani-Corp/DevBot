@@ -1,5 +1,23 @@
 # Agent Workflow Rules
 
+## 📋 Task Management Protocol (READ FIRST)
+
+**CRITICAL**: All agents MUST follow the task coordination protocol:
+- 📜 **Master Protocol**: [`~/Projects/TASK_COORDINATION.md`](../../TASK_COORDINATION.md)
+- 🤖 **AI Agent Guide**: [`~/Projects/.agents/AI_AGENT_TASK_PROTOCOL.md`](../../.agents/AI_AGENT_TASK_PROTOCOL.md)
+- ✅ **Project TODO**: [`~/Projects/DevBot/TODO.md`](../TODO.md)
+
+**Task Lifecycle**: `[ ]` → `[⏳]` → `[✅]` → `[🔒]` → Archive
+
+**Quick Rules**:
+- **Creating task**: Include acceptance criteria, estimate, dependencies
+- **Starting task**: Mark `[⏳]`, add owner & timestamp
+- **Completing task**: Mark `[✅]`, provide proof (commit SHA, tests passing)
+- **Blocked**: Mark `[🚧]`, create unblocking task, notify human
+- **Never abandon**: Every `[ ]` task must reach `[🔒]` or `[❌]`
+
+---
+
 ## Core Principle: Parallel Build + Redevelopment Queue
 
 Never block the main thread on errors. Always keep building forward.
