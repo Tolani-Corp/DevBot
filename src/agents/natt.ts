@@ -28,6 +28,12 @@ import dns from "dns/promises";
 import crypto from "crypto";
 import { execFileSync } from "child_process";
 import { sanitizeShellArg } from "@/middleware/sanitizer";
+import {
+  validateROE,
+  type ROEValidationResult,
+} from "./natt-roe.js";
+
+export type { ROEValidationResult };
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
@@ -923,10 +929,43 @@ export async function launchNATTMission(
   target: NATTTarget,
   missionType: NATTMissionType = "full-ghost",
   ghostMode: NATTGhostMode = "stealth",
-  operator: string = "anonymous"
+  operator: string = "anonymous",
+  options?: {
+    /** ROE engagement ID. When provided, ROE is validated before the mission starts. */
+    engagementId?: string;
+    /** Mission passphrase — must match the engagement's missionPassphrase. */
+    passphrase?: string;
+    /** Automatically save mission to vault on completion (default: true). */
+    autoVault?: boolean;
+    /** Mermaid diagram for vault artifact. */
+    mermaidDiagram?: string;
+  }
 ): Promise<NATTMission> {
   // Ethics gate — throws if unauthorized
   ethicsGate(target, ghostMode);
+
+  // ── ROE Validation ────────────────────────────────────────
+  let roeResult: ROEValidationResult | undefined;
+  if (options?.engagementId) {
+    console.log(`[NATT] 🔒 ROE validation for engagement: ${options.engagementId}`);
+    roeResult = await validateROE(
+      options.engagementId,
+      target.value,
+      missionType,
+      ghostMode,
+      options.passphrase ?? "",
+      operator
+    );
+    if (!roeResult.approved) {
+      const blocking = roeResult.violations.filter((v) => v.severity === "blocking");
+      throw new Error(
+        `[NATT] ROE validation failed — mission blocked.\n` +
+        blocking.map((v) => `  ⛔ ${v.type}: ${v.message}`).join("\n")
+      );
+    }
+    console.log(`[NATT] ✅ ROE approved — mission guidance loaded`);
+    console.log(roeResult.operatorBrief);
+  }
 
   const missionId = crypto.randomUUID();
   const codename = generateCodename();
@@ -1281,7 +1320,7 @@ export async function launchNATTMission(
     `${findings.length} findings | Risk: ${summary.riskScore}/100 (${summary.riskRating})`
   );
 
-  return {
+  const mission: NATTMission = {
     missionId,
     codename,
     operator,
@@ -1295,6 +1334,26 @@ export async function launchNATTMission(
     aiIntelligence,
     recon,
   };
+
+  // ── Auto-Vault: store mission artifacts ──────────────────
+  const autoVault = options?.autoVault !== false; // default true
+  if (autoVault) {
+    try {
+      // Dynamic import avoids circular dep (natt-vault imports from natt types)
+      const { storeMission } = await import("./natt-vault.js");
+      await storeMission(mission, {
+        roeResult,
+        engagementId: options?.engagementId,
+        operatorBrief: roeResult?.operatorBrief,
+        mermaidDiagram: options?.mermaidDiagram,
+      });
+    } catch (vaultErr) {
+      // Non-fatal — vault storage failure should not block mission return
+      console.warn(`[NATT] ⚠️  Vault storage failed: ${String(vaultErr)}`);
+    }
+  }
+
+  return mission;
 }
 
 /**

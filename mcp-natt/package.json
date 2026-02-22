@@ -1,0 +1,21 @@
+{
+  "name": "natt-mcp-server",
+  "version": "1.0.0",
+  "description": "NATT — Network Attack & Testing Toolkit MCP Knowledge Server",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": ["natt", "ethical-hacking", "pentesting", "mcp", "security"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.2"
+  }
+}
