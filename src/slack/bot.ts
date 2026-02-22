@@ -606,3 +606,157 @@ app.command("/pentest", async ({ command, ack, say, client }) => {
     await say(`❌ Scan failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 });
+
+// ─── /natt Command — NATT Ghost Agent ────────────────────────
+// Usage: /natt <target> [--mode=passive|stealth|active] [--mission=web-app|api-recon|full-ghost|...]
+// Examples:
+//   /natt https://example.com
+//   /natt https://myapp.com --mode=stealth --mission=web-app
+//   /natt https://api.example.com/v1/users --mode=active --mission=api-recon
+app.command("/natt", async ({ command, say, ack, client }) => {
+  await ack();
+
+  const parts = command.text.trim().split(/\s+/);
+
+  if (parts.length === 0 || !parts[0]) {
+    await say({
+      text: "👻 NATT Ghost Agent — Ethical Hacker",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              "*👻 NATT — Network Attack & Testing Toolkit*",
+              "_Ghost Agent • Ethical Hacker • Full Spectrum Access_",
+              "",
+              "*Usage:* `/natt <target> [options]`",
+              "",
+              "*Targets:*",
+              "• `https://example.com` — Web app / URL",
+              "• `192.168.1.1` — IP address / network",
+              "• `api.example.com` — Domain / OSINT",
+              "",
+              "*Options:*",
+              "• `--mode=passive|stealth|active` (default: stealth)",
+              "• `--mission=web-app|html-analysis|api-recon|network-recon|osint|auth-testing|full-ghost`",
+              "• `--auth=<proof>` (required for active mode)",
+              "",
+              "*Mission Types:*",
+              "`web-app` `html-analysis` `api-recon` `network-recon` `osint` `auth-testing` `full-ghost`",
+            ].join("\n"),
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: "⚠️ NATT only engages targets you are authorized to test. Active mode requires `--auth=<proof>`.",
+            },
+          ],
+        },
+      ],
+    });
+    return;
+  }
+
+  const target = parts[0]!;
+  let ghostMode: "passive" | "stealth" | "active" = "stealth";
+  let missionType: string = "full-ghost";
+  let authProof: string | undefined;
+  let targetType: "url" | "ip" | "domain" | "html" | "api-endpoint" = "url";
+
+  // Parse flags
+  for (const part of parts.slice(1)) {
+    if (part.startsWith("--mode=")) {
+      const m = part.replace("--mode=", "");
+      if (["passive", "stealth", "active"].includes(m)) ghostMode = m as typeof ghostMode;
+    }
+    if (part.startsWith("--mission=")) {
+      missionType = part.replace("--mission=", "");
+    }
+    if (part.startsWith("--auth=")) {
+      authProof = part.replace("--auth=", "");
+    }
+    if (part.startsWith("--type=")) {
+      const t = part.replace("--type=", "");
+      if (["url", "ip", "domain", "html", "api-endpoint"].includes(t)) {
+        targetType = t as typeof targetType;
+      }
+    }
+  }
+
+  // Auto-detect target type
+  if (target.startsWith("http")) {
+    targetType = "url";
+  } else if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(target)) {
+    targetType = "ip";
+  } else if (!target.includes("/") && target.includes(".")) {
+    targetType = "domain";
+  }
+
+  try {
+    const { launchNATTMission, formatNATTForSlack } = await import("@/agents/natt");
+
+    // Acknowledge with ghost mode banner
+    await say({
+      text: `👻 NATT Ghost activated — Mission: ${missionType} | Mode: ${ghostMode}`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              `*👻 NATT Ghost Activated*`,
+              `*Target:* \`${target}\``,
+              `*Mission:* ${missionType}`,
+              `*Ghost Mode:* ${ghostMode}`,
+              `*Status:* 🔄 Infiltrating...`,
+            ].join("\n"),
+          },
+        },
+      ],
+    });
+
+    const mission = await launchNATTMission(
+      {
+        value: target,
+        type: targetType,
+        authorizationProof: authProof,
+      },
+      missionType as Parameters<typeof launchNATTMission>[1],
+      ghostMode,
+      `slack:${command.user_id}`
+    );
+
+    const blocks = formatNATTForSlack(mission) as any;
+    await say({
+      text: `👻 NATT Mission Complete — ${mission.codename} — Risk: ${mission.summary.riskRating.toUpperCase()}`,
+      blocks,
+    });
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    await say({
+      text: `❌ NATT Mission Aborted`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              `*❌ NATT Mission Aborted*`,
+              `*Reason:* ${msg}`,
+              "",
+              msg.includes("authorizationProof") || msg.includes("Active mode")
+                ? "_Active ghost mode requires `--auth=<proof>` to proceed._"
+                : "_Check target accessibility and permissions._",
+            ].join("\n"),
+          },
+        },
+      ],
+    });
+    console.error("NATT command error:", error);
+  }
+});
