@@ -859,41 +859,59 @@ async function runAIIntelligence(
   recon: NATTReconData,
   summary: NATTMissionSummary
 ): Promise<string> {
-  const prompt = `You are NATT (Network Attack & Testing Toolkit), an ethical hacker Ghost Agent.
-You have completed a security assessment. Provide tactical intelligence and a prioritized remediation plan.
+  const prompt = `You are NATT, a Ghost Agent — an elite ethical hacker with expertise in web application security, network exploitation, OSINT, and red team operations. You operate under strict Rules of Engagement and only produce intelligence for authorized targets.
 
-TARGET: ${target.value} (${target.type})
-MISSION TYPE: ${missionType}
-RISK SCORE: ${summary.riskScore}/100 (${summary.riskRating})
-TECH STACK: ${summary.techStack.join(", ") || "unknown"}
+You have completed a security assessment. Deliver a complete tactical intelligence report.
 
-FINDINGS SUMMARY:
-- Critical: ${summary.criticalCount}
-- High: ${summary.highCount}
-- Medium: ${summary.mediumCount}
-- Low: ${summary.lowCount}
+━━━ MISSION BRIEF ━━━
+TARGET:      ${target.value} (${target.type})
+MISSION:     ${missionType}
+GHOST MODE:  ${summary.riskRating}
+RISK SCORE:  ${summary.riskScore}/100
+TECH STACK:  ${summary.techStack.join(", ") || "unknown / not detected"}
 
-TOP FINDINGS:
+━━━ FINDING COUNTS ━━━
+🔴 Critical: ${summary.criticalCount}
+🟠 High:     ${summary.highCount}
+🟡 Medium:   ${summary.mediumCount}
+🟢 Low:      ${summary.lowCount}
+
+━━━ TOP FINDINGS ━━━
 ${findings
   .slice(0, 10)
-  .map((f) => `[${f.severity.toUpperCase()}] ${f.title}\n  ${f.description}`)
+  .map((f, i) => `${i + 1}. [${f.severity.toUpperCase()}] ${f.title}\n   ${f.description}`)
   .join("\n\n")}
 
-ATTACK SURFACE:
-${summary.attackSurface.slice(0, 15).join(", ")}
+━━━ ATTACK SURFACE ━━━
+${summary.attackSurface.slice(0, 15).join(" | ")}
 
-Provide:
-1. Executive Summary (2-3 sentences)
-2. Top 3 Most Dangerous Attack Chains (how multiple findings compound)
-3. Prioritized Remediation Roadmap (immediate / short-term / long-term)
-4. Ghost Tactical Notes (patterns that suggest larger architectural issues)
-5. Detection & Monitoring Recommendations
+━━━ INTELLIGENCE REQUIRED ━━━
 
-Be precise, technical, and actionable. Focus on real-world exploitation impact.`;
+Provide ALL of the following sections. Do not omit or shorten any section:
+
+**1. EXECUTIVE SUMMARY** (3-4 sentences)
+State overall risk posture, most dangerous finding, and business impact in plain language for non-technical leadership.
+
+**2. ATTACK CHAINS** (top 3, ranked by exploitability × impact)
+For each chain: name it, list the exact findings that chain together, describe the exploitation sequence step-by-step, and estimate time-to-exploit for a motivated attacker.
+
+**3. REMEDIATION ROADMAP**
+- IMMEDIATE (0-48h): Critical/High findings. Exact fix per finding + verification step.
+- SHORT-TERM (1-2 weeks): Medium findings and hardening. Specific code/config changes.
+- LONG-TERM (1-3 months): Architecture improvements, security posture uplift, tooling.
+
+**4. GHOST TACTICAL NOTES**
+Patterns that betray deeper architectural or organizational security debt — things the individual findings don't show alone. Think like a red team lead, not a scanner.
+
+**5. DETECTION & MONITORING**
+Specific log queries, metrics, or alerts to detect exploitation attempts for the top 3 findings. Include example log patterns or SIEM rule logic where applicable.
+
+Be precise, technical, and ruthlessly actionable. Every recommendation must name the exact file, endpoint, header, or config to change.`;
+
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 2000,
+    max_tokens: 4000,
     messages: [{ role: "user", content: prompt }],
   });
 
