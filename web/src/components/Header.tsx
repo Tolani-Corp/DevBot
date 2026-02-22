@@ -24,7 +24,7 @@ export function Header() {
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white">
                             <CommandLineIcon className="h-5 w-5" />
                         </div>
-                        <span className="font-bold text-[var(--text-primary)]">DevBot</span>
+                        <span className="font-bold text-[var(--text-primary)]">Debo</span>
                     </Link>
                 </div>
 
@@ -68,7 +68,7 @@ export function Header() {
                 <div className="lg:hidden fixed inset-0 z-50 bg-[var(--bg-page)] p-6">
                     <div className="flex items-center justify-between mb-8">
                         <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                            <span className="font-bold text-[var(--text-primary)]">DevBot</span>
+                            <span className="font-bold text-[var(--text-primary)]">Debo</span>
                         </Link>
                         <button
                             type="button"

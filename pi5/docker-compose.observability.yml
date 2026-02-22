@@ -1,0 +1,123 @@
+# docker-compose.observability.yml — Debo v1 Observability Stack
+#
+# Runs Grafana + Tempo (distributed traces) + OTEL Collector on Pi 5 / any Linux host.
+# DevBot emits OpenTelemetry traces via OTLP; the collector forwards them to Tempo;
+# Grafana visualises them.
+#
+# Usage (bare-metal mode — append to main stack):
+#   docker compose -f pi5/docker-compose.pi5.yml \
+#                  -f pi5/docker-compose.observability.yml up -d
+#
+# Grafana UI: http://<pi-ip>:3200   (default login: admin / admin — CHANGE THIS)
+# Traces:     Grafana → Explore → Tempo data source
+#
+# Required env var in .env:
+#   OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318  ← for Docker networking
+#   OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318       ← for bare-metal DevBot
+#
+
+services:
+
+  # ── OTEL Collector ──────────────────────────────────────────────────────────
+  # Receives OTLP traces from DevBot and forwards to Tempo.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.116.0
+    container_name: debo-otel-collector
+    restart: unless-stopped
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml:ro
+    command: ["--config=/etc/otel-collector-config.yml"]
+    ports:
+      - "4317:4317"   # OTLP gRPC (DevBot → collector)
+      - "4318:4318"   # OTLP HTTP (DevBot → collector — preferred)
+      - "8888:8888"   # Collector self-metrics
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  # ── Tempo ────────────────────────────────────────────────────────────────────
+  # Distributed trace backend (stores + serves traces to Grafana).
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: debo-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - tempo-data:/tmp/tempo
+    configs:
+      - source: tempo_config
+        target: /etc/tempo.yml
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ── Grafana ───────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: debo-grafana
+    restart: unless-stopped
+    ports:
+      - "3200:3000"   # Grafana UI (not 3000 to avoid collisions)
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-changeme}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  tempo-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/observability/tempo
+  grafana-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/observability/grafana
+
+# ── Configs ───────────────────────────────────────────────────────────────────
+configs:
+  tempo_config:
+    content: |
+      server:
+        http_listen_port: 3200
+      distributor:
+        receivers:
+          otlp:
+            protocols:
+              grpc:
+              http:
+      storage:
+        trace:
+          backend: local
+          local:
+            path: /tmp/tempo/traces
+      compactor:
+        compaction:
+          block_retention: 336h   # 14 days
+
+# ── Network ───────────────────────────────────────────────────────────────────
+networks:
+  observability:
+    driver: bridge

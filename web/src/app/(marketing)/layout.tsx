@@ -12,7 +12,7 @@ export default function MarketingLayout({
                 {children}
             </main>
             <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] py-12 text-center text-sm text-[var(--text-secondary)]">
-                &copy; 2026 DevBot AI. All rights reserved.
+                &copy; 2026 Debo v1 by Tolani Labs. All rights reserved.
             </footer>
         </div>
     )

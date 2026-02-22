@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { workspaces } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -146,17 +146,12 @@ export const TIER_CONFIGS: Record<TierName, TierLimits> = {
 const TIER_ORDER: TierName[] = ["free", "pro", "team", "enterprise"];
 
 // ---------------------------------------------------------------------------
-// In-memory stores (should be moved to DB tables in production)
+// In-memory cache (DB is source of truth — cache reduces read latency)
 // ---------------------------------------------------------------------------
 
-/** Maps workspaceId -> assigned tier. */
-const workspaceTiers = new Map<string, TierName>();
-
-/** Maps workspaceId -> tasks used in the current billing period. */
-const workspaceTaskUsage = new Map<string, number>();
-
-/** Maps workspaceId -> next reset date for the monthly task counter. */
-const workspaceResetDates = new Map<string, Date>();
+/** Short-lived tier cache: workspaceId → { tier, expiresAt } */
+const tierCache = new Map<string, { tier: TierName; expiresAt: number }>();
+const TIER_CACHE_TTL_MS = 60_000; // 1 minute
 
 /** Maps workspaceId -> number of connected repos (tracked externally). */
 const workspaceActiveRepos = new Map<string, number>();
@@ -176,12 +171,27 @@ function getNextResetDate(from: Date = new Date()): Date {
 /**
  * Ensure the usage counter is still valid. If the reset date has passed,
  * zero out the counter and set a new reset date.
+ * DB-backed: reads/writes workspaces.tasks_used_this_month and usage_reset_at.
  */
-function ensureUsageFresh(workspaceId: string): void {
-  const resetDate = workspaceResetDates.get(workspaceId);
-  if (!resetDate || new Date() >= resetDate) {
-    workspaceTaskUsage.set(workspaceId, 0);
-    workspaceResetDates.set(workspaceId, getNextResetDate());
+async function ensureUsageFresh(workspaceId: string): Promise<void> {
+  const [ws] = await db
+    .select({ usageResetAt: workspaces.usageResetAt })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  if (!ws) return;
+
+  const resetAt = ws.usageResetAt;
+  if (!resetAt || new Date() >= resetAt) {
+    await db
+      .update(workspaces)
+      .set({
+        tasksUsedThisMonth: 0,
+        usageResetAt: getNextResetDate(),
+        updatedAt: new Date(),
+      })
+      .where(eq(workspaces.id, workspaceId));
   }
 }
 
@@ -203,30 +213,20 @@ function lowestTierForFeature(feature: TierFeature): TierName | undefined {
 
 /**
  * Return the tier currently assigned to a workspace, defaulting to "free".
- *
- * Checks the in-memory map first; if not found, attempts a DB lookup to see
- * if the workspace exists at all (the workspace table does not store tiers
- * today, so this is purely a validation step).
+ * Reads from DB with a 1-minute in-memory cache.
  */
 export async function getWorkspaceTier(workspaceId: string): Promise<TierName> {
-  const cached = workspaceTiers.get(workspaceId);
-  if (cached) {
-    return cached;
-  }
+  const cached = tierCache.get(workspaceId);
+  if (cached && Date.now() < cached.expiresAt) return cached.tier;
 
-  // Validate the workspace exists in the database
   const [workspace] = await db
-    .select({ id: workspaces.id })
+    .select({ tier: workspaces.tier })
     .from(workspaces)
     .where(eq(workspaces.id, workspaceId))
     .limit(1);
 
-  // Default every workspace to "free" when no explicit tier is assigned
-  const tier: TierName = "free";
-  if (workspace) {
-    workspaceTiers.set(workspaceId, tier);
-  }
-
+  const tier: TierName = (workspace?.tier as TierName | undefined) ?? "free";
+  tierCache.set(workspaceId, { tier, expiresAt: Date.now() + TIER_CACHE_TTL_MS });
   return tier;
 }
 
@@ -265,73 +265,83 @@ export async function checkFeatureAccess(
 
 /**
  * Check whether a workspace is within its monthly task allowance.
- *
- * A limit of -1 (enterprise) means unlimited, so this always returns
- * `allowed: true` in that case.
+ * Reads from DB; resets counter if billing period has rolled over.
  */
 export async function checkTaskLimit(workspaceId: string): Promise<TaskLimitResult> {
+  await ensureUsageFresh(workspaceId);
+
   const tier = await getWorkspaceTier(workspaceId);
   const limits = TIER_CONFIGS[tier];
 
-  ensureUsageFresh(workspaceId);
+  const [ws] = await db
+    .select({ tasksUsedThisMonth: workspaces.tasksUsedThisMonth, usageResetAt: workspaces.usageResetAt })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
 
-  const used = workspaceTaskUsage.get(workspaceId) ?? 0;
+  const used = ws?.tasksUsedThisMonth ?? 0;
   const limit = limits.tasksPerMonth;
-  const resetDate = workspaceResetDates.get(workspaceId) ?? getNextResetDate();
-
-  // -1 means unlimited
+  const resetDate = ws?.usageResetAt ?? getNextResetDate();
   const allowed = limit === -1 || used < limit;
 
   return { allowed, used, limit, resetDate };
 }
 
 /**
- * Increment the monthly task counter for a workspace.
- *
- * Callers should check `checkTaskLimit` first and only call this when
- * a task is actually started.
+ * Increment the monthly task counter for a workspace (DB-backed).
  */
 export async function incrementTaskUsage(workspaceId: string): Promise<void> {
-  ensureUsageFresh(workspaceId);
-  const current = workspaceTaskUsage.get(workspaceId) ?? 0;
-  workspaceTaskUsage.set(workspaceId, current + 1);
+  await ensureUsageFresh(workspaceId);
+  await db
+    .update(workspaces)
+    .set({
+      tasksUsedThisMonth: sql`${workspaces.tasksUsedThisMonth} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(eq(workspaces.id, workspaceId));
+  // Invalidate tier cache so next read reflects updated usage
+  tierCache.delete(workspaceId);
 }
 
 /**
- * Return a full usage summary for a workspace.
+ * Return a full usage summary for a workspace (reads from DB).
  */
 export async function getWorkspaceUsage(workspaceId: string): Promise<WorkspaceUsage> {
-  const tier = await getWorkspaceTier(workspaceId);
+  await ensureUsageFresh(workspaceId);
+
+  const [ws] = await db
+    .select({
+      tier: workspaces.tier,
+      tasksUsedThisMonth: workspaces.tasksUsedThisMonth,
+      usageResetAt: workspaces.usageResetAt,
+    })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  const tier = (ws?.tier as TierName | undefined) ?? "free";
   const limits = TIER_CONFIGS[tier];
-
-  ensureUsageFresh(workspaceId);
-
-  const tasksUsedThisMonth = workspaceTaskUsage.get(workspaceId) ?? 0;
-  const resetDate = workspaceResetDates.get(workspaceId) ?? getNextResetDate();
   const activeRepos = workspaceActiveRepos.get(workspaceId) ?? 0;
 
   return {
     workspaceId,
     tier,
-    tasksUsedThisMonth,
+    tasksUsedThisMonth: ws?.tasksUsedThisMonth ?? 0,
     tasksLimit: limits.tasksPerMonth,
-    resetDate,
+    resetDate: ws?.usageResetAt ?? getNextResetDate(),
     activeRepos,
     features: limits.features,
   };
 }
 
 /**
- * Set the pricing tier for a workspace (admin function).
- *
- * Resets the usage counter to 0 when switching tiers so the workspace
- * starts fresh under the new plan.
+ * Set the pricing tier for a workspace — writes to DB, invalidates cache.
+ * Called by Stripe webhook handler on subscription events.
  */
 export async function setWorkspaceTier(
   workspaceId: string,
   tier: TierName,
 ): Promise<void> {
-  // Validate the workspace exists
   const [workspace] = await db
     .select({ id: workspaces.id })
     .from(workspaces)
@@ -342,11 +352,19 @@ export async function setWorkspaceTier(
     throw new Error(`Workspace ${workspaceId} not found`);
   }
 
-  workspaceTiers.set(workspaceId, tier);
+  await db
+    .update(workspaces)
+    .set({
+      tier,
+      tasksUsedThisMonth: 0,
+      usageResetAt: getNextResetDate(),
+      updatedAt: new Date(),
+    })
+    .where(eq(workspaces.id, workspaceId));
 
-  // Reset usage on tier change so the workspace starts with a clean slate
-  workspaceTaskUsage.set(workspaceId, 0);
-  workspaceResetDates.set(workspaceId, getNextResetDate());
+  // Invalidate cache
+  tierCache.delete(workspaceId);
+  console.log(`[tier-manager] Workspace ${workspaceId} tier set to: ${tier}`);
 }
 
 /**

@@ -110,13 +110,24 @@ export const workspaces = pgTable("workspaces", {
   platformType: text("platform_type").notNull(), // "slack", "discord", "vscode", etc.
   
   // Customization
-  botName: text("bot_name").notNull().default("DevBot"), // Custom name for the bot
+  botName: text("bot_name").notNull().default("Debo"), // Custom name for the bot
   botMention: text("bot_mention"), // Custom mention handle like "@Debo"
   
   // Onboarding
   onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   
+  // ── Billing / Tier ─────────────────────────────────────────────────────────
+  tier: text("tier").$type<"free" | "pro" | "team" | "enterprise">().notNull().default("free"),
+  stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeSubscriptionId: text("stripe_subscription_id").unique(),
+  stripePriceId: text("stripe_price_id"),
+  billingStatus: text("billing_status").$type<"active" | "past_due" | "canceled" | "trialing">().default("active"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  // Monthly usage counter — reset by billing period, not calendar month
+  tasksUsedThisMonth: integer("tasks_used_this_month").notNull().default(0),
+  usageResetAt: timestamp("usage_reset_at"),
+
   // Settings
   settings: jsonb("settings").$type<{
     autoRespond?: boolean;

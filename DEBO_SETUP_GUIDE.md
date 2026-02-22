@@ -78,8 +78,8 @@ Set **Request URL** to any placeholder (e.g. `https://example.com`) — Socket M
 
 | Command | Description |
 |---|---|
-| `/devbot-status` | Show active tasks, queue depth, system health |
-| `/devbot-help` | Full command reference |
+| `/debo-status` | Show active tasks, queue depth, system health |
+| `/debo-help` | Full command reference |
 | `/clickup-create` | Create a ClickUp task linked to a PR |
 | `/clickup-tasks` | List open ClickUp tasks for this workspace |
 | `/clickup-update` | Update a ClickUp task status |
@@ -189,8 +189,8 @@ DEVBOT_MENTION_TRIGGER=@Debo   # What users type to trigger the bot (display nam
 
 | Command | Usage | What it does |
 |---|---|---|
-| `/devbot-help` | `/devbot-help` | Full command reference card |
-| `/devbot-status` | `/devbot-status` | Queue depth, active tasks, Redis/DB health |
+| `/debo-help` | `/debo-help` | Full command reference card |
+| `/debo-status` | `/debo-status` | Queue depth, active tasks, Redis/DB health |
 
 ### Task Management
 

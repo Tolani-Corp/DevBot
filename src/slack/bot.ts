@@ -36,7 +36,7 @@ export const app = new App({
 // Register interactive component handlers (buttons, modals, select menus)
 registerInteractiveHandlers(app);
 
-const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot";
+const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo";
 
 // Listen for app mentions
 app.event("app_mention", async ({ event, say, client }) => {
@@ -225,7 +225,7 @@ app.event("message", async ({ event, say, client }) => {
       
       // Validate name
       if (customName && customName.length > 0 && customName.length <= 50) {
-        const finalName = customName.toLowerCase().includes("keep") ? "DevBot" : customName;
+        const finalName = customName.toLowerCase().includes("keep") ? "Debo" : customName;
         
         await completeOnboarding(
           {
@@ -242,7 +242,7 @@ app.event("message", async ({ event, say, client }) => {
       } else {
         await say({
           thread_ts: event.thread_ts,
-          text: "Please provide a valid name (1-50 characters) or say 'keep DevBot' to use the default name.",
+          text: "Please provide a valid name (1-50 characters) or say 'keep Debo' to use the default name.",
         });
       }
       return;
@@ -337,8 +337,8 @@ app.event("message", async ({ event, say, client }) => {
   }
 });
 
-// Command: /devbot-status
-app.command("/devbot-status", async ({ command, ack, say }) => {
+// Command: /debo-status
+app.command("/debo-status", async ({ command, ack, say }) => {
   await ack();
 
   try {
@@ -350,7 +350,7 @@ app.command("/devbot-status", async ({ command, ack, say }) => {
       .limit(10);
 
     if (userTasks.length === 0) {
-      await say("No tasks found. Tag @FunBot to get started!");
+      await say("No tasks found. Tag @Debo to get started!");
       return;
     }
 
@@ -375,26 +375,26 @@ app.command("/devbot-status", async ({ command, ack, say }) => {
   }
 });
 
-// Command: /devbot-help
-app.command("/devbot-help", async ({ ack, say }) => {
+// Command: /debo-help
+app.command("/debo-help", async ({ ack, say }) => {
   await ack();
 
-  const helpText = `🤖 **FunBot - Autonomous AI Software Engineer**
+  const helpText = `🤖 **Debo v1 — Autonomous AI Software Engineer**
 
 **How to use:**
-• Tag \`@FunBot\` in any channel with your request
+• Tag \`@Debo\` in any channel with your request
 • I'll respond in a thread with updates
 • I can fix bugs, add features, review code, and answer questions
 
 **Examples:**
-• \`@FunBot fix the authentication bug in HookTravel\`
-• \`@FunBot add rate limiting to the API in repo TolaniLabs\`
-• \`@FunBot explain how the session key registry works\`
-• \`@FunBot review the recent changes in dashboard.tsx\`
+• \`@Debo fix the authentication bug in HookTravel\`
+• \`@Debo add rate limiting to the API in repo TolaniLabs\`
+• \`@Debo explain how the session key registry works\`
+• \`@Debo review the recent changes in dashboard.tsx\`
 
 **Commands:**
-• \`/devbot-status\` - See your recent tasks
-• \`/devbot-help\` - Show this help message
+• \`/debo-status\` - See your recent tasks
+• \`/debo-help\` - Show this help message
 • \`/pentest <target>\` - Security & vulnerability scanning
 • \`/clickup-create\` - Create a ClickUp task
 • \`/clickup-tasks\` - List your ClickUp tasks
@@ -486,13 +486,13 @@ app.command("/pentest", async ({ command, ack, say, client }) => {
   const parts = command.text.trim().split(/\s+/);
   if (parts.length === 0 || !parts[0]) {
     await say({
-      text: "🔒 DevBot Security Scanner",
+      text: "🔒 Debo Security Scanner",
       blocks: [
         {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "*🔒 DevBot Security Scanner*\n\nRun penetration tests and security scans on authorized targets.",
+            text: "*🔒 Debo Security Scanner*\n\nRun penetration tests and security scans on authorized targets.",,
           },
         },
         {

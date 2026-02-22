@@ -16,7 +16,7 @@ export default function Home() {
                             Your AI <span className="text-gradient">Engineering Team</span>
                         </h1>
                         <p className="mt-6 text-lg leading-8 text-[var(--text-secondary)]">
-                            DevBot autonomously plans, codes, and deploys full-stack applications.
+                            Debo v1 autonomously plans, codes, and deploys full-stack applications.
                             Stop writing boilerplate. Start shipping products.
                         </p>
                         <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -37,12 +37,12 @@ export default function Home() {
                                     <div className="w-3 h-3 rounded-full bg-red-500" />
                                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="ml-2 text-xs text-[var(--text-secondary)] font-mono">devbot-terminal — zsh</span>
+                                    <span className="ml-2 text-xs text-[var(--text-secondary)] font-mono">debo — zsh</span>
                                 </div>
                                 <div className="p-6 font-mono text-sm">
                                     <div className="flex gap-2 text-green-400">
                                         <span>➜</span>
-                                        <span className="text-[var(--text-primary)]">devbot create "SaaS Platform"</span>
+                                        <span className="text-[var(--text-primary)]">debo create "SaaS Platform"</span>
                                     </div>
                                     <div className="text-[var(--text-secondary)] mt-2">
                                         <span>Analysis complete. Generating architecture...</span><br />

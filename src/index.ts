@@ -75,6 +75,9 @@ async function main() {
       try {
         if (req.method === "POST" && req.url === "/webhooks/github") {
           await handleGitHubWebhook(req, res, selfUpdateQueue);
+        } else if (req.method === "POST" && req.url === "/webhooks/stripe") {
+          const { handleStripeWebhook } = await import("./webhooks/stripe.js");
+          await handleStripeWebhook(req, res);
         } else if (req.url === "/health") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ status: "ok", pid: process.pid, ts: Date.now() }));
