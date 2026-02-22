@@ -989,3 +989,259 @@ app.event("app_mention", async ({ event, say, client }) => {
   await handlePresentationRequest(text, event.channel, event.user ?? "", say, client);
 });
 
+// ─── /natt-cron Command — Scheduled Report Manager ────────────────────────────
+// Usage:
+//   /natt-cron list
+//   /natt-cron add name="Weekly Report" cadence=weekly window=last-7-days channel=#security
+//   /natt-cron add name="Daily" cadence=daily window=last-24h channel=#natt-reports
+//   /natt-cron add name="Monthly" cadence=monthly window=last-month channel=#security
+//   /natt-cron add name="Custom" cadence=custom cron="0 9 * * 1,3,5" window=mtd channel=#security
+//   /natt-cron remove <jobId>
+//   /natt-cron pause <jobId>
+//   /natt-cron resume <jobId>
+//   /natt-cron run <jobId>
+//   /natt-cron health
+
+app.command("/natt-cron", async ({ command, ack, say }) => {
+  await ack();
+  const text = command.text.trim();
+  const [subcommand, ...rest] = text.split(/\s+/);
+
+  try {
+    const { 
+      addCronJob, removeCronJob, pauseCronJob, resumeCronJob,
+      runJobNow, listCronJobs, getCronJob, getCronQueueStats,
+      runHealthCheck, formatJobListForSlack, formatJobForSlack,
+    } = await import("@/agents/natt-report-cron");
+
+    // ── list ──────────────────────────────────────────────────
+    if (!subcommand || subcommand === "list" || subcommand === "ls") {
+      const jobs = await listCronJobs();
+      const stats = await getCronQueueStats();
+      await say({
+        text: `📊 NATT Cron — ${jobs.length} jobs`,
+        blocks: [
+          ...formatJobListForSlack(jobs) as any[],
+          {
+            type: "context",
+            elements: [{
+              type: "mrkdwn",
+              text: `Queue: ${stats.waiting} waiting | ${stats.active} active | ${stats.failed} failed | ${stats.repeatableJobs} repeating schedules`,
+            }],
+          },
+        ],
+      });
+      return;
+    }
+
+    // ── health ────────────────────────────────────────────────
+    if (subcommand === "health" || subcommand === "status") {
+      const health = await runHealthCheck();
+      const stats = await getCronQueueStats();
+      await say({
+        text: "📊 NATT Cron Health",
+        blocks: [{
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              "*📊 NATT Report Cron — Health Status*",
+              "",
+              `🟢 Active jobs: ${health.activeJobs}  |  ⏸️ Paused: ${health.pausedJobs}  |  🔴 Errors: ${health.errorJobs}`,
+              `📬 Queue depth: ${health.queueDepth}  |  🔁 Repeatables: ${stats.repeatableJobs}`,
+              health.failedLastRun.length > 0 ? `⚠️ Failed last run: \`${health.failedLastRun.join(", ")}\`` : "✅ All last runs succeeded",
+              health.overdueJobs.length > 0 ? `🕐 Overdue: \`${health.overdueJobs.join(", ")}\`` : "✅ No overdue jobs",
+            ].join("\n"),
+          },
+        }],
+      });
+      return;
+    }
+
+    // ── run ───────────────────────────────────────────────────
+    if (subcommand === "run" || subcommand === "trigger") {
+      const jobId = rest[0];
+      if (!jobId) { await say({ text: "❌ Usage: `/natt-cron run <jobId>`" }); return; }
+      const bullJobId = await runJobNow(jobId);
+      const job = await getCronJob(jobId);
+      await say({
+        text: `▶️ Triggered: ${job?.name}`,
+        blocks: [{ type: "section", text: { type: "mrkdwn",
+          text: `*▶️ NATT Cron — Immediate Run Triggered*\n\`${jobId}\` → ${job?.name ?? "unknown"}\nBullMQ job ID: \`${bullJobId}\`\nDelivery to <#${job?.slackChannelId}> shortly...`,
+        }}],
+      });
+      return;
+    }
+
+    // ── pause ─────────────────────────────────────────────────
+    if (subcommand === "pause") {
+      const jobId = rest[0];
+      if (!jobId) { await say({ text: "❌ Usage: `/natt-cron pause <jobId>`" }); return; }
+      const ok = await pauseCronJob(jobId);
+      await say({ text: ok ? `⏸️ Job \`${jobId}\` paused.` : `❌ Job \`${jobId}\` not found.` });
+      return;
+    }
+
+    // ── resume ────────────────────────────────────────────────
+    if (subcommand === "resume") {
+      const jobId = rest[0];
+      if (!jobId) { await say({ text: "❌ Usage: `/natt-cron resume <jobId>`" }); return; }
+      const ok = await resumeCronJob(jobId);
+      await say({ text: ok ? `▶️ Job \`${jobId}\` resumed.` : `❌ Job \`${jobId}\` not found.` });
+      return;
+    }
+
+    // ── remove ────────────────────────────────────────────────
+    if (subcommand === "remove" || subcommand === "delete" || subcommand === "rm") {
+      const jobId = rest[0];
+      if (!jobId) { await say({ text: "❌ Usage: `/natt-cron remove <jobId>`" }); return; }
+      const job = await getCronJob(jobId);
+      const ok = await removeCronJob(jobId);
+      await say({ text: ok ? `🗑️ Removed: ${job?.name} (\`${jobId}\`)` : `❌ Job \`${jobId}\` not found.` });
+      return;
+    }
+
+    // ── add ───────────────────────────────────────────────────
+    if (subcommand === "add" || subcommand === "create") {
+      const argStr = rest.join(" ");
+
+      // Parse key=value and key="quoted value" args
+      function getArg(key: string, fallback?: string): string | undefined {
+        const re = new RegExp(`(?:^|\\s)${key}=["']?([^"'\\s]+(?:[\\s][^"'\\s]+)*?)["']?(?=\\s|$)`, "i");
+        const m = argStr.match(re) ?? argStr.match(new RegExp(`${key}="([^"]+)"`, "i")) ?? argStr.match(new RegExp(`${key}='([^']+)'`, "i"));
+        return m?.[1] ?? fallback;
+      }
+
+      const name = getArg("name") ?? getArg("n") ?? `Auto Report ${Date.now()}`;
+      const cadence = (getArg("cadence") ?? getArg("c") ?? "weekly") as any;
+      const cronExpr = getArg("cron") ?? getArg("expr");
+      const window = (getArg("window") ?? getArg("w") ?? "last-7-days") as any;
+      const customFrom = getArg("from");
+      const customTo = getArg("to");
+      const timezone = getArg("tz") ?? getArg("timezone") ?? "UTC";
+      const channelRaw = getArg("channel") ?? getArg("ch") ?? command.channel_id;
+      // Strip # and <#CHANNEL_ID|name> formats
+      const slackChannelId = channelRaw.replace(/^#/, "").replace(/^<#([A-Z0-9]+).*>$/, "$1");
+      const slackChannelName = channelRaw.replace(/^<#[A-Z0-9]+\|(.+)>$/, "$1").replace(/^#/, "");
+      const operatorFilter = getArg("operator") ?? getArg("op");
+      const includeEmpty = getArg("empty") === "true";
+      const reportTitle = getArg("title");
+      const teamName = getArg("team");
+
+      const valid_cadences = ["hourly", "daily", "weekly", "biweekly", "monthly", "custom"];
+      const valid_windows = ["last-24h", "last-7-days", "last-30-days", "last-month", "mtd", "ytd", "custom"];
+
+      if (!valid_cadences.includes(cadence)) {
+        await say({ text: `❌ Invalid cadence \`${cadence}\`. Valid: ${valid_cadences.join(", ")}` }); return;
+      }
+      if (!valid_windows.includes(window)) {
+        await say({ text: `❌ Invalid window \`${window}\`. Valid: ${valid_windows.join(", ")}` }); return;
+      }
+      if (cadence === "custom" && !cronExpr) {
+        await say({ text: "❌ Custom cadence requires `cron=\"<expr>\"`. Example: `cron=\"0 9 * * 1,3,5\"`" }); return;
+      }
+
+      const job = await addCronJob({
+        name,
+        cadence,
+        cronExpr,
+        timezone,
+        window,
+        customFrom,
+        customTo,
+        operatorFilter,
+        slackChannelId,
+        slackChannelName,
+        reportTitle,
+        teamName,
+        includeEmptySummary: includeEmpty,
+        createdBy: `slack:${command.user_id}`,
+      });
+
+      await say({
+        text: `✅ Scheduled: ${job.name}`,
+        blocks: [
+          { type: "header", text: { type: "plain_text", text: "✅ NATT Cron Job Created" } },
+          ...formatJobForSlack(job) as any[],
+          { type: "context", elements: [{ type: "mrkdwn",
+            text: `Created by <@${command.user_id}> | ID: \`${job.id}\` | Use \`/natt-cron run ${job.id}\` to test immediately`,
+          }] },
+        ],
+      });
+      return;
+    }
+
+    // ── help / unknown ────────────────────────────────────────
+    await say({
+      text: "📊 NATT Cron — Help",
+      blocks: [{ type: "section", text: { type: "mrkdwn", text: [
+        "*📊 NATT Report Cron — Command Reference*",
+        "",
+        "*List & Status*",
+        "• `/natt-cron list` — show all scheduled jobs",
+        "• `/natt-cron health` — queue health and error summary",
+        "",
+        "*Create a schedule*",
+        "• `/natt-cron add name=\"Weekly Security\" cadence=weekly window=last-7-days channel=#security`",
+        "• `/natt-cron add name=\"Daily\" cadence=daily window=last-24h channel=#natt`",
+        "• `/natt-cron add name=\"Monthly\" cadence=monthly window=last-month channel=#security-mgmt`",
+        "• `/natt-cron add name=\"MWF 9am\" cadence=custom cron=\"0 9 * * 1,3,5\" window=mtd channel=#security`",
+        "",
+        "*Manage jobs*",
+        "• `/natt-cron run <jobId>` — trigger immediately",
+        "• `/natt-cron pause <jobId>` — pause without deleting",
+        "• `/natt-cron resume <jobId>` — resume paused job",
+        "• `/natt-cron remove <jobId>` — delete permanently",
+        "",
+        "*Cadences:* `hourly` `daily` `weekly` `biweekly` `monthly` `custom`",
+        "*Windows:* `last-24h` `last-7-days` `last-30-days` `last-month` `mtd` `ytd` `custom`",
+      ].join("\n") } }],
+    });
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    await say({
+      text: `❌ NATT Cron Error: ${msg}`,
+      blocks: [{ type: "section", text: { type: "mrkdwn",
+        text: `*❌ NATT Cron Error*\n${msg}`,
+      }}],
+    });
+    console.error("NATT cron command error:", error);
+  }
+});
+
+// ─── Cron Overflow Action Handler ─────────────────────────────────────────────
+// Handles the overflow menu actions (Run Now / Pause / Remove) in /natt-cron list
+
+app.action(/^cron_action:/, async ({ action, ack, respond }) => {
+  await ack();
+  const value = (action as any).selected_option?.value ?? "";
+  const [cmd, jobId] = value.split(":");
+
+  if (!cmd || !jobId) return;
+
+  try {
+    const { runJobNow, pauseCronJob, resumeCronJob, removeCronJob, getCronJob } =
+      await import("@/agents/natt-report-cron");
+
+    if (cmd === "run") {
+      await runJobNow(jobId);
+      const job = await getCronJob(jobId);
+      await respond({ text: `▶️ Triggered immediate run for: ${job?.name} (\`${jobId}\`)` });
+    } else if (cmd === "pause") {
+      await pauseCronJob(jobId);
+      await respond({ text: `⏸️ Paused: \`${jobId}\`` });
+    } else if (cmd === "resume") {
+      await resumeCronJob(jobId);
+      await respond({ text: `▶️ Resumed: \`${jobId}\`` });
+    } else if (cmd === "remove") {
+      const job = await getCronJob(jobId);
+      await removeCronJob(jobId);
+      await respond({ text: `🗑️ Removed: ${job?.name} (\`${jobId}\`)` });
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await respond({ text: `❌ Cron action failed: ${msg}` });
+  }
+});
+
