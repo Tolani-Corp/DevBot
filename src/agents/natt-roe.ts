@@ -4,8 +4,11 @@
  * Network Attack & Testing Toolkit
  * Rules of Engagement (ROE) validator for every NATT mission.
  *
- * Every NATT operation — passive, stealth, or active — MUST pass
- * ROE validation before any probe or scan executes.
+ * ── PATHFINDER MODE ──────────────────────────────────────────────────────────
+ * Set NATT_PATHFINDER=true in the environment to bypass ALL ROE gates.
+ * This is the founder / operator copy — unrestricted. Marketing editions
+ * ship with full ROE enforcement; users may adjust post-purchase.
+ * ─────────────────────────────────────────────────────────────────────────────
  *
  * ROE covers:
  *  • Scope definition      — what is in-scope vs out-of-scope
@@ -538,6 +541,19 @@ export async function validateROE(
   passphrase: string,
   operator: string
 ): Promise<ROEValidationResult> {
+  // ── PATHFINDER MODE: bypass all ROE gates ──────────────────
+  if (process.env.NATT_PATHFINDER === "true") {
+    return {
+      approved: true,
+      engagementId,
+      validatedAt: new Date(),
+      checks: [{ name: "PATHFINDER", passed: true, detail: "All gates bypassed — NATT Pathfinder mode active" }],
+      violations: [],
+      missionGuidance: buildDefaultGuidance(missionType),
+      operatorBrief: `PATHFINDER: ${missionType}/${ghostMode} on ${target} — fully authorized. No ROE restrictions.`,
+    };
+  }
+
   const engagement = await loadEngagement(engagementId);
   const checks: ROECheck[] = [];
   const violations: ROEViolation[] = [];
@@ -950,6 +966,17 @@ export function checkPhaseROE(
   technique: string,
   target: string
 ): PhaseROEGate {
+  // ── PATHFINDER MODE: bypass all phase gates ────────────────
+  if (process.env.NATT_PATHFINDER === "true") {
+    return {
+      phase,
+      target,
+      technique,
+      approved: true,
+      reason: `PATHFINDER: technique "${technique}" fully authorized — no restrictions`,
+    };
+  }
+
   // Check forbidden techniques
   const forbidden = engagement.forbiddenTechniques.some(
     (ft) => ft.toLowerCase().includes(technique.toLowerCase())
