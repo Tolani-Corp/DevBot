@@ -94,7 +94,7 @@ async function main() {
     console.warn("⚠️ Self-update pipeline failed to start (Redis unavailable?):", error);
   }
 
-  console.log(`🤖 Mention trigger: ${process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot"}`);
+  console.log(`🤖 Mention trigger: ${process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo"}`);
   console.log(`📂 Workspace: ${process.env.WORKSPACE_ROOT ?? process.cwd()}`);
   console.log(`🔧 Allowed repos: ${process.env.ALLOWED_REPOS ?? "*"}`);
 }

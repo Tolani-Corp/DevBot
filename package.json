@@ -1,7 +1,7 @@
 {
-  "name": "@tolani/funbot",
-  "version": "0.1.0",
-  "description": "FunBot - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
+  "name": "@tolani/debo",
+  "version": "1.0.0",
+  "description": "Debo v1 - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
   "type": "module",
   "license": "UNLICENSED",
   "private": true,

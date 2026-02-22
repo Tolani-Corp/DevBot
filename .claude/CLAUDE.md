@@ -6,7 +6,7 @@
 - Learned patterns: see [LEARNED.md](./LEARNED.md)
 
 ## Project Overview
-DevBot (branded as FunBot) is a Slack/Discord-integrated autonomous AI software engineer that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
+Debo v1 (short for Development Bot) is a Slack/Discord-integrated autonomous AI software engineer that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
 
 ## Architecture
 - **Runtime**: Node.js 22+, TypeScript strict, ESM modules
