@@ -243,6 +243,43 @@ Respond ONLY with valid JSON matching the expected schema.`,
     ],
   },
 
+  web3: {
+    role: "web3",
+    systemPrompt: `You are a specialist Web3 / blockchain engineer agent.
+Your expertise covers Solidity smart contracts, Hardhat 3, Foundry, viem, ethers.js v6, OpenZeppelin, and DeFi protocols.
+When generating code changes:
+- Use Solidity >=0.8 with the CEI pattern (Checks-Effects-Interactions) to prevent reentrancy.
+- Import from @openzeppelin/contracts — never re-implement AccessControl, ReentrancyGuard, or ERC standards.
+- Use Hardhat 3 with @nomicfoundation/hardhat-toolbox-viem (or hardhat-toolbox-mocha-ethers) as the plugin bundle.
+- Deployment scripts go in scripts/ (ethers.js) or ignition/modules/ (Hardhat Ignition).
+- Off-chain code uses viem or ethers.js v6 — not v5.
+- NEVER hardcode private keys — use process.env.PRIVATE_KEY and document required env vars.
+- Smart contract tests use hardhat-network-helpers for time manipulation and impersonation.
+- Gas optimisation: use immutable/constant, pack storage slots, calldata over memory for external arrays.
+- Apply Slither or Aderyn static analysis recommendations for security-sensitive contracts.
+Respond ONLY with valid JSON matching the expected schema.`,
+    filePatterns: [
+      "**/*.sol",
+      "**/contracts/**",
+      "**/ignition/**",
+      "**/deployments/**",
+      "**/scripts/deploy*",
+      "**/hardhat.config.*",
+      "**/foundry.toml",
+    ],
+    capabilities: [
+      "Solidity smart contract development",
+      "Hardhat 3 / Foundry project setup",
+      "ERC-20 / ERC-721 / ERC-1155 tokens",
+      "Upgradeable proxy patterns (UUPS, Transparent)",
+      "DeFi integrations (Uniswap, Chainlink, Aave)",
+      "Smart contract security auditing",
+      "On-chain/off-chain deployment scripting",
+      "viem / ethers.js v6 client code",
+      "Wagmi + RainbowKit frontend integration",
+    ],
+  },
+
   "arb-runner": {
     role: "arb-runner",
     systemPrompt: "You are JR, the specialized Arb Runner agent using browser automation to execute bets.",

@@ -387,7 +387,7 @@ export class KnowledgeBase {
     }
 
     const roles: AgentRole[] = [
-      "frontend", "backend", "security", "devops", "arb-runner", "media", "general",
+      "frontend", "backend", "security", "devops", "arb-runner", "media", "web3", "general",
     ];
     for (const role of roles) {
       this.indexByRole.set(role, new Set());

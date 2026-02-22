@@ -10,6 +10,7 @@ export type AgentRole =
   | "devops"
   | "arb-runner"
   | "media"
+  | "web3"
   | "general";
 
 export type AgentStatus = "idle" | "working" | "completed" | "failed" | "requeued";
