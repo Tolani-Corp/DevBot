@@ -668,6 +668,41 @@ export async function listVaultMissions(filter?: {
 }
 
 /**
+ * List vault missions within a date range (from/to) with optional filters.
+ * Primary query used by the report generator and Slack presentation commands.
+ */
+export async function listVaultMissionsInRange(filter?: {
+  from?: Date;
+  to?: Date;
+  operator?: string;
+  missionType?: string;
+  riskRating?: string;
+}): Promise<VaultEntry[]> {
+  const index = await loadIndex();
+  let entries = index.entries;
+
+  if (filter?.from) {
+    entries = entries.filter((e) => e.completedAt >= filter.from!);
+  }
+  if (filter?.to) {
+    const toEnd = new Date(filter.to);
+    toEnd.setHours(23, 59, 59, 999);
+    entries = entries.filter((e) => e.completedAt <= toEnd);
+  }
+  if (filter?.operator) {
+    entries = entries.filter((e) => e.operator.includes(filter.operator!));
+  }
+  if (filter?.missionType) {
+    entries = entries.filter((e) => e.missionType === filter.missionType);
+  }
+  if (filter?.riskRating) {
+    entries = entries.filter((e) => e.riskRating === filter.riskRating);
+  }
+
+  return entries.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+}
+
+/**
  * Read a specific artifact from the vault.
  */
 export async function readArtifact(missionId: string, artifactName: string): Promise<string | null> {

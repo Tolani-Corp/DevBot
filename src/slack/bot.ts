@@ -760,3 +760,232 @@ app.command("/natt", async ({ command, say, ack, client }) => {
     console.error("NATT command error:", error);
   }
 });
+
+// ─── /natt-report Command — NATT Mission Report Generator ─────────────────────
+// Usage: /natt-report from=<date> to=<date> [operator=<user>]
+//   /natt-report from=2026-01-02 to=2026-02-05
+//   /natt-report from="02 January 2026" to="5 February 2026"
+//   /natt-report from=2026-01-01 to=2026-01-31 operator=slack:U123456
+//
+// Also triggered by app_mention patterns like:
+//   @devbot presentation from 02 January 2026 to 5 February 2026 in powerpoint format
+//   @natt i want report from Jan 2 to Feb 5 with pivot tables
+
+app.command("/natt-report", async ({ command, ack, say, client }) => {
+  await ack();
+  const text = command.text.trim();
+
+  if (!text || text === "help") {
+    await say({
+      text: "📊 NATT Report Generator",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              "*📊 NATT Mission Report Generator*",
+              "Generates a PowerPoint presentation with pivot tables and visual graphs from vault mission data.",
+              "",
+              "*Usage:* `/natt-report from=<date> to=<date> [operator=<user>]`",
+              "",
+              "*Examples:*",
+              "• `/natt-report from=2026-01-02 to=2026-02-05`",
+              "• `/natt-report from=\"02 January 2026\" to=\"5 February 2026\"`",
+              "• `/natt-report from=2026-01-01 to=2026-01-31 operator=slack:U123456`",
+              "",
+              "*Or mention:* `@DevBot presentation from 02 Jan 2026 to 5 Feb 2026 in powerpoint format`",
+            ].join("\n"),
+          },
+        },
+      ],
+    });
+    return;
+  }
+
+  await say({
+    text: "📊 NATT Report — Building your PowerPoint presentation...",
+    blocks: [{
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*📊 NATT Report Generator*\n🔄 Querying mission vault and assembling slides...",
+      },
+    }],
+  });
+
+  try {
+    const { parseReportRequest, generateMissionReport } = await import("@/agents/natt-report");
+
+    const parsed = parseReportRequest(text);
+
+    // Also parse key=value style args
+    let from = parsed.from;
+    let to = parsed.to;
+    let operator = parsed.operator;
+
+    const kvFrom = text.match(/from=["']?([^"'\s]+(?:\s+[^"'\s]+)*?)["']?(?:\s+|$)/i);
+    const kvTo = text.match(/to=["']?([^"'\s]+(?:\s+[^"'\s]+)*?)["']?(?:\s+|$)/i);
+    const kvOp = text.match(/operator=["']?(\S+)["']?/i);
+
+    if (kvFrom?.[1] && !from) {
+      const { parseReportRequest: p2 } = await import("@/agents/natt-report");
+      const r = p2(`from ${kvFrom[1]} to ${kvTo?.[1] ?? "today"}`);
+      from = r.from;
+    }
+    if (kvTo?.[1] && !to) {
+      const { parseReportRequest: p2 } = await import("@/agents/natt-report");
+      const r = p2(`from today to ${kvTo[1]}`);
+      to = r.to;
+    }
+    if (kvOp?.[1]) operator = kvOp[1];
+
+    const report = await generateMissionReport({
+      from,
+      to,
+      operator,
+      author: `slack:${command.user_id}`,
+      title: `NATT Mission Report${from && to ? ` — ${from.toLocaleDateString("en-GB")} to ${to.toLocaleDateString("en-GB")}` : ""}`,
+    });
+
+    if (report.missionCount === 0) {
+      await say({
+        text: "📊 NATT Report — No missions found in range",
+        blocks: [{
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              "*📊 NATT Report — No Missions Found*",
+              `No missions in vault for the requested period${from ? ` (${from.toLocaleDateString("en-GB")} → ${to?.toLocaleDateString("en-GB") ?? "now"})` : ""}.`,
+              "Run some missions first with `/natt <target>` then request a report.",
+            ].join("\n"),
+          },
+        }],
+      });
+      return;
+    }
+
+    // Upload the PPTX to Slack
+    const uploadResult = await client.files.uploadV2({
+      channel_id: command.channel_id,
+      filename: report.filename,
+      file: report.buffer,
+      title: `NATT Mission Report — ${report.dateRange.from} to ${report.dateRange.to}`,
+      initial_comment: [
+        `*📊 NATT Mission Report — PowerPoint Ready*`,
+        `📅 Period: *${report.dateRange.from}* → *${report.dateRange.to}*`,
+        `📋 ${report.missionCount} missions  |  🔍 ${report.findingCount} findings  |  🖥️ ${report.slideCount} slides`,
+        ``,
+        `Slides include: Executive Summary, Risk Charts, Mission Timeline, Severity Pivot Table, Findings Analysis, Attack Surface Map, Operator Activity, Recommendations`,
+      ].join("\n"),
+    });
+
+    if (!uploadResult.ok) {
+      throw new Error(`File upload failed: ${uploadResult.error}`);
+    }
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    await say({
+      text: "❌ NATT Report Failed",
+      blocks: [{
+        type: "section",
+        text: { type: "mrkdwn", text: `*❌ NATT Report Failed*\n${msg}` },
+      }],
+    });
+    console.error("NATT report command error:", error);
+  }
+});
+
+// ─── Natural Language Presentation Request Handler ─────────────────────────────
+// Handles @devbot / @natt mentions requesting presentations:
+//   "@DevBot presentation of all mission context from 02 Jan 2026 to 5 Feb 2026 in powerpoint"
+//   "@natt generate report jan 2 to feb 5 pptx with pivot tables"
+
+async function handlePresentationRequest(
+  text: string,
+  channelId: string,
+  userId: string,
+  say: Function,
+  client: any
+): Promise<boolean> {
+  const lower = text.toLowerCase();
+  const isPresentationRequest =
+    /presentation|powerpoint|pptx|\.pptx|slides?|deck|report.*mission|mission.*report|mission.*context/.test(lower) &&
+    /from\s|between\s|\d{4}-\d{2}-\d{2}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/.test(lower);
+
+  if (!isPresentationRequest) return false;
+
+  await say({
+    text: "📊 Building your PowerPoint presentation...",
+    blocks: [{
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*📊 NATT Report Generator*\n🔄 Parsing your request and querying the mission vault...",
+      },
+    }],
+  });
+
+  try {
+    const { parseReportRequest, generateMissionReport } = await import("@/agents/natt-report");
+    const parsed = parseReportRequest(text);
+
+    const report = await generateMissionReport({
+      from: parsed.from,
+      to: parsed.to,
+      operator: parsed.operator,
+      author: `slack:${userId}`,
+      title: `NATT Mission Report${parsed.from && parsed.to ? ` — ${parsed.from.toLocaleDateString("en-GB")} to ${parsed.to.toLocaleDateString("en-GB")}` : ""}`,
+    });
+
+    if (report.missionCount === 0) {
+      await say({
+        text: "📊 No missions found in vault for the requested period.",
+        blocks: [{
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: [
+              "*📊 NATT Report — No Missions Found*",
+              `No vault entries found${parsed.from ? ` for ${parsed.from.toLocaleDateString("en-GB")} → ${parsed.to?.toLocaleDateString("en-GB") ?? "now"}` : ""}.`,
+              "Use `/natt <target>` to run missions, then request a report.",
+            ].join("\n"),
+          },
+        }],
+      });
+      return true;
+    }
+
+    await client.files.uploadV2({
+      channel_id: channelId,
+      filename: report.filename,
+      file: report.buffer,
+      title: `NATT Mission Report — ${report.dateRange.from} to ${report.dateRange.to}`,
+      initial_comment: [
+        `*📊 NATT Mission Report — PowerPoint Ready* 🎯`,
+        `📅 *${report.dateRange.from}* → *${report.dateRange.to}*`,
+        `📋 ${report.missionCount} missions  |  🔍 ${report.findingCount} findings  |  🖥️ ${report.slideCount} slides`,
+        ``,
+        `Includes: Executive Summary • Risk Charts • Mission Timeline • Severity Pivot Table`,
+        `Attack Surface Map • Findings Breakdown • Operator Activity • Recommendations`,
+      ].join("\n"),
+    });
+
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await say({ text: `❌ Report generation failed: ${msg}` });
+    console.error("NATT presentation mention error:", err);
+  }
+
+  return true;
+}
+
+// Inject presentation handler into app_mention — register a secondary listener
+// that checks for presentation keywords before general task routing
+app.event("app_mention", async ({ event, say, client }) => {
+  const text = (event.text ?? "").replace(/<@[A-Z0-9]+>/g, "").trim();
+  await handlePresentationRequest(text, event.channel, event.user ?? "", say, client);
+});
+
