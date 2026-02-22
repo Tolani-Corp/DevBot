@@ -1,0 +1,40 @@
+[Unit]
+Description=DevBot BullMQ Worker — Task Queue Processor
+Documentation=https://github.com/Tolani-Corp/DevBot
+After=network-online.target redis-server.service postgresql.service devbot.service
+Wants=network-online.target
+Requires=redis-server.service postgresql.service
+
+[Service]
+Type=simple
+User=devbot
+Group=devbot
+WorkingDirectory=/opt/devbot
+
+Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=2048
+Environment=PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+Environment=PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+Environment=CHROMIUM_FLAGS=--no-sandbox --disable-gpu --disable-dev-shm-usage
+EnvironmentFile=/opt/devbot/.env
+
+ExecStart=/usr/bin/node dist/worker.js
+Restart=on-failure
+RestartSec=15
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+StandardOutput=append:/mnt/nvme/logs/devbot/worker.log
+StandardError=append:/mnt/nvme/logs/devbot/worker-error.log
+
+LimitNOFILE=32768
+OOMScoreAdjust=-400
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/devbot /mnt/nvme/natt
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

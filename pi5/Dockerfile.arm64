@@ -1,0 +1,104 @@
+# ─── Raspberry Pi 5 — ARM64 Multi-Stage Dockerfile ────────────────────────────
+# Target: linux/arm64 (BCM2712 / ARM Cortex-A76)
+# Node.js:  22-alpine (native arm64 manifest — no emulation needed)
+# Tested:   Raspberry Pi OS Bookworm 64-bit, Ubuntu Server 24.04 LTS arm64
+
+# ── Stage 1: deps ─────────────────────────────────────────────────────────────
+FROM --platform=linux/arm64 node:22-alpine AS deps
+
+# Build tools for native module compilation
+# (discord.js: bufferutil / utf-8-validate; opentelemetry addons)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    libc6-compat \
+    # Playwright arm64 Chromium system dependencies
+    chromium \
+    chromium-chromedriver \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    dbus \
+    # pptxgenjs / canvas optional deps
+    pixman-dev \
+    cairo-dev \
+    pango-dev
+
+WORKDIR /app
+
+# Tell Playwright to use system Chromium (no download)
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage"
+
+COPY package.json pnpm-lock.yaml* ./
+
+RUN corepack enable pnpm && \
+    pnpm install --frozen-lockfile \
+    # Re-build native modules for linux/arm64
+    --ignore-scripts=false
+
+# ── Stage 2: builder ─────────────────────────────────────────────────────────
+FROM --platform=linux/arm64 node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# TypeScript compile + path alias resolution
+RUN corepack enable pnpm && pnpm build
+
+# ── Stage 3: production runner ────────────────────────────────────────────────
+FROM --platform=linux/arm64 node:22-alpine AS runner
+
+RUN apk add --no-cache \
+    libc6-compat \
+    # Runtime Chromium (Playwright/NATT HTML analysis)
+    chromium \
+    chromium-chromedriver \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    dbus \
+    # Git (required for DevBot git operations)
+    git \
+    # Timezone data
+    tzdata
+
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    # Limit Node.js heap to 4 GB — leaves room for Redis + PG on 16GB Pi
+    NODE_OPTIONS="--max-old-space-size=4096" \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage" \
+    TZ=UTC
+
+# Non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 --ingroup nodejs devbot
+
+# NATT vault and cron schedule dirs (persisted via volume)
+RUN mkdir -p /app/.natt/vault /app/.natt/cron && \
+    chown -R devbot:nodejs /app
+
+COPY --from=builder --chown=devbot:nodejs /app/dist      ./dist
+COPY --from=builder --chown=devbot:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=devbot:nodejs /app/package.json ./package.json
+
+USER devbot
+
+EXPOSE 3100
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD node -e "fetch('http://localhost:3100/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
+
+CMD ["node", "dist/index.js"]

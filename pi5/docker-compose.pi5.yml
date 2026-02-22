@@ -1,0 +1,227 @@
+# ─── DevBot Docker Compose — Raspberry Pi 5 (linux/arm64) ─────────────────────
+# Usage:
+#   docker compose -f pi5/docker-compose.pi5.yml up -d
+#
+# Prerequisites:
+#   1. NVMe SSD mounted at /mnt/nvme (see setup.sh)
+#   2. .env file in project root (copy .env.example → .env, fill values)
+#   3. docker buildx imagetools inspect node:22-alpine   # verify arm64 manifest
+
+version: '3.9'
+
+x-platform: &platform
+  platform: linux/arm64
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+# ── Shared environment ────────────────────────────────────────────────────────
+x-app-env: &app-env
+  NODE_ENV: production
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  DATABASE_URL: postgresql://devbot:devbot@postgres:5432/devbot
+  REDIS_URL: redis://redis:6379
+  TZ: UTC
+  # Playwright / NATT HTML analysis on Pi
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+  PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium-browser
+  CHROMIUM_FLAGS: "--no-sandbox --disable-gpu --disable-dev-shm-usage"
+
+services:
+
+  # ── DevBot API + Slack/Discord bot ─────────────────────────────────────────
+  devbot:
+    <<: [*platform, *restart, *logging]
+    build:
+      context: ..
+      dockerfile: pi5/Dockerfile.arm64
+      target: runner
+    image: tolani/devbot:pi5
+    container_name: devbot
+    ports:
+      - "127.0.0.1:3100:3100"    # Bind to loopback — expose via nginx/caddy
+    environment:
+      <<: *app-env
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - natt_vault:/app/.natt/vault      # NATT mission archive — NVMe backed
+      - natt_cron:/app/.natt/cron        # Cron schedules
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+
+  # ── BullMQ Worker ────────────────────────────────────────────────────────────
+  worker:
+    <<: [*platform, *restart, *logging]
+    build:
+      context: ..
+      dockerfile: pi5/Dockerfile.arm64
+      target: runner
+    image: tolani/devbot:pi5
+    container_name: devbot-worker
+    command: ["node", "dist/worker.js"]
+    environment:
+      <<: *app-env
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - natt_vault:/app/.natt/vault
+      - natt_cron:/app/.natt/cron
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.5"
+        reservations:
+          memory: 256M
+
+  # ── NATT Cron Worker ─────────────────────────────────────────────────────────
+  natt-cron:
+    <<: [*platform, *restart, *logging]
+    build:
+      context: ..
+      dockerfile: pi5/Dockerfile.arm64
+      target: runner
+    image: tolani/devbot:pi5
+    container_name: devbot-natt-cron
+    command: ["node", "dist/agents/natt-report-cron.js"]
+    environment:
+      <<: *app-env
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - natt_vault:/app/.natt/vault
+      - natt_cron:/app/.natt/cron
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+
+  # ── PostgreSQL 16 (arm64) ────────────────────────────────────────────────────
+  postgres:
+    <<: [*platform, *restart, *logging]
+    image: postgres:16-alpine
+    container_name: devbot-postgres
+    environment:
+      POSTGRES_USER: devbot
+      POSTGRES_PASSWORD: devbot
+      POSTGRES_DB: devbot
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./postgresql.pi5.conf:/etc/postgresql/postgresql.conf:ro
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devbot -d devbot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 256M
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  # ── Redis 7 (arm64) ──────────────────────────────────────────────────────────
+  redis:
+    <<: [*platform, *restart, *logging]
+    image: redis:7-alpine
+    container_name: devbot-redis
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis_data:/data
+      - ./redis.pi5.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "127.0.0.1:6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+
+  # ── Caddy (reverse proxy + TLS) ──────────────────────────────────────────────
+  caddy:
+    <<: [*platform, *restart, *logging]
+    image: caddy:2-alpine
+    container_name: devbot-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - devbot
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+
+# ── Volumes — all backed by /mnt/nvme ─────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/docker/postgres
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/docker/redis
+  natt_vault:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/natt/vault
+  natt_cron:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/nvme/natt/cron
+  caddy_data:
+  caddy_config:

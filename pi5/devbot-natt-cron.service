@@ -1,0 +1,37 @@
+[Unit]
+Description=DevBot NATT Report Cron — Scheduled Mission Report Delivery
+Documentation=https://github.com/Tolani-Corp/DevBot
+After=network-online.target redis-server.service devbot.service
+Wants=network-online.target
+Requires=redis-server.service
+
+[Service]
+Type=simple
+User=devbot
+Group=devbot
+WorkingDirectory=/opt/devbot
+
+Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=1024
+EnvironmentFile=/opt/devbot/.env
+
+ExecStart=/usr/bin/node dist/agents/natt-report-cron.js
+Restart=on-failure
+RestartSec=20
+StartLimitIntervalSec=180
+StartLimitBurst=3
+
+StandardOutput=append:/mnt/nvme/logs/devbot/natt-cron.log
+StandardError=append:/mnt/nvme/logs/devbot/natt-cron-error.log
+
+LimitNOFILE=16384
+OOMScoreAdjust=-300
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/devbot /mnt/nvme/natt
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

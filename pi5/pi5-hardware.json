@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pi5-hardware.json",
+  "description": "Raspberry Pi 5 hardware specification and compatibility matrix for DevBot / DevTown / NATT stack",
+  "lastUpdated": "2026-02-22",
+
+  "board": {
+    "model": "Raspberry Pi 5",
+    "revision": "1.0",
+    "formFactor": "85 × 56 mm (credit-card)",
+    "releaseDate": "2023-10-23"
+  },
+
+  "soc": {
+    "chip": "BCM2712",
+    "manufacturer": "Broadcom",
+    "architecture": "ARMv8.2-A (64-bit)",
+    "cores": 4,
+    "coreName": "ARM Cortex-A76",
+    "clockSpeed": "2.4 GHz",
+    "processNode": "16nm",
+    "gpu": "VideoCore VII",
+    "gpuCores": 12,
+    "gpuClockMHz": 800,
+    "ioController": "RP1 (Raspberry Pi RP1 I/O controller — 40nm TSMC)"
+  },
+
+  "memory": {
+    "model": "16GB LPDDR4X",
+    "speedMbps": 4267,
+    "bandwidth": "68.3 GB/s",
+    "channels": 2,
+    "variants": ["4GB", "8GB", "16GB"],
+    "ecc": false,
+    "notes": "Shared with GPU. Reserve 256 MB minimum for VideoCore firmware."
+  },
+
+  "storage": {
+    "primary": {
+      "type": "microSD",
+      "interface": "SDIO 3.0",
+      "maxSpeedMBs": 104,
+      "recommended": "Samsung PRO Endurance 128GB A2 (high write-cycle endurance for DB workloads)"
+    },
+    "nvme": {
+      "connector": "PCIe 2.0 x1 (FPC ribbon — requires HAT+ adapter)",
+      "recommended": "WD SN770M 1TB M.2 2230 (Pi HAT+ form factor) or Pimoroni NVMe Base HAT",
+      "maxSpeedMBs": 400,
+      "notes": "Move PostgreSQL data dir and Redis RDB/AOF to NVMe. Critical for DevBot production workloads.",
+      "bootFromNVMe": true
+    },
+    "usb": {
+      "usb3": "2× USB-A 3.0 (5 Gbps)",
+      "usb2": "2× USB-A 2.0",
+      "notes": "USB 3.0 suitable for external SSD when NVMe HAT unavailable"
+    }
+  },
+
+  "networking": {
+    "ethernet": {
+      "standard": "Gigabit Ethernet (1000BASE-T)",
+      "controller": "RP1",
+      "poe": "Requires PoE+ HAT (802.3at — up to 25.5W)"
+    },
+    "wifi": {
+      "standard": "IEEE 802.11ac (Wi-Fi 5)",
+      "bands": ["2.4 GHz", "5 GHz"],
+      "antenna": "Onboard PCB antenna + external connector (U.FL)"
+    },
+    "bluetooth": "Bluetooth 5.0 + BLE"
+  },
+
+  "display": {
+    "hdmi": "2× micro-HDMI (up to 4Kp60 each, simultaneous)",
+    "csi": "2× MIPI CSI camera — 4-lane each (via FPC)",
+    "dsi": "2× MIPI DSI display — 4-lane each (via FPC)"
+  },
+
+  "gpio": {
+    "pinCount": 40,
+    "gpioCount": 26,
+    "i2c": ["I2C0 (pins 27/28)", "I2C1 (pins 3/5)"],
+    "spi": ["SPI0 (CE0/CE1)", "SPI1 (CE0/CE1/CE2)", "SPI2-SPI6 via RP1"],
+    "uart": "UART0 (pins 8/10) + UART2-UART5 via RP1 expansion",
+    "pwm": "PWM0/PWM1 (hardware) + RP1 additional channels",
+    "voltage": "3.3V logic (NOT 5V tolerant) — level shifter required for 5V peripherals",
+    "currentLimit": "50mA total GPIO draw (use powered hub for HID devices)"
+  },
+
+  "power": {
+    "connector": "USB-C PD",
+    "nominalW": 27,
+    "officialPSU": "Raspberry Pi 27W USB-C Power Supply (5.1V / 5A)",
+    "minimumW": 15,
+    "typicalIdleW": 3.5,
+    "typicalLoadW": 12.5,
+    "peakW": 25,
+    "rtcBattery": "CR2032 (dedicated RTC battery connector onboard)",
+    "notes": "Do NOT use generic 5V/3A USB-C chargers — voltage drops cause throttling. PoE+ HAT eliminates need for separate PSU."
+  },
+
+  "cooling": {
+    "thermalChip": "BCM2712 includes onboard thermal management (headless throttle at 80°C)",
+    "recommended": "Official Raspberry Pi Active Cooler (heat spreader + brushless fan — 22mm × 22mm)",
+    "alternatives": [
+      "Argon NEO 5 case (passive aluminum, rated to 70°C sustained)",
+      "Pimoroni Aluminium Heatsink Case",
+      "Waveshare Metal Case with fan"
+    ],
+    "throttleTemp": 80,
+    "targetTemp": 60,
+    "fanControlGPIO": "GPIO 14 (PWM fan header onboard — JST-SH 1.0mm 4-pin)"
+  },
+
+  "os": {
+    "recommended": "Raspberry Pi OS Lite 64-bit (Bookworm / Debian 12)",
+    "alternates": ["Ubuntu Server 24.04 LTS arm64", "DietPi (arm64)"],
+    "arch": "aarch64 (arm64)",
+    "kernel": "6.6 (Linux RT patches available for real-time workloads)",
+    "notes": "Always use 64-bit OS for Node.js 22 + PostgreSQL 16 performance"
+  },
+
+  "runtimeVersions": {
+    "nodejs": {
+      "required": "22.x LTS",
+      "installMethod": "NodeSource binary (deb.nodesource.com/node_22.x) — official arm64 binary",
+      "packageManager": "pnpm@9 (corepack enable && corepack prepare pnpm@latest)"
+    },
+    "redis": {
+      "version": "7.x",
+      "installMethod": "apt (redis-server on Bookworm ships 7.0)",
+      "configPath": "/etc/redis/redis.conf",
+      "dataDir": "/mnt/nvme/redis (relocate from SD to NVMe)"
+    },
+    "postgresql": {
+      "version": "16",
+      "installMethod": "pgdg apt repo (apt.postgresql.org)",
+      "dataDir": "/mnt/nvme/postgresql/16/main (relocate from SD to NVMe)",
+      "tuning": "See pi5/postgres.conf for Pi-optimized settings"
+    },
+    "docker": {
+      "version": "26.x (Docker CE for arm64)",
+      "installMethod": "get.docker.com convenience script or apt docker.io",
+      "platform": "linux/arm64",
+      "notes": "All official images (node:22-alpine, postgres:16-alpine, redis:7-alpine) have native arm64 manifests"
+    },
+    "python": {
+      "version": "3.12",
+      "note": "Pre-installed on Pi OS. Used by freakme_python backend."
+    }
+  },
+
+  "accessories": {
+    "recommended": [
+      {
+        "name": "Raspberry Pi Official Active Cooler",
+        "purpose": "Thermal — required for sustained AI/BullMQ workloads",
+        "connector": "4-pin fan header + adhesive heatsink",
+        "required": true
+      },
+      {
+        "name": "Pimoroni NVMe Base HAT (M.2 2230/2242)",
+        "purpose": "Fast storage for PostgreSQL + Redis on PCIe 2.0",
+        "interface": "PCIe 2.0 x1 via FPC",
+        "notes": "Stack with official Active Cooler using standoffs",
+        "required": "strongly recommended for production"
+      },
+      {
+        "name": "WD SN770M 1TB M.2 NVMe (2230)",
+        "purpose": "Primary storage for DB, .natt/vault, log files",
+        "required": "strongly recommended for production"
+      },
+      {
+        "name": "Official 27W USB-C PSU",
+        "purpose": "Power — prevents undervolting under sustained load",
+        "required": true
+      },
+      {
+        "name": "CR2032 Battery (RTC)",
+        "purpose": "Maintain system clock on power loss — critical for cron scheduling accuracy",
+        "notes": "Insert in onboard RTC battery holder. Enable via /boot/firmware/config.txt: dtparam=rtc=on",
+        "required": true
+      },
+      {
+        "name": "Argon NEO 5 BRED Case",
+        "purpose": "Enclosure with integrated heatsink — production deployment case",
+        "notes": "Has slot for M.2 NVMe + fan header. Replaces Official Active Cooler + separate NVMe HAT."
+      },
+      {
+        "name": "PoE+ HAT+ (802.3at)",
+        "purpose": "Single-cable power + Ethernet — cleaner rack/server room deployment",
+        "notes": "Requires 802.3at PoE+ switch port (25.5W minimum)"
+      },
+      {
+        "name": "Raspberry Pi Camera Module 3 (IMX708)",
+        "purpose": "Optional — feed into NATT media scaffolding pipeline",
+        "connector": "CSI FPC (15-pin)"
+      },
+      {
+        "name": "USB 3.0 Gigabit Ethernet Adapter (secondary)",
+        "purpose": "Dual-NIC for network recon lab — NATT passive recon on isolated interface"
+      }
+    ],
+
+    "optional_gpio": [
+      {
+        "name": "Waveshare 2.7\" e-Ink HAT",
+        "purpose": "Display DevBot status / active mission count without screen",
+        "interface": "SPI0",
+        "notes": "Use raspi-gpio + node-spi bindings"
+      },
+      {
+        "name": "Adafruit NeoPixel ring (24 LED)",
+        "purpose": "NATT ghost mode status indicator — passive=blue, stealth=amber, active=red",
+        "interface": "GPIO 18 (PWM0)",
+        "voltage": "5V (requires level shifter from 3.3V)"
+      },
+      {
+        "name": "UPS-Lite (I2C LiPo UPS HAT)",
+        "purpose": "Graceful shutdown + battery backup for cron job continuity",
+        "interface": "I2C1",
+        "notes": "Monitor via /dev/i2c-1 — trigger shutdown at 5% battery"
+      }
+    ]
+  },
+
+  "performanceTuning": {
+    "bootConfig": {
+      "file": "/boot/firmware/config.txt",
+      "settings": {
+        "arm_boost": 1,
+        "over_voltage_delta": 50000,
+        "arm_freq": 2800,
+        "gpu_mem": 128,
+        "dtparam=rtc": "on",
+        "dtparam=i2c_arm": "on",
+        "dtparam=spi": "on",
+        "force_turbo": 0,
+        "disable_overscan": 1,
+        "hdmi_blanking": 1
+      },
+      "notes": "arm_freq=2800 is a mild overclock (from 2400MHz). Requires adequate cooling. Omit if using passive-only case."
+    },
+    "sysctlTuning": {
+      "file": "/etc/sysctl.d/99-devbot.conf",
+      "settings": {
+        "vm.overcommit_memory": 1,
+        "vm.swappiness": 1,
+        "net.core.somaxconn": 65535,
+        "net.ipv4.tcp_max_syn_backlog": 65535,
+        "net.core.netdev_max_backlog": 65535,
+        "fs.file-max": 1048576
+      }
+    },
+    "swapConfig": {
+      "type": "zram (preferable to SD card swap)",
+      "size": "4GB zram0 (lz4 compression)",
+      "setup": "sudo apt install zram-tools && echo 'PERCENT=25' >> /etc/default/zramswap"
+    },
+    "nodeMemory": {
+      "NODE_OPTIONS": "--max-old-space-size=4096",
+      "notes": "4GB heap for Node.js. Leaves 12GB for OS, Redis, PostgreSQL on 16GB board."
+    }
+  },
+
+  "networkLayout": {
+    "recommended": {
+      "eth0": "LAN / management interface (DevBot API, Slack webhook ingress)",
+      "usb0": "Optional — isolated lab interface for NATT active recon",
+      "wlan0": "Standby / PoE fallback"
+    },
+    "ports": {
+      "devbot_api": 3100,
+      "redis": 6379,
+      "postgresql": 5432,
+      "devbot_worker": "no port — BullMQ internal",
+      "mcp_server": 8700,
+      "kali_mcp": 8701
+    },
+    "firewall": "ufw default deny in. Allow 3100/tcp, 22/tcp from management VLAN only. Redis/PG bind to 127.0.0.1."
+  }
+}

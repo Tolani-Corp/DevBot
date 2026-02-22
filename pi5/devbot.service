@@ -1,0 +1,49 @@
+[Unit]
+Description=DevBot — Autonomous AI Software Engineer (Tolani Corp)
+Documentation=https://github.com/Tolani-Corp/DevBot
+After=network-online.target redis-server.service postgresql.service
+Wants=network-online.target
+Requires=redis-server.service postgresql.service
+
+[Service]
+Type=simple
+User=devbot
+Group=devbot
+WorkingDirectory=/opt/devbot
+
+# Environment
+Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=4096
+# Playwright / NATT HTML analysis (system Chromium on Pi OS)
+Environment=PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+Environment=PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+Environment=CHROMIUM_FLAGS=--no-sandbox --disable-gpu --disable-dev-shm-usage
+EnvironmentFile=/opt/devbot/.env
+
+ExecStart=/usr/bin/node dist/index.js
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+# Logging — write to NVMe
+StandardOutput=append:/mnt/nvme/logs/devbot/devbot.log
+StandardError=append:/mnt/nvme/logs/devbot/devbot-error.log
+
+# Limits — tuned for 16GB Pi
+LimitNOFILE=65536
+LimitNPROC=4096
+OOMScoreAdjust=-500
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/devbot /mnt/nvme/natt
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
