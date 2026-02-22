@@ -4,11 +4,13 @@ initTracing("devbot-agents");
 
 import "dotenv/config";
 import { app } from "./slack/bot";
+import { createServer, type Server } from "http";
 
 import { startDiscordBot } from "./discord/bot";
 
 // Cron worker cleanup reference
 let stopCronWorker: (() => Promise<void>) | null = null;
+let webhookServer: Server | null = null;
 
 async function main() {
   const port = Number(process.env.PORT ?? 3100);
@@ -54,25 +56,60 @@ async function main() {
     }
   }
 
+  // ── Autonomous Self-Update Pipeline ───────────────────────────────────────
+  // Starts a webhook HTTP server on WEBHOOK_PORT (default 3101) that accepts
+  // GitHub push events, enqueues a BullMQ self-update job, and spawns
+  // pi5/update.sh detached so it survives the subsequent systemctl restart.
+  try {
+    const {
+      createSelfUpdateQueue,
+      startSelfUpdateWorker,
+    } = await import("./services/self-updater.js");
+    const { handleGitHubWebhook } = await import("./webhooks/github.js");
+
+    const selfUpdateQueue = createSelfUpdateQueue();
+    startSelfUpdateWorker();
+
+    const webhookPort = Number(process.env.WEBHOOK_PORT ?? 3101);
+    webhookServer = createServer(async (req, res) => {
+      try {
+        if (req.method === "POST" && req.url === "/webhooks/github") {
+          await handleGitHubWebhook(req, res, selfUpdateQueue);
+        } else if (req.url === "/health") {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "ok", pid: process.pid, ts: Date.now() }));
+        } else {
+          res.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+        }
+      } catch (err) {
+        console.error("[webhook-server] Unhandled error:", err);
+        if (!res.headersSent) res.writeHead(500).end("Internal server error");
+      }
+    });
+
+    webhookServer.listen(webhookPort, "0.0.0.0", () => {
+      console.log(`🔗 Webhook + health server listening on port ${webhookPort}`);
+    });
+  } catch (error) {
+    console.warn("⚠️ Self-update pipeline failed to start (Redis unavailable?):", error);
+  }
+
   console.log(`🤖 Mention trigger: ${process.env.DEVBOT_MENTION_TRIGGER ?? "@FunBot"}`);
   console.log(`📂 Workspace: ${process.env.WORKSPACE_ROOT ?? process.cwd()}`);
   console.log(`🔧 Allowed repos: ${process.env.ALLOWED_REPOS ?? "*"}`);
 }
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\nShutting down FunBot...");
+async function gracefulShutdown(signal: string): Promise<void> {
+  console.log(`\n[${signal}] Shutting down FunBot...`);
+  if (webhookServer) webhookServer.close();
   if (stopCronWorker) await stopCronWorker();
   await shutdownTracing();
   process.exit(0);
-});
+}
 
-process.on("SIGTERM", async () => {
-  console.log("\nShutting down FunBot...");
-  if (stopCronWorker) await stopCronWorker();
-  await shutdownTracing();
-  process.exit(0);
-});
+process.on("SIGINT",  () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 main().catch(async (error) => {
   console.error("Failed to start FunBot:", error);

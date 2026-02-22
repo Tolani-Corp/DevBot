@@ -1,0 +1,70 @@
+# watchtower.docker-compose.yml — Automatic Docker image pull + restart
+#
+# For teams using the Docker deployment mode (docker-compose.pi5.yml).
+# Watchtower polls the container registry and automatically pulls the latest
+# tolani/devbot:pi5 image, then restarts the container — zero human required.
+#
+# Usage:
+#   # Start alongside the main stack:
+#   docker compose -f docker-compose.pi5.yml -f watchtower.docker-compose.yml up -d
+#
+#   # Or standalone (if main stack is already running):
+#   docker compose -f watchtower.docker-compose.yml up -d
+#
+# Required: DOCKER_REGISTRY_TOKEN env var for private registry auth (optional for GHCR public)
+#
+# Note: For Raspberry Pi 5, the image must be published as a linux/arm64 manifest.
+#   Push with: docker buildx build --platform linux/arm64 -t tolani/devbot:pi5 .
+
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: devbot-watchtower
+    restart: unless-stopped
+
+    volumes:
+      # Required to watch and restart other containers
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    environment:
+      # Poll interval: check for new images every 5 minutes (300 seconds)
+      WATCHTOWER_POLL_INTERVAL: "300"
+
+      # Only watch containers with this label:
+      #   labels: [ "com.centurylinklabs.watchtower.enable=true" ]
+      # (set in docker-compose.pi5.yml on the devbot/devbot-worker services)
+      WATCHTOWER_LABEL_ENABLE: "true"
+
+      # Run once then exit (useful for testing — remove for production daemon)
+      # WATCHTOWER_RUN_ONCE: "true"
+
+      # Clean up old images after pulling new ones (saves NVMe space)
+      WATCHTOWER_CLEANUP: "true"
+
+      # Notify Slack on successful image update (optional — uses apprise URL format)
+      # WATCHTOWER_NOTIFICATION_URL: "slack://SLACK_BOT_TOKEN@WORKSPACE/CHANNEL"
+
+      # Timeout for container stop before force kill
+      WATCHTOWER_TIMEOUT: "30s"
+
+      # Only check during low-traffic hours (cron schedule: 3:00-4:00 UTC)
+      # Comment out to use WATCHTOWER_POLL_INTERVAL instead
+      WATCHTOWER_SCHEDULE: "0 0 3 * * *"
+
+      # Auth for private registry (GHCR / Docker Hub)
+      # Set DOCKER_REGISTRY_TOKEN in your .env file
+      REPO_USER: "${DOCKER_REGISTRY_USER:-tolanilabs}"
+      REPO_PASS: "${DOCKER_REGISTRY_TOKEN:-}"
+
+    # Resource limits — don't starve Redis/Postgres on Pi 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

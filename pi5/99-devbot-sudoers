@@ -1,0 +1,20 @@
+# 99-devbot-sudoers — Minimal passwordless sudo for the devbot service account
+#
+# Grants the `devbot` OS user the ability to restart exactly the 3 DevBot
+# services via systemctl — nothing else. Principle of least privilege.
+#
+# Install (DO NOT edit /etc/sudoers directly — use visudo or drop-in):
+#   sudo cp pi5/99-devbot-sudoers /etc/sudoers.d/99-devbot
+#   sudo chmod 440 /etc/sudoers.d/99-devbot
+#   sudo visudo -c    # Validate — never skip this step
+#
+# Verify:
+#   sudo -u devbot sudo systemctl restart devbot       # should not prompt
+#   sudo -u devbot sudo systemctl restart nginx        # should FAIL (not listed)
+
+Defaults:devbot !requiretty
+
+# Allow devbot to restart only these 3 services, no password required
+devbot ALL=(ALL) NOPASSWD: /bin/systemctl restart devbot
+devbot ALL=(ALL) NOPASSWD: /bin/systemctl restart devbot-worker
+devbot ALL=(ALL) NOPASSWD: /bin/systemctl restart devbot-natt-cron

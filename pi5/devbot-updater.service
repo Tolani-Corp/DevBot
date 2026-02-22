@@ -1,0 +1,30 @@
+# devbot-updater.service — one-shot service that triggers a self-update check
+# Paired with devbot-updater.timer for scheduled daily safety-net pulls.
+# This fires update.sh directly as the devbot user.
+# NOT needed for the webhook-triggered path — only for the scheduled fallback.
+
+[Unit]
+Description=DevBot Scheduled Self-Update Check
+After=network-online.target devbot.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=devbot
+Group=devbot
+WorkingDirectory=/opt/devbot
+
+# Pass the same env vars as self-updater.ts would inject
+Environment="DEVBOT_DIR=/opt/devbot"
+Environment="LOG_DIR=/mnt/nvme/logs/devbot"
+Environment="UPDATE_TRIGGERED_BY=scheduled"
+Environment="UPDATE_PUSHER=systemd-timer"
+EnvironmentFile=/opt/devbot/.env
+
+ExecStart=/bin/bash /opt/devbot/pi5/update.sh
+
+# Update.sh redirects its own output to /mnt/nvme/logs/devbot/update.log
+StandardOutput=null
+StandardError=null
+
+TimeoutStartSec=600

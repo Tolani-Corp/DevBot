@@ -1,0 +1,30 @@
+# devbot-updater.timer — daily safety-net pull for DevBot
+#
+# Purpose: If GitHub webhooks are missed (network hiccup, Pi restart, etc.),
+# this timer ensures DevBot pulls the latest code within 24 hours.
+# The webhook-triggered path handles most updates; this is the fallback.
+#
+# Install:
+#   sudo cp devbot-updater.service /etc/systemd/system/
+#   sudo cp devbot-updater.timer   /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now devbot-updater.timer
+#
+# Status:  sudo systemctl list-timers --all | grep devbot
+
+[Unit]
+Description=DevBot Daily Self-Update Timer
+Requires=devbot-updater.service
+
+[Timer]
+# Fire at 03:00 UTC daily (low-traffic window)
+OnCalendar=*-*-* 03:00:00 UTC
+# If Pi was offline at 03:00, fire once as soon as it comes back online
+Persistent=true
+# Spread up to 5 minutes to avoid exact-time thundering herd
+RandomizedDelaySec=300
+# Ensure the service is triggered relative to boot as well
+Unit=devbot-updater.service
+
+[Install]
+WantedBy=timers.target
