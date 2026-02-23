@@ -497,9 +497,19 @@
           {
             "id": "cloud-misconfiguration",
             "name": "Cloud Misconfiguration Scan",
-            "status": "planned",
-            "description": "S3 bucket public access, Azure Storage anonymous blob, GCS public bucket enumeration for authorized cloud assets.",
-            "missionTypes": ["network-recon", "osint"]
+            "status": "available",
+            "description": "Cloudflare zone settings audit, DNS record analysis, SSL posture check, firewall rule review, cache config inspection. Uses CLOUDFLARE_API_TOKEN env var. See .claude/skills/cloudflare-infrastructure.md for token permissions and zone IDs.",
+            "missionTypes": ["network-recon", "osint"],
+            "cloudflareCapabilities": [
+              "zone-settings-audit",
+              "dns-record-enumeration",
+              "ssl-certificate-verification",
+              "firewall-rule-inspection",
+              "cache-configuration-review",
+              "worker-route-mapping",
+              "pages-deployment-inventory",
+              "analytics-traffic-profiling"
+            ]
           },
           {
             "id": "mobile-api-recon",

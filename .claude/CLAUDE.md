@@ -4,6 +4,7 @@
 
 - Workflow rules: see [AGENTS.md](./AGENTS.md)
 - Learned patterns: see [LEARNED.md](./LEARNED.md)
+- Cloudflare infra: see [skills/cloudflare-infrastructure.md](./skills/cloudflare-infrastructure.md)
 
 ## Project Overview
 Debo v1 (short for Development Bot) is a Slack/Discord-integrated autonomous AI software engineer that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
@@ -92,7 +93,17 @@ tests/
   git/             # Git operations tests
   middleware/      # Sanitizer, validator, rate-limiter tests
   queue/           # Worker tests
+mcp-natt/          # MCP Server: NATT security knowledge
+  src/index.ts     # Tools: validate_roe, identify_hash, scan_for_secrets, etc.
 ```
+
+## Cloudflare Integration
+- **Token**: Stored in `CLOUDFLARE_API_TOKEN` env var
+- **Full reference**: `.claude/skills/cloudflare-infrastructure.md`
+- **Zones**: bettorsace.win, freakme.fun, mangomodels.io, tccg.work
+- **NATT access**: `cloud-misconfiguration` skill activated — zone settings, DNS, SSL, firewall, cache audit
+- **Agent access**: `devops` role can deploy Pages/Workers, manage DNS, purge cache
+- **MCP reference**: Token permissions map to API endpoints in the skills doc
 
 ## Testing
 - Run: `pnpm test` or `npx vitest run`
