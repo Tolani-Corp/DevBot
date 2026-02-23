@@ -8,6 +8,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";            -- uuid_generate_v4() hel
 -- hstore for flexible key-value columns (NATT finding metadata)
 CREATE EXTENSION IF NOT EXISTS "hstore";
 
+-- pgvector for RAG embedding storage (1536-dim OpenAI vectors, HNSW index)
+-- Install: apt install postgresql-16-pgvector (bare metal) or use pgvector/pgvector:pg16 image (Docker)
+CREATE EXTENSION IF NOT EXISTS "vector";
+
 -- Grant stats access to devbot user
 GRANT SELECT ON pg_stat_statements TO devbot;
 
