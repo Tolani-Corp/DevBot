@@ -25,6 +25,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import https from "https";
 import http from "http";
 import dns from "dns/promises";
+import net from "net";
 import crypto from "crypto";
 import { execFileSync } from "child_process";
 import { sanitizeShellArg } from "@/middleware/sanitizer";
@@ -32,6 +33,12 @@ import {
   validateROE,
   type ROEValidationResult,
 } from "./natt-roe.js";
+import {
+  recordScan,
+  recordEpisode,
+  getMemorySummary,
+  type NATTScanRecord,
+} from "./natt-memory.js";
 
 export type { ROEValidationResult };
 
@@ -170,6 +177,15 @@ export interface NATTReconData {
   osint?: { dorks: string[]; certDomains: string[]; emailPatterns: string[] };
   /** Raw cookies from initial probe. */
   cookies?: Array<{ name: string; flags: string[]; secure: boolean; httpOnly: boolean; sameSite: string }>;
+  /** Email security policy records. */
+  emailSecurity?: {
+    spf?: string;
+    dkim?: Record<string, string>;
+    dmarc?: string;
+    assessment: string;
+  };
+  /** CVE matches found for detected technologies. */
+  cveMatches?: Array<{ tech: string; cveId: string; description: string; severity: string }>;
 }
 
 export interface NATTFormRecon {
@@ -592,6 +608,194 @@ function runPortScanSafe(host: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Lightweight TCP Port Probe (fallback when nmap is unavailable)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const COMMON_PORTS = [21, 22, 25, 53, 80, 110, 143, 443, 587, 993, 995,
+  3000, 3306, 5432, 6379, 8080, 8443, 9200, 27017];
+
+function probePort(host: string, port: number, timeoutMs = 2000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const sock = new net.Socket();
+    sock.setTimeout(timeoutMs);
+    sock.once("connect", () => { sock.destroy(); resolve(true); });
+    sock.once("timeout", () => { sock.destroy(); resolve(false); });
+    sock.once("error", () => { sock.destroy(); resolve(false); });
+    sock.connect(port, host);
+  });
+}
+
+async function probePorts(host: string, ports: number[] = COMMON_PORTS): Promise<number[]> {
+  const results = await Promise.allSettled(
+    ports.map(async (p) => ({ port: p, open: await probePort(host, p) }))
+  );
+  return results
+    .filter((r) => r.status === "fulfilled" && r.value.open)
+    .map((r) => (r as PromiseFulfilledResult<{ port: number; open: boolean }>).value.port);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DKIM / SPF / DMARC Email Security Check
+// ─────────────────────────────────────────────────────────────────────────────
+
+const DKIM_SELECTORS = ["default", "google", "selector1", "selector2", "k1", "s1", "dkim", "mail"];
+
+async function checkEmailSecurity(domain: string): Promise<{
+  spf?: string;
+  dkim: Record<string, string>;
+  dmarc?: string;
+  assessment: string;
+}> {
+  const issues: string[] = [];
+
+  // SPF — look for v=spf1 in TXT records
+  let spf: string | undefined;
+  try {
+    const txt = await dns.resolveTxt(domain);
+    const flat = txt.flat();
+    spf = flat.find((r) => r.startsWith("v=spf1"));
+  } catch { /* no TXT */ }
+  if (!spf) issues.push("Missing SPF record");
+  else if (spf.includes("+all")) issues.push("SPF uses +all (accepts any sender)");
+
+  // DMARC — _dmarc.<domain>
+  let dmarc: string | undefined;
+  try {
+    const txt = await dns.resolveTxt(`_dmarc.${domain}`);
+    dmarc = txt.flat().find((r) => r.startsWith("v=DMARC1"));
+  } catch { /* no DMARC */ }
+  if (!dmarc) issues.push("Missing DMARC record");
+  else if (/p=none/i.test(dmarc)) issues.push("DMARC policy is 'none' (monitoring only)");
+
+  // DKIM — probe common selectors
+  const dkim: Record<string, string> = {};
+  for (const sel of DKIM_SELECTORS) {
+    try {
+      const txt = await dns.resolveTxt(`${sel}._domainkey.${domain}`);
+      const val = txt.flat().join("");
+      if (val.includes("v=DKIM1") || val.includes("p=")) {
+        dkim[sel] = val;
+      }
+    } catch { /* selector not found */ }
+  }
+  if (Object.keys(dkim).length === 0) issues.push("No DKIM selectors found");
+
+  const assessment = issues.length === 0
+    ? "Email authentication fully configured (SPF + DKIM + DMARC)"
+    : `Email security gaps: ${issues.join("; ")}`;
+
+  return { spf, dkim, dmarc, assessment };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CVE / Threat Intelligence Lookup (NIST NVD API v2.0)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CVEMatch {
+  tech: string;
+  cveId: string;
+  description: string;
+  severity: string;
+}
+
+async function lookupCVEs(techStack: string[]): Promise<CVEMatch[]> {
+  const matches: CVEMatch[] = [];
+  // Rate-limit: NVD allows ~5 req/30s without API key
+  for (const tech of techStack.slice(0, 5)) {
+    try {
+      const keyword = encodeURIComponent(tech.replace(/[^a-zA-Z0-9 .]/g, "").trim());
+      if (!keyword) continue;
+      const data = await new Promise<string>((resolve, reject) => {
+        const req = https.get(
+          `https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${keyword}&resultsPerPage=3`,
+          { headers: { Accept: "application/json", "User-Agent": "NATT-Ghost/1.0" } },
+          (res) => {
+            let body = "";
+            res.on("data", (c) => { body += c; });
+            res.on("end", () => resolve(body));
+          }
+        );
+        req.on("error", reject);
+        req.setTimeout(8000, () => { req.destroy(); reject(new Error("timeout")); });
+      });
+      const parsed = JSON.parse(data);
+      for (const vuln of parsed.vulnerabilities ?? []) {
+        const cve = vuln.cve;
+        const desc = cve?.descriptions?.find((d: { lang: string }) => d.lang === "en")?.value ?? "";
+        const metrics = cve?.metrics?.cvssMetricV31?.[0] ?? cve?.metrics?.cvssMetricV2?.[0];
+        const severity = metrics?.cvssData?.baseSeverity ?? "UNKNOWN";
+        matches.push({ tech, cveId: cve?.id ?? "unknown", description: desc.substring(0, 200), severity });
+      }
+      // Brief pause between requests to respect NVD rate limits
+      await new Promise((r) => setTimeout(r, 6500));
+    } catch {
+      // Non-fatal — CVE lookup is best-effort
+    }
+  }
+  return matches;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SIEM Webhook Output (Splunk HEC / Elastic / Datadog / generic)
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function postToSIEM(webhookUrl: string, mission: NATTMission): Promise<void> {
+  const url = new URL(webhookUrl);
+  const payload = JSON.stringify({
+    source: "natt-ghost",
+    sourcetype: "_json",
+    event: {
+      missionId: mission.missionId,
+      codename: mission.codename,
+      operator: mission.operator,
+      target: mission.target.value,
+      targetType: mission.target.type,
+      missionType: mission.missionType,
+      ghostMode: mission.ghostMode,
+      riskScore: mission.summary.riskScore,
+      riskRating: mission.summary.riskRating,
+      totalFindings: mission.summary.totalFindings,
+      criticalCount: mission.summary.criticalCount,
+      highCount: mission.summary.highCount,
+      mediumCount: mission.summary.mediumCount,
+      lowCount: mission.summary.lowCount,
+      techStack: mission.summary.techStack,
+      topVector: mission.summary.topVector,
+      findings: mission.findings.map((f) => ({
+        id: f.id,
+        severity: f.severity,
+        category: f.category,
+        title: f.title,
+        description: f.description,
+        cve: f.cve,
+        cvss: f.cvss,
+        location: f.location,
+      })),
+      completedAt: mission.completedAt.toISOString(),
+    },
+  });
+
+  const mod = url.protocol === "https:" ? https : http;
+  await new Promise<void>((resolve, reject) => {
+    const req = mod.request(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) },
+      timeout: 10_000,
+    }, (res) => {
+      res.resume();
+      res.on("end", () => {
+        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) resolve();
+        else reject(new Error(`SIEM webhook returned ${res.statusCode}`));
+      });
+    });
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error("SIEM webhook timeout")); });
+    req.write(payload);
+    req.end();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Finding Builders
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -857,12 +1061,17 @@ async function runAIIntelligence(
   missionType: NATTMissionType,
   findings: NATTFinding[],
   recon: NATTReconData,
-  summary: NATTMissionSummary
+  summary: NATTMissionSummary,
+  memoryContext: string = ""
 ): Promise<string> {
+  const memoryBlock = memoryContext
+    ? `\n━━━ GHOST MEMORY (cross-session intelligence) ━━━\n${memoryContext}\n`
+    : "";
+
   const prompt = `You are NATT, a Ghost Agent — an elite ethical hacker with expertise in web application security, network exploitation, OSINT, and red team operations. You operate under strict Rules of Engagement and only produce intelligence for authorized targets.
 
 You have completed a security assessment. Deliver a complete tactical intelligence report.
-
+${memoryBlock}
 ━━━ MISSION BRIEF ━━━
 TARGET:      ${target.value} (${target.type})
 MISSION:     ${missionType}
@@ -957,6 +1166,10 @@ export async function launchNATTMission(
     autoVault?: boolean;
     /** Mermaid diagram for vault artifact. */
     mermaidDiagram?: string;
+    /** SIEM webhook URL — POST findings as structured JSON on completion. */
+    webhookUrl?: string;
+    /** Enable CVE lookup against NIST NVD for detected tech stack (default: false). */
+    cveCheck?: boolean;
   }
 ): Promise<NATTMission> {
   // Ethics gate — throws if unauthorized
@@ -1083,11 +1296,17 @@ export async function launchNATTMission(
         ? new URL(target.value).hostname
         : target.value;
 
+      // Try nmap first, fall back to lightweight TCP probe
       const nmap = runPortScanSafe(host);
-      // Parse open ports from nmap output
-      const portMatches = nmap.matchAll(/(\d+)\/tcp\s+open/g);
-      const openPorts: number[] = [];
-      for (const m of portMatches) openPorts.push(parseInt(m[1] ?? "0"));
+      let openPorts: number[] = [];
+
+      if (nmap.startsWith("nmap not available")) {
+        console.log("[NATT] nmap unavailable — falling back to TCP connect probe");
+        openPorts = await probePorts(host);
+      } else {
+        const portMatches = nmap.matchAll(/(\d+)\/tcp\s+open/g);
+        for (const m of portMatches) openPorts.push(parseInt(m[1] ?? "0"));
+      }
       recon.openPorts = openPorts;
 
       if (openPorts.length > 10) {
@@ -1157,6 +1376,32 @@ export async function launchNATTMission(
         MX: mxRecords.status === "fulfilled" ? mxRecords.value.map((r) => r.exchange) : [],
         TXT: txtRecords.status === "fulfilled" ? txtRecords.value.flat() : [],
       };
+
+      // Email security: SPF, DKIM, DMARC
+      const emailSec = await checkEmailSecurity(domain);
+      recon.emailSecurity = emailSec;
+
+      if (emailSec.assessment.includes("gaps")) {
+        const missingParts: string[] = [];
+        if (!emailSec.spf) missingParts.push("SPF");
+        if (Object.keys(emailSec.dkim).length === 0) missingParts.push("DKIM");
+        if (!emailSec.dmarc) missingParts.push("DMARC");
+
+        findings.push(
+          buildFinding(
+            missingParts.length >= 2 ? "high" : "medium",
+            "security-misconfiguration",
+            `Email Authentication Gaps: ${missingParts.join(", ")} Missing`,
+            emailSec.assessment,
+            `SPF: ${emailSec.spf ?? "MISSING"} | DKIM selectors: ${Object.keys(emailSec.dkim).join(", ") || "NONE"} | DMARC: ${emailSec.dmarc ?? "MISSING"}`,
+            `DNS: ${domain}`,
+            `dig TXT ${domain}; dig TXT _dmarc.${domain}; dig TXT default._domainkey.${domain}`,
+            "Configure SPF (v=spf1 with -all), DKIM (2048-bit key), and DMARC (p=reject). " +
+              "These prevent email spoofing and phishing using your domain.",
+            { owasp: "A05:2021 – Security Misconfiguration" }
+          )
+        );
+      }
 
       // TXT records may reveal internal info
       const txtFlat = recon.dnsRecords["TXT"] ?? [];
@@ -1328,9 +1573,43 @@ export async function launchNATTMission(
     }
   }
 
+  // ── CVE Lookup (optional, queries NIST NVD) ─────────────
+  if (options?.cveCheck && recon.techStack && recon.techStack.length > 0) {
+    console.log("[NATT] CVE lookup against NIST NVD for detected tech stack");
+    try {
+      const cves = await lookupCVEs(recon.techStack);
+      recon.cveMatches = cves;
+      for (const cve of cves) {
+        const sev = cve.severity.toLowerCase();
+        findings.push(
+          buildFinding(
+            sev === "critical" ? "critical" : sev === "high" ? "high" : sev === "medium" ? "medium" : "low",
+            "vulnerable-components",
+            `Known CVE: ${cve.cveId} (${cve.tech})`,
+            cve.description,
+            `Technology: ${cve.tech} | CVE: ${cve.cveId} | Severity: ${cve.severity}`,
+            target.value,
+            `Search https://nvd.nist.gov/vuln/detail/${cve.cveId}`,
+            `Update ${cve.tech} to the latest patched version. Check vendor advisories for ${cve.cveId}.`,
+            { cve: cve.cveId, owasp: "A06:2021 – Vulnerable and Outdated Components" }
+          )
+        );
+      }
+    } catch (err) {
+      console.warn(`[NATT] CVE lookup failed: ${String(err)}`);
+    }
+  }
+
   // ── Build Summary & AI Intelligence ─────────────────────
   const summary = buildSummary(findings, recon);
-  const aiIntelligence = await runAIIntelligence(target, missionType, findings, recon, summary);
+
+  // Inject memory context into AI analysis for cross-session intelligence
+  let memoryContext = "";
+  try {
+    memoryContext = await getMemorySummary();
+  } catch { /* memory not available yet — first run */ }
+
+  const aiIntelligence = await runAIIntelligence(target, missionType, findings, recon, summary, memoryContext);
 
   const completedAt = new Date();
   console.log(
@@ -1368,6 +1647,45 @@ export async function launchNATTMission(
     } catch (vaultErr) {
       // Non-fatal — vault storage failure should not block mission return
       console.warn(`[NATT] ⚠️  Vault storage failed: ${String(vaultErr)}`);
+    }
+  }
+
+  // ── Persistent Memory: record scan for cross-session recall ────
+  try {
+    await recordScan({
+      missionId,
+      target: target.value,
+      domain: target.type === "url" ? new URL(target.value).hostname : target.value,
+      missionType,
+      ghostMode,
+      riskScore: summary.riskScore,
+      riskRating: summary.riskRating,
+      findingCount: summary.totalFindings,
+      criticalCount: summary.criticalCount,
+      highCount: summary.highCount,
+      techStack: summary.techStack,
+      topVector: summary.topVector,
+      scannedAt: completedAt.toISOString(),
+    });
+    if (summary.criticalCount > 0) {
+      await recordEpisode(
+        missionId,
+        `CRITICAL findings on ${target.value}: ${summary.criticalCount} critical, risk ${summary.riskScore}/100`,
+        "critical-finding"
+      );
+    }
+  } catch (memErr) {
+    console.warn(`[NATT] Memory recording failed: ${String(memErr)}`);
+  }
+
+  // ── SIEM Webhook Output ─────────────────────────────────
+  if (options?.webhookUrl) {
+    console.log(`[NATT] Posting findings to SIEM webhook: ${options.webhookUrl}`);
+    try {
+      await postToSIEM(options.webhookUrl, mission);
+      console.log("[NATT] SIEM webhook delivery successful");
+    } catch (siemErr) {
+      console.warn(`[NATT] SIEM webhook failed: ${String(siemErr)}`);
     }
   }
 
