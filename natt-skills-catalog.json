@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "natt-skills-catalog.json",
   "description": "NATT Ghost Agent — Baseline and Additional Skills Capabilities Catalog",
-  "version": "1.0.0",
-  "lastUpdated": "2026-02-22",
-  "source": "DevBot src/agents/natt-skills.ts + natt.ts",
+  "version": "1.1.0",
+  "lastUpdated": "2026-02-23",
+  "source": "DevBot src/agents/natt-skills.ts + natt.ts + natt-roe.ts + natt-vault.ts + natt-memory.ts + natt-report.ts + natt-report-cron.ts",
 
   "missionTypes": [
     "web-app",
@@ -93,36 +93,51 @@
           {
             "id": "secret-pattern-scan",
             "name": "80+ Secret Pattern Scan",
-            "function": "scanContentForSecrets(content, options)",
-            "description": "Scans any text content against 80+ compiled regex patterns for API keys, tokens, certificates, and credentials.",
-            "patternCategories": [
-              "aws-access-key", "aws-secret-key", "aws-session-token",
-              "gcp-service-account", "gcp-api-key",
-              "azure-connection-string", "azure-sas-token",
-              "github-pat", "github-oauth",
-              "stripe-secret", "stripe-publishable",
-              "twilio-account-sid", "twilio-auth-token",
-              "sendgrid-api-key",
-              "jwt-secret", "jwt-token",
-              "private-key-pem", "certificate-pem",
-              "slack-token", "slack-webhook",
-              "discord-token", "discord-webhook",
-              "mailgun-api-key", "mailchimp-api-key",
-              "heroku-api-key",
-              "npm-token", "pypi-token",
-              "database-connection-string",
-              "generic-password", "generic-api-key", "generic-token"
-            ],
-            "inputs": ["content string (any format)"],
+            "function": "scanContentForSecrets(content: string, filename?: string)",
+            "description": "Scans any text content against compiled regex patterns for API keys, tokens, certificates, and credentials. Optional filename param provides context for reporting.",
+            "patternCategories": {
+              "implemented": [
+                "aws-access-key", "aws-secret-key",
+                "gcp-service-account", "gcp-api-key",
+                "azure-connection-string", "azure-service-principal-secret",
+                "github-pat", "github-oauth", "github-actions-secret",
+                "stripe-secret", "stripe-test-key",
+                "twilio-auth-token",
+                "sendgrid-api-key",
+                "anthropic-api-key", "openai-api-key",
+                "jwt-token", "jwt-none-algorithm",
+                "private-key-pem-rsa", "private-key-pem-ec", "pgp-private-key", "ssh-private-key-openssh",
+                "slack-token", "slack-webhook",
+                "mongodb-connection-string", "postgresql-connection-string",
+                "generic-password", "generic-api-key", "generic-bearer-token"
+              ],
+              "planned": [
+                "aws-session-token", "azure-sas-token",
+                "stripe-publishable", "twilio-account-sid",
+                "jwt-secret", "certificate-pem",
+                "discord-token", "discord-webhook",
+                "mailgun-api-key", "mailchimp-api-key",
+                "heroku-api-key", "npm-token", "pypi-token"
+              ]
+            },
+            "inputs": ["content: string", "filename?: string"],
             "outputs": ["SecretScanResult[]", "severity", "patternName", "matchedValue (redacted)", "location"]
           },
           {
             "id": "shannon-entropy",
             "name": "Shannon Entropy Analysis",
-            "function": "shannonEntropy(str) + isLikelySecret(value)",
-            "description": "Calculates information entropy of a string. Values > 4.0 bits/char with length > 16 are flagged as likely secrets. Catches secrets that don't match known patterns.",
-            "inputs": ["string value"],
-            "outputs": ["entropy (float)", "isLikelySecret (boolean)"],
+            "function": "shannonEntropy(str: string): number",
+            "description": "Calculates information entropy of a string in bits per character.",
+            "inputs": ["str: string"],
+            "outputs": ["entropy: number (float)"]
+          },
+          {
+            "id": "likely-secret-detection",
+            "name": "Likely Secret Detection",
+            "function": "isLikelySecret(value: string): boolean",
+            "description": "Determines if a string value is likely a secret based on Shannon entropy > 4.0 bits/char and length > 16. Catches secrets that don't match known regex patterns.",
+            "inputs": ["value: string"],
+            "outputs": ["isLikelySecret: boolean"],
             "threshold": { "minEntropy": 4.0, "minLength": 16 }
           },
           {
@@ -388,9 +403,26 @@
           {
             "id": "natt-pptx-report",
             "name": "NATT PPTX Report Generator",
-            "description": "Generates a 10-slide PowerPoint mission brief from vault data: cover, exec summary, mission matrix, findings, top vulns, attack chain diagram, lateral movement map, timeline, remediation table, appendix.",
+            "description": "Generates a 10-slide PowerPoint mission brief from vault data with NATT dark theme, pivot tables, and charts.",
             "module": "natt-report.ts",
             "missionTypes": ["full-ghost"],
+            "slides": [
+              "1. Title / Cover",
+              "2. Executive Summary",
+              "3. Risk Distribution Chart (bar + pie)",
+              "4. Mission Timeline Table",
+              "5. Severity Pivot Table",
+              "6. Findings by Severity & Category (bar charts)",
+              "7. Critical & High Findings Detail",
+              "8. Attack Surface Analysis",
+              "9. Operator Activity Summary",
+              "10. Recommendations"
+            ],
+            "functions": [
+              "buildPowerPointReport(entries, missions, opts)",
+              "generateMissionReport(opts)",
+              "parseReportRequest(text)"
+            ],
             "outputs": ["path", "filename", "buffer (Slack-ready)", "slideCount", "missionCount", "findingCount", "dateRange"]
           }
         ]
@@ -453,9 +485,133 @@
           {
             "id": "vault-archive",
             "name": "Mission Vault Archive",
-            "description": "Persistent JSON storage of all missions in .natt/vault/. Queryable by date range, operator, severity, mission type.",
+            "description": "Persistent JSON storage of all missions in .natt/vault/. Queryable by date range, operator, severity, mission type, risk rating.",
             "module": "natt-vault.ts",
-            "queryMethods": ["listVaultMissionsInRange(from, to)", "getVaultMission(id)", "archiveMission(mission)"]
+            "queryMethods": [
+              "listVaultMissionsInRange(filter?: { from?, to?, operator?, missionType?, riskRating? })",
+              "listVaultMissions(filter?: { riskRating?, missionType?, operator?, since? })",
+              "getMission(missionId: string)",
+              "storeMission(mission, options?)",
+              "readArtifact(missionId, artifactName)",
+              "createReconsolidationPackage(missionId)",
+              "getVaultStats()"
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "persistent-memory",
+        "name": "Persistent Memory System",
+        "status": "available",
+        "module": "natt-memory.ts",
+        "ghostModes": ["passive"],
+        "description": "Three-tier persistent memory (procedural, semantic, episodic) stored at NATT_MEMORY_PATH (default .natt/memory.json). Enables cross-mission pattern recognition and operator context retention.",
+        "skills": [
+          {
+            "id": "procedural-memory",
+            "name": "Procedural Memory",
+            "description": "Stores learned techniques, successful attack paths, tool preferences. Auto-referenced during new missions for faster recon.",
+            "memoryType": "procedural"
+          },
+          {
+            "id": "semantic-memory",
+            "name": "Semantic Memory",
+            "description": "Tech stack fingerprints, known infrastructure patterns, org-specific knowledge. Persisted across sessions.",
+            "memoryType": "semantic"
+          },
+          {
+            "id": "episodic-memory",
+            "name": "Episodic Memory",
+            "description": "Timestamped mission logs with findings, operator actions, and outcomes. Used for trend analysis and regression tracking.",
+            "memoryType": "episodic"
+          },
+          {
+            "id": "memory-compaction",
+            "name": "Background Memory Compaction",
+            "description": "Periodic compaction of episodic memory to reduce storage and improve retrieval speed. Deduplicates findings, merges related entries."
+          }
+        ]
+      },
+
+      {
+        "id": "internal-recon-utilities",
+        "name": "Internal Recon Utilities",
+        "status": "available",
+        "module": "natt.ts",
+        "ghostModes": ["passive", "stealth", "active"],
+        "description": "Core recon functions used internally by mission execution. Not exported — invoked by launchNATTMission() based on mission type and ghost mode.",
+        "skills": [
+          {
+            "id": "probe-http",
+            "name": "HTTP Probe",
+            "function": "probeHTTP(url, options)",
+            "description": "Fetches target URL with configurable timeout, User-Agent, TLS settings. Foundation for all HTTP-based recon.",
+            "visibility": "internal"
+          },
+          {
+            "id": "parse-security-headers",
+            "name": "Security Headers Parser",
+            "function": "parseSecurityHeaders(headers)",
+            "description": "Checks 9 security headers: HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection, COOP, CORP.",
+            "visibility": "internal"
+          },
+          {
+            "id": "analyze-cookies",
+            "name": "Cookie Analyzer",
+            "function": "analyzeCookies(headers)",
+            "description": "Parses Set-Cookie headers for Secure, HttpOnly, SameSite flag presence and correctness.",
+            "visibility": "internal"
+          },
+          {
+            "id": "analyze-html",
+            "name": "HTML Analyzer",
+            "function": "analyzeHTML(html)",
+            "description": "Extracts forms, JS files, inline scripts, sensitive comments, insecure resource loads, meta tags.",
+            "visibility": "internal"
+          },
+          {
+            "id": "detect-tech-stack",
+            "name": "Technology Stack Detector",
+            "function": "detectTechStack(headers, html)",
+            "description": "18 fingerprint patterns: WordPress, Drupal, React, Vue, Angular, Next.js, Laravel, Django, Rails, ASP.NET, and more.",
+            "visibility": "internal"
+          },
+          {
+            "id": "enumerate-subdomains",
+            "name": "Subdomain Enumerator",
+            "function": "enumerateSubdomains(domain)",
+            "description": "DNS-based enumeration with 32 common subdomain prefixes.",
+            "visibility": "internal"
+          },
+          {
+            "id": "probe-tls-info",
+            "name": "TLS Info Probe",
+            "function": "probeTLSInfo(hostname, port)",
+            "description": "Extracts TLS protocol version, cipher suite, certificate expiry via socket connection.",
+            "visibility": "internal"
+          },
+          {
+            "id": "discover-sensitive-endpoints",
+            "name": "Sensitive Endpoint Discovery",
+            "function": "discoverSensitiveEndpoints(baseUrl)",
+            "description": "Probes 16 common paths (/admin, /api, /config, /debug, /swagger, etc.) for exposed surfaces.",
+            "visibility": "internal"
+          },
+          {
+            "id": "generate-dorks",
+            "name": "Google Dork Generator",
+            "function": "generateDorks(domain)",
+            "description": "Produces 12 Google dork query templates for the target domain.",
+            "visibility": "internal"
+          },
+          {
+            "id": "port-scan-safe",
+            "name": "Safe Port Scanner",
+            "function": "runPortScanSafe(target, ports)",
+            "description": "Invokes nmap via execFileSync with safe array arguments. ROE-gated.",
+            "visibility": "internal",
+            "ghostModes": ["active"]
           }
         ]
       },
@@ -541,7 +697,58 @@
 
   "findingSeverities": ["critical", "high", "medium", "low", "info"],
 
-  "roeStatuses": ["authorized", "unauthorized", "pending-approval", "expired"],
+  "roeStatuses": ["draft", "pending-approval", "approved", "active", "suspended", "expired", "revoked"],
+
+  "mcpServer": {
+    "name": "natt-mcp-knowledge",
+    "version": "1.0.0",
+    "module": "mcp-natt/src/index.ts",
+    "transport": "stdio",
+    "tools": [
+      {
+        "name": "get_roe_template",
+        "description": "Get ROE template for a mission type (scope, time window, forbidden techniques, evidence requirements)"
+      },
+      {
+        "name": "validate_roe_checklist",
+        "description": "Validate mission parameters against ROE constraints — returns pass/fail per check"
+      },
+      {
+        "name": "get_mission_guidance",
+        "description": "Get phase checklist and hard limits for a specific mission type"
+      },
+      {
+        "name": "identify_hash",
+        "description": "Identify hash type, crackability, hashcat/john modes from hash string"
+      },
+      {
+        "name": "get_password_attacks",
+        "description": "Get password attack techniques and defenses for a context"
+      },
+      {
+        "name": "get_auth_bypass_techniques",
+        "description": "Get auth bypass vector catalog filtered by context (jwt/oauth/session/all)"
+      },
+      {
+        "name": "get_secret_patterns",
+        "description": "Get all secret detection regex signatures with metadata"
+      },
+      {
+        "name": "scan_for_secrets",
+        "description": "Scan submitted content for exposed secrets against pattern library"
+      },
+      {
+        "name": "get_default_credentials",
+        "description": "Look up known default credentials for a given service name"
+      }
+    ],
+    "resources": [
+      "natt://roe-templates",
+      "natt://password-techniques",
+      "natt://auth-bypass",
+      "natt://mission-checklists"
+    ]
+  },
 
   "slackCommands": {
     "missions": [
