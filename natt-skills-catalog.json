@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "natt-skills-catalog.json",
   "description": "NATT Ghost Agent — Baseline and Additional Skills Capabilities Catalog",
-  "version": "1.1.0",
-  "lastUpdated": "2026-02-23",
-  "source": "DevBot src/agents/natt-skills.ts + natt.ts + natt-roe.ts + natt-vault.ts + natt-memory.ts + natt-report.ts + natt-report-cron.ts",
+  "version": "2.0.0",
+  "lastUpdated": "2026-02-24",
+  "source": "DevBot src/agents/natt-skills.ts + natt-skills-cloud.ts + natt-skills-cve.ts + natt-skills-osint.ts + natt-skills-nuclei.ts + natt-skills-llm.ts + natt-skills-mobile.ts + natt-skills-rag.ts + natt.ts + natt-roe.ts + natt-vault.ts + natt-memory.ts + natt-report.ts + natt-report-cron.ts",
 
   "missionTypes": [
     "web-app",
@@ -111,7 +111,7 @@
                 "mongodb-connection-string", "postgresql-connection-string",
                 "generic-password", "generic-api-key", "generic-bearer-token"
               ],
-              "planned": [
+              "recentlyImplemented": [
                 "aws-session-token", "azure-sas-token",
                 "stripe-publishable", "twilio-account-sid",
                 "jwt-secret", "certificate-pem",
@@ -617,45 +617,60 @@
       },
 
       {
-        "id": "future-expansion",
-        "name": "Future / Pluggable Skill Slots",
-        "status": "planned",
-        "description": "Capability slots reserved for future NATT skill modules. Implement as separate TypeScript modules under src/agents/natt-skills-*.ts.",
+        "id": "expansion-skills",
+        "name": "Expansion Skill Modules",
+        "status": "available",
+        "description": "Expanded NATT skill modules implemented as separate TypeScript files under src/agents/natt-skills-*.ts.",
         "skills": [
           {
             "id": "nuclei-integration",
             "name": "Nuclei Template Runner",
-            "status": "planned",
-            "description": "Run community Nuclei templates against authorized targets. Returns structured findings mapped to NATT finding schema.",
-            "missionTypes": ["web-app", "api-recon", "network-recon"]
+            "status": "available",
+            "module": "src/agents/natt-skills-nuclei.ts",
+            "function": "runNucleiScan(target, options?) | quickNucleiScan(target) | cveNucleiScan(target)",
+            "description": "Runs Nuclei vulnerability scanner templates via execFileSync. Parses JSON output and maps to NATTFinding schema. Requires nuclei binary on PATH.",
+            "missionTypes": ["web-app", "api-recon", "network-recon"],
+            "requires": "nuclei binary (github.com/projectdiscovery/nuclei)"
           },
           {
             "id": "shodan-lookup",
             "name": "Shodan / Censys Integration",
-            "status": "planned",
-            "description": "Query Shodan/Censys APIs for target org's internet-facing asset inventory. Requires API keys in vault.",
-            "missionTypes": ["osint", "network-recon"]
+            "status": "available",
+            "module": "src/agents/natt-skills-osint.ts",
+            "function": "osintLookup(ip) | shodanSearch(query, maxResults?)",
+            "description": "Queries Shodan and Censys APIs for host intelligence — open ports, services, banners, CVEs, ASN, geolocation. Generates NATTFindings for dangerous ports and known vulnerabilities.",
+            "missionTypes": ["osint", "network-recon"],
+            "requires": "SHODAN_API_KEY env var (optional: CENSYS_API_ID + CENSYS_API_SECRET)"
           },
           {
             "id": "llm-prompt-injection",
             "name": "LLM Prompt Injection Testing",
-            "status": "planned",
-            "description": "Probes AI-powered features (chatbots, summarizers) for prompt injection, data exfil, jailbreak vectors.",
-            "missionTypes": ["web-app", "api-recon"]
+            "status": "available",
+            "module": "src/agents/natt-skills-llm.ts",
+            "function": "runPromptInjectionScan(target, sendMessage, options?) | testInjection(test, sendMessage) | createCustomInjectionTest(...)",
+            "description": "12 built-in prompt injection tests across 6 categories: direct-injection, indirect-injection, data-exfiltration, jailbreak, tool-abuse, encoding-bypass. OWASP LLM01:2023 coverage.",
+            "missionTypes": ["web-app", "api-recon"],
+            "testCount": 12
           },
           {
             "id": "dependency-cve-correlation",
             "name": "Live CVE Correlation",
-            "status": "planned",
-            "description": "Queries NVD/OSV APIs for dependencies found in package.json/requirements.txt. Returns exploitability score + PoC links.",
-            "missionTypes": ["code-analysis"]
+            "status": "available",
+            "module": "src/agents/natt-skills-cve.ts",
+            "function": "correlateCVEs(manifestPath, content?) | scanProjectForCVEs(projectDir) | parseManifest(filename, content)",
+            "description": "Parses package.json, requirements.txt, go.mod, Cargo.toml manifests and queries OSV.dev API for known vulnerabilities. Returns CVEMatch objects with fix versions and CVSS scores.",
+            "missionTypes": ["code-analysis"],
+            "supportedManifests": ["package.json", "requirements.txt", "go.mod", "Cargo.toml", "Gemfile.lock"]
           },
           {
             "id": "cloud-misconfiguration",
             "name": "Cloud Misconfiguration Scan",
             "status": "available",
-            "description": "Cloudflare zone settings audit, DNS record analysis, SSL posture check, firewall rule review, cache config inspection. Uses CLOUDFLARE_API_TOKEN env var. See .claude/skills/cloudflare-infrastructure.md for token permissions and zone IDs.",
+            "module": "src/agents/natt-skills-cloud.ts",
+            "function": "auditCloudflareZone(zoneId) | auditAllZones() | auditDNSOnly(zoneId)",
+            "description": "Full Cloudflare zone security audit: SSL/TLS mode, minimum TLS version, HTTPS rewrites, security level, WAF status, DNS posture (SPF/DMARC/origin exposure), and firewall rules. Uses CLOUDFLARE_API_TOKEN env var.",
             "missionTypes": ["network-recon", "osint"],
+            "requires": "CLOUDFLARE_API_TOKEN + CF_ZONE_* env vars",
             "cloudflareCapabilities": [
               "zone-settings-audit",
               "dns-record-enumeration",
@@ -670,16 +685,20 @@
           {
             "id": "mobile-api-recon",
             "name": "Mobile App API Recon",
-            "status": "planned",
-            "description": "Extracts endpoints, secrets, and cert-pinning posture from APK/IPA strings and decompiled output.",
+            "status": "available",
+            "module": "src/agents/natt-skills-mobile.ts",
+            "function": "scanMobileContent(content, source?) | scanMobileAppDirectory(dir)",
+            "description": "Extracts API endpoints, hardcoded secrets, deep links, and config URLs from decompiled mobile app content. Supports APK strings, IPA bundles, React Native, Flutter, smali, and raw binary dumps.",
             "missionTypes": ["api-recon", "code-analysis"]
           },
           {
             "id": "rag-knowledge-base",
             "name": "RAG-Enhanced Mission Context",
-            "status": "planned",
-            "description": "Embeds prior mission findings into vector store for semantic retrieval during new assessments. Cross-mission pattern recognition.",
-            "module": "ai/rag.ts (existing)"
+            "status": "available",
+            "module": "src/agents/natt-skills-rag.ts",
+            "function": "indexMissionFindings(mission) | searchMissionHistory(query, limit?) | enrichFindingsWithHistory(findings) | indexSingleFinding(missionId, finding)",
+            "description": "Indexes mission findings into RAG vector store (via RAGEngine + OpenAI embeddings) for semantic retrieval. Enables cross-mission pattern detection, recurring vulnerability tracking, and contextual enrichment.",
+            "requires": "OPENAI_API_KEY env var + PostgreSQL with pgvector"
           }
         ]
       }
