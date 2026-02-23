@@ -16,6 +16,9 @@ const DEFAULT_LIMITS: Record<string, RateLimitConfig> = {
   "slack:mention": { maxRequests: 20, windowMs: 60_000 },
   "task:create": { maxRequests: 5, windowMs: 60_000 },
   "task:execute": { maxRequests: 3, windowMs: 300_000 },
+  "natt:mission": { maxRequests: 5, windowMs: 600_000 },   // 5 scans per 10 min
+  "natt:report": { maxRequests: 3, windowMs: 300_000 },     // 3 reports per 5 min
+  "pentest:scan": { maxRequests: 2, windowMs: 600_000 },    // 2 pentests per 10 min
 };
 
 /**

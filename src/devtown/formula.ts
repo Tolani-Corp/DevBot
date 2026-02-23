@@ -128,6 +128,7 @@ const ROLE_SYMBOLS: Record<AgentRole, string> = {
   devops: "Dv",
   "arb-runner": "Ar",
   media: "Md",
+  web3: "W3",
   general: "Gn",
 };
 

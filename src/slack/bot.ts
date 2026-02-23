@@ -25,6 +25,28 @@ import {
   registerInteractiveHandlers,
   getOnboardingBlocks,
 } from "./interactive";
+import { RateLimiter } from "@/middleware/rate-limiter";
+import Redis from "ioredis";
+
+// ─── RBAC: security-sensitive command roles ──────────────────
+const NATT_AUTHORIZED_USERS = new Set(
+  (process.env.NATT_AUTHORIZED_USERS ?? "").split(",").filter(Boolean)
+);
+const NATT_RBAC_ENABLED = process.env.NATT_RBAC_ENABLED !== "false"; // default ON
+
+function isNATTAuthorized(userId: string): boolean {
+  // When RBAC is off (dev/test), everyone is authorized
+  if (!NATT_RBAC_ENABLED) return true;
+  // When no users configured, allow all (backward-compat until list is populated)
+  if (NATT_AUTHORIZED_USERS.size === 0) return true;
+  return NATT_AUTHORIZED_USERS.has(userId);
+}
+
+// Rate limiter singleton (reuse Redis for rate limiting)
+const rateLimiterRedis = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
+  maxRetriesPerRequest: null,
+});
+const rateLimiter = new RateLimiter(rateLimiterRedis);
 
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -492,7 +514,7 @@ app.command("/pentest", async ({ command, ack, say, client }) => {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "*🔒 Debo Security Scanner*\n\nRun penetration tests and security scans on authorized targets.",,
+            text: "*🔒 Debo Security Scanner*\n\nRun penetration tests and security scans on authorized targets.",
           },
         },
         {
@@ -615,6 +637,31 @@ app.command("/pentest", async ({ command, ack, say, client }) => {
 //   /natt https://api.example.com/v1/users --mode=active --mission=api-recon
 app.command("/natt", async ({ command, say, ack, client }) => {
   await ack();
+
+  // ── RBAC gate ──────────────────────────────────────
+  if (!isNATTAuthorized(command.user_id)) {
+    await say({
+      text: "🔒 NATT access denied",
+      blocks: [{
+        type: "section",
+        text: { type: "mrkdwn", text: "*🔒 Access Denied*\nYou are not authorized to run NATT missions.\nContact a workspace admin to be added to `NATT_AUTHORIZED_USERS`." }
+      }],
+    });
+    return;
+  }
+
+  // ── Rate limiting ──────────────────────────────────
+  const rl = await rateLimiter.checkUser(command.user_id, "natt:mission");
+  if (!rl.allowed) {
+    await say({
+      text: "⏳ NATT rate limited",
+      blocks: [{
+        type: "section",
+        text: { type: "mrkdwn", text: `*⏳ Rate Limited*\nYou've exceeded the NATT mission limit. Try again in ${Math.ceil(rl.resetMs / 1000)}s.\nRemaining: ${rl.remaining}` }
+      }],
+    });
+    return;
+  }
 
   const parts = command.text.trim().split(/\s+/);
 
@@ -773,6 +820,20 @@ app.command("/natt", async ({ command, say, ack, client }) => {
 
 app.command("/natt-report", async ({ command, ack, say, client }) => {
   await ack();
+
+  // ── RBAC gate ──────────────────────────────────────
+  if (!isNATTAuthorized(command.user_id)) {
+    await say({ text: "🔒 Access denied. You are not authorized to generate NATT reports." });
+    return;
+  }
+
+  // ── Rate limiting ──────────────────────────────────
+  const rl = await rateLimiter.checkUser(command.user_id, "natt:report");
+  if (!rl.allowed) {
+    await say({ text: `⏳ Rate limited. Try again in ${Math.ceil(rl.resetMs / 1000)}s.` });
+    return;
+  }
+
   const text = command.text.trim();
 
   if (!text || text === "help") {

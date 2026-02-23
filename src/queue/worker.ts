@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { analyzeTask, generateCodeChanges, answerQuestion } from "@/ai/claude";
 import * as git from "@/git/operations";
 import { updateSlackThread } from "@/slack/messages";
+import { sanitizeAIOutput } from "@/middleware/sanitizer";
 import {
   buildBranchName,
   prefixCommitMessage,
@@ -196,11 +197,14 @@ export async function processTask(job: Job<TaskData>) {
       const changedFiles: string[] = [];
 
       for (const change of codeChanges.changes) {
-        await git.writeFile(targetRepo, change.file, change.newContent);
+        // Defense-in-depth: sanitize AI output before writing to disk
+        const sanitizedContent = sanitizeAIOutput(change.newContent);
+        await git.writeFile(targetRepo, change.file, sanitizedContent);
         changedFiles.push(change.file);
         await logAudit(taskId, "file_write", {
           file: change.file,
-          explanation: change.explanation
+          explanation: change.explanation,
+          wasSanitized: sanitizedContent !== change.newContent,
         });
       }
 

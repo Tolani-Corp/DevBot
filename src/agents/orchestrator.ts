@@ -880,10 +880,17 @@ Respond in JSON:
     );
     
     return verificationResult;
-  } catch {
-    trace?.observation("Verification threw error - passing task through");
-    // If verification itself fails, pass the task through
-    return { passed: true, errors: [], suggestions: [] };
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    trace?.observation(`Verification threw error — FAILING SAFE: ${errMsg}`);
+    // SECURITY: verification failure must NOT default to pass.
+    // A broken verifier silently passing all code through is worse
+    // than blocking a task that might have been fine.
+    return {
+      passed: false,
+      errors: [`Verification system error: ${errMsg}`],
+      suggestions: ["Re-run verification after fixing the verifier"],
+    };
   }
 }
 

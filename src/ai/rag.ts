@@ -3,6 +3,8 @@ import { documents, documentEmbeddings } from "../db/schema";
 import OpenAI from "openai";
 import { eq, sql, cosineDistance, desc, gt, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { chunkCode, detectLanguage } from "./chunking/ast-chunker";
+import path from "path";
 
 // Initialize OpenAI only if key is present to avoid crash on startup
 const openai = process.env.OPENAI_API_KEY
@@ -66,8 +68,18 @@ export class RAGEngine {
             lastHash: "hash-placeholder", // TODO: Implement proper hashing
         });
 
-        // 3. Chunk content
-        const chunks = this.chunkText(content, 1000); // ~1000 chars per chunk
+        // 3. Chunk content — use AST-aware chunker for code files, fallback to line-based
+        const ext = path.extname(filePath);
+        const language = detectLanguage(ext);
+        let chunks: string[];
+
+        if (language !== "text") {
+          // AST-aware chunking preserves function/class boundaries
+          const codeChunks = chunkCode(content, filePath);
+          chunks = codeChunks.map((c) => c.content);
+        } else {
+          chunks = this.chunkText(content, 1000);
+        }
 
         // 4. Generate embeddings in parallel (with concurrency limit)
         const BATCH_SIZE = 5; // Respect OpenAI rate limits

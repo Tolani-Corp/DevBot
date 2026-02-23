@@ -309,3 +309,29 @@ export const agentPerformanceHistory = pgTable("agent_performance_history", {
 
 export type AgentPerformance = typeof agentPerformanceHistory.$inferSelect;
 export type NewAgentPerformance = typeof agentPerformanceHistory.$inferInsert;
+
+// ─── Approval Requests ────────────────────────────────────────
+// Persists approval state across restarts (was previously in-memory only).
+
+export const approvalRequests = pgTable("approval_requests", {
+  taskId: text("task_id").primaryKey(),
+  requestedBy: text("requested_by").notNull().default("devbot"),
+  approvers: jsonb("approvers").$type<string[]>().notNull().default([]),
+  changes: jsonb("changes").$type<{
+    files: string[];
+    diff: string;
+    commitMessage: string;
+    prDescription: string;
+  }>().notNull(),
+  status: text("status").notNull().default("pending_review"), // pending_review | approved | rejected | auto_approved
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => ({
+  statusIdx: index("idx_approval_status").on(t.status),
+}));
+
+export type ApprovalRequestRow = typeof approvalRequests.$inferSelect;
+export type NewApprovalRequestRow = typeof approvalRequests.$inferInsert;
