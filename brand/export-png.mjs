@@ -27,11 +27,15 @@ try {
 
 const exports = [
   // [input svg,              output png,               width, height]
-  ["icon-512.svg",         "icon-512.png",              512,   512],
-  ["icon-512.svg",         "icon-1024.png",            1024,  1024],  // Discord nitro, App Store
+  // --- App icons (Slack requires 512–2000px square) ---
+  ["icon-512.svg",         "icon-512.png",              512,   512],   // Slack minimum
+  ["icon-512.svg",         "icon-1024.png",            1024,  1024],  // Slack recommended / Discord
+  ["icon-512.svg",         "icon-2000.png",            2000,  2000],  // Slack maximum / App Store
+  // --- Web icons ---
   ["apple-touch-icon.svg", "apple-touch-icon.png",     180,   180],
   ["favicon-32.svg",       "favicon-32.png",            32,    32],
   ["favicon-32.svg",       "favicon-16.png",            16,    16],
+  // --- Wordmark ---
   ["logo.svg",             "logo-dark-2x.png",          840,   200],
   ["logo-light.svg",       "logo-light-2x.png",         840,   200],
 ];
