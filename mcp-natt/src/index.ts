@@ -37,6 +37,15 @@
  *   analyze_jwt_config         — Analyze JWT configuration for weaknesses
  *   get_jwt_library_vulns      — Library-specific JWT vulnerability signatures
  *
+ * Tools (VPN Security):
+ *   get_vpn_protocol           — VPN protocol security analysis (WireGuard, OpenVPN, IKEv2, etc.)
+ *   get_vpn_leak               — VPN leak detection patterns (DNS, WebRTC, IPv6, kill switch)
+ *   get_vpn_defense            — VPN defense playbooks (protocol hardening, leak prevention)
+ *   get_vpn_provider           — VPN provider profiles with API integration info
+ *   analyze_vpn_config         — Analyze VPN configuration for weaknesses
+ *   analyze_ip_reputation      — Detect VPN/proxy/datacenter IPs for defense
+ *   build_operational_config   — Generate proxy-aware HTTP client configuration
+ *
  * Resources:
  *   natt://roe-templates           — All ROE templates
  *   natt://password-techniques     — Password attack knowledge base
@@ -55,6 +64,10 @@
  *   natt://jwt-attacks             — JWT attack pattern catalog
  *   natt://jwt-defenses            — JWT defense playbook library
  *   natt://jwt-library-vulns       — JWT library vulnerability signatures
+ *   natt://vpn-protocols           — VPN protocol security analysis
+ *   natt://vpn-leaks               — VPN leak detection patterns
+ *   natt://vpn-defenses            — VPN defense playbooks
+ *   natt://vpn-providers           — VPN provider profiles and API info
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -135,6 +148,40 @@ import {
   type JwtAttackPattern,
   type JwtDefensePlaybook,
 } from "./jwt-security.js";
+
+import {
+  VPN_PROTOCOL_ANALYSIS,
+  VPN_LEAK_PATTERNS,
+  VPN_DEFENSE_PLAYBOOKS,
+  VPN_PROVIDER_PROFILES,
+  analyzeVpnConfig,
+  analyzeIpReputation,
+  buildOperationalConfig,
+  getVpnProtocol,
+  getSecureProtocols,
+  getVpnLeak,
+  getVpnLeaksByType,
+  getVpnLeaksBySeverity,
+  getAutomatableVpnLeakTests,
+  getVpnDefense,
+  getVpnDefensesByCategory,
+  getVpnDefensesForLeak,
+  getVpnProvider,
+  getVpnProvidersWithApi,
+  getVpnProvidersByProtocol,
+  getNoLogVpnProviders,
+  getAllVpnTestCases,
+  getAutomatableVpnTests,
+  scoreVpnPosture,
+  type VpnProtocol,
+  type VpnLeakType,
+  type VpnDefenseCategory,
+  type VpnProvider,
+  type VpnSeverity,
+  type VpnLeakPattern,
+  type VpnDefensePlaybook as VpnDefensePlaybookType,
+  type VpnProviderProfile,
+} from "./vpn-security.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
@@ -700,6 +747,251 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           severity: {
             type: "string",
             description: "Filter by severity: critical, high, medium, low, info",
+          },
+        },
+        required: [],
+      },
+    },
+    // ─── VPN Security Tools ────────────────────────────────────────────────────
+    {
+      name: "get_vpn_protocol",
+      description:
+        "Get detailed security analysis for a VPN protocol. Covers: WireGuard, OpenVPN, IKEv2, IPSec, " +
+        "L2TP, PPTP, SSTP, Shadowsocks, V2Ray. Returns security rating, strengths, weaknesses, " +
+        "recommended ciphers, known vulnerabilities, and best practices.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          protocol: {
+            type: "string",
+            description: "Protocol to analyze: wireguard, openvpn, ikev2, ipsec, l2tp, pptp, sstp, shadowsocks, v2ray",
+          },
+          list_all: {
+            type: "boolean",
+            description: "List all protocols with security ratings",
+          },
+          secure_only: {
+            type: "boolean",
+            description: "List only protocols with rating >= 4/5",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_vpn_leak",
+      description:
+        "Get VPN leak detection patterns and test methodologies. Covers: DNS leaks, WebRTC leaks, " +
+        "IPv6 leaks, kill switch bypass, traffic correlation, split tunnel leaks, captive portal bypass, " +
+        "torrent leaks, timing attacks, browser fingerprinting. Returns detection methods, indicators, " +
+        "test steps, tools, and remediation.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Specific leak pattern ID (e.g., 'leak-dns-01')",
+          },
+          leak_type: {
+            type: "string",
+            description: "Filter by type: dns-leak, webrtc-leak, ipv6-leak, kill-switch-bypass, traffic-correlation, etc.",
+          },
+          severity: {
+            type: "string",
+            description: "Filter by severity: critical, high, medium, low, info",
+          },
+          automatable_only: {
+            type: "boolean",
+            description: "Return only leaks with automated test methods",
+          },
+          list_all: {
+            type: "boolean",
+            description: "List all leak patterns",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_vpn_defense",
+      description:
+        "Get VPN defense playbooks with implementation guidance. Covers: protocol hardening, " +
+        "leak prevention, traffic obfuscation, key management, authentication, network isolation, " +
+        "monitoring, failsafe configuration. Returns effectiveness rating, code examples in multiple " +
+        "languages, configuration guidance, common mistakes, and test cases.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Specific defense playbook ID (e.g., 'def-leak-01')",
+          },
+          category: {
+            type: "string",
+            description: "Filter by category: protocol-hardening, leak-prevention, traffic-obfuscation, key-management, authentication, network-isolation, monitoring, failsafe",
+          },
+          for_leak: {
+            type: "string",
+            description: "Get defenses that mitigate a specific leak type",
+          },
+          list_all: {
+            type: "boolean",
+            description: "List all defense playbooks",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_vpn_provider",
+      description:
+        "Get VPN provider profiles with API integration capabilities. Covers: Mullvad, NordVPN, " +
+        "ExpressVPN, ProtonVPN, Tailscale, Surfshark, PIA, custom/self-hosted. Returns API availability, " +
+        "supported protocols, features, logging policy, automation capabilities.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          provider: {
+            type: "string",
+            description: "Provider: mullvad, nordvpn, expressvpn, protonvpn, tailscale, surfshark, privateinternetaccess, custom",
+          },
+          with_api: {
+            type: "boolean",
+            description: "List only providers with API access",
+          },
+          supports_protocol: {
+            type: "string",
+            description: "Filter by supported protocol: wireguard, openvpn, ikev2",
+          },
+          no_logs: {
+            type: "boolean",
+            description: "List only no-logs providers",
+          },
+          list_all: {
+            type: "boolean",
+            description: "List all VPN providers",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "analyze_vpn_config",
+      description:
+        "Analyze a VPN configuration for security weaknesses. Checks protocol, cipher, " +
+        "TLS version, key exchange, kill switch, DNS leak protection, IPv6 settings, " +
+        "split tunneling, and logging. Returns severity-rated findings with recommendations.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          protocol: {
+            type: "string",
+            description: "VPN protocol: wireguard, openvpn, ikev2, ipsec, l2tp, pptp",
+          },
+          cipher: {
+            type: "string",
+            description: "Cipher suite in use (e.g., AES-256-GCM, CHACHA20-POLY1305)",
+          },
+          tls_version: {
+            type: "string",
+            description: "TLS version (e.g., 1.2, 1.3)",
+          },
+          key_exchange: {
+            type: "string",
+            description: "Key exchange algorithm (e.g., ECDHE, DH)",
+          },
+          kill_switch: {
+            type: "boolean",
+            description: "Is kill switch enabled?",
+          },
+          dns_leak_protection: {
+            type: "boolean",
+            description: "Is DNS leak protection enabled?",
+          },
+          ipv6_enabled: {
+            type: "boolean",
+            description: "Is IPv6 enabled on the connection?",
+          },
+          split_tunnel: {
+            type: "boolean",
+            description: "Is split tunneling enabled?",
+          },
+          logging_enabled: {
+            type: "boolean",
+            description: "Is verbose logging enabled?",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "analyze_ip_reputation",
+      description:
+        "Analyze an IP address for VPN/proxy/datacenter indicators. Used for platform defense " +
+        "to detect users hiding behind VPNs/proxies. Returns IP type classification, risk score, " +
+        "datacenter ASN detection, geo mismatch detection, and confidence level.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          ip: {
+            type: "string",
+            description: "IP address to analyze",
+          },
+          asn: {
+            type: "number",
+            description: "Autonomous System Number (if known)",
+          },
+          asn_org: {
+            type: "string",
+            description: "ASN organization name (if known)",
+          },
+          reverse_dns: {
+            type: "string",
+            description: "Reverse DNS hostname (if known)",
+          },
+          geo_country: {
+            type: "string",
+            description: "GeoIP country (if known)",
+          },
+          user_claimed_country: {
+            type: "string",
+            description: "Country the user claims to be in",
+          },
+        },
+        required: ["ip"],
+      },
+    },
+    {
+      name: "build_operational_config",
+      description:
+        "Generate operational configuration for VPN-compatible HTTP clients. Creates proxy settings, " +
+        "DNS-over-HTTPS configuration, timeout tuning for high-latency VPN connections, and network settings.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          vpn_provider: {
+            type: "string",
+            description: "VPN provider for provider-specific optimizations",
+          },
+          proxy_url: {
+            type: "string",
+            description: "Proxy URL (http://..., socks5://...)",
+          },
+          use_doh: {
+            type: "boolean",
+            description: "Enable DNS-over-HTTPS (default: true)",
+          },
+          doh_provider: {
+            type: "string",
+            description: "DoH provider URL (default: cloudflare)",
+          },
+          force_ipv4: {
+            type: "boolean",
+            description: "Force IPv4-only connections (default: true)",
+          },
+          high_latency_mode: {
+            type: "boolean",
+            description: "Enable extended timeouts for high-latency VPN connections",
           },
         },
         required: [],
@@ -1475,6 +1767,234 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text: `# JWT Library Vulnerabilities\n\n${text}` }] };
       }
 
+      // ─── VPN Security Tool Handlers ──────────────────────────────────────────
+
+      case "get_vpn_protocol": {
+        const listAll = args?.["list_all"] === true;
+        const secureOnly = args?.["secure_only"] === true;
+        
+        if (listAll || secureOnly) {
+          const protocols = secureOnly ? getSecureProtocols() : Object.values(VPN_PROTOCOL_ANALYSIS);
+          const summary = protocols.map((p) =>
+            `- **${p.protocol}** [Rating: ${"★".repeat(p.securityRating)}${"☆".repeat(5 - p.securityRating)}] ${p.name} — ${p.auditStatus === "audited" ? "✅ Audited" : p.auditStatus === "partial" ? "⚠️ Partial Audit" : "❌ Unaudited"}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# VPN Protocols (${protocols.length})\n\n${summary}` }] };
+        }
+
+        const protocol = args?.["protocol"] as VpnProtocol | undefined;
+        if (!protocol) {
+          return { content: [{ type: "text", text: "Specify a protocol or use list_all=true. Options: wireguard, openvpn, ikev2, ipsec, l2tp, pptp, sstp, shadowsocks, v2ray" }] };
+        }
+
+        const info = getVpnProtocol(protocol);
+        if (!info) {
+          return { content: [{ type: "text", text: `Protocol "${protocol}" not found.` }] };
+        }
+
+        const text = formatVpnProtocol(info);
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_vpn_leak": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = VPN_LEAK_PATTERNS.map((l: VpnLeakPattern) =>
+            `- **${l.id}** [${l.severity.toUpperCase()} CVSS:${l.cvss}] ${l.name} (${l.type}) ${l.automatable ? "⚙️" : "🔧"}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# VPN Leak Patterns (${VPN_LEAK_PATTERNS.length})\n\n${summary}` }] };
+        }
+
+        const leakId = args?.["id"] as string | undefined;
+        if (leakId) {
+          const leak = getVpnLeak(leakId);
+          if (!leak) return { content: [{ type: "text", text: `Leak "${leakId}" not found.` }] };
+          return { content: [{ type: "text", text: formatVpnLeak(leak) }] };
+        }
+
+        const leakType = args?.["leak_type"] as VpnLeakType | undefined;
+        const leakSeverity = args?.["severity"] as VpnSeverity | undefined;
+        const automatableOnly = args?.["automatable_only"] === true;
+
+        let leaks: VpnLeakPattern[] = [...VPN_LEAK_PATTERNS];
+        if (automatableOnly) leaks = getAutomatableVpnLeakTests();
+        if (leakType) leaks = leaks.filter((l: VpnLeakPattern) => l.type === leakType);
+        if (leakSeverity) leaks = leaks.filter((l: VpnLeakPattern) => l.severity === leakSeverity);
+
+        if (leaks.length === 0) return { content: [{ type: "text", text: "No VPN leaks match the filters." }] };
+
+        const text = leaks.map(formatVpnLeak).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_vpn_defense": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = VPN_DEFENSE_PLAYBOOKS.map((d: VpnDefensePlaybookType) =>
+            `- **${d.id}** [Effectiveness: ${d.effectiveness}/10] ${d.name} (${d.category}) — mitigates: ${d.mitigatesLeaks.join(", ") || "N/A"}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# VPN Defense Playbooks (${VPN_DEFENSE_PLAYBOOKS.length})\n\n${summary}` }] };
+        }
+
+        const defId = args?.["id"] as string | undefined;
+        if (defId) {
+          const defense = getVpnDefense(defId);
+          if (!defense) return { content: [{ type: "text", text: `Defense "${defId}" not found.` }] };
+          return { content: [{ type: "text", text: formatVpnDefense(defense) }] };
+        }
+
+        const category = args?.["category"] as VpnDefenseCategory | undefined;
+        const forLeak = args?.["for_leak"] as VpnLeakType | undefined;
+
+        let defenses: VpnDefensePlaybookType[] = [...VPN_DEFENSE_PLAYBOOKS];
+        if (category) defenses = getVpnDefensesByCategory(category);
+        if (forLeak) defenses = getVpnDefensesForLeak(forLeak);
+
+        if (defenses.length === 0) return { content: [{ type: "text", text: "No VPN defenses match." }] };
+
+        const text = defenses.map(formatVpnDefense).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_vpn_provider": {
+        const listAll = args?.["list_all"] === true;
+        const withApi = args?.["with_api"] === true;
+        const noLogs = args?.["no_logs"] === true;
+        const supportsProtocol = args?.["supports_protocol"] as VpnProtocol | undefined;
+
+        if (listAll || withApi || noLogs || supportsProtocol) {
+          let providers: VpnProviderProfile[] = [...VPN_PROVIDER_PROFILES];
+          if (withApi) providers = getVpnProvidersWithApi();
+          if (noLogs) providers = getNoLogVpnProviders();
+          if (supportsProtocol) providers = getVpnProvidersByProtocol(supportsProtocol);
+
+          const summary = providers.map((p) =>
+            `- **${p.provider}** ${p.name} — ${p.apiAvailable ? "✅ API" : "❌ No API"} | ${p.loggingPolicy} | Protocols: ${p.protocols.join(", ")}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# VPN Providers (${providers.length})\n\n${summary}` }] };
+        }
+
+        const provider = args?.["provider"] as VpnProvider | undefined;
+        if (!provider) {
+          return { content: [{ type: "text", text: "Specify a provider or use list_all=true. Options: mullvad, nordvpn, expressvpn, protonvpn, tailscale, surfshark, privateinternetaccess, custom" }] };
+        }
+
+        const profile = getVpnProvider(provider);
+        if (!profile) {
+          return { content: [{ type: "text", text: `Provider "${provider}" not found.` }] };
+        }
+
+        const text = formatVpnProvider(profile);
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "analyze_vpn_config": {
+        const weaknesses = analyzeVpnConfig({
+          protocol: args?.["protocol"] as VpnProtocol | undefined,
+          cipher: args?.["cipher"] as string | undefined,
+          tlsVersion: args?.["tls_version"] as string | undefined,
+          keyExchange: args?.["key_exchange"] as string | undefined,
+          killSwitch: args?.["kill_switch"] as boolean | undefined,
+          dnsLeakProtection: args?.["dns_leak_protection"] as boolean | undefined,
+          ipv6Enabled: args?.["ipv6_enabled"] as boolean | undefined,
+          splitTunnel: args?.["split_tunnel"] as boolean | undefined,
+          loggingEnabled: args?.["logging_enabled"] as boolean | undefined,
+        });
+
+        if (weaknesses.length === 0) {
+          return { content: [{ type: "text", text: "# VPN Configuration Analysis\n\n✅ No weaknesses detected in the provided configuration." }] };
+        }
+
+        const text = [
+          `# VPN Configuration Analysis`,
+          ``,
+          `Found **${weaknesses.length}** weakness(es):`,
+          ``,
+          ...weaknesses.map((w) => [
+            `## [${w.severity.toUpperCase()}] ${w.issue}`,
+            `**Config:** ${w.configKey}`,
+            `**CWE:** ${w.cwe}`,
+            ``,
+            `**Recommendation:** ${w.recommendation}`,
+          ].join("\n")),
+        ].join("\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "analyze_ip_reputation": {
+        const ip = args?.["ip"] as string;
+        if (!ip) {
+          return { content: [{ type: "text", text: "IP address is required." }], isError: true };
+        }
+
+        const result = analyzeIpReputation(
+          ip,
+          args?.["asn"] as number | undefined,
+          args?.["asn_org"] as string | undefined,
+          args?.["reverse_dns"] as string | undefined,
+          args?.["geo_country"] as string | undefined,
+          args?.["user_claimed_country"] as string | undefined
+        );
+
+        const text = [
+          `# IP Reputation Analysis`,
+          `**IP:** ${ip}`,
+          `**Type:** ${result.ipType}`,
+          `**Confidence:** ${result.confidence}%`,
+          `**Risk Score:** ${result.riskScore}/100`,
+          ``,
+          `## Detection Flags`,
+          `- Datacenter ASN: ${result.datacenterAsn ? "✅ Yes" : "❌ No"}`,
+          `- Known VPN Exit: ${result.knownVpnExit ? "✅ Yes" : "❌ No"}`,
+          `- Tor Exit: ${result.torExit ? "✅ Yes" : "❌ No"}`,
+          `- Proxy Detected: ${result.proxyDetected ? "✅ Yes" : "❌ No"}`,
+          `- Geo Mismatch: ${result.geoMismatch ? "⚠️ Yes" : "❌ No"}`,
+          `- Residential Proxy: ${result.residentialProxy ? "⚠️ Yes" : "❌ No"}`,
+          ``,
+          `## Indicators`,
+          result.indicators.length > 0 ? result.indicators.map((i) => `- ${i}`).join("\n") : "No specific indicators detected.",
+        ].join("\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "build_operational_config": {
+        const config = buildOperationalConfig({
+          vpnProvider: args?.["vpn_provider"] as VpnProvider | undefined,
+          proxyUrl: args?.["proxy_url"] as string | undefined,
+          useDoh: args?.["use_doh"] as boolean | undefined,
+          dohProvider: args?.["doh_provider"] as string | undefined,
+          forceIpv4: args?.["force_ipv4"] as boolean | undefined,
+          highLatencyMode: args?.["high_latency_mode"] as boolean | undefined,
+        });
+
+        const text = [
+          `# Operational Configuration`,
+          ``,
+          `## Proxy Settings`,
+          `\`\`\`json`,
+          JSON.stringify(config.proxySettings, null, 2),
+          `\`\`\``,
+          ``,
+          `## DNS Settings`,
+          `\`\`\`json`,
+          JSON.stringify(config.dnsSettings, null, 2),
+          `\`\`\``,
+          ``,
+          `## Timeout Settings`,
+          `\`\`\`json`,
+          JSON.stringify(config.timeoutSettings, null, 2),
+          `\`\`\``,
+          ``,
+          `## Network Settings`,
+          `\`\`\`json`,
+          JSON.stringify(config.networkSettings, null, 2),
+          `\`\`\``,
+        ].join("\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
       default:
         return {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -1597,6 +2117,30 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "Known CVEs and vulnerabilities in popular JWT libraries across languages",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://vpn-protocols",
+      name: "VPN Protocol Analysis",
+      description: "Security analysis of VPN protocols (WireGuard, OpenVPN, IKEv2, etc.)",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://vpn-leaks",
+      name: "VPN Leak Patterns",
+      description: "VPN leak detection patterns (DNS, WebRTC, IPv6, kill switch bypass)",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://vpn-defenses",
+      name: "VPN Defense Playbooks",
+      description: "VPN defense implementations with code examples and test cases",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://vpn-providers",
+      name: "VPN Provider Profiles",
+      description: "VPN provider profiles with API integration capabilities",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -1671,6 +2215,22 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     case "natt://jwt-library-vulns":
       return {
         contents: [{ uri, mimeType: "application/json", text: JSON.stringify(JWT_LIBRARY_VULNS, null, 2) }],
+      };
+    case "natt://vpn-protocols":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VPN_PROTOCOL_ANALYSIS, null, 2) }],
+      };
+    case "natt://vpn-leaks":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VPN_LEAK_PATTERNS, null, 2) }],
+      };
+    case "natt://vpn-defenses":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VPN_DEFENSE_PLAYBOOKS, null, 2) }],
+      };
+    case "natt://vpn-providers":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VPN_PROVIDER_PROFILES, null, 2) }],
       };
     default:
       throw new Error(`Unknown resource: ${uri}`);
@@ -2005,6 +2565,136 @@ function scanContentLocal(content: string, filename: string): SecretResult[] {
     }
   }
   return results;
+}
+
+// VPN format helpers
+function formatVpnProtocol(p: { protocol: VpnProtocol; name: string; securityRating: 1 | 2 | 3 | 4 | 5; strengths: readonly string[]; weaknesses: readonly string[]; recommendedCiphers: readonly string[]; deprecatedCiphers: readonly string[]; portOptions: readonly number[]; obfuscationSupport: boolean; auditStatus: "audited" | "partial" | "none"; knownVulnerabilities: readonly string[]; bestPractices: readonly string[] }): string {
+  const stars = "★".repeat(p.securityRating) + "☆".repeat(5 - p.securityRating);
+  const lines = [
+    `# ${p.name}`,
+    `**Protocol:** ${p.protocol}`,
+    `**Security Rating:** ${stars} (${p.securityRating}/5)`,
+    `**Audit Status:** ${p.auditStatus === "audited" ? "✅ Audited" : p.auditStatus === "partial" ? "⚠️ Partial Audit" : "❌ Unaudited"}`,
+    `**Obfuscation:** ${p.obfuscationSupport ? "✅ Supported" : "❌ Not Supported"}`,
+    `**Ports:** ${p.portOptions.join(", ")}`,
+    ``,
+    `## Strengths`,
+    p.strengths.map((s) => `- ✅ ${s}`).join("\n"),
+    ``,
+    `## Weaknesses`,
+    p.weaknesses.map((w) => `- ⚠️ ${w}`).join("\n"),
+  ];
+  if (p.recommendedCiphers.length > 0) {
+    lines.push(``, `## Recommended Ciphers`, p.recommendedCiphers.map((c) => `- \`${c}\``).join("\n"));
+  }
+  if (p.deprecatedCiphers.length > 0) {
+    lines.push(``, `## Deprecated Ciphers (DO NOT USE)`, p.deprecatedCiphers.map((c) => `- ❌ \`${c}\``).join("\n"));
+  }
+  if (p.knownVulnerabilities.length > 0) {
+    lines.push(``, `## Known Vulnerabilities`, p.knownVulnerabilities.map((v) => `- 🔓 ${v}`).join("\n"));
+  }
+  lines.push(``, `## Best Practices`, p.bestPractices.map((b) => `- 🛡 ${b}`).join("\n"));
+  return lines.join("\n");
+}
+
+function formatVpnLeak(l: VpnLeakPattern): string {
+  const lines = [
+    `# [${l.severity.toUpperCase()} CVSS:${l.cvss}] ${l.name}`,
+    `**ID:** ${l.id}`,
+    `**Leak Type:** ${l.type}`,
+    `**CWE:** ${l.cwe}`,
+    `**Automatable:** ${l.automatable ? "Yes ⚙️" : "Manual 🔧"}`,
+    ``,
+    l.description,
+    ``,
+    `## Detection Methods`,
+    l.detectionMethods.map((d) => `- 🔍 ${d}`).join("\n"),
+    ``,
+    `## Indicators`,
+    l.indicators.map((i) => `- 🎯 ${i}`).join("\n"),
+    ``,
+    `## Test Steps`,
+    l.testSteps.map((s) => s).join("\n"),
+    ``,
+    `## Tools`,
+    l.tools.map((t) => `- ${t}`).join("\n"),
+    ``,
+    `## Remediation`,
+    l.remediation.map((r) => `- ✅ ${r}`).join("\n"),
+  ];
+  if (l.references.length > 0) {
+    lines.push(``, `## References`, l.references.map((r) => `- ${r}`).join("\n"));
+  }
+  return lines.join("\n");
+}
+
+function formatVpnDefense(d: VpnDefensePlaybookType): string {
+  const lines = [
+    `# ${d.name}`,
+    `**ID:** ${d.id}`,
+    `**Category:** ${d.category}`,
+    `**Effectiveness:** ${d.effectiveness}/10`,
+    `**Mitigates:** ${d.mitigatesLeaks.length > 0 ? d.mitigatesLeaks.join(", ") : "N/A"}`,
+    ``,
+    d.description,
+    ``,
+    `## Principle`,
+    d.implementation.principle,
+  ];
+  if (d.implementation.codeExamples.length > 0) {
+    lines.push(``, `## Code Examples`);
+    for (const ex of d.implementation.codeExamples) {
+      lines.push(``, `### ${ex.language}`, "```", ex.code, "```", ex.notes);
+    }
+  }
+  if (d.implementation.configuration.length > 0) {
+    lines.push(``, `## Configuration`, d.implementation.configuration.map((c) => `- ${c}`).join("\n"));
+  }
+  if (d.implementation.commonMistakes.length > 0) {
+    lines.push(``, `## Common Mistakes`, d.implementation.commonMistakes.map((m) => `- ❌ ${m}`).join("\n"));
+  }
+  if (d.testCases.length > 0) {
+    lines.push(``, `## Test Cases`);
+    for (const tc of d.testCases) {
+      lines.push(
+        ``, `### ${tc.name} ${tc.automatable ? "⚙️" : "🔧"}`,
+        tc.description,
+        `**Steps:**`, tc.steps.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+        `**Expected:** ${tc.expected}`,
+      );
+    }
+  }
+  lines.push(``, `## References`, d.references.map((r) => `- ${r}`).join("\n"));
+  return lines.join("\n");
+}
+
+function formatVpnProvider(p: VpnProviderProfile): string {
+  const lines = [
+    `# ${p.name}`,
+    `**Provider:** ${p.provider}`,
+    `**API Available:** ${p.apiAvailable ? "✅ Yes" : "❌ No"}`,
+    p.apiEndpoint ? `**API Endpoint:** ${p.apiEndpoint}` : "",
+    `**Logging Policy:** ${p.loggingPolicy}`,
+    `**Jurisdictions:** ${p.jurisdictions.join(", ")}`,
+    ``,
+    `## Protocols`,
+    p.protocols.map((pr) => `- ${pr}`).join("\n"),
+    ``,
+    `## Features`,
+    p.features.map((f) => `- ✅ ${f}`).join("\n"),
+    ``,
+    `## Capabilities`,
+    `- Kill Switch: ${p.killSwitchSupport ? "✅" : "❌"}`,
+    `- Multi-hop: ${p.multihopSupport ? "✅" : "❌"}`,
+    `- Port Forwarding: ${p.portForwardingSupport ? "✅" : "❌"}`,
+  ].filter(Boolean);
+  if (p.integrationNotes.length > 0) {
+    lines.push(``, `## Integration Notes`, p.integrationNotes.map((n) => `- ${n}`).join("\n"));
+  }
+  if (p.automationCapabilities.length > 0) {
+    lines.push(``, `## Automation Capabilities`, p.automationCapabilities.map((c) => `- ⚙️ ${c}`).join("\n"));
+  }
+  return lines.join("\n");
 }
 
 const DEFAULT_CREDS = [

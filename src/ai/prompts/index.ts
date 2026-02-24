@@ -276,6 +276,19 @@ You are a world-class JWT security specialist. You understand every attack vecto
 - Posture Scoring: quantitative JWT security posture assessment based on attack surface coverage, defense effectiveness, and library safety
 Test methodology: automated JWT attack simulation, algorithm confusion testing, claim tampering, library CVE verification, defense bypass scoring`,
 
+  VPN_EXPERT: `VPN SECURITY & OPERATIONAL EXPERTISE:
+You are an expert in VPN security, operational compatibility, and detection/evasion:
+- Protocol Analysis: WireGuard (★★★★★, audited, ChaCha20-Poly1305), OpenVPN (★★★★☆, tls-crypt, AES-256-GCM), IKEv2/IPSec (★★★★☆, MOBIKE, EAP-TLS), PPTP (★☆☆☆☆, BROKEN - never use), L2TP (★★★☆☆, NSA concerns)
+- Leak Detection: DNS leaks (ISP resolver exposure), WebRTC leaks (RTCPeerConnection IP disclosure), IPv6 leaks (dual-stack bypass), kill switch bypass (traffic on VPN drop), traffic correlation (timing analysis)
+- Leak Prevention: OS firewall rules (iptables -A OUTPUT ! -o tun0 -j DROP), WebRTC disable (media.peerconnection.enabled=false), IPv6 disable (sysctl net.ipv6.conf.all.disable_ipv6=1), DNS-over-HTTPS
+- Protocol Hardening: cipher suites (AES-256-GCM, ChaCha20-Poly1305), TLS 1.2+ enforcement, ECDHE key exchange, tls-crypt control channel encryption, certificate pinning
+- Key Management: unique keys per device, 90-day rotation, CRL/OCSP for revocation, HSM for high-security, EasyRSA PKI management
+- Traffic Obfuscation: stunnel (TLS wrapper), wstunnel (WebSocket), obfs4, V2Ray/VMess, domain fronting, CDN routing
+- Provider Integration: Mullvad (API, WG key upload, anonymous accounts), NordVPN (OAuth2 API, NordLynx), ProtonVPN (Secure Core, Stealth), Tailscale (mesh VPN, ACLs, zero-trust)
+- VPN-Aware Defense: IP reputation (datacenter ASN detection, geo-mismatch, Tor exit detection), residential proxy detection, fingerprint persistence through VPN
+- Operational Config: proxy-aware HTTP clients, DNS-over-HTTPS, timeout tuning for high-latency VPN, IPv4 forcing, keep-alive intervals
+Test methodology: leak tests (DNS, WebRTC, IPv6, kill switch), protocol analyzer (DPI detection), posture scoring`,
+
   MEDIA_DEFENSE: `MEDIA PLATFORM DEFENSE EXPERTISE:
 You are an expert in protecting media platforms from content scraping and unauthorized downloading:
 - URL Signing: HMAC-SHA256 signed URLs with userId, contentId, ipHash, expiry, nonce; CDN edge validation
@@ -459,7 +472,7 @@ Respond in JSON:
   GHOST_MISSION: {
     identity: "GHOST_CORE" as TraitKey,
     traits: [
-      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "JWT_EXPERT", "SCRAPER_INTEL", "MEDIA_DEFENSE", "ROI",
+      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "JWT_EXPERT", "VPN_EXPERT", "SCRAPER_INTEL", "MEDIA_DEFENSE", "ROI",
     ] as TraitKey[],
     output: "JSON_STRICT" as TraitKey,
     extra: `Plan and execute a NATT security assessment.
@@ -640,6 +653,50 @@ Respond in JSON:
 }`,
   },
 
+  VPN_SECURITY_AUDIT: {
+    identity: "GHOST_CORE" as TraitKey,
+    traits: [
+      "ROLE_GHOST", "VPN_EXPERT", "VULN_TAXONOMY", "PENTEST_EXPERT", "SECURITY",
+    ] as TraitKey[],
+    output: "JSON_STRICT" as TraitKey,
+    extra: `Audit VPN configuration and test for leaks across all vectors.
+Analyze protocol security, test for DNS/WebRTC/IPv6/kill switch leaks, evaluate defense posture.
+Respond in JSON:
+{
+  "target": "...",
+  "protocolAnalysis": {
+    "protocol": "...",
+    "rating": 0,
+    "cipherSuite": "...",
+    "weaknesses": [{"type": "...", "severity": "...", "description": "..."}]
+  },
+  "leakTests": [
+    {"type": "dns-leak|webrtc-leak|ipv6-leak|kill-switch-bypass", "detected": false, "evidence": "..."}
+  ],
+  "defensePosture": {"score": 0-100, "gaps": ["..."], "strengths": ["..."]},
+  "operationalConfig": {"proxy": "...", "dns": "...", "timeouts": {}},
+  "recommendations": ["..."]
+}`,
+  },
+
+  VPN_OPERATIONAL_CONFIG: {
+    identity: "DEBO_CORE" as TraitKey,
+    traits: [
+      "VPN_EXPERT", "SECURITY", "TYPESCRIPT",
+    ] as TraitKey[],
+    output: "JSON_STRICT" as TraitKey,
+    extra: `Configure agents and HTTP clients for VPN-compatible operation.
+Generate proxy-aware configuration, DNS-over-HTTPS setup, timeout tuning for high-latency connections.
+Respond in JSON:
+{
+  "proxySettings": {"httpProxy": "...", "socksProxy": "...", "noProxy": ["..."]},
+  "dnsSettings": {"useDoh": true, "dohProvider": "...", "fallbackDns": ["..."]},
+  "timeoutSettings": {"connectTimeout": 10000, "readTimeout": 30000, "retryAttempts": 3},
+  "networkSettings": {"forceIpv4": true, "keepAliveInterval": 30000},
+  "codeChanges": [{"file": "...", "change": "..."}]
+}`,
+  },
+
   SCRAPER_DEFENSE: {
     identity: "DEBO_CORE" as TraitKey,
     traits: [
@@ -724,6 +781,11 @@ export function detectTraits(description: string): TraitKey[] {
   // Media platform defense signals
   if (/media.?security|content.?defense|platform.?protection|signed.?url|url.?signing|anti.?debug|forensic.?watermark|content.?integrity|takedown|dmca/i.test(d)) {
     traits.push("MEDIA_DEFENSE");
+  }
+
+  // VPN security signals
+  if (/vpn|wireguard|openvpn|ikev2|ipsec|l2tp|pptp|sstp|shadowsocks|v2ray|dns.?leak|webrtc.?leak|ipv6.?leak|kill.?switch|traffic.?obfusc|mullvad|nordvpn|expressvpn|protonvpn|tailscale|surfshark|ip.?reputation|proxy.?aware|socks.?proxy|doh|dns.?over.?https/i.test(d)) {
+    traits.push("VPN_EXPERT", "SECURITY");
   }
 
   // Frontend signals
