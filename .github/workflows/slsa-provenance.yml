@@ -79,7 +79,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
@@ -147,9 +147,10 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-  # npm Publishing with provenance
+  # npm Publishing with provenance (requires NPM_TOKEN secret)
   npm:
     needs: [build, provenance]
+    if: ${{ secrets.NPM_TOKEN != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -184,7 +185,7 @@ jobs:
   release:
     needs: [build, provenance, docker]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: always() && github.event_name == 'release' && needs.build.result == 'success'
     permissions:
       contents: write
     
