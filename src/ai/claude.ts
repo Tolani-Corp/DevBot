@@ -1,12 +1,50 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ragEngine } from "./rag";
 import { costTracker } from "@/services/cost-service";
+import { getModelForWorkspace, getAnthropicClientForWorkspace, type AnthropicModelId } from "@/services/tier-manager";
 
-const client = new Anthropic({
+// Shared fallback client — used when no workspaceId is provided (system tasks).
+const _fallbackClient = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+/** Fallback model used when no workspaceId is available (e.g. system tasks). */
+const DEFAULT_MODEL: AnthropicModelId =
+  (process.env.ANTHROPIC_MODEL as AnthropicModelId | undefined) ?? "claude-3-5-haiku-20241022";
+
+/**
+ * Resolve the Anthropic client + model for a request.
+ *
+ * - If workspaceId is provided: enforces tier-based model access and uses
+ *   the workspace's BYOK key (Enterprise) or the shared platform key.
+ * - If no workspaceId: uses the fallback shared client and DEFAULT_MODEL.
+ */
+async function resolveClientAndModel(
+  workspaceId?: string,
+  preferredModel?: string,
+): Promise<{ client: Anthropic; model: AnthropicModelId; isByok: boolean }> {
+  if (!workspaceId) {
+    return {
+      client: _fallbackClient,
+      model: (preferredModel as AnthropicModelId | undefined) ?? DEFAULT_MODEL,
+      isByok: false,
+    };
+  }
+
+  const [{ client, isByok }, { model, allowed, tier }] = await Promise.all([
+    getAnthropicClientForWorkspace(workspaceId),
+    getModelForWorkspace(workspaceId, preferredModel),
+  ]);
+
+  if (preferredModel && !allowed) {
+    console.warn(
+      `[claude] Model "${preferredModel}" not allowed on tier "${tier}". ` +
+      `Falling back to "${model}". Upgrade to Pro or Enterprise for model selection.`
+    );
+  }
+
+  return { client, model, isByok };
+}
 
 export type Message = {
   role: "user" | "assistant";
@@ -21,6 +59,8 @@ export async function analyzeTask(
     filesContents: Record<string, string>;
     userId?: string;
     workspaceId?: string;
+    /** Pro/Enterprise only: request a specific Anthropic model. */
+    preferredModel?: string;
   }
 ): Promise<{
   taskType: "bug_fix" | "feature" | "question" | "review" | "refactor";
@@ -99,8 +139,9 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
     { role: "user", content: userPrompt },
   ];
 
+  const { client, model } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
   const response = await client.messages.create({
-    model: MODEL,
+    model,
     max_tokens: 4096,
     system: systemPrompt,
     messages,
@@ -120,7 +161,9 @@ export async function generateCodeChanges(
   plan: string,
   fileContents: Record<string, string>,
   userId: string = "system",
-  workspaceId: string = "system"
+  workspaceId: string = "system",
+  /** Pro/Enterprise only: request a specific Anthropic model. */
+  preferredModel?: string
 ): Promise<{
   changes: Array<{
     file: string;
@@ -174,17 +217,20 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
     .map(([path, content]) => `### ${path}\n\`\`\`\n${content}\n\`\`\``)
     .join("\n\n")}`;
 
+  const { client, model, isByok } = await resolveClientAndModel(workspaceId, preferredModel);
   const response = await client.messages.create({
-    model: MODEL,
+    model,
     max_tokens: 8192,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
-  if (response.usage) {
+  if (response.usage && !isByok) {
+    // Only track cost against DEBO's account when using the shared platform key.
+    // BYOK users pay Anthropic directly — we don't track their spend.
     costTracker.track(userId, workspaceId, {
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
-      model: MODEL,
+      model,
     }).catch(console.error);
   }
   const text = response.content[0].type === "text" ? response.content[0].text : "";
@@ -205,6 +251,8 @@ export async function answerQuestion(
     previousMessages?: Message[];
     userId?: string;
     workspaceId?: string;
+    /** Pro/Enterprise only: request a specific Anthropic model. */
+    preferredModel?: string;
   }
 ): Promise<string> {
   const systemPrompt = `You are Debo, an expert AI software engineer assistant with deep knowledge of TypeScript, Node.js, React, distributed systems, security, and Web3/blockchain development (Solidity, Hardhat 3, Foundry, viem, ethers.js, OpenZeppelin, DeFi protocols, ERC standards).
@@ -233,18 +281,19 @@ ANSWER RULES:
     { role: "user", content: userPrompt },
   ];
 
+  const { client, model, isByok } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
   const response = await client.messages.create({
-    model: MODEL,
+    model,
     max_tokens: 4096,
     system: systemPrompt,
     messages,
   });
 
-  if (response.usage && context?.userId) {
+  if (response.usage && context?.userId && !isByok) {
     costTracker.track(context.userId, context.workspaceId ?? "unknown", {
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
-      model: MODEL,
+      model,
     }).catch(console.error);
   }
 

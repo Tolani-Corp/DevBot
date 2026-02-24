@@ -134,6 +134,17 @@ export const workspaces = pgTable("workspaces", {
     notificationPreferences?: string[];
     defaultRepository?: string;
     theme?: string;
+    /**
+     * Enterprise BYOK: encrypted Anthropic API key.
+     * When set, DEBO uses this key instead of the shared platform key.
+     * Encrypted with AES-256-GCM using ENCRYPTION_SECRET env var before storage.
+     */
+    byokAnthropicKey?: string;
+    /**
+     * Pro/Enterprise: user-preferred Anthropic model ID.
+     * Must be in the tier's allowedModels list — ignored otherwise.
+     */
+    preferredAnthropicModel?: string;
   }>(),
   
   createdAt: timestamp("created_at").notNull().defaultNow(),
