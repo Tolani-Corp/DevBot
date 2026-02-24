@@ -1,10 +1,80 @@
-# 🤖 DevBot - Autonomous AI Software Engineer
+# 🤖 DEBO - Autonomous AI Software Engineer
 
-**Status:** 🚧 **Beta** - Production-ready SaaS foundation
+[![npm](https://img.shields.io/npm/v/@tolani/debo)](https://www.npmjs.com/package/@tolani/debo)
+[![Docker](https://img.shields.io/badge/ghcr.io-tolani--corp%2Fdevbot-blue)](https://ghcr.io/tolani-corp/devbot)
+[![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
+[![License: Commercial](https://img.shields.io/badge/license-commercial-orange)](./LICENSE.md)
+
+**v0.1.0** | **Status:** Production-ready
 
 > *"Building Beyond"* - Tolani Corp
 
-DevBot is an AI-powered software engineer that responds to Slack mentions, autonomously executes code changes, and creates pull requests with progress updates in-thread. **Going beyond** conventional AI assistants with proactive analysis, intelligent testing, and self-evolving capabilities.
+DEBO is an autonomous AI software engineer that responds to Slack/Discord mentions, executes code changes, and creates pull requests. It ships with enterprise-grade security modules (JWT, VPN, media defense), multi-agent orchestration, and SLSA Level 3 supply chain attestation.
+
+---
+
+## 📦 Install
+
+```bash
+# npm (SDK)
+npm install @tolani/debo
+
+# Docker (self-hosted)
+docker pull ghcr.io/tolani-corp/devbot:0.1.0
+
+# Docker Compose (full stack)
+docker compose up -d
+```
+
+## ⚡ Quick Start (SDK)
+
+```typescript
+import { initDebo, orchestrateWithRedevelopment } from '@tolani/debo';
+import { jwtSecurity, vpnSecurity } from '@tolani/debo/agents';
+import { detectTraits, buildSystemPrompt } from '@tolani/debo/ai';
+
+// Initialize
+initDebo({ anthropicApiKey: process.env.ANTHROPIC_API_KEY! });
+
+// Detect security traits from a task description
+const traits = detectTraits("Audit JWT tokens and VPN config for leaks");
+// → ["TYPESCRIPT", "JWT_EXPERT", "VPN_EXPERT", "SECURITY", ...]
+
+// Use specialist modules directly
+const protocols = vpnSecurity.getSecureProtocols();
+const jwtAttacks = jwtSecurity.getJwtAttacksByCategory("algorithm");
+```
+
+## 🐳 Quick Start (Self-Hosted)
+
+```bash
+# Clone and configure
+git clone https://github.com/Tolani-Corp/DevBot.git && cd DevBot
+cp .env.example .env  # Edit with your keys
+
+# Run with Docker Compose
+docker compose up -d
+
+# Or run directly
+debo server   # Start Slack/Discord bots + API
+debo worker   # Start background task worker
+```
+
+---
+
+## 💰 Pricing
+
+| | Free | Pro | Team | Enterprise |
+|---|---|---|---|---|
+| **Price** | $0 | $29/mo | $99/mo | Custom |
+| **Tasks/month** | 50 | 500 | 2,000 | Unlimited |
+| **Repos** | 2 | 10 | 50 | Unlimited |
+| **PR Reviews** | — | ✅ | ✅ | ✅ |
+| **Health Scan** | — | — | ✅ | ✅ |
+| **Analytics** | — | — | ✅ | ✅ |
+| **Multi-Agent** | — | — | — | ✅ |
+| **Self-Hosted** | — | — | — | ✅ |
+| **Support** | Community | Community | Email (48h) | Priority (4h) |
 
 ---
 

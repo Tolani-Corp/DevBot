@@ -1,51 +1,103 @@
-version: '3.8'
+# DEBO v0.1.0 - Self-Hosted Deployment
+# Usage: docker compose up -d
+# Docs: https://github.com/Tolani-Corp/DevBot
 
 services:
-  devbot:
+  debo:
     build: .
+    image: ghcr.io/tolani-corp/devbot:0.1.0
+    container_name: debo-server
+    restart: unless-stopped
     ports:
-      - "3100:3100"
+      - "${PORT:-3100}:3100"
+      - "${WS_PORT:-8080}:8080"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://devbot:devbot@postgres:5432/devbot
-      - REDIS_URL=redis://redis:6379
+      NODE_ENV: production
+      PORT: 3100
+      WS_PORT: 8080
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      DATABASE_URL: postgresql://debo:${POSTGRES_PASSWORD:-debo_secret}@postgres:5432/debo
+      REDIS_URL: redis://redis:6379
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+      SLACK_APP_TOKEN: ${SLACK_APP_TOKEN:-}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET:-}
+      DISCORD_TOKEN: ${DISCORD_TOKEN:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_ORG: ${GITHUB_ORG:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
-    restart: unless-stopped
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3100/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   worker:
     build: .
-    command: node dist/worker.js
+    image: ghcr.io/tolani-corp/devbot:0.1.0
+    container_name: debo-worker
+    restart: unless-stopped
+    command: ["node", "dist/worker.js"]
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://devbot:devbot@postgres:5432/devbot
-      - REDIS_URL=redis://redis:6379
+      NODE_ENV: production
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      DATABASE_URL: postgresql://debo:${POSTGRES_PASSWORD:-debo_secret}@postgres:5432/debo
+      REDIS_URL: redis://redis:6379
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_ORG: ${GITHUB_ORG:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
-    restart: unless-stopped
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg17
+    container_name: debo-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: devbot
-      POSTGRES_PASSWORD: devbot
-      POSTGRES_DB: devbot
+      POSTGRES_USER: debo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-debo_secret}
+      POSTGRES_DB: debo
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U debo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
+    container_name: debo-redis
+    restart: unless-stopped
     volumes:
       - redis_data:/data
-    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
+    driver: local
   redis_data:
