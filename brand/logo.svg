@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="420" height="100">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&amp;display=swap');
+      .wordmark { font-family: 'JetBrains Mono', 'Courier New', monospace; font-weight: 700; font-size: 72px; fill: #e6edf3; letter-spacing: -1px; }
+      .cursor   { fill: #00d97e; }
+      .tagline  { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 11px; fill: #7d8590; letter-spacing: 3.5px; text-transform: uppercase; }
+      .blink    { animation: blink 1.1s step-end infinite; }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="420" height="100" fill="#0a0e14" rx="8"/>
+
+  <!-- Prompt chevron -->
+  <text x="18" y="72" font-family="JetBrains Mono, Courier New, monospace" font-size="32" fill="#00d97e" font-weight="700">›</text>
+
+  <!-- DE  (left of cursor) -->
+  <text x="46" y="75" class="wordmark">DE</text>
+
+  <!-- Cursor block between E and B -->
+  <rect x="156" y="16" width="22" height="58" rx="2" class="cursor blink"/>
+
+  <!-- BO  (right of cursor) -->
+  <text x="181" y="75" class="wordmark">BO</text>
+
+  <!-- Divider -->
+  <line x1="302" y1="20" x2="302" y2="80" stroke="#21262d" stroke-width="1"/>
+
+  <!-- Tagline -->
+  <text x="318" y="44" class="tagline">Autonomous</text>
+  <text x="318" y="60" class="tagline">AI Engineer</text>
+</svg>

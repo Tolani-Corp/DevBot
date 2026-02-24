@@ -1,4 +1,9 @@
-# 🤖 DEBO - Autonomous AI Software Engineer
+<div align="center">
+  <img src="./brand/logo.svg" alt="DEBO — Autonomous AI Software Engineer" width="380"/>
+  <br/><br/>
+</div>
+
+# DEBO™ — Autonomous AI Software Engineer
 
 [![npm](https://img.shields.io/npm/v/@tolani/debo)](https://www.npmjs.com/package/@tolani/debo)
 [![Docker](https://img.shields.io/badge/ghcr.io-tolani--corp%2Fdevbot-blue)](https://ghcr.io/tolani-corp/devbot)

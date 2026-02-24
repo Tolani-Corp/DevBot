@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="5" fill="#0a0e14"/>
+  <!-- D left stroke -->
+  <rect x="5" y="6"  width="3" height="20" rx="1" fill="#e6edf3"/>
+  <!-- D top stroke -->
+  <rect x="5" y="6"  width="10" height="3"  rx="1" fill="#e6edf3"/>
+  <!-- D bottom stroke -->
+  <rect x="5" y="23" width="10" height="3"  rx="1" fill="#e6edf3"/>
+  <!-- D right curve approximation -->
+  <rect x="14" y="9"  width="3" height="14" rx="1" fill="#e6edf3"/>
+
+  <!-- Cursor block -->
+  <rect x="19" y="8" width="4" height="16" rx="1" fill="#00d97e"/>
+</svg>
