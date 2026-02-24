@@ -150,7 +150,6 @@ jobs:
   # npm Publishing with provenance (requires NPM_TOKEN secret)
   npm:
     needs: [build, provenance]
-    if: ${{ secrets.NPM_TOKEN != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -177,9 +176,11 @@ jobs:
         run: npm version ${{ needs.build.outputs.version }} --no-git-tag-version --allow-same-version
       
       - name: Publish to npm with provenance
+        if: env.NPM_TOKEN != ''
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # Upload to GitHub Release
   release:
