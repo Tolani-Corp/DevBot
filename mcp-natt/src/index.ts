@@ -5,7 +5,7 @@
  * Network Attack & Testing Toolkit — Model Context Protocol Server
  * Exposes NATT security knowledge to AI models via MCP.
  *
- * Tools:
+ * Tools (Core):
  *   validate_roe              — Validate mission against ROE parameters
  *   get_roe_template          — Get ROE template for a mission type
  *   get_mission_guidance      — Get mission checklist and hard limits
@@ -14,12 +14,27 @@
  *   get_auth_bypass_techniques — Get auth bypass vector catalog
  *   get_secret_patterns       — Get secret detection signatures
  *   scan_for_secrets          — Scan content for exposed secrets
+ *   get_default_credentials   — Default credential lookup
+ *
+ * Tools (PortSwigger Security):
+ *   get_vulnerability_info    — Web vulnerability taxonomy (20+ classes)
+ *   get_dast_profile          — DAST scan profiles (full, CI/CD, API, auth)
+ *   get_compliance_mapping    — Compliance framework controls (OWASP, PCI, SOC2, GDPR, ISO)
+ *   get_bug_bounty_guidance   — Bug bounty methodology (scope → report)
+ *   get_devsecops_guidance    — DevSecOps pipeline security integration
+ *   get_pentest_methodology   — Pentest methodology (PTES-aligned)
  *
  * Resources:
- *   natt://roe-templates       — All ROE templates
- *   natt://password-techniques — Password attack knowledge base
- *   natt://auth-bypass         — Auth bypass research catalog
- *   natt://mission-checklists  — Mission phase checklists
+ *   natt://roe-templates           — All ROE templates
+ *   natt://password-techniques     — Password attack knowledge base
+ *   natt://auth-bypass             — Auth bypass research catalog
+ *   natt://mission-checklists      — Mission phase checklists
+ *   natt://vulnerability-taxonomy  — Web vulnerability classes
+ *   natt://dast-profiles           — DAST scan profiles
+ *   natt://compliance-frameworks   — Compliance framework controls
+ *   natt://bug-bounty              — Bug bounty methodology
+ *   natt://devsecops               — DevSecOps pipeline patterns
+ *   natt://pentest-methodology     — Pentest methodology phases
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -40,6 +55,22 @@ import {
   type PasswordAttackTechnique,
   type AuthBypassTechnique,
 } from "./knowledge.js";
+
+import {
+  VULNERABILITY_CLASSES,
+  BUG_BOUNTY_METHODOLOGY,
+  DEVSECOPS_PIPELINE_STAGES,
+  PENTEST_METHODOLOGY,
+  DAST_SCAN_PROFILES,
+  COMPLIANCE_FRAMEWORKS,
+  getVulnByCategory,
+  getVulnBySeverity,
+  getVulnById,
+  getComplianceFramework,
+  getDASTProfile,
+  type VulnerabilityClass,
+  type WebSecurityCategory,
+} from "./portswigger.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
@@ -255,6 +286,125 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           },
         },
         required: ["service"],
+      },
+    },
+    // ── PortSwigger Security Knowledge Tools ──────────────────────────────
+    {
+      name: "get_vulnerability_info",
+      description:
+        "Get detailed information about a web vulnerability class from the PortSwigger Web Security Academy. " +
+        "Returns description, impact, test cases with payloads, detection methods, and remediation guidance. " +
+        "Covers 20+ vulnerability categories: SQLi, XSS, CSRF, SSRF, XXE, IDOR, path traversal, " +
+        "request smuggling, race conditions, prototype pollution, GraphQL, JWT, OAuth, and more.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Vulnerability ID (e.g. vuln-sqli, vuln-xss, vuln-ssrf). Use list_all=true to see all IDs.",
+          },
+          category: {
+            type: "string",
+            description: "Category filter: injection, xss, ssrf, xxe, broken-access, jwt, oauth, graphql, " +
+              "cors, clickjacking, request-smuggling, race-conditions, prototype-pollution, etc.",
+          },
+          severity: {
+            type: "string",
+            description: "Severity filter: critical, high, medium, low, info",
+          },
+          list_all: {
+            type: "boolean",
+            description: "If true, return a summary list of all vulnerability classes (no details)",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_dast_profile",
+      description:
+        "Get a DAST (Dynamic Application Security Testing) scan profile with scan checks, " +
+        "crawl configuration, CI/CD integration settings, and compliance mappings. " +
+        "Profiles: dast-full (160+ checks, 4h), dast-cicd (fast, <15min), dast-api (REST/GraphQL), dast-auth (auth focus).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          profile_id: {
+            type: "string",
+            description: "Profile ID: dast-full, dast-cicd, dast-api, dast-auth. Leave empty for all.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_compliance_mapping",
+      description:
+        "Get compliance framework controls and their mapping to security scan checks. " +
+        "Frameworks: owasp-top10-2021, pci-dss-4, soc2-type2, gdpr-security, iso-27001. " +
+        "Returns control ID, name, requirement, test procedure, evidence needed, and automatable scan checks.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          framework_id: {
+            type: "string",
+            description: "Framework ID: owasp-top10-2021, pci-dss-4, soc2-type2, gdpr-security, iso-27001",
+          },
+          control_id: {
+            type: "string",
+            description: "Optional specific control ID (e.g. A03, 6.4.1, CC6.1, Art.32)",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_bug_bounty_guidance",
+      description:
+        "Get bug bounty hunting methodology covering all phases from scope analysis through " +
+        "report submission. Includes techniques, tools, time estimates, and deliverables for each phase.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          phase: {
+            type: "string",
+            description: "Optional phase filter: scope, recon, discovery, exploitation, reporting. Leave empty for all.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_devsecops_guidance",
+      description:
+        "Get DevSecOps CI/CD security integration patterns including shift-left practices, " +
+        "pipeline security gates, DAST/SAST/SCA integration, and CI example configs for " +
+        "GitHub Actions, GitLab CI, Jenkins, and Azure DevOps.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          stage: {
+            type: "string",
+            description: "Pipeline stage: shiftLeft, commitStage, buildStage, testStage, deployStage, monitorStage. Leave empty for all.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_pentest_methodology",
+      description:
+        "Get structured penetration testing methodology (PTES-aligned) with phases, " +
+        "activities, tools, outputs, and risk levels. From pre-engagement through reporting.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          phase: {
+            type: "string",
+            description: "Optional phase filter: pre-engagement, intelligence, scanning, vulnerability, exploitation, reporting",
+          },
+        },
+        required: [],
       },
     },
   ],
@@ -507,6 +657,240 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
+      // ── PortSwigger Security Knowledge Handlers ───────────────────────
+      case "get_vulnerability_info": {
+        const id = args?.["id"] as string | undefined;
+        const category = args?.["category"] as WebSecurityCategory | undefined;
+        const severity = args?.["severity"] as VulnerabilityClass["severity"] | undefined;
+        const listAll = args?.["list_all"] as boolean | undefined;
+
+        if (listAll) {
+          const summary = VULNERABILITY_CLASSES.map(
+            (v) => `${v.id} | ${v.name} | ${v.severity} | ${v.category} | ${v.owaspTopTen}`
+          );
+          return {
+            content: [{
+              type: "text",
+              text: `# Vulnerability Classes (${summary.length} total)\n\nID | Name | Severity | Category | OWASP\n---|------|----------|----------|------\n${summary.join("\n")}`,
+            }],
+          };
+        }
+
+        let vulns: VulnerabilityClass[];
+        if (id) {
+          const v = getVulnById(id);
+          vulns = v ? [v] : [];
+        } else if (category) {
+          vulns = getVulnByCategory(category);
+        } else if (severity) {
+          vulns = getVulnBySeverity(severity);
+        } else {
+          vulns = VULNERABILITY_CLASSES;
+        }
+
+        if (vulns.length === 0) {
+          return { content: [{ type: "text", text: "No vulnerabilities found matching the criteria." }] };
+        }
+
+        const text = vulns.map((v) => [
+          `# [${v.severity.toUpperCase()}] ${v.name}`,
+          `**ID:** ${v.id} | **Category:** ${v.category} | **CWEs:** ${v.cwes.join(", ")}`,
+          `**OWASP:** ${v.owaspTopTen}`,
+          ``,
+          `## Description`,
+          v.description,
+          ``,
+          `## Impact`,
+          v.impact,
+          ``,
+          `## Detection Methods`,
+          v.detectionMethods.map((d) => `- ${d}`).join("\n"),
+          ``,
+          `## Test Cases`,
+          ...v.testCases.map((tc) => [
+            `### ${tc.name} ${tc.automatable ? "⚙️" : "🔧"}`,
+            `**Technique:** ${tc.technique}`,
+            ...(tc.payloads ? [`**Payloads:**\n\`\`\`\n${tc.payloads.join("\n")}\n\`\`\``] : []),
+            `**Indicators:** ${tc.indicators.join("; ")}`,
+          ].join("\n")),
+          ``,
+          `## Remediation`,
+          v.remediation.map((r) => `- ${r}`).join("\n"),
+          ``,
+          `## References`,
+          v.references.map((r) => `- ${r}`).join("\n"),
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_dast_profile": {
+        const profileId = args?.["profile_id"] as string | undefined;
+        const profiles = profileId ? [getDASTProfile(profileId)].filter(Boolean) : DAST_SCAN_PROFILES;
+
+        if (profiles.length === 0) {
+          return { content: [{ type: "text", text: `No DAST profile found for "${profileId}". Options: dast-full, dast-cicd, dast-api, dast-auth` }] };
+        }
+
+        const text = (profiles as typeof DAST_SCAN_PROFILES).map((p) => [
+          `# DAST Profile: ${p.name}`,
+          `**ID:** ${p.id}`,
+          ``,
+          p.description,
+          ``,
+          `## Scan Checks (${p.scanChecks.length})`,
+          p.scanChecks.map((c) => `- ${c}`).join("\n"),
+          ``,
+          `## Crawl Configuration`,
+          `- Max Depth: ${p.crawlConfig.maxDepth}`,
+          `- Max Pages: ${p.crawlConfig.maxPages}`,
+          `- Follow Redirects: ${p.crawlConfig.followRedirects}`,
+          `- Handle Forms: ${p.crawlConfig.handleForms}`,
+          `- Handle JavaScript: ${p.crawlConfig.handleJavascript}`,
+          ...(p.crawlConfig.excludePatterns.length > 0 ? [`- Exclude: ${p.crawlConfig.excludePatterns.join(", ")}`] : []),
+          ...(p.crawlConfig.authentication ? [`- Auth Type: ${p.crawlConfig.authentication.type}`] : []),
+          ``,
+          `## CI/CD Integration`,
+          `- Platforms: ${p.ciIntegration.platforms.join(", ")}`,
+          `- Fail On: ${p.ciIntegration.failOnSeverity}+`,
+          `- Report Formats: ${p.ciIntegration.reportFormats.join(", ")}`,
+          `- Max Duration: ${p.ciIntegration.maxScanDuration}`,
+          `- Baseline Comparison: ${p.ciIntegration.baselineComparison}`,
+          ``,
+          `## Compliance Coverage`,
+          p.compliance.map((c) => `- ${c}`).join("\n"),
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_compliance_mapping": {
+        const frameworkId = args?.["framework_id"] as string | undefined;
+        const controlId = args?.["control_id"] as string | undefined;
+
+        if (!frameworkId) {
+          const summary = COMPLIANCE_FRAMEWORKS.map(
+            (f) => `- **${f.id}**: ${f.name} ${f.version} (${f.controls.length} controls)`
+          );
+          return { content: [{ type: "text", text: `# Available Compliance Frameworks\n\n${summary.join("\n")}` }] };
+        }
+
+        const framework = getComplianceFramework(frameworkId);
+        if (!framework) {
+          return { content: [{ type: "text", text: `Framework "${frameworkId}" not found. Options: ${COMPLIANCE_FRAMEWORKS.map(f => f.id).join(", ")}` }] };
+        }
+
+        const controls = controlId
+          ? framework.controls.filter((c) => c.id === controlId)
+          : framework.controls;
+
+        const text = [
+          `# ${framework.name} ${framework.version}`,
+          ``,
+          ...controls.map((c) => [
+            `## ${c.id}: ${c.name}`,
+            `**Requirement:** ${c.requirement}`,
+            `**Test Procedure:** ${c.testProcedure}`,
+            `**Evidence Required:**`,
+            c.evidenceRequired.map((e) => `- ${e}`).join("\n"),
+            `**Automatable:** ${c.automatable ? "Yes ⚙️" : "No (manual) 🔧"}`,
+            `**Scan Checks:** ${c.scanChecks.length > 0 ? c.scanChecks.join(", ") : "N/A"}`,
+          ].join("\n")),
+        ].join("\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_bug_bounty_guidance": {
+        const phase = args?.["phase"] as string | undefined;
+        const phases = phase
+          ? BUG_BOUNTY_METHODOLOGY.filter((p) =>
+              p.phase.toLowerCase().includes(phase.toLowerCase())
+            )
+          : BUG_BOUNTY_METHODOLOGY;
+
+        if (phases.length === 0) {
+          return { content: [{ type: "text", text: `No phase matching "${phase}". Phases: scope, recon, discovery, exploitation, reporting` }] };
+        }
+
+        const text = phases.map((p) => [
+          `# Phase: ${p.phase}`,
+          `**Objective:** ${p.objective}`,
+          `**Time Estimate:** ${p.timeEstimate}`,
+          ``,
+          `## Techniques`,
+          p.techniques.map((t) => `- ${t}`).join("\n"),
+          ``,
+          `## Tools`,
+          p.tools.map((t) => `- ${t}`).join("\n"),
+          ``,
+          `## Deliverables`,
+          p.deliverables.map((d) => `- ${d}`).join("\n"),
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_devsecops_guidance": {
+        const stage = args?.["stage"] as string | undefined;
+        const stages = Object.entries(DEVSECOPS_PIPELINE_STAGES);
+        const filtered = stage
+          ? stages.filter(([key]) => key.toLowerCase() === stage.toLowerCase())
+          : stages;
+
+        if (filtered.length === 0) {
+          return { content: [{ type: "text", text: `Stage "${stage}" not found. Options: ${stages.map(([k]) => k).join(", ")}` }] };
+        }
+
+        const text = filtered.map(([key, s]) => {
+          const lines = [
+            `# ${s.name}`,
+            `**Key:** ${key}`,
+            ``,
+            s.description,
+            ``,
+            `## Practices`,
+            s.practices.map((p) => `- ${p}`).join("\n"),
+          ];
+          if ("ciExample" in s && typeof s.ciExample === "string") {
+            lines.push(``, `## CI Example`, "```yaml", s.ciExample, "```");
+          }
+          return lines.join("\n");
+        }).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_pentest_methodology": {
+        const phase = args?.["phase"] as string | undefined;
+        const phases = phase
+          ? PENTEST_METHODOLOGY.filter((p) =>
+              p.phase.toLowerCase().includes(phase.toLowerCase())
+            )
+          : PENTEST_METHODOLOGY;
+
+        if (phases.length === 0) {
+          return { content: [{ type: "text", text: `No phase matching "${phase}".` }] };
+        }
+
+        const text = phases.map((p) => [
+          `# Phase: ${p.phase}`,
+          `**Objective:** ${p.objective}`,
+          `**Risk Level:** ${p.riskLevel}`,
+          ``,
+          `## Activities`,
+          p.activities.map((a) => `- ${a}`).join("\n"),
+          ``,
+          `## Tools`,
+          p.tools.map((t) => `- ${t}`).join("\n"),
+          ``,
+          `## Outputs`,
+          p.outputs.map((o) => `- ${o}`).join("\n"),
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
       default:
         return {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -551,6 +935,42 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "Phase-by-phase mission checklists for each mission type",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://vulnerability-taxonomy",
+      name: "Web Vulnerability Taxonomy",
+      description: "Complete PortSwigger-aligned vulnerability classes with test cases and remediation",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://dast-profiles",
+      name: "DAST Scan Profiles",
+      description: "Dynamic Application Security Testing scan profiles (full, CI/CD, API, auth)",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://compliance-frameworks",
+      name: "Compliance Frameworks",
+      description: "OWASP Top 10, PCI DSS, SOC 2, GDPR, ISO 27001 control mappings",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://bug-bounty",
+      name: "Bug Bounty Methodology",
+      description: "Complete bug bounty hunting methodology from scope to reporting",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://devsecops",
+      name: "DevSecOps Pipeline",
+      description: "CI/CD security integration patterns with pipeline stage guidance",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://pentest-methodology",
+      name: "Pentest Methodology",
+      description: "PTES-aligned penetration testing methodology phases",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -573,6 +993,30 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     case "natt://mission-checklists":
       return {
         contents: [{ uri, mimeType: "application/json", text: JSON.stringify(MISSION_CHECKLISTS, null, 2) }],
+      };
+    case "natt://vulnerability-taxonomy":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VULNERABILITY_CLASSES, null, 2) }],
+      };
+    case "natt://dast-profiles":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(DAST_SCAN_PROFILES, null, 2) }],
+      };
+    case "natt://compliance-frameworks":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(COMPLIANCE_FRAMEWORKS, null, 2) }],
+      };
+    case "natt://bug-bounty":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(BUG_BOUNTY_METHODOLOGY, null, 2) }],
+      };
+    case "natt://devsecops":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(DEVSECOPS_PIPELINE_STAGES, null, 2) }],
+      };
+    case "natt://pentest-methodology":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(PENTEST_METHODOLOGY, null, 2) }],
       };
     default:
       throw new Error(`Unknown resource: ${uri}`);
