@@ -27,6 +27,7 @@ import {
 } from "./interactive";
 import { RateLimiter } from "@/middleware/rate-limiter";
 import Redis from "ioredis";
+import { computeAgentROI, formatROIReportBlocks } from "@/services/agent-roi";
 
 // ─── RBAC: security-sensitive command roles ──────────────────
 const NATT_AUTHORIZED_USERS = new Set(
@@ -417,6 +418,7 @@ app.command("/debo-help", async ({ ack, say }) => {
 **Commands:**
 • \`/debo-status\` - See your recent tasks
 • \`/debo-help\` - Show this help message
+• \`/debo-roi [days]\` - Agent ROI report (default: 30 days)
 • \`/pentest <target>\` - Security & vulnerability scanning
 • \`/clickup-create\` - Create a ClickUp task
 • \`/clickup-tasks\` - List your ClickUp tasks
@@ -435,6 +437,20 @@ app.command("/debo-help", async ({ ack, say }) => {
 ${process.env.ALLOWED_REPOS ?? "All repositories"}`;
 
   await say(helpText);
+});
+
+// Command: /debo-roi [days]
+app.command("/debo-roi", async ({ command, ack, say }) => {
+  await ack();
+  try {
+    const days = Math.min(Math.max(parseInt(command.text?.trim() || "30", 10) || 30, 1), 365);
+    const report = await computeAgentROI(days);
+    const blocks = formatROIReportBlocks(report, days);
+    await say({ blocks } as Parameters<typeof say>[0]);
+  } catch (error) {
+    console.error("Error computing ROI:", error);
+    await say(`❌ Failed to compute ROI report: ${error}`);
+  }
 });
 
 // ==================== ClickUp Commands ====================
