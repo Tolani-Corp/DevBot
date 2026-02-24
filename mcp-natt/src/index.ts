@@ -30,6 +30,13 @@
  *   get_platform_defense       — Platform-specific defense profiles
  *   get_content_integrity      — Content integrity verification methods
  *
+ * Tools (JWT Security):
+ *   decode_jwt                 — Decode and analyze JWT tokens (header, payload, weaknesses)
+ *   get_jwt_attack             — JWT attack patterns catalog (12 attack types)
+ *   get_jwt_defense            — JWT defense playbooks (8 categories)
+ *   analyze_jwt_config         — Analyze JWT configuration for weaknesses
+ *   get_jwt_library_vulns      — Library-specific JWT vulnerability signatures
+ *
  * Resources:
  *   natt://roe-templates           — All ROE templates
  *   natt://password-techniques     — Password attack knowledge base
@@ -45,6 +52,9 @@
  *   natt://defense-playbooks       — Media platform defense playbooks
  *   natt://platform-defenses       — Platform-specific defense profiles
  *   natt://content-integrity       — Content integrity verification methods
+ *   natt://jwt-attacks             — JWT attack pattern catalog
+ *   natt://jwt-defenses            — JWT defense playbook library
+ *   natt://jwt-library-vulns       — JWT library vulnerability signatures
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -101,6 +111,30 @@ import {
   type ScraperTechnique,
   type DefenseCategory,
 } from "./media-security.js";
+
+import {
+  JWT_ATTACK_PATTERNS,
+  JWT_DEFENSE_PLAYBOOKS,
+  JWT_LIBRARY_VULNS,
+  decodeJwt,
+  analyzeJwtConfig,
+  getJwtAttack,
+  getJwtAttacksByType,
+  getJwtAttacksBySeverity,
+  getAutomatableJwtAttacks,
+  getJwtDefense,
+  getJwtDefensesByCategory,
+  getJwtDefensesForAttack,
+  getAllJwtTestCases,
+  getJwtLibraryVulnsByLanguage,
+  getJwtLibraryVulnsBySeverity,
+  scoreJwtPosture,
+  type JwtAttackType,
+  type JwtDefenseCategory,
+  type JwtSeverity,
+  type JwtAttackPattern,
+  type JwtDefensePlaybook,
+} from "./jwt-security.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
@@ -530,6 +564,142 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           method: {
             type: "string",
             description: "Method filter: hash-verify, watermark-detect, drm-check, metadata-strip, exif-sanitize, fingerprint-embed",
+          },
+        },
+        required: [],
+      },
+    },
+    // ── JWT Security Tools ────────────────────────────────────────────────
+    {
+      name: "decode_jwt",
+      description:
+        "Decode a JWT token into its header, payload, and signature components with security analysis. " +
+        "Detects weaknesses: none algorithm, embedded jwk/jku/x5c, missing claims (exp, iss, aud), " +
+        "excessive lifetime, sensitive data in payload, path traversal in kid, and more. " +
+        "This is a PASSIVE decoder — it does NOT verify signatures.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          token: {
+            type: "string",
+            description: "The JWT token string to decode (format: header.payload.signature)",
+          },
+        },
+        required: ["token"],
+      },
+    },
+    {
+      name: "get_jwt_attack",
+      description:
+        "Get JWT attack patterns from a catalog of 12 attack types. Each includes step-by-step " +
+        "exploitation, payloads, indicators, detection methods, tools, and remediation. " +
+        "Attacks: none-algorithm, algorithm-confusion, jwk-self-signed, jku-poisoning, x5c-chain-injection, " +
+        "kid-path-traversal, kid-sql-injection, kid-command-injection, claim-tampering, token-replay, " +
+        "cross-service-confusion, nested-jwt-abuse.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Attack ID (e.g. jwt-atk-01). Use list_all=true to see all IDs.",
+          },
+          attack_type: {
+            type: "string",
+            description: "Attack type filter: none-algorithm, algorithm-confusion, jwk-self-signed, jku-poisoning, " +
+              "x5c-chain-injection, kid-path-traversal, kid-sql-injection, kid-command-injection, " +
+              "claim-tampering, token-replay, cross-service-confusion, nested-jwt-abuse",
+          },
+          severity: {
+            type: "string",
+            description: "Severity filter: critical, high, medium, low",
+          },
+          automatable_only: {
+            type: "boolean",
+            description: "If true, return only automatable attacks (for CI integration)",
+          },
+          list_all: {
+            type: "boolean",
+            description: "If true, return summary list of all JWT attack patterns",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_jwt_defense",
+      description:
+        "Get JWT defense playbooks with implementation guidance, code examples (Node.js, Python, Go, Java), " +
+        "test cases, and effectiveness ratings. 8 categories: algorithm-pinning, key-management, " +
+        "claim-validation, token-lifecycle, library-hardening, transport-security, monitoring, architecture.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Defense ID (e.g. jwt-def-01). Use list_all=true to see all IDs.",
+          },
+          category: {
+            type: "string",
+            description: "Category: algorithm-pinning, key-management, claim-validation, token-lifecycle, " +
+              "library-hardening, transport-security, monitoring, architecture",
+          },
+          for_attack: {
+            type: "string",
+            description: "Get defenses that mitigate a specific attack type (e.g. algorithm-confusion, none-algorithm)",
+          },
+          list_all: {
+            type: "boolean",
+            description: "If true, return summary list of all defense playbooks",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "analyze_jwt_config",
+      description:
+        "Analyze a JWT verification configuration for security weaknesses. " +
+        "Checks: algorithm pinning, none rejection, mixed algorithm types, claim requirements, " +
+        "key length, token lifetime, JWK/JKU header handling, kid validation. " +
+        "Returns weakness list with severity, CWE, and recommendations.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          algorithm: { type: "string", description: "Primary algorithm in use" },
+          accepted_algorithms: {
+            type: "array",
+            items: { type: "string" },
+            description: "List of accepted algorithms (e.g. ['RS256', 'RS384'])",
+          },
+          key_length: { type: "number", description: "HMAC key length in bits (for symmetric algorithms)" },
+          require_exp: { type: "boolean", description: "Whether expiration claim is required" },
+          require_iss: { type: "boolean", description: "Whether issuer claim is validated" },
+          require_aud: { type: "boolean", description: "Whether audience claim is validated" },
+          max_lifetime: { type: "number", description: "Maximum token lifetime in seconds" },
+          allow_none: { type: "boolean", description: "Whether 'none' algorithm is accepted" },
+          validate_kid: { type: "boolean", description: "Whether 'kid' header is sanitized/validated" },
+          allow_jwk_header: { type: "boolean", description: "Whether embedded JWK in header is allowed" },
+          allow_jku_header: { type: "boolean", description: "Whether JKU header URL is followed" },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_jwt_library_vulns",
+      description:
+        "Get known JWT library vulnerabilities and CVEs. Covers: jsonwebtoken (Node.js), PyJWT (Python), " +
+        "ruby-jwt, php-jwt, go-jose (Go), Nimbus JOSE+JWT (Java), jose (Node.js). " +
+        "Returns CVE, affected versions, vulnerability details, and fix guidance.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          language: {
+            type: "string",
+            description: "Filter by language: Node.js, Python, Ruby, PHP, Go, Java",
+          },
+          severity: {
+            type: "string",
+            description: "Filter by severity: critical, high, medium, low, info",
           },
         },
         required: [],
@@ -1145,6 +1315,166 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text }] };
       }
 
+      // ── JWT Security Tool Handlers ────────────────────────────────────
+
+      case "decode_jwt": {
+        const token = args?.["token"] as string;
+        if (!token) return { content: [{ type: "text", text: "Error: 'token' parameter is required." }] };
+
+        const decoded = decodeJwt(token);
+        const lines = [
+          `# JWT Decode Analysis`,
+          ``,
+          `## Header`,
+          "```json",
+          JSON.stringify(decoded.header, null, 2),
+          "```",
+          ``,
+          `## Payload`,
+          "```json",
+          JSON.stringify(decoded.payload, null, 2),
+          "```",
+          ``,
+          `## Signature`,
+          decoded.signature ? `\`${decoded.signature.substring(0, 40)}${decoded.signature.length > 40 ? "..." : ""}\`` : "⚠️ EMPTY (unsigned token)",
+        ];
+
+        if (decoded.weaknesses.length > 0) {
+          lines.push(``, `## 🔴 Security Weaknesses`, decoded.weaknesses.map((w: string) => `- ${w}`).join("\n"));
+        }
+        if (decoded.warnings.length > 0) {
+          lines.push(``, `## ⚠️ Warnings`, decoded.warnings.map((w: string) => `- ${w}`).join("\n"));
+        }
+
+        const securityScore = decoded.weaknesses.length === 0 ? "✅ No critical weaknesses detected" :
+          decoded.weaknesses.filter((w: string) => w.includes("[CRITICAL]")).length > 0 ? "🔴 CRITICAL vulnerabilities found" :
+          "🟡 Weaknesses detected — review recommended";
+        lines.push(``, `## Verdict: ${securityScore}`);
+
+        return { content: [{ type: "text", text: lines.join("\n") }] };
+      }
+
+      case "get_jwt_attack": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = JWT_ATTACK_PATTERNS.map((a: JwtAttackPattern) =>
+            `- **${a.id}** [${a.severity.toUpperCase()} CVSS:${a.cvss}] ${a.name} (${a.attack})`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# JWT Attack Patterns (${JWT_ATTACK_PATTERNS.length})\n\n${summary}` }] };
+        }
+
+        const attackId = args?.["id"] as string | undefined;
+        if (attackId) {
+          const attack = getJwtAttack(attackId);
+          if (!attack) return { content: [{ type: "text", text: `Attack "${attackId}" not found.` }] };
+          return { content: [{ type: "text", text: formatJwtAttack(attack) }] };
+        }
+
+        const automatableOnly = args?.["automatable_only"] === true;
+        const attackType = args?.["attack_type"] as JwtAttackType | undefined;
+        const atkSeverity = args?.["severity"] as JwtSeverity | undefined;
+
+        let attacks: JwtAttackPattern[] = JWT_ATTACK_PATTERNS;
+        if (automatableOnly) attacks = getAutomatableJwtAttacks();
+        if (attackType) attacks = attacks.filter((a: JwtAttackPattern) => a.attack === attackType);
+        if (atkSeverity) attacks = attacks.filter((a: JwtAttackPattern) => a.severity === atkSeverity);
+
+        if (attacks.length === 0) return { content: [{ type: "text", text: "No JWT attacks match the filters." }] };
+
+        const text = attacks.map(formatJwtAttack).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_jwt_defense": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = JWT_DEFENSE_PLAYBOOKS.map((d: JwtDefensePlaybook) =>
+            `- **${d.id}** [Effectiveness: ${d.effectiveness}/10] ${d.name} (${d.category}) — mitigates: ${d.mitigatesAttacks.join(", ")}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# JWT Defense Playbooks (${JWT_DEFENSE_PLAYBOOKS.length})\n\n${summary}` }] };
+        }
+
+        const defId = args?.["id"] as string | undefined;
+        if (defId) {
+          const defense = getJwtDefense(defId);
+          if (!defense) return { content: [{ type: "text", text: `Defense "${defId}" not found.` }] };
+          return { content: [{ type: "text", text: formatJwtDefense(defense) }] };
+        }
+
+        const category = args?.["category"] as JwtDefenseCategory | undefined;
+        const forAttack = args?.["for_attack"] as JwtAttackType | undefined;
+
+        let defenses: JwtDefensePlaybook[] = JWT_DEFENSE_PLAYBOOKS;
+        if (category) defenses = getJwtDefensesByCategory(category);
+        if (forAttack) defenses = getJwtDefensesForAttack(forAttack);
+
+        if (defenses.length === 0) return { content: [{ type: "text", text: "No JWT defenses match." }] };
+
+        const text = defenses.map(formatJwtDefense).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "analyze_jwt_config": {
+        const weaknesses = analyzeJwtConfig({
+          algorithm: args?.["algorithm"] as string | undefined,
+          acceptedAlgorithms: args?.["accepted_algorithms"] as string[] | undefined,
+          keyLength: args?.["key_length"] as number | undefined,
+          requireExp: args?.["require_exp"] as boolean | undefined,
+          requireIss: args?.["require_iss"] as boolean | undefined,
+          requireAud: args?.["require_aud"] as boolean | undefined,
+          maxLifetime: args?.["max_lifetime"] as number | undefined,
+          allowNone: args?.["allow_none"] as boolean | undefined,
+          validateKid: args?.["validate_kid"] as boolean | undefined,
+          allowJwkHeader: args?.["allow_jwk_header"] as boolean | undefined,
+          allowJkuHeader: args?.["allow_jku_header"] as boolean | undefined,
+        });
+
+        if (weaknesses.length === 0) {
+          return { content: [{ type: "text", text: "# JWT Configuration Analysis\n\n✅ No weaknesses detected in the provided configuration." }] };
+        }
+
+        const text = [
+          `# JWT Configuration Analysis`,
+          ``,
+          `Found **${weaknesses.length}** weakness(es):`,
+          ``,
+          ...weaknesses.map((w) => [
+            `## [${w.severity.toUpperCase()}] ${w.name}`,
+            `**CWE:** ${w.cwe}`,
+            ``,
+            w.description,
+            ``,
+            `**Recommendation:** ${w.recommendation}`,
+          ].join("\n")),
+        ].join("\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_jwt_library_vulns": {
+        const language = args?.["language"] as string | undefined;
+        const vulnSeverity = args?.["severity"] as JwtSeverity | undefined;
+
+        let vulns = JWT_LIBRARY_VULNS;
+        if (language) vulns = getJwtLibraryVulnsByLanguage(language);
+        if (vulnSeverity) vulns = getJwtLibraryVulnsBySeverity(vulnSeverity);
+
+        if (vulns.length === 0) return { content: [{ type: "text", text: "No JWT library vulnerabilities match." }] };
+
+        const text = vulns.map((v) => [
+          `## ${v.library} (${v.language})`,
+          `**Affected:** ${v.version}`,
+          `**CVE:** ${v.cve}`,
+          `**Severity:** ${v.severity.toUpperCase()}`,
+          ``,
+          v.description,
+          ``,
+          `**Fix:** ${v.fix}`,
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text: `# JWT Library Vulnerabilities\n\n${text}` }] };
+      }
+
       default:
         return {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -1249,6 +1579,24 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "Content integrity verification methods (hash, watermark, DRM, metadata, fingerprint)",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://jwt-attacks",
+      name: "JWT Attack Patterns",
+      description: "12 JWT attack types with payloads, steps, detection, and remediation",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://jwt-defenses",
+      name: "JWT Defense Playbooks",
+      description: "8 JWT defense categories with code examples, test cases, and effectiveness ratings",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://jwt-library-vulns",
+      name: "JWT Library Vulnerabilities",
+      description: "Known CVEs and vulnerabilities in popular JWT libraries across languages",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -1312,6 +1660,18 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       return {
         contents: [{ uri, mimeType: "application/json", text: JSON.stringify(CONTENT_INTEGRITY_CHECKS, null, 2) }],
       };
+    case "natt://jwt-attacks":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(JWT_ATTACK_PATTERNS, null, 2) }],
+      };
+    case "natt://jwt-defenses":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(JWT_DEFENSE_PLAYBOOKS, null, 2) }],
+      };
+    case "natt://jwt-library-vulns":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(JWT_LIBRARY_VULNS, null, 2) }],
+      };
     default:
       throw new Error(`Unknown resource: ${uri}`);
   }
@@ -1320,6 +1680,73 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Helper Functions (inlined to avoid cross-server module dependencies)
 // ─────────────────────────────────────────────────────────────────────────────
+
+function formatJwtAttack(a: JwtAttackPattern): string {
+  const lines = [
+    `# [${a.severity.toUpperCase()} CVSS:${a.cvss}] ${a.name}`,
+    `**ID:** ${a.id}`,
+    `**Attack Type:** ${a.attack}`,
+    `**CWEs:** ${a.cwes.join(", ")}`,
+    `**Automatable:** ${a.automatable ? "Yes ⚙️" : "Manual 🔧"}`,
+    ``,
+    a.description,
+  ];
+  if (a.prerequisites.length > 0) {
+    lines.push(``, `## Prerequisites`, a.prerequisites.map((p: string) => `- ${p}`).join("\n"));
+  }
+  lines.push(``, `## Steps`, a.steps.map((s: string) => s).join("\n"));
+  if (a.payloads.length > 0) {
+    lines.push(``, `## Payloads`, "```", ...a.payloads, "```");
+  }
+  lines.push(
+    ``, `## Indicators`, a.indicators.map((i: string) => `- 🎯 ${i}`).join("\n"),
+    ``, `## Detection`, a.detectionMethods.map((d: string) => `- 🔍 ${d}`).join("\n"),
+    ``, `## Tools`, a.tools.map((t: string) => `- ${t}`).join("\n"),
+    ``, `## Remediation`, a.remediation.map((r: string) => `- ✅ ${r}`).join("\n"),
+    ``, `## References`, a.references.map((r: string) => `- ${r}`).join("\n"),
+  );
+  return lines.join("\n");
+}
+
+function formatJwtDefense(d: JwtDefensePlaybook): string {
+  const lines = [
+    `# ${d.name}`,
+    `**ID:** ${d.id}`,
+    `**Category:** ${d.category}`,
+    `**Effectiveness:** ${d.effectiveness}/10`,
+    `**Mitigates:** ${d.mitigatesAttacks.join(", ")}`,
+    ``,
+    d.description,
+    ``,
+    `## Principle`,
+    d.implementation.principle,
+  ];
+  if (d.implementation.codeExamples.length > 0) {
+    lines.push(``, `## Code Examples`);
+    for (const ex of d.implementation.codeExamples) {
+      lines.push(``, `### ${ex.language}`, "```", ex.code, "```", ex.notes);
+    }
+  }
+  if (d.implementation.configuration.length > 0) {
+    lines.push(``, `## Configuration`, d.implementation.configuration.map((c: string) => `- ${c}`).join("\n"));
+  }
+  if (d.implementation.commonMistakes.length > 0) {
+    lines.push(``, `## Common Mistakes`, d.implementation.commonMistakes.map((m: string) => `- ❌ ${m}`).join("\n"));
+  }
+  if (d.testCases.length > 0) {
+    lines.push(``, `## Test Cases`);
+    for (const tc of d.testCases) {
+      lines.push(
+        ``, `### ${tc.name} ${tc.automatable ? "⚙️" : "🔧"}`,
+        tc.description,
+        `**Steps:**`, tc.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n"),
+        `**Expected:** ${tc.expected}`,
+      );
+    }
+  }
+  lines.push(``, `## References`, d.references.map((r: string) => `- ${r}`).join("\n"));
+  return lines.join("\n");
+}
 
 function formatScraperPattern(p: { id: string; technique: string; name: string; description: string; attackVector: string; indicatorPatterns: string[]; httpSignatures: { userAgents?: string[]; headers?: Record<string, string>; requestPatterns?: string[] }; detectionMethods: string[]; defenses: string[]; severity: string; reference: string }): string {
   const lines = [

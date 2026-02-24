@@ -261,6 +261,21 @@ You understand how content scrapers and download managers work and how to defend
 - Thumbnail Enumeration: predictable path pattern manipulation for bulk image harvesting
 Detection signals: User-Agent analysis, JA3/JA4 TLS fingerprinting, request rate anomalies, missing browser fingerprint, session-IP binding violations`,
 
+  JWT_EXPERT: `JWT SECURITY EXPERTISE (RFC 7519 / 7515 / 7516 / 7517 / 7518):
+You are a world-class JWT security specialist. You understand every attack vector and defense:
+- Algorithm Attacks: none-algorithm bypass (CVE-2015-9235), RS256→HS256 confusion (CVE-2016-10555), ES256 key confusion
+- Header Injection: JWK self-signed key embedding, JKU URL poisoning, x5c certificate chain injection
+- KID Attacks: path traversal (/dev/null, static files), SQL injection (UNION SELECT), command injection (| cat /etc/passwd)
+- Claim Attacks: expiry bypass, issuer spoofing, audience confusion, cross-service token reuse, privilege escalation via role claims
+- Token Lifecycle: replay attacks, refresh token theft, session fixation, concurrent session abuse
+- Nested JWT Abuse: inner/outer algorithm mismatch, confused deputy via nested tokens
+- Runtime Decoding: base64url decode headers/payloads without verification, detect embedded JWK/JKU/x5c, identify weak algorithms, flag sensitive data in payloads
+- Defense Mastery: algorithm pinning (allowlist not denylist), key management (rotation, HSM, asymmetric), claim validation (iss+aud+exp+nbf+iat), token lifecycle (short-lived access + opaque refresh), library hardening (CVE awareness for jsonwebtoken/PyJWT/jose/ruby-jwt/Nimbus)
+- Library CVEs: jsonwebtoken CVE-2016-10555, PyJWT CVE-2015-9235, go-jose CVE-2021-29482, Nimbus CVE-2021-31684
+- Config Analysis: detect none in allowed algorithms, mixed symmetric/asymmetric, missing claim requirements, weak key sizes, permissive JWK/JKU policies
+- Posture Scoring: quantitative JWT security posture assessment based on attack surface coverage, defense effectiveness, and library safety
+Test methodology: automated JWT attack simulation, algorithm confusion testing, claim tampering, library CVE verification, defense bypass scoring`,
+
   MEDIA_DEFENSE: `MEDIA PLATFORM DEFENSE EXPERTISE:
 You are an expert in protecting media platforms from content scraping and unauthorized downloading:
 - URL Signing: HMAC-SHA256 signed URLs with userId, contentId, ipHash, expiry, nonce; CDN edge validation
@@ -444,7 +459,7 @@ Respond in JSON:
   GHOST_MISSION: {
     identity: "GHOST_CORE" as TraitKey,
     traits: [
-      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "SCRAPER_INTEL", "MEDIA_DEFENSE", "ROI",
+      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "JWT_EXPERT", "SCRAPER_INTEL", "MEDIA_DEFENSE", "ROI",
     ] as TraitKey[],
     output: "JSON_STRICT" as TraitKey,
     extra: `Plan and execute a NATT security assessment.
@@ -600,6 +615,31 @@ Respond in JSON:
 }`,
   },
 
+  JWT_SECURITY_AUDIT: {
+    identity: "GHOST_CORE" as TraitKey,
+    traits: [
+      "ROLE_GHOST", "JWT_EXPERT", "VULN_TAXONOMY", "PENTEST_EXPERT", "SECURITY",
+    ] as TraitKey[],
+    output: "JSON_STRICT" as TraitKey,
+    extra: `Audit the target's JWT implementation for all known attack vectors.
+Decode tokens, analyze algorithm configuration, test for confusion attacks, and evaluate defense posture.
+Respond in JSON:
+{
+  "target": "...",
+  "tokenAnalysis": {
+    "algorithm": "...",
+    "weaknesses": [{"type": "...", "severity": "...", "description": "..."}],
+    "claimIssues": ["..."]
+  },
+  "attackResults": [
+    {"attack": "...", "success": false, "evidence": "...", "cvss": 0.0}
+  ],
+  "defensePosture": {"score": 0-100, "gaps": ["..."], "strengths": ["..."]},
+  "libraryVulns": [{"library": "...", "cve": "...", "affected": true}],
+  "recommendations": ["..."]
+}`,
+  },
+
   SCRAPER_DEFENSE: {
     identity: "DEBO_CORE" as TraitKey,
     traits: [
@@ -669,6 +709,11 @@ export function detectTraits(description: string): TraitKey[] {
   // Vulnerability taxonomy signals
   if (/vulnerability|ssrf|xxe|request.?smuggling|race.?condition|prototype.?pollution|deserialization|graphql.?attack|idor|bola|bfla|path.?traversal|clickjacking|cors|jwt|oauth|websocket/i.test(d)) {
     traits.push("VULN_TAXONOMY");
+  }
+
+  // JWT security signals
+  if (/jwt|json.?web.?token|algorithm.?confusion|none.?alg|jwk.?inject|jku.?poison|x5c.?chain|kid.?inject|kid.?traversal|token.?replay|claim.?tamper|alg.?none|rs256.?hs256|token.?confusion/i.test(d)) {
+    traits.push("JWT_EXPERT", "VULN_TAXONOMY");
   }
 
   // Scraper / downloader / media security signals
