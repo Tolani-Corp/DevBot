@@ -34,7 +34,7 @@ export interface AllowlistEntry extends UnchainedOperator {
 // Founder seed — Tolani Corp
 // ---------------------------------------------------------------------------
 
-export const FOUNDER_ID = "tolani-founder-thines";
+export const FOUNDER_ID = "Tolanicorp-main";
 
 /**
  * Static allowlist bootstrap. In production this is backed by the DB
@@ -44,7 +44,7 @@ export const FOUNDER_ID = "tolani-founder-thines";
 export const FOUNDER_ENTRY: AllowlistEntry = {
   operatorId:    FOUNDER_ID,
   workspaceId:   "tolani-corp",
-  displayName:   "Terri Hines",
+  displayName:   "tolanicorp6",
   email:         "T.Hines5@student.evergladesuniversity.edu",
   githubHandle:  "github.com/Tolani-Corp",
   role:          "founder",
