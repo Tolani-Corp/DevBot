@@ -247,6 +247,32 @@ Full methodology from pre-engagement through reporting:
 6. Post-Exploitation & Reporting: cleanup test artifacts, CVSS-scored findings, executive summary, technical appendix, retest schedule
 - Risk classification: Critical ≥9.0, High 7.0-8.9, Medium 4.0-6.9, Low 0.1-3.9, Info 0.0
 - Every finding format: title, severity, CVSS 3.1 vector, description, PoC, remediation, references`,
+
+  SCRAPER_INTEL: `SCRAPER / DOWNLOADER INTELLIGENCE (JDownloader-inspired):
+You understand how content scrapers and download managers work and how to defend against them:
+- Link Crawling: regex-based URL discovery (DEEPDECRYPT, DIRECTHTTP, REWRITE, FOLLOWREDIRECT, SUBMITFORM rules)
+- Direct HTTP: chunked Range requests, multi-connection acceleration, HEAD probing
+- Cookie/Session Replay: cookie export from browser extensions, updateCookies auto-refresh
+- HLS/DASH Harvesting: .m3u8/.mpd manifest capture, segment downloading via yt-dlp/ffmpeg/N_m3u8DL-RE/streamlink
+- API Abuse: sequential ID enumeration, pagination exhaustion, GraphQL introspection
+- Browser Emulation: Puppeteer/Playwright/Selenium headless scraping with JS execution
+- Stream Capture: OBS screen recording, HDMI capture cards, virtual display drivers
+- Header Spoofing: Referer/Origin/UA forgery with per-domain custom headers
+- Thumbnail Enumeration: predictable path pattern manipulation for bulk image harvesting
+Detection signals: User-Agent analysis, JA3/JA4 TLS fingerprinting, request rate anomalies, missing browser fingerprint, session-IP binding violations`,
+
+  MEDIA_DEFENSE: `MEDIA PLATFORM DEFENSE EXPERTISE:
+You are an expert in protecting media platforms from content scraping and unauthorized downloading:
+- URL Signing: HMAC-SHA256 signed URLs with userId, contentId, ipHash, expiry, nonce; CDN edge validation
+- Rate Limiting: multi-layer (per-IP, session, user, endpoint); graduated response (throttle → CAPTCHA → block)
+- Browser Fingerprinting: JA3/JA4 TLS, Canvas/WebGL/AudioContext, HTTP/2 SETTINGS, navigator.webdriver detection
+- DRM: Widevine L1/L3 + FairPlay + PlayReady; CENC encryption; key rotation; HDCP enforcement
+- Forensic Watermarking: invisible per-session user ID; survives re-encoding, cropping, screen capture
+- Hotlink Protection: Referer validation, CSP frame-ancestors, signed CDN cookies
+- Anti-Debug: DevTools detection, JS obfuscation, code integrity checks, string encryption
+- Content Integrity: SHA-256 hash verification, perceptual fingerprinting (pHash), EXIF/metadata sanitization
+- Platform profiles: adult-content (watermark+DRM+signed URLs+DMCA automation), streaming (multi-DRM+key rotation+concurrent limits)
+Test methodology: automated defense validation via scraper simulation, bypass difficulty scoring (1-10)`,
 } as const;
 
 // ─── Prompt Builder ───────────────────────────────────────────────────────────
@@ -418,7 +444,7 @@ Respond in JSON:
   GHOST_MISSION: {
     identity: "GHOST_CORE" as TraitKey,
     traits: [
-      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "ROI",
+      "ROLE_GHOST", "SECURITY", "VULN_TAXONOMY", "PENTEST_EXPERT", "SCRAPER_INTEL", "MEDIA_DEFENSE", "ROI",
     ] as TraitKey[],
     output: "JSON_STRICT" as TraitKey,
     extra: `Plan and execute a NATT security assessment.
@@ -552,6 +578,47 @@ When showing status, use:  ✅ done  🔄 running  ⏳ queued  ❌ failed  🛡 
 If the user asks for monitoring data, query the real DB/fleet state.
 If the user gives a wish/command, decompose into actionable beads and dispatch.`,
   },
+
+  MEDIA_SECURITY_AUDIT: {
+    identity: "GHOST_CORE" as TraitKey,
+    traits: [
+      "ROLE_GHOST", "SCRAPER_INTEL", "MEDIA_DEFENSE", "VULN_TAXONOMY", "COMPLIANCE",
+    ] as TraitKey[],
+    output: "JSON_STRICT" as TraitKey,
+    extra: `Audit the platform's media security posture against content scraping and unauthorized downloading.
+Simulate scraper attack patterns (JDownloader, yt-dlp, headless browsers) and evaluate defense effectiveness.
+Score each defense by bypass difficulty (1-10). Identify gaps.
+Respond in JSON:
+{
+  "target": "...",
+  "scraperTests": [
+    { "technique": "...", "blocked": true, "bypassDifficulty": 8, "notes": "..." }
+  ],
+  "defensePosture": { "score": 0-100, "gaps": ["..."], "activeDefenses": ["..."] },
+  "recommendations": ["..."],
+  "contentIntegrity": { "hashVerified": true, "watermarkPresent": true, "drmActive": true }
+}`,
+  },
+
+  SCRAPER_DEFENSE: {
+    identity: "DEBO_CORE" as TraitKey,
+    traits: [
+      "MEDIA_DEFENSE", "SCRAPER_INTEL", "SECURITY", "TYPESCRIPT",
+    ] as TraitKey[],
+    output: "JSON_STRICT" as TraitKey,
+    extra: `Implement or review media platform defenses against content scraping.
+Generate production-ready code for: signed URLs, rate limiting, TLS fingerprinting, DRM integration,
+watermarking, hotlink protection, anti-debug measures.
+Respond in JSON:
+{
+  "changes": [
+    { "file": "...", "oldContent": "...", "newContent": "...", "explanation": "..." }
+  ],
+  "defensesImplemented": ["..."],
+  "bypassDifficulty": 7,
+  "testCases": ["..."]
+}`,
+  },
 } as const;
 
 // ─── Signal-based Trait Selection ─────────────────────────────────────────────
@@ -602,6 +669,16 @@ export function detectTraits(description: string): TraitKey[] {
   // Vulnerability taxonomy signals
   if (/vulnerability|ssrf|xxe|request.?smuggling|race.?condition|prototype.?pollution|deserialization|graphql.?attack|idor|bola|bfla|path.?traversal|clickjacking|cors|jwt|oauth|websocket/i.test(d)) {
     traits.push("VULN_TAXONOMY");
+  }
+
+  // Scraper / downloader / media security signals
+  if (/scraper|scraping|downloader|jdownloader|yt-?dlp|m3u8|hls|dash|mpd|stream.?rip|cookie.?replay|hotlink|watermark|drm|content.?protection|anti.?bot|fingerprint.?bypass/i.test(d)) {
+    traits.push("SCRAPER_INTEL", "MEDIA_DEFENSE");
+  }
+
+  // Media platform defense signals
+  if (/media.?security|content.?defense|platform.?protection|signed.?url|url.?signing|anti.?debug|forensic.?watermark|content.?integrity|takedown|dmca/i.test(d)) {
+    traits.push("MEDIA_DEFENSE");
   }
 
   // Frontend signals

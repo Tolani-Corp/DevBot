@@ -24,6 +24,12 @@
  *   get_devsecops_guidance    — DevSecOps pipeline security integration
  *   get_pentest_methodology   — Pentest methodology (PTES-aligned)
  *
+ * Tools (Media Security / Anti-Scraping):
+ *   get_scraper_pattern        — Scraper/downloader attack patterns (JDownloader-inspired)
+ *   get_defense_playbook       — Platform defense implementations & test cases
+ *   get_platform_defense       — Platform-specific defense profiles
+ *   get_content_integrity      — Content integrity verification methods
+ *
  * Resources:
  *   natt://roe-templates           — All ROE templates
  *   natt://password-techniques     — Password attack knowledge base
@@ -35,6 +41,10 @@
  *   natt://bug-bounty              — Bug bounty methodology
  *   natt://devsecops               — DevSecOps pipeline patterns
  *   natt://pentest-methodology     — Pentest methodology phases
+ *   natt://scraper-patterns        — Scraper/downloader attack taxonomy
+ *   natt://defense-playbooks       — Media platform defense playbooks
+ *   natt://platform-defenses       — Platform-specific defense profiles
+ *   natt://content-integrity       — Content integrity verification methods
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -71,6 +81,26 @@ import {
   type VulnerabilityClass,
   type WebSecurityCategory,
 } from "./portswigger.js";
+
+import {
+  SCRAPER_PATTERNS,
+  DEFENSE_PLAYBOOKS,
+  PLATFORM_DEFENSE_PROFILES,
+  CONTENT_INTEGRITY_CHECKS,
+  getScraperPattern,
+  getScrapersByTechnique,
+  getScrapersBySeverity,
+  getDefensePlaybook,
+  getDefensesByCategory,
+  getDefensesForTechnique,
+  getPlatformProfile,
+  getContentIntegrityCheck,
+  getAllTestCases,
+  getAutomatableTests,
+  scoreDefensePosture,
+  type ScraperTechnique,
+  type DefenseCategory,
+} from "./media-security.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
@@ -402,6 +432,104 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           phase: {
             type: "string",
             description: "Optional phase filter: pre-engagement, intelligence, scanning, vulnerability, exploitation, reporting",
+          },
+        },
+        required: [],
+      },
+    },
+    // ── Media Security / Anti-Scraping Tools ─────────────────────────────
+    {
+      name: "get_scraper_pattern",
+      description:
+        "Get scraper/downloader attack patterns inspired by JDownloader, yt-dlp, and similar tools. " +
+        "Returns attack vectors, HTTP signatures, indicator patterns, detection methods, and defenses. " +
+        "Covers: link crawling, direct HTTP, cookie replay, HLS/DASH harvesting, API abuse, " +
+        "browser emulation, stream capture, header spoofing, thumbnail enumeration, redirect following.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Pattern ID (e.g. scrp-link-crawl, scrp-m3u8-harvest). Use list_all=true to see all.",
+          },
+          technique: {
+            type: "string",
+            description: "Technique filter: link-crawl, direct-http, cookie-replay, m3u8-harvest, api-abuse, browser-emulation, stream-capture, header-spoof, thumbnail-enum, follow-redirect",
+          },
+          severity: {
+            type: "string",
+            description: "Severity filter: critical, high, medium, low, info",
+          },
+          list_all: {
+            type: "boolean",
+            description: "If true, return summary list of all scraper patterns",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_defense_playbook",
+      description:
+        "Get media platform defense playbooks with implementation guidance, test cases, and bypass difficulty ratings. " +
+        "Covers: URL signing, rate limiting, browser/TLS fingerprinting, DRM, forensic watermarking, " +
+        "hotlink protection, anti-debug/obfuscation. Each includes server-side, client-side, and CDN configs.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Playbook ID (e.g. def-signed-urls, def-drm, def-watermark). Use list_all=true to see all.",
+          },
+          category: {
+            type: "string",
+            description: "Category filter: url-signing, rate-limiting, fingerprinting, drm, watermarking, hotlink-protection, anti-debug",
+          },
+          for_technique: {
+            type: "string",
+            description: "Get defenses that mitigate a specific scraper technique (e.g. m3u8-harvest, direct-http)",
+          },
+          list_all: {
+            type: "boolean",
+            description: "If true, return summary list of all defense playbooks",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_platform_defense",
+      description:
+        "Get a complete platform-specific defense profile with threat model, defense stack, " +
+        "monitoring signals, and incident response procedures. " +
+        "Platforms: adult-content-platform, streaming-platform.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          platform: {
+            type: "string",
+            description: "Platform type: adult-content-platform, streaming-platform",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_content_integrity",
+      description:
+        "Get content integrity verification methods: hash verification, watermark detection, " +
+        "DRM validation, metadata/EXIF sanitization, and content fingerprint embedding. " +
+        "Returns implementation guidance and recommended tools.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Check ID (e.g. ci-hash-verify, ci-watermark-detect, ci-drm-check, ci-metadata-strip, ci-fingerprint-embed)",
+          },
+          method: {
+            type: "string",
+            description: "Method filter: hash-verify, watermark-detect, drm-check, metadata-strip, exif-sanitize, fingerprint-embed",
           },
         },
         required: [],
@@ -891,6 +1019,132 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text }] };
       }
 
+      // ── Media Security / Anti-Scraping Tool Handlers ──────────────────
+
+      case "get_scraper_pattern": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = SCRAPER_PATTERNS.map((p) =>
+            `- **${p.id}** [${p.severity.toUpperCase()}] ${p.name}: ${p.technique}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# Scraper Attack Patterns\n\n${summary}` }] };
+        }
+
+        const patternId = args?.["id"] as string | undefined;
+        if (patternId) {
+          const pattern = getScraperPattern(patternId);
+          if (!pattern) return { content: [{ type: "text", text: `Pattern "${patternId}" not found.` }] };
+          return { content: [{ type: "text", text: formatScraperPattern(pattern) }] };
+        }
+
+        const technique = args?.["technique"] as ScraperTechnique | undefined;
+        const patternSeverity = args?.["severity"] as string | undefined;
+
+        let patterns = SCRAPER_PATTERNS;
+        if (technique) patterns = getScrapersByTechnique(technique);
+        if (patternSeverity) patterns = patterns.filter((p) => p.severity === patternSeverity);
+
+        if (patterns.length === 0) return { content: [{ type: "text", text: "No patterns match the filters." }] };
+
+        const text = patterns.map(formatScraperPattern).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_defense_playbook": {
+        const listAll = args?.["list_all"] === true;
+        if (listAll) {
+          const summary = DEFENSE_PLAYBOOKS.map((p) =>
+            `- **${p.id}** [Bypass: ${p.bypassDifficulty}/10] ${p.name} (${p.category}) — mitigates: ${p.mitigates.join(", ")}`
+          ).join("\n");
+          return { content: [{ type: "text", text: `# Defense Playbooks\n\n${summary}` }] };
+        }
+
+        const defId = args?.["id"] as string | undefined;
+        if (defId) {
+          const playbook = getDefensePlaybook(defId);
+          if (!playbook) return { content: [{ type: "text", text: `Playbook "${defId}" not found.` }] };
+          return { content: [{ type: "text", text: formatDefensePlaybook(playbook) }] };
+        }
+
+        const category = args?.["category"] as DefenseCategory | undefined;
+        const forTechnique = args?.["for_technique"] as ScraperTechnique | undefined;
+
+        let playbooks = DEFENSE_PLAYBOOKS;
+        if (category) playbooks = getDefensesByCategory(category);
+        if (forTechnique) playbooks = getDefensesForTechnique(forTechnique);
+
+        if (playbooks.length === 0) return { content: [{ type: "text", text: "No playbooks match." }] };
+
+        const text = playbooks.map(formatDefensePlaybook).join("\n\n---\n\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_platform_defense": {
+        const platform = args?.["platform"] as string | undefined;
+        if (!platform) {
+          const text = PLATFORM_DEFENSE_PROFILES.map((p) =>
+            `# ${p.platform}\n${p.description}\n\n## Threat Model\n${p.threatModel.map((t) => `- ${t}`).join("\n")}\n\n## Defenses\n${p.defenses.map((d) => `- ${d}`).join("\n")}\n\n## Monitoring Signals\n${p.monitoringSignals.map((s) => `- ${s}`).join("\n")}\n\n## Incident Response\n${p.incidentResponse.map((r) => `- ${r}`).join("\n")}`
+          ).join("\n\n---\n\n");
+          return { content: [{ type: "text", text }] };
+        }
+
+        const profile = getPlatformProfile(platform);
+        if (!profile) {
+          return { content: [{ type: "text", text: `Platform "${platform}" not found. Options: ${PLATFORM_DEFENSE_PROFILES.map((p) => p.platform).join(", ")}` }] };
+        }
+
+        const text = [
+          `# ${profile.platform}`,
+          profile.description,
+          ``,
+          `## Threat Model`,
+          profile.threatModel.map((t) => `- ${t}`).join("\n"),
+          ``,
+          `## Defense Stack`,
+          profile.defenses.map((d) => `- ✅ ${d}`).join("\n"),
+          ``,
+          `## Monitoring Signals`,
+          profile.monitoringSignals.map((s) => `- 📊 ${s}`).join("\n"),
+          ``,
+          `## Incident Response`,
+          profile.incidentResponse.map((r) => `- 🚨 ${r}`).join("\n"),
+        ].join("\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_content_integrity": {
+        const checkId = args?.["id"] as string | undefined;
+        const method = args?.["method"] as string | undefined;
+
+        let checks = CONTENT_INTEGRITY_CHECKS;
+        if (checkId) {
+          const check = getContentIntegrityCheck(checkId);
+          if (!check) return { content: [{ type: "text", text: `Check "${checkId}" not found.` }] };
+          checks = [check];
+        } else if (method) {
+          checks = checks.filter((c) => c.method === method);
+        }
+
+        if (checks.length === 0) return { content: [{ type: "text", text: "No integrity checks match." }] };
+
+        const text = checks.map((c) => [
+          `# ${c.name}`,
+          `**ID:** ${c.id}`,
+          `**Method:** ${c.method}`,
+          ``,
+          c.description,
+          ``,
+          `## Implementation`,
+          c.implementation,
+          ``,
+          `## Tools`,
+          c.tools.map((t) => `- ${t}`).join("\n"),
+        ].join("\n")).join("\n\n---\n\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
       default:
         return {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -971,6 +1225,30 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "PTES-aligned penetration testing methodology phases",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://scraper-patterns",
+      name: "Scraper Attack Patterns",
+      description: "JDownloader-inspired scraper/downloader attack taxonomy with detection and defense",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://defense-playbooks",
+      name: "Defense Playbooks",
+      description: "Media platform defense implementations with test cases and bypass difficulty ratings",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://platform-defenses",
+      name: "Platform Defense Profiles",
+      description: "Complete defense profiles for adult content and streaming platforms",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://content-integrity",
+      name: "Content Integrity Checks",
+      description: "Content integrity verification methods (hash, watermark, DRM, metadata, fingerprint)",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -1018,6 +1296,22 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       return {
         contents: [{ uri, mimeType: "application/json", text: JSON.stringify(PENTEST_METHODOLOGY, null, 2) }],
       };
+    case "natt://scraper-patterns":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(SCRAPER_PATTERNS, null, 2) }],
+      };
+    case "natt://defense-playbooks":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(DEFENSE_PLAYBOOKS, null, 2) }],
+      };
+    case "natt://platform-defenses":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(PLATFORM_DEFENSE_PROFILES, null, 2) }],
+      };
+    case "natt://content-integrity":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(CONTENT_INTEGRITY_CHECKS, null, 2) }],
+      };
     default:
       throw new Error(`Unknown resource: ${uri}`);
   }
@@ -1026,6 +1320,67 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Helper Functions (inlined to avoid cross-server module dependencies)
 // ─────────────────────────────────────────────────────────────────────────────
+
+function formatScraperPattern(p: { id: string; technique: string; name: string; description: string; attackVector: string; indicatorPatterns: string[]; httpSignatures: { userAgents?: string[]; headers?: Record<string, string>; requestPatterns?: string[] }; detectionMethods: string[]; defenses: string[]; severity: string; reference: string }): string {
+  const lines = [
+    `# [${p.severity.toUpperCase()}] ${p.name}`,
+    `**ID:** ${p.id}`,
+    `**Technique:** ${p.technique}`,
+    ``,
+    p.description,
+    ``,
+    `## Attack Vector`,
+    p.attackVector,
+  ];
+  if (p.indicatorPatterns.length > 0) {
+    lines.push(``, `## Indicator Patterns`, "```", ...p.indicatorPatterns, "```");
+  }
+  if (p.httpSignatures.userAgents && p.httpSignatures.userAgents.length > 0) {
+    lines.push(``, `## Known User-Agents`, p.httpSignatures.userAgents.map((u) => `- \`${u}\``).join("\n"));
+  }
+  if (p.httpSignatures.requestPatterns && p.httpSignatures.requestPatterns.length > 0) {
+    lines.push(``, `## Request Patterns`, p.httpSignatures.requestPatterns.map((r) => `- ${r}`).join("\n"));
+  }
+  lines.push(
+    ``, `## Detection Methods`, p.detectionMethods.map((d) => `- 🔍 ${d}`).join("\n"),
+    ``, `## Defenses`, p.defenses.map((d) => `- 🛡 ${d}`).join("\n"),
+    ``, `**Reference:** ${p.reference}`,
+  );
+  return lines.join("\n");
+}
+
+function formatDefensePlaybook(p: { id: string; category: string; name: string; description: string; implementation: { serverSide: string[]; clientSide: string[]; cdnConfig?: string[] }; testCases: Array<{ name: string; description: string; steps: string[]; expectedResult: string; automatable: boolean }>; mitigates: string[]; bypassDifficulty: number }): string {
+  const lines = [
+    `# ${p.name}`,
+    `**ID:** ${p.id}`,
+    `**Category:** ${p.category}`,
+    `**Bypass Difficulty:** ${p.bypassDifficulty}/10`,
+    `**Mitigates:** ${p.mitigates.join(", ")}`,
+    ``,
+    p.description,
+    ``,
+    `## Server-Side Implementation`,
+    p.implementation.serverSide.map((s) => `- ${s}`).join("\n"),
+    ``,
+    `## Client-Side Implementation`,
+    p.implementation.clientSide.map((s) => `- ${s}`).join("\n"),
+  ];
+  if (p.implementation.cdnConfig && p.implementation.cdnConfig.length > 0) {
+    lines.push(``, `## CDN Configuration`, p.implementation.cdnConfig.map((c) => `- ${c}`).join("\n"));
+  }
+  if (p.testCases.length > 0) {
+    lines.push(``, `## Test Cases`);
+    for (const tc of p.testCases) {
+      lines.push(
+        ``, `### ${tc.name} ${tc.automatable ? "⚙️" : "🔧"}`,
+        tc.description,
+        `**Steps:**`, tc.steps.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+        `**Expected:** ${tc.expectedResult}`,
+      );
+    }
+  }
+  return lines.join("\n");
+}
 
 function formatROETemplate(template: ROETemplate): string {
   return [
