@@ -59,7 +59,8 @@ export type NATTMissionType =
   | "auth-testing"
   | "platform-detection"
   | "code-analysis"
-  | "full-ghost";
+  | "full-ghost"
+  | "racing-recon";
 
 export type NATTSeverity = "critical" | "high" | "medium" | "low" | "info";
 
