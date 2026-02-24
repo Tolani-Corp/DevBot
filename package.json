@@ -1,10 +1,61 @@
 {
   "name": "@tolani/debo",
-  "version": "1.0.0",
-  "description": "Debo v1 - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
+  "version": "0.1.0",
+  "description": "DEBO - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
   "type": "module",
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "SEE LICENSE IN LICENSE.md",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tolani-Corp/DevBot.git"
+  },
+  "homepage": "https://github.com/Tolani-Corp/DevBot#readme",
+  "bugs": {
+    "url": "https://github.com/Tolani-Corp/DevBot/issues"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "slack",
+    "discord",
+    "code-generation",
+    "pull-request",
+    "devops",
+    "security"
+  ],
+  "main": "dist/sdk.js",
+  "types": "dist/sdk.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/sdk.d.ts",
+      "import": "./dist/sdk.js"
+    },
+    "./agents": {
+      "types": "./dist/agents/index.d.ts",
+      "import": "./dist/agents/index.js"
+    },
+    "./ai": {
+      "types": "./dist/ai/index.d.ts",
+      "import": "./dist/ai/index.js"
+    },
+    "./server": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "debo": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias",
