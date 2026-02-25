@@ -89,6 +89,8 @@ import {
   type AuthBypassTechnique,
 } from "./knowledge.js";
 
+import { generatePassword, generatePassphrase } from "./password-generator.js";
+
 import {
   VULNERABILITY_CLASSES,
   BUG_BOUNTY_METHODOLOGY,
@@ -242,6 +244,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           },
         },
         required: ["mission_type"],
+      },
+    },
+    {
+      name: "generate_password",
+      description:
+        "Generate a cryptographically secure password or passphrase with hack-a-thon level optimization. " +
+        "Supports high-entropy passwords with custom character sets, or diceware-style passphrases. " +
+        "Returns the generated string, calculated Shannon entropy, strength rating, and estimated crack time.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          type: {
+            type: "string",
+            description: "Type of generation: 'password' or 'passphrase' (default: 'password')",
+            enum: ["password", "passphrase"]
+          },
+          length: {
+            type: "number",
+            description: "Length of password (default: 16) or number of words for passphrase (default: 4)"
+          },
+          includeUppercase: { type: "boolean", description: "Include uppercase letters (default: true)" },
+          includeLowercase: { type: "boolean", description: "Include lowercase letters (default: true)" },
+          includeNumbers: { type: "boolean", description: "Include numbers (default: true)" },
+          includeSymbols: { type: "boolean", description: "Include symbols (default: true)" },
+          excludeSimilar: { type: "boolean", description: "Exclude similar characters like i, l, 1, L, o, 0, O (default: false)" },
+          excludeAmbiguous: { type: "boolean", description: "Exclude ambiguous symbols like {}[]()/\\'\"`~,;:.<> (default: false)" },
+          separator: { type: "string", description: "Separator for passphrase words (default: '-')" },
+          capitalize: { type: "boolean", description: "Capitalize each word in passphrase (default: false)" },
+          includeNumberInPassphrase: { type: "boolean", description: "Append a random number to one word in passphrase (default: false)" }
+        },
+        required: [],
       },
     },
     {
@@ -1048,6 +1081,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 ),
               ]
             : []),
+        ].join("\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "generate_password": {
+        const type = String(args?.["type"] ?? "password");
+        
+        let result;
+        if (type === "passphrase") {
+          result = generatePassphrase({
+            words: args?.["length"] ? Number(args["length"]) : undefined,
+            separator: args?.["separator"] ? String(args["separator"]) : undefined,
+            capitalize: args?.["capitalize"] ? Boolean(args["capitalize"]) : undefined,
+            includeNumber: args?.["includeNumberInPassphrase"] ? Boolean(args["includeNumberInPassphrase"]) : undefined,
+          });
+        } else {
+          result = generatePassword({
+            length: args?.["length"] ? Number(args["length"]) : undefined,
+            includeUppercase: args?.["includeUppercase"] !== undefined ? Boolean(args["includeUppercase"]) : undefined,
+            includeLowercase: args?.["includeLowercase"] !== undefined ? Boolean(args["includeLowercase"]) : undefined,
+            includeNumbers: args?.["includeNumbers"] !== undefined ? Boolean(args["includeNumbers"]) : undefined,
+            includeSymbols: args?.["includeSymbols"] !== undefined ? Boolean(args["includeSymbols"]) : undefined,
+            excludeSimilar: args?.["excludeSimilar"] !== undefined ? Boolean(args["excludeSimilar"]) : undefined,
+            excludeAmbiguous: args?.["excludeAmbiguous"] !== undefined ? Boolean(args["excludeAmbiguous"]) : undefined,
+          });
+        }
+
+        const text = [
+          `## Generated ${type === "passphrase" ? "Passphrase" : "Password"}`,
+          `**Value:** \`${result.value}\``,
+          `**Entropy:** ${result.entropy} bits`,
+          `**Strength:** ${result.strength}`,
+          `**Estimated Time to Crack:** ${result.timeToCrack} (assuming 100B guesses/sec)`
         ].join("\n");
 
         return { content: [{ type: "text", text }] };
