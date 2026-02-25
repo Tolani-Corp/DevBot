@@ -16,6 +16,46 @@ import {
   syncStatusFromGitEvent,
   getTask as getClickUpTask,
 } from "@/integrations/clickup";
+import { writeChangelogEntry, updateTaskStatus as notionUpdateStatus } from "@/integrations/notion";
+import { onTaskComplete, onPRCreated, onHealthAlert } from "@/integrations/zapier";
+import { triggerBuildFailure } from "@/integrations/pagerduty";
+
+/** Fire all post-PR integration hooks in parallel — non-blocking */
+function fireIntegrationHooks(data: {
+  taskId: string;
+  repo: string;
+  prUrl: string;
+  commitSha: string;
+  description: string;
+  branch: string;
+  workspace: string;
+  notionPageId?: string;
+}) {
+  const { taskId, repo, prUrl, commitSha, description, branch, workspace, notionPageId } = data;
+  Promise.allSettled([
+    // Notion: write changelog entry
+    process.env.NOTION_CHANGELOG_DB_ID
+      ? writeChangelogEntry({ taskId, prUrl, commitSha, branch, filesChanged: 0, description, repo })
+      : Promise.resolve(),
+    // Notion: update source task status to Done
+    notionPageId
+      ? notionUpdateStatus(notionPageId, "Done")
+      : Promise.resolve(),
+    // Zapier: broadcast task_complete and pr_created events
+    process.env.ZAPIER_WEBHOOK_TASK_COMPLETE
+      ? onTaskComplete({ taskId, description, prUrl, commitSha, repo, workspace })
+      : Promise.resolve(),
+    process.env.ZAPIER_WEBHOOK_PR_CREATED
+      ? onPRCreated({ prUrl, title: description.slice(0, 80), repo, branch, workspace })
+      : Promise.resolve(),
+  ]).then((results) => {
+    results.forEach((r, i) => {
+      if (r.status === "rejected") {
+        console.warn(`[integrations] hook ${i} failed:`, r.reason);
+      }
+    });
+  });
+}
 
 const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
   maxRetriesPerRequest: null,
@@ -280,6 +320,17 @@ export async function processTask(job: Job<TaskData>) {
             console.warn(`[clickup] Failed to link PR to CU-${clickUpTaskId}:`, err)
           );
         }
+
+        // Fire Notion + Zapier integration hooks (non-blocking)
+        fireIntegrationHooks({
+          taskId,
+          repo: targetRepo,
+          prUrl,
+          commitSha,
+          description,
+          branch: branchName,
+          workspace: slackChannelId,
+        });
 
         await updateSlackThread(
           slackChannelId,
