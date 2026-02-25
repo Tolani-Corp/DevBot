@@ -284,14 +284,86 @@ export async function processTask(job: Job<TaskData>) {
         await updateSlackThread(
           slackChannelId,
           slackThreadTs,
-          `🎉 All done! Pull request created:\n${prUrl}\n\n${codeChanges.prDescription}`
+          `🎉 All done! Pull request created:\n${prUrl}\n\n${codeChanges.prDescription}`,
+          [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `🎉 *All done!* Pull request created:\n<${prUrl}|View Pull Request>\n\n${codeChanges.prDescription}`
+              }
+            },
+            {
+              type: "actions",
+              elements: [
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "👍 Good Job",
+                    emoji: true
+                  },
+                  style: "primary",
+                  action_id: "feedback_positive",
+                  value: taskId
+                },
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "👎 Needs Work",
+                    emoji: true
+                  },
+                  style: "danger",
+                  action_id: "feedback_negative",
+                  value: taskId
+                }
+              ]
+            }
+          ]
         );
       } else {
         await updateTaskStatus(taskId, "completed", 100, { completedAt: new Date() });
         await updateSlackThread(
           slackChannelId,
           slackThreadTs,
-          `✅ Changes committed to branch \`${branchName}\`\n\nReview the changes and create a PR manually if needed.`
+          `✅ Changes committed to branch \`${branchName}\`\n\nReview the changes and create a PR manually if needed.`,
+          [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `✅ Changes committed to branch \`${branchName}\`\n\nReview the changes and create a PR manually if needed.`
+              }
+            },
+            {
+              type: "actions",
+              elements: [
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "👍 Good Job",
+                    emoji: true
+                  },
+                  style: "primary",
+                  action_id: "feedback_positive",
+                  value: taskId
+                },
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "👎 Needs Work",
+                    emoji: true
+                  },
+                  style: "danger",
+                  action_id: "feedback_negative",
+                  value: taskId
+                }
+              ]
+            }
+          ]
         );
       }
     } else {

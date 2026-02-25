@@ -52,6 +52,10 @@ export function registerInteractiveHandlers(app: App) {
   // Task action buttons
   app.action("view_pr", handleViewPR);
   app.action("view_diff", handleViewDiff);
+
+  // CLLM Feedback buttons
+  app.action("feedback_positive", handleFeedbackPositive);
+  app.action("feedback_negative", handleFeedbackNegative);
 }
 
 /**
@@ -544,4 +548,40 @@ async function handleViewDiff({ ack, client, body, action }: any) {
   const taskId = action.value;
   // Fetch full diff from database
   // Open modal with full diff view
+}
+
+/**
+ * Handle positive feedback for CLLM improvements
+ */
+async function handleFeedbackPositive({ ack, body, client, respond }: any) {
+  await ack();
+  
+  const taskId = body.actions[0].value;
+  
+  // Send webhook to CLLM or log to database
+  console.log(`[CLLM Feedback] Positive feedback received for task ${taskId}`);
+  
+  // Update the message to show feedback was received
+  await respond({
+    text: "Thanks for the feedback! This helps improve my decision-making models. 🧠✨",
+    replace_original: false,
+  });
+}
+
+/**
+ * Handle negative feedback for CLLM improvements
+ */
+async function handleFeedbackNegative({ ack, body, client, respond }: any) {
+  await ack();
+  
+  const taskId = body.actions[0].value;
+  
+  // Send webhook to CLLM or log to database
+  console.log(`[CLLM Feedback] Negative feedback received for task ${taskId}`);
+  
+  // Update the message to show feedback was received
+  await respond({
+    text: "Thanks for the feedback. I'll use this to adjust my algorithm weights and do better next time. 🛠️📉",
+    replace_original: false,
+  });
 }

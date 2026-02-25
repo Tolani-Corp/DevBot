@@ -1051,6 +1051,71 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: [],
       },
     },
+    {
+      name: "submit_aar",
+      description: "Submit an After Action Report (AAR) to enhance internal memory and adjust algorithm weights.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          report: {
+            type: "object",
+            description: "The AAR object containing scouting, offensive, defensive, monitoring results, and algorithm adjustments.",
+          },
+        },
+        required: ["report"],
+      },
+    },
+    {
+      name: "get_algorithm_weights",
+      description: "Retrieve the current algorithm weights adjusted by past AARs.",
+      inputSchema: {
+        type: "object",
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: "store_generated_password",
+      description: "Store a generated password in the internal vault for memory and decision speed during offensive campaigns.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          password: { type: "string", description: "The generated password" },
+          context: { type: "string", description: "Context or target (e.g., 'admin-panel', 'wifi')" },
+          entropy: { type: "number", description: "Calculated entropy of the password" },
+          isSuccess: { type: "boolean", description: "Whether this password was successfully used in an attack" },
+          tags: { type: "array", items: { type: "string" }, description: "Tags for pivoting (e.g., ['web', 'default'])" },
+          labels: { type: "object", additionalProperties: { type: "string" }, description: "Key-value labels for multidimensional retrieval" },
+        },
+        required: ["password"],
+      },
+    },
+    {
+      name: "get_top_passwords",
+      description: "Retrieve the most successful passwords from the internal vault for a specific context, tags, or labels.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          context: { type: "string", description: "Context or target (e.g., 'admin-panel', 'wifi')" },
+          tags: { type: "array", items: { type: "string" }, description: "Filter by tags (e.g., ['web', 'default'])" },
+          labels: { type: "object", additionalProperties: { type: "string" }, description: "Filter by key-value labels" },
+          limit: { type: "number", description: "Number of passwords to retrieve (default: 10)" },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "run_e2e_simulation",
+      description: "Run an end-to-end offensive, defensive, scouting, and monitoring campaign simulation to generate an AAR.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          target: { type: "string", description: "Target domain or IP" },
+          context: { type: "string", description: "Campaign context (e.g., 'auth', 'sql_injection')" },
+        },
+        required: ["target"],
+      },
+    },
   ],
 }));
 

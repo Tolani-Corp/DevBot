@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0a0a0a">
+<title>NATT TACTICAL</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --border: #2a2a2a;
+    --green: #00ff41;
+    --green-dim: #006b1a;
+    --red: #ff3b30;
+    --yellow: #ffcc00;
+    --blue: #0af;
+    --text: #e0e0e0;
+    --text-dim: #666;
+    --font: 'Courier New', Courier, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
+  body { display: flex; flex-direction: column; }
+
+  /* ── Header ── */
+  #header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--green-dim);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  #header .logo { color: var(--green); font-size: 16px; font-weight: bold; letter-spacing: 3px; }
+  #header .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+  #header .status-label { font-size: 11px; color: var(--green); letter-spacing: 1px; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ── Main content ── */
+  #content { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .section { display: none; padding: 16px; min-height: 100%; }
+  .section.active { display: block; }
+
+  /* ── Bottom nav (mobile) ── */
+  #nav {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 10px 4px 8px;
+    font-family: var(--font);
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: color 0.15s;
+    min-height: 56px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn.active { color: var(--green); }
+  .nav-btn .icon { font-size: 20px; }
+  .nav-btn .label { letter-spacing: 1px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    color: var(--green);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+
+  /* ── Stat grid ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px; text-align: center; }
+  .stat-val { font-size: 22px; color: var(--green); font-weight: bold; }
+  .stat-val.warn { color: var(--yellow); }
+  .stat-val.danger { color: var(--red); }
+  .stat-lbl { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-top: 4px; }
+
+  /* ── Big op buttons ── */
+  .ops-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 600px) { .ops-grid { grid-template-columns: repeat(3, 1fr); } }
+  .op-btn {
+    background: var(--bg3);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 18px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-height: 80px;
+    transition: background 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .op-btn:hover, .op-btn:active { background: var(--green-dim); border-color: var(--green); }
+  .op-btn .op-icon { font-size: 24px; }
+  .op-btn.danger { border-color: #7a1a1a; color: var(--red); }
+  .op-btn.danger:hover, .op-btn.danger:active { background: #3a0a0a; }
+
+  /* ── Inputs ── */
+  input, textarea, select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    width: 100%;
+    outline: none;
+    margin-bottom: 8px;
+  }
+  input:focus, textarea:focus { border-color: var(--green); }
+  label { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; display: block; margin-bottom: 4px; text-transform: uppercase; }
+  .form-group { margin-bottom: 12px; }
+
+  /* ── Buttons ── */
+  .btn {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green);
+    font-family: var(--font);
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:hover, .btn:active { background: #00802a; }
+  .btn.secondary { background: var(--bg3); color: var(--text-dim); border-color: var(--border); }
+  .btn.danger { background: #3a0a0a; color: var(--red); border-color: var(--red); }
+  .btn.small { padding: 6px 12px; font-size: 11px; width: auto; }
+  .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    z-index: 100;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--green-dim);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 560px;
+    margin: auto;
+    padding: 20px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .modal-title { color: var(--green); font-size: 13px; letter-spacing: 2px; }
+  .modal-close { background: none; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer; padding: 0 4px; }
+
+  /* ── Result output ── */
+  .result-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 320px;
+    overflow-y: auto;
+    margin-top: 12px;
+    color: var(--green);
+  }
+  .result-box.error { color: var(--red); border-color: #7a1a1a; }
+
+  /* ── Feedback ── */
+  .feedback-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .feedback-row span { font-size: 11px; color: var(--text-dim); }
+  .fb-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-size: 18px; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
+  .fb-btn:hover { border-color: var(--green); }
+
+  /* ── Vault table ── */
+  .vault-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; margin-bottom: 8px; }
+  .vault-pw { color: var(--yellow); font-size: 13px; letter-spacing: 2px; }
+  .vault-meta { font-size: 10px; color: var(--text-dim); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .vault-tag { background: var(--green-dim); color: var(--green); padding: 2px 7px; border-radius: 3px; font-size: 10px; }
+
+  /* ── AAR item ── */
+  .aar-item { border-left: 3px solid var(--green-dim); padding-left: 12px; margin-bottom: 14px; }
+  .aar-ts { font-size: 10px; color: var(--text-dim); }
+  .aar-score { font-size: 20px; color: var(--green); font-weight: bold; }
+
+  /* ── Weights ── */
+  .weight-bar-wrap { margin-bottom: 10px; }
+  .weight-label { font-size: 11px; color: var(--text-dim); margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .weight-bar-bg { background: var(--bg3); border-radius: 2px; height: 8px; overflow: hidden; }
+  .weight-bar { background: var(--green); height: 100%; border-radius: 2px; transition: width 0.5s; }
+
+  /* ── Survival guide ── */
+  .survival-search { margin-bottom: 14px; }
+  .survival-cat { cursor: pointer; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; margin-bottom: 6px; }
+  .survival-cat-header { display: flex; justify-content: space-between; align-items: center; }
+  .survival-cat-title { color: var(--yellow); font-size: 12px; letter-spacing: 2px; }
+  .survival-cat-body { display: none; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .survival-cat.open .survival-cat-body { display: block; }
+  .survival-tip { font-size: 12px; line-height: 1.8; color: var(--text); padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .survival-tip:last-child { border-bottom: none; }
+  .tip-priority { font-size: 10px; padding: 1px 6px; border-radius: 2px; margin-right: 6px; }
+  .tip-priority.crit { background: #7a0000; color: var(--red); }
+  .tip-priority.high { background: #5a4400; color: var(--yellow); }
+  .tip-priority.med { background: var(--green-dim); color: var(--green); }
+
+  /* ── PANIC button ── */
+  #panic-fab {
+    position: fixed;
+    bottom: 72px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 50;
+    box-shadow: 0 0 18px rgba(255,59,48,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Loading spinner ── */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--green-dim); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Network list ── */
+  .net-item { font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .net-iface { color: var(--text-dim); }
+  .net-addr { color: var(--blue); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo">⬡ NATT TACTICAL</div>
+  <div>
+    <span class="status-dot" id="status-dot"></span>
+    <span class="status-label" id="status-label">ONLINE</span>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="content">
+
+  <!-- STATUS -->
+  <div class="section active" id="sec-status">
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-box"><div class="stat-val" id="s-temp">--</div><div class="stat-lbl">CPU TEMP</div></div>
+      <div class="stat-box"><div class="stat-val" id="s-mem">--</div><div class="stat-lbl">MEMORY %</div></div>
+      <div class="stat-box"><div class="stat-val" id="s-load">--</div><div class="stat-lbl">LOAD AVG</div></div>
+      <div class="stat-box"><div class="stat-val" id="s-uptime">--</div><div class="stat-lbl">UPTIME (H)</div></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">NETWORK INTERFACES</div>
+      <div id="net-list"><div class="stat-lbl">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">SYSTEM INFO</div>
+      <div id="sys-info" style="font-size:12px; line-height:2; color:var(--text-dim)">Loading...</div>
+    </div>
+    <div style="font-size:10px; color:var(--text-dim); text-align:center; padding:8px 0">Auto-refresh every 10s &nbsp;|&nbsp; <span id="last-refresh">--</span></div>
+  </div>
+
+  <!-- OPS -->
+  <div class="section" id="sec-ops">
+    <div class="card">
+      <div class="card-title">OPERATOR TOOLS</div>
+      <div class="ops-grid">
+        <button class="op-btn" onclick="openTool('scan_for_secrets')"><span class="op-icon">🔍</span>SCAN SECRETS</button>
+        <button class="op-btn" onclick="openTool('identify_hash')"><span class="op-icon">🔑</span>IDENTIFY HASH</button>
+        <button class="op-btn" onclick="openTool('generate_password')"><span class="op-icon">🛡</span>GEN PASSWORD</button>
+        <button class="op-btn" onclick="openTool('run_e2e_simulation')"><span class="op-icon">⚡</span>E2E SIMULATE</button>
+        <button class="op-btn" onclick="openTool('get_top_passwords')"><span class="op-icon">📋</span>TOP PASSWORDS</button>
+        <button class="op-btn" onclick="openTool('validate_roe_checklist')"><span class="op-icon">📜</span>VALIDATE ROE</button>
+        <button class="op-btn" onclick="openTool('get_vulnerability_info')"><span class="op-icon">🕷</span>VULN INFO</button>
+        <button class="op-btn" onclick="openTool('decode_jwt')"><span class="op-icon">🔓</span>DECODE JWT</button>
+        <button class="op-btn" onclick="openTool('get_default_credentials')"><span class="op-icon">🗝</span>DEFAULT CREDS</button>
+        <button class="op-btn" onclick="openTool('get_auth_bypass_techniques')"><span class="op-icon">🚪</span>AUTH BYPASS</button>
+        <button class="op-btn" onclick="openTool('analyze_vpn_config')"><span class="op-icon">🌐</span>ANALYZE VPN</button>
+        <button class="op-btn" onclick="openTool('store_generated_password')"><span class="op-icon">💾</span>STORE PASS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VAULT -->
+  <div class="section" id="sec-vault">
+    <div class="card">
+      <div class="card-title">PASSWORD VAULT</div>
+      <div class="form-group">
+        <input type="text" id="vault-filter" placeholder="Filter by context or tag..." oninput="renderVault()">
+      </div>
+      <div id="vault-list"><div class="stat-lbl">Loading vault...</div></div>
+    </div>
+  </div>
+
+  <!-- INTEL -->
+  <div class="section" id="sec-intel">
+    <div class="card">
+      <div class="card-title">ALGORITHM WEIGHTS</div>
+      <div id="weights-display"><div class="stat-lbl">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AFTER ACTION REPORTS</div>
+      <div id="aar-list"><div class="stat-lbl">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- SURVIVAL -->
+  <div class="section" id="sec-survival">
+    <div class="card">
+      <div class="card-title">⚠ OFFLINE SURVIVAL GUIDE</div>
+      <div class="survival-search">
+        <input type="text" id="survival-search" placeholder="Search survival tips..." oninput="renderSurvival()">
+      </div>
+      <div id="survival-cats"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div id="nav">
+  <button class="nav-btn active" onclick="nav('status',this)"><span class="icon">📡</span><span class="label">STATUS</span></button>
+  <button class="nav-btn" onclick="nav('ops',this)"><span class="icon">⚡</span><span class="label">OPS</span></button>
+  <button class="nav-btn" onclick="nav('vault',this)"><span class="icon">🔐</span><span class="label">VAULT</span></button>
+  <button class="nav-btn" onclick="nav('intel',this)"><span class="icon">🧠</span><span class="label">INTEL</span></button>
+  <button class="nav-btn" onclick="nav('survival',this)"><span class="icon">🌿</span><span class="label">SURVIVAL</span></button>
+</div>
+
+<!-- PANIC FAB -->
+<button id="panic-fab" onclick="triggerPanic()" title="PANIC — Wipe all memory">☠</button>
+
+<!-- Tool Modal -->
+<div class="modal-overlay" id="tool-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">TOOL</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-form"></div>
+    <div id="modal-result"></div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let vaultData = [];
+let survivalData = [];
+let currentTool = null;
+let lastTaskId = null;
+
+// ── Navigation ─────────────────────────────────────────────────
+function nav(section, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + section).classList.add('active');
+  btn.classList.add('active');
+
+  if (section === 'vault') loadVault();
+  if (section === 'intel') loadIntel();
+  if (section === 'survival') renderSurvival();
+}
+
+// ── Health Poll ────────────────────────────────────────────────
+async function pollHealth() {
+  try {
+    const r = await fetch('/api/health');
+    const d = await r.json();
+
+    // Stats
+    const temp = d.cpuTemp ?? 'N/A';
+    const tempNum = parseFloat(temp);
+    const tempEl = document.getElementById('s-temp');
+    tempEl.textContent = temp;
+    tempEl.className = 'stat-val' + (tempNum > 75 ? ' danger' : tempNum > 60 ? ' warn' : '');
+
+    const memEl = document.getElementById('s-mem');
+    memEl.textContent = d.memory.percent + '%';
+    memEl.className = 'stat-val' + (d.memory.percent > 85 ? ' danger' : d.memory.percent > 65 ? ' warn' : '');
+
+    document.getElementById('s-load').textContent = (d.load?.[0] ?? 0).toFixed(2);
+    document.getElementById('s-uptime').textContent = Math.floor(d.uptime / 3600);
+
+    // Network
+    const netEl = document.getElementById('net-list');
+    if (d.network && d.network.length > 0) {
+      netEl.innerHTML = d.network.map(n => `
+        <div class="net-item">
+          <span class="net-iface">${n.name}</span>
+          <span class="net-addr">${n.address}</span>
+        </div>`).join('');
+    } else {
+      netEl.innerHTML = '<div class="stat-lbl">No active interfaces</div>';
+    }
+
+    // Sysinfo
+    document.getElementById('sys-info').innerHTML = `
+      <span style="color:var(--green)">HOST:</span> ${d.hostname}<br>
+      <span style="color:var(--green)">PLATFORM:</span> ${d.platform} / ${d.arch}<br>
+      <span style="color:var(--green)">RAM:</span> ${d.memory.usedMB}MB / ${d.memory.totalMB}MB
+    `;
+
+    document.getElementById('status-dot').style.background = '#00ff41';
+    document.getElementById('status-label').textContent = 'ONLINE';
+    document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById('status-dot').style.background = '#ff3b30';
+    document.getElementById('status-label').textContent = 'OFFLINE';
+  }
+}
+
+// ── Vault ──────────────────────────────────────────────────────
+async function loadVault() {
+  try {
+    const r = await fetch('/api/vault');
+    vaultData = await r.json();
+    renderVault();
+  } catch (e) {
+    document.getElementById('vault-list').innerHTML = '<div class="stat-lbl" style="color:var(--red)">Failed to load vault.</div>';
+  }
+}
+
+function renderVault() {
+  const filter = (document.getElementById('vault-filter')?.value ?? '').toLowerCase();
+  const filtered = vaultData.filter(v =>
+    !filter ||
+    (v.context ?? '').toLowerCase().includes(filter) ||
+    (v.tags ?? []).some(t => t.toLowerCase().includes(filter))
+  );
+  if (filtered.length === 0) {
+    document.getElementById('vault-list').innerHTML = '<div class="stat-lbl">No entries found.</div>';
+    return;
+  }
+  document.getElementById('vault-list').innerHTML = filtered.map(v => `
+    <div class="vault-item">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <span class="vault-pw">${v.password}</span>
+        <button class="btn small" onclick="copyText('${v.password}')">COPY</button>
+      </div>
+      <div class="vault-meta">
+        <span>CTX: ${v.context ?? '--'}</span>
+        <span>ENTROPY: ${(v.entropy ?? 0).toFixed(1)}</span>
+        <span>✓: ${v.successCount ?? 0}</span>
+        ${(v.tags ?? []).map(t => `<span class="vault-tag">${t}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── Intel ──────────────────────────────────────────────────────
+async function loadIntel() {
+  try {
+    const [wRes, aRes] = await Promise.all([fetch('/api/weights'), fetch('/api/aar')]);
+    const weights = await wRes.json();
+    const aars = await aRes.json();
+
+    // Weights
+    const wEl = document.getElementById('weights-display');
+    const entries = Object.entries(weights);
+    if (entries.length === 0) {
+      wEl.innerHTML = '<div class="stat-lbl">No weights recorded yet. Run simulations to build memory.</div>';
+    } else {
+      const max = Math.max(...entries.map(e => e[1]));
+      wEl.innerHTML = entries.map(([k, v]) => `
+        <div class="weight-bar-wrap">
+          <div class="weight-label"><span>${k}</span><span>${Number(v).toFixed(3)}</span></div>
+          <div class="weight-bar-bg"><div class="weight-bar" style="width:${Math.round((v/max)*100)}%"></div></div>
+        </div>`).join('');
+    }
+
+    // AARs
+    const aEl = document.getElementById('aar-list');
+    if (!aars || aars.length === 0) {
+      aEl.innerHTML = '<div class="stat-lbl">No AARs recorded yet.</div>';
+    } else {
+      aEl.innerHTML = aars.map(a => `
+        <div class="aar-item">
+          <div class="aar-ts">${a.timestamp ?? '--'}</div>
+          <div class="aar-score">${a.overallScore ?? '--'}</div>
+          <div style="font-size:11px; color:var(--text-dim)">${a.summary ?? ''}</div>
+        </div>`).join('');
+    }
+  } catch (e) {
+    document.getElementById('weights-display').innerHTML = '<div class="stat-lbl" style="color:var(--red)">Failed to load intel.</div>';
+  }
+}
+
+// ── Survival Guide ─────────────────────────────────────────────
+function renderSurvival() {
+  const query = (document.getElementById('survival-search')?.value ?? '').toLowerCase();
+  const container = document.getElementById('survival-cats');
+
+  const filtered = SURVIVAL_DATA.map(cat => ({
+    ...cat,
+    tips: cat.tips.filter(t =>
+      !query ||
+      t.text.toLowerCase().includes(query) ||
+      cat.title.toLowerCase().includes(query)
+    )
+  })).filter(cat => cat.tips.length > 0);
+
+  container.innerHTML = filtered.map((cat, ci) => `
+    <div class="survival-cat ${query ? 'open' : ''}" id="scat-${ci}" onclick="toggleCat(${ci})">
+      <div class="survival-cat-header">
+        <span class="survival-cat-title">${cat.icon} ${cat.title}</span>
+        <span style="color:var(--text-dim); font-size:16px">${cat.expand ? '▲' : '▼'}</span>
+      </div>
+      <div class="survival-cat-body">
+        ${cat.tips.map(t => `
+          <div class="survival-tip">
+            <span class="tip-priority ${t.priority}">${t.priority.toUpperCase()}</span>${t.text}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleCat(i) {
+  const el = document.getElementById('scat-' + i);
+  el.classList.toggle('open');
+}
+
+// ── Tool Modal ─────────────────────────────────────────────────
+const TOOL_FORMS = {
+  scan_for_secrets: { label:'SCAN FOR SECRETS', fields:[{key:'content',type:'textarea',label:'PASTE CONTENT TO SCAN',rows:6}] },
+  identify_hash: { label:'IDENTIFY HASH', fields:[{key:'hash',type:'text',label:'HASH STRING'}] },
+  generate_password: { label:'GENERATE PASSWORD', fields:[{key:'length',type:'number',label:'LENGTH (default 32)',default:'32'},{key:'type',type:'select',label:'TYPE',options:['password','passphrase']}] },
+  run_e2e_simulation: { label:'E2E SIMULATION', fields:[{key:'target',type:'text',label:'TARGET (domain or IP)'},{key:'context',type:'text',label:'CONTEXT (e.g., auth, sql_injection)'}] },
+  get_top_passwords: { label:'TOP PASSWORDS', fields:[{key:'context',type:'text',label:'CONTEXT (leave blank for all)'},{key:'limit',type:'number',label:'LIMIT (default 10)',default:'10'}] },
+  validate_roe_checklist: { label:'VALIDATE ROE', fields:[{key:'missionType',type:'text',label:'MISSION TYPE'},{key:'targetScope',type:'text',label:'TARGET SCOPE'}] },
+  get_vulnerability_info: { label:'VULNERABILITY INFO', fields:[{key:'category',type:'text',label:'CATEGORY (e.g., sqli, xss, ssrf)'}] },
+  decode_jwt: { label:'DECODE JWT', fields:[{key:'token',type:'textarea',label:'JWT TOKEN',rows:3}] },
+  get_default_credentials: { label:'DEFAULT CREDENTIALS', fields:[{key:'device',type:'text',label:'DEVICE/VENDOR (e.g., cisco, mikrotik)'}] },
+  get_auth_bypass_techniques: { label:'AUTH BYPASS', fields:[{key:'category',type:'text',label:'CATEGORY (leave blank for all)'}] },
+  analyze_vpn_config: { label:'ANALYZE VPN CONFIG', fields:[{key:'protocol',type:'text',label:'PROTOCOL (e.g., wireguard, openvpn)'},{key:'config',type:'textarea',label:'CONFIG SNIPPET',rows:4}] },
+  store_generated_password: { label:'STORE PASSWORD', fields:[{key:'password',type:'text',label:'PASSWORD'},{key:'context',type:'text',label:'CONTEXT'},{key:'entropy',type:'number',label:'ENTROPY',default:'0'},{key:'tags',type:'text',label:'TAGS (comma separated)'}] },
+};
+
+function openTool(name) {
+  currentTool = name;
+  const def = TOOL_FORMS[name] ?? { label: name.toUpperCase().replace(/_/g,' '), fields: [{key:'input',type:'text',label:'INPUT'}] };
+  document.getElementById('modal-title').textContent = def.label;
+
+  const formEl = document.getElementById('modal-form');
+  formEl.innerHTML = def.fields.map(f => {
+    if (f.type === 'textarea') return `<div class="form-group"><label>${f.label}</label><textarea id="tf-${f.key}" rows="${f.rows ?? 4}" placeholder="${f.label}..."></textarea></div>`;
+    if (f.type === 'select') return `<div class="form-group"><label>${f.label}</label><select id="tf-${f.key}">${(f.options??[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+    return `<div class="form-group"><label>${f.label}</label><input type="${f.type}" id="tf-${f.key}" value="${f.default??''}" placeholder="${f.label}..."></div>`;
+  }).join('') + `<button class="btn" onclick="runTool()">▶ EXECUTE</button>`;
+
+  document.getElementById('modal-result').innerHTML = '';
+  document.getElementById('tool-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('tool-modal').classList.remove('open');
+  currentTool = null;
+}
+
+async function runTool() {
+  if (!currentTool) return;
+  const def = TOOL_FORMS[currentTool] ?? { fields: [{key:'input',type:'text'}] };
+  const body = {};
+  for (const f of def.fields) {
+    const el = document.getElementById('tf-' + f.key);
+    if (!el) continue;
+    let val = el.value.trim();
+    if (f.type === 'number') val = val ? Number(val) : undefined;
+    if (f.key === 'tags' && typeof val === 'string') val = val ? val.split(',').map(s=>s.trim()) : [];
+    if (val !== undefined && val !== '') body[f.key] = val;
+  }
+
+  const resultEl = document.getElementById('modal-result');
+  resultEl.innerHTML = '<div class="result-box"><span class="spinner"></span>Executing...</div>';
+
+  try {
+    const r = await fetch('/api/tool/' + currentTool, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    const text = d.result?.content?.[0]?.text ?? JSON.stringify(d, null, 2);
+    const taskId = 'tool-' + Date.now();
+    lastTaskId = taskId;
+    resultEl.innerHTML = `
+      <div class="result-box">${escapeHtml(text)}</div>
+      <div class="feedback-row">
+        <span>RATE THIS RESULT:</span>
+        <button class="fb-btn" onclick="sendFeedback('positive','${taskId}')">👍</button>
+        <button class="fb-btn" onclick="sendFeedback('negative','${taskId}')">👎</button>
+      </div>`;
+  } catch (e) {
+    resultEl.innerHTML = `<div class="result-box error">ERROR: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function sendFeedback(type, taskId) {
+  try {
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type, taskId })
+    });
+    document.querySelector('.feedback-row').innerHTML = `<span style="color:var(--green)">✓ Feedback recorded. CLLM will adjust.</span>`;
+  } catch {}
+}
+
+// ── Panic ──────────────────────────────────────────────────────
+async function triggerPanic() {
+  const c1 = confirm('⚠ PANIC MODE\n\nThis will WIPE all memory files:\n• Password vault\n• AAR history\n• Algorithm weights\n• Feedback logs\n\nProceed?');
+  if (!c1) return;
+  const c2 = confirm('FINAL CONFIRM: Type OK in the next prompt.');
+  if (!c2) return;
+  const code = prompt('Type WIPE to confirm memory wipe:');
+  if (code !== 'WIPE') { alert('Panic cancelled.'); return; }
+  try {
+    const r = await fetch('/api/panic', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ confirm: 'WIPE' })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      alert('✓ Memory wiped at ' + d.timestamp);
+      vaultData = [];
+      renderVault();
+    } else {
+      alert('Error: ' + d.error);
+    }
+  } catch (e) {
+    alert('Panic request failed: ' + e.message);
+  }
+}
+
+// ── Utilities ──────────────────────────────────────────────────
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // brief visual feedback
+    const btn = event.target;
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = 'COPY', 1200);
+  }).catch(() => {
+    prompt('Copy manually:', text);
+  });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Survival Data ──────────────────────────────────────────────
+const SURVIVAL_DATA = [
+  {
+    icon: '📡',
+    title: 'COMMUNICATIONS',
+    tips: [
+      { priority: 'crit', text: 'Default to out-of-band comms. If primary channel is compromised, switch to pre-agreed fallback (e.g., mesh radio, physical dead-drop).' },
+      { priority: 'crit', text: 'Assume all digital comms are monitored. Use end-to-end encrypted channels (Signal, Briar, LoRa mesh) whenever available.' },
+      { priority: 'high', text: 'Mesh networks (Meshtastic + LoRa) can operate without internet over 10–50km range on the 915MHz or 868MHz band.' },
+      { priority: 'high', text: 'On cellular: use airplane mode + WiFi only to prevent IMSI catchers from logging your device ID.' },
+      { priority: 'med', text: 'Missed-check-in protocol: if a contact misses a scheduled check-in by >30min, assume compromise. Stop transmitting on that channel immediately.' },
+      { priority: 'med', text: 'Maritime frequencies (VHF Ch 16) are the universal distress channel worldwide. Coast Guard monitors 24/7.' },
+      { priority: 'med', text: 'Amateur radio (ham) frequencies require a license legally but provide intercontinental range in emergencies using HF bands (40m = 7MHz).' },
+    ]
+  },
+  {
+    icon: '🔐',
+    title: 'OPSEC',
+    tips: [
+      { priority: 'crit', text: 'Power off device fully if detainment risk. Data at rest is only safe if disk is encrypted AND device is powered off (not just locked).' },
+      { priority: 'crit', text: 'PANIC button wipes .natt-memory — use it if device is about to be seized. Covers vault, AARs, weights, and feedback logs.' },
+      { priority: 'crit', text: 'Never use real names, real locations, or real targets in any system connected to this dashboard.' },
+      { priority: 'high', text: 'Use Tor or a trusted VPN before launching any NATT tool against a target. Your real IP is your real address.' },
+      { priority: 'high', text: 'TAILS OS on a USB drive leaves zero trace on the host machine. Use for sensitive operations.' },
+      { priority: 'high', text: 'Physical security: cover webcam, use privacy screen protector, and position yourself against a wall in public.' },
+      { priority: 'med', text: 'Minimize digital footprint: disable Bluetooth when not in use, disable location services, use DNS-over-HTTPS (1.1.1.1).' },
+      { priority: 'med', text: 'Social engineering is the #1 attack vector. Verify all requests through a secondary channel before complying.' },
+    ]
+  },
+  {
+    icon: '🌐',
+    title: 'NETWORK SURVIVAL',
+    tips: [
+      { priority: 'crit', text: 'If internet is down, this dashboard still runs locally. Access at http://localhost:7474 or your Pi\'s LAN IP on port 7474.' },
+      { priority: 'crit', text: 'Raspberry Pi can share its cellular connection (USB dongle) to a local WiFi hotspot. All devices on the hotspot then route through the Pi.' },
+      { priority: 'high', text: 'Setup Pi as a wireless access point: hostapd + dnsmasq. Even without internet, creates a local network for device coordination.' },
+      { priority: 'high', text: 'Captive portals can be bypassed by using DNS over HTTPS (DoH) or changing DNS to 8.8.8.8 or 1.1.1.1.' },
+      { priority: 'high', text: 'Network scanning: nmap -sV -p 22,80,443,8080,7474 <subnet>/24 to discover active services on local network.' },
+      { priority: 'med', text: 'Pi can act as a WiFi repeater/extender using a second USB WiFi adapter, boosting range in field ops.' },
+      { priority: 'med', text: 'Avoid hotel/public WiFi without a VPN. Use your phone as a hotspot instead — it\'s significantly more secure.' },
+    ]
+  },
+  {
+    icon: '⚡',
+    title: 'POWER MANAGEMENT',
+    tips: [
+      { priority: 'crit', text: 'Raspberry Pi 4 draws ~3W at idle, ~7W under load. A 20,000mAh power bank (5V/3A) provides roughly 40–60 hours of idle runtime.' },
+      { priority: 'crit', text: 'Thermal throttling: Pi 4 throttles at 80°C. In hot environments, attach a heatsink or active fan. Throttled Pi can drop to 600MHz (from 1.8GHz).' },
+      { priority: 'high', text: 'For solar charging: a 10W solar panel can maintain a Pi 4 in full sun. Get a solar charge controller, not a direct panel connection.' },
+      { priority: 'high', text: 'Reduce Pi power draw: disable HDMI (tvservice --off), disable LEDs, set GPU memory to 16MB if headless: gpu_mem=16 in /boot/config.txt.' },
+      { priority: 'high', text: 'Phone battery: put it in airplane mode (WiFi only) to reduce drain by 60-80%, Brightness to minimum, disable auto-sync and push notifications.' },
+      { priority: 'med', text: 'UPS HATs (Uninterruptible Power Supply) for Pi keep it running through brief power interruptions and signal via GPIO when battery is low.' },
+    ]
+  },
+  {
+    icon: '🔑',
+    title: 'ENCRYPTION',
+    tips: [
+      { priority: 'crit', text: 'AES-256-GCM is the gold standard for file/disk encryption. Use VeraCrypt (cross-platform) or LUKS (Linux) for full disk encryption.' },
+      { priority: 'crit', text: 'Password entropy: length > complexity. A 6-word passphrase (e.g., "correct-horse-battery-staple-random-cloud") has ~77 bits of entropy — stronger than most complex passwords.' },
+      { priority: 'high', text: 'GPG/OpenPGP for file encryption and signing. Generate a 4096-bit RSA or Ed25519 key: gpg --gen-key' },
+      { priority: 'high', text: 'Use the NATT password generator (Gen Password button) for cryptographically secure passwords. Store in the vault with context tags.' },
+      { priority: 'high', text: 'Key derivation: PBKDF2, bcrypt, or Argon2id are the correct algorithms for storing/deriving keys from passwords. Never use MD5 or SHA1 for this.' },
+      { priority: 'med', text: 'Steganography can hide data inside image files (steghide). Useful for covert data exfiltration or dead-drop communication.' },
+      { priority: 'med', text: 'Ephemeral keys: generate fresh key pairs for each sensitive operation. Do not reuse keys across missions.' },
+    ]
+  },
+  {
+    icon: '🤖',
+    title: 'AGENT USAGE',
+    tips: [
+      { priority: 'crit', text: 'This dashboard requires the NATT server running ("npm start"). If tools fail, check that dist/ exists — run "npm run build-natt" from the tactical-dashboard directory first.' },
+      { priority: 'crit', text: 'PANIC wipes .natt-memory only. It does NOT wipe the NATT knowledge base or tool code. It clears: vault, AARs, weights, feedback logs.' },
+      { priority: 'high', text: 'Algorithm weights improve over time via AARs. Run E2E Simulation after each operation to feed results back into the learning loop.' },
+      { priority: 'high', text: 'Password vault is local SQLite-alternative (JSON). Back it up: copy .natt-memory/password-vault.json to a secure encrypted USB before panic procedures.' },
+      { priority: 'high', text: 'Feedback (thumbs up/down) after each tool result trains the CLLM. Use it — even a few data points significantly improve future decision quality.' },
+      { priority: 'med', text: 'After Action Reports automatically adjust algorithm weights: high-success campaigns increase offensive weights, low-success campaigns trigger defensive weight adjustments.' },
+      { priority: 'med', text: 'The E2E Simulation does not require network access. It is a knowledge-based simulation that uses historic AAR data to predict campaign outcomes.' },
+    ]
+  },
+  {
+    icon: '🏥',
+    title: 'FIRST AID — DIGITAL',
+    tips: [
+      { priority: 'crit', text: 'Device won\'t boot: if Raspberry Pi has corrupted SD card, boot from USB3 (faster + more reliable than SD for long-term ops). Keep a backup SD card with a clean image.' },
+      { priority: 'crit', text: 'Suspected malware: disconnect from all networks immediately. Boot from a known-clean live USB (Tails/Kali). Do not save or access sensitive files until clean.' },
+      { priority: 'high', text: 'Data recovery: testdisk and photorec (open source) recover files from corrupted/deleted partitions. Run from a live boot, mount the damaged drive read-only.' },
+      { priority: 'high', text: 'SSH connection dropped: reconnect with ssh -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" to auto-reconnect on unstable links.' },
+      { priority: 'high', text: 'RAM overload causing crashes: reduce NATT dashboard ops, disable other services (sudo systemctl stop apache2 etc.), add swap space: sudo dphys-swapfile install.' },
+      { priority: 'med', text: 'SD card lifespan: write-heavy ops (databases, logs) degrade SD cards fast. Use a USB3 SSD for the Pi OS drive for field deployments.' },
+    ]
+  },
+  {
+    icon: '🛡',
+    title: 'DEFENSIVE POSTURE',
+    tips: [
+      { priority: 'crit', text: 'Change default credentials on ALL devices immediately after setup. Default passwords are the #1 entry point for adversaries.' },
+      { priority: 'crit', text: 'Firewall the Pi: ufw allow 7474; ufw enable. Only expose port 7474 on trusted interfaces (not WAN).' },
+      { priority: 'high', text: 'Intrusion detection: install fail2ban to block brute-force SSH attacks. sudo apt install fail2ban — it configures itself automatically.' },
+      { priority: 'high', text: 'Log rotation: ensure /var/log does not fill up the disk. logrotate handles this on most Linux distros — verify it is running: logrotate --debug /etc/logrotate.conf.' },
+      { priority: 'high', text: 'Port knocking: hide SSH (port 22) behind a knock sequence. knockd allows SSH only after a specific sequence of connection attempts on decoy ports.' },
+      { priority: 'med', text: 'Network segmentation: keep the NATT device on a separate VLAN or isolated hotspot from personal/work devices.' },
+      { priority: 'med', text: 'Regular updates are your most cost-effective defense: sudo apt update && sudo apt upgrade. Patch weekly minimum.' },
+    ]
+  },
+];
+
+// ── Init ───────────────────────────────────────────────────────
+pollHealth();
+setInterval(pollHealth, 10000);
+renderSurvival();
+</script>
+</body>
+</html>

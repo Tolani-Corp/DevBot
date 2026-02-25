@@ -3,13 +3,15 @@ import { app } from "./bot";
 export async function updateSlackThread(
   channelId: string,
   threadTs: string,
-  message: string
+  message: string,
+  blocks?: any[]
 ): Promise<void> {
   try {
     await app.client.chat.postMessage({
       channel: channelId,
       thread_ts: threadTs,
       text: message,
+      ...(blocks ? { blocks } : {}),
     });
   } catch (error) {
     console.error("Failed to update Slack thread:", error);
