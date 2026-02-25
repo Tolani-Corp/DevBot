@@ -74,6 +74,16 @@ export interface MissionPhase {
   outputArtifacts: string[];
 }
 
+export interface ReverseEngineeringKnowledge {
+  id: string;
+  category: "basic" | "advanced" | "tools" | "resources" | "practice";
+  name: string;
+  description: string;
+  techniques?: string[];
+  tools?: string[];
+  links?: string[];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  ROE Templates
 // ─────────────────────────────────────────────────────────────────────────────
@@ -468,4 +478,64 @@ export const MISSION_CHECKLISTS: MissionChecklist[] = [
       },
     ],
   },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Reverse Engineering Knowledge (SANReN CSC)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const REVERSE_ENGINEERING_KNOWLEDGE: ReverseEngineeringKnowledge[] = [
+  {
+    id: "re-basic-activities",
+    category: "basic",
+    name: "Basic RE Activities",
+    description: "Initial steps to analyze a compiled application or binary.",
+    techniques: [
+      "Check the File Type: determine the file type by executing the `file [filename]` command in a terminal.",
+      "Execute the Binary: interact with the binary in a controlled, sandbox environment. Check for inputs requested.",
+      "Print Strings: print all the strings present in the binary using `strings -a [filename]` command."
+    ],
+    tools: ["file", "strings", "sandbox"]
+  },
+  {
+    id: "re-fuzzing",
+    category: "advanced",
+    name: "Fuzzing",
+    description: "Test the input response of the application. Test how the application responds when presented with unexpected inputs (submitting an Integer in a String field or visa versa). Determine what controls are in place to prevent unexpected user behaviour. Map out these controls to start identifying control flows within the application. Fuzzing could be a viable technique to identify insecure input validation and possible injection paths.",
+    techniques: ["Input validation testing", "Unexpected input injection", "Control flow mapping"]
+  },
+  {
+    id: "re-decompilation",
+    category: "advanced",
+    name: "Decompilation",
+    description: "Decompiling an application attempts to convert the binary code into the higher order language it was written in. Higher order languages tend to be more human readable but depending on how the source code was obfuscated, the decompiled code might still be difficult to decipher. It is recommended you step through the code blocks to determine the logical flow of the program.",
+    tools: ["Hex Rays", "APKTool", "Dex2Jar", "Java-Decompiler", "Hex Editor (hexed.it)"]
+  },
+  {
+    id: "re-disassemble",
+    category: "advanced",
+    name: "Disassemble",
+    description: "A disassembler tool breaks down a compiled program into machine code.",
+    tools: ["Binary Ninja", "Ghidra", "Radare2", "IDA Pro"]
+  },
+  {
+    id: "re-debugging",
+    category: "advanced",
+    name: "Debugging",
+    description: "A debugging application allows you to perform dynamic analysis and set break points to step through the execution of a program. Another option would be to perform active analysis and step through the code with a debugger.",
+    tools: ["OllyDbg", "GDB", "x64dbg"]
+  },
+  {
+    id: "re-resources",
+    category: "resources",
+    name: "Additional Resources & Practice",
+    description: "Platforms and challenges to practice Reverse Engineering skills.",
+    links: [
+      "Microcorruption (https://microcorruption.com/): RE exercises and challenges.",
+      "Challenges.re (https://challenges.re/): RE exercises.",
+      "Beginners.re (https://beginners.re/): beginner’s guide to RE.",
+      "Reversing.Kr (http://reversing.kr/): crack and RE challenges.",
+      "TryHackMe Reversing ELF (https://tryhackme.com/r/room/reverselfiles)"
+    ]
+  }
 ];

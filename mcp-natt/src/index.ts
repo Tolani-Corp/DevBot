@@ -15,6 +15,8 @@
  *   get_secret_patterns       — Get secret detection signatures
  *   scan_for_secrets          — Scan content for exposed secrets
  *   get_default_credentials   — Default credential lookup
+ *   get_reverse_engineering_guidance — Reverse engineering methodology and tools
+ *   generate_password         — Cryptographically secure password/passphrase generator
  *
  * Tools (PortSwigger Security):
  *   get_vulnerability_info    — Web vulnerability taxonomy (20+ classes)
@@ -84,9 +86,11 @@ import {
   PASSWORD_ATTACK_TECHNIQUES,
   AUTH_BYPASS_TECHNIQUES,
   MISSION_CHECKLISTS,
+  REVERSE_ENGINEERING_KNOWLEDGE,
   type ROETemplate,
   type PasswordAttackTechnique,
   type AuthBypassTechnique,
+  type ReverseEngineeringKnowledge,
 } from "./knowledge.js";
 
 import { generatePassword, generatePassphrase } from "./password-generator.js";
@@ -273,6 +277,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           separator: { type: "string", description: "Separator for passphrase words (default: '-')" },
           capitalize: { type: "boolean", description: "Capitalize each word in passphrase (default: false)" },
           includeNumberInPassphrase: { type: "boolean", description: "Append a random number to one word in passphrase (default: false)" }
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_reverse_engineering_guidance",
+      description:
+        "Get reverse engineering (RE) guidance, techniques, tools, and resources based on the SANReN Cyber Security Challenge methodology. " +
+        "Returns basic and advanced RE activities, decompilation/disassembly tools, and practice resources.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          category: {
+            type: "string",
+            description: "Filter by category: basic, advanced, resources (optional)",
+            enum: ["basic", "advanced", "resources"]
+          },
         },
         required: [],
       },
@@ -1081,6 +1102,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 ),
               ]
             : []),
+        ].join("\n");
+
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "get_reverse_engineering_guidance": {
+        const category = args?.["category"] ? String(args["category"]) : undefined;
+        
+        let knowledge = REVERSE_ENGINEERING_KNOWLEDGE;
+        if (category) {
+          knowledge = knowledge.filter(k => k.category === category);
+        }
+
+        const text = [
+          `# Reverse Engineering Guidance (SANReN CSC Methodology)`,
+          `*Source: https://www.csc.ac.za/?page_id=143*\n`,
+          ...knowledge.map(k => {
+            let section = `## ${k.name}\n${k.description}\n`;
+            if (k.techniques && k.techniques.length > 0) {
+              section += `\n**Techniques:**\n` + k.techniques.map(t => `- ${t}`).join("\n") + `\n`;
+            }
+            if (k.tools && k.tools.length > 0) {
+              section += `\n**Tools:** ${k.tools.join(", ")}\n`;
+            }
+            if (k.links && k.links.length > 0) {
+              section += `\n**Resources:**\n` + k.links.map(l => `- ${l}`).join("\n") + `\n`;
+            }
+            return section;
+          })
         ].join("\n");
 
         return { content: [{ type: "text", text }] };
