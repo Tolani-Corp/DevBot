@@ -1,0 +1,38 @@
+#!/bin/sh
+# Safety pre-commit hook stored in repository; use `git config core.hooksPath .githooks`
+
+# abort on any error
+set -e
+
+# 1. forbid staging of ignored or sensitive file patterns
+if git diff --cached --name-only | grep -qE '(^|/)(\.env|\.env.local|node_modules|\.next|build/|dist/|\.cache/)'; then
+  echo "🚫 Ignored or sensitive files are staged. Remove them before committing."
+  git diff --cached --name-only | grep -E '(^|/)(\.env|\.env.local|node_modules|\.next|build/|dist/|\.cache/)'
+  exit 1
+fi
+
+# 2. run a basic secret scanner (regex for API keys, tokens)
+if git diff --cached --name-only -z | xargs -0 grep -nE "(AIza[0-9A-Za-z_-]{35}|AKIA[0-9A-Z]{16}|[A-Za-z0-9_\-]{40})"; then
+  echo "🚨 Potential secret detected in staged files. Please remove before commit."
+  exit 1
+fi
+
+# 3. ensure no files with CRLF committed (enforce LF via gitattributes)
+if git diff --cached --name-only -z | xargs -0 grep -Il $'\r'; then
+  echo "⚠️ Detected CRLF line endings in staged files. Please convert to LF."
+  exit 1
+fi
+
+# 4. optional: run lint/tests if scripts exist
+if [ -f package.json ]; then
+  if grep -q 'lint' package.json; then
+    echo "Running npm run lint..."
+    npm run lint --silent || { echo 'Lint failed'; exit 1; }
+  fi
+  if grep -q 'test' package.json; then
+    echo "Running npm test..."
+    npm test --silent || { echo 'Tests failed'; exit 1; }
+  fi
+fi
+
+exit 0
