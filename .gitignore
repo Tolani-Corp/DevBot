@@ -17,3 +17,12 @@ build/
 .cache/
 # lock files produced by runtime
 web/.next/dev/lock
+
+# common build or cache
+.next/
+web/.next/dev/lock
+build/
+.cache/
+.vscode/
+.idea/
+
