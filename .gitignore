@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.next/
 .env
 .env.local
 *.log
@@ -8,3 +9,11 @@ coverage/
 .turbo/
 temp/
 *.tsbuildinfo
+# ignore local IDEA/VSCode settings
+.vscode/
+.idea/
+# ignore build outputs and caches
+build/
+.cache/
+# lock files produced by runtime
+web/.next/dev/lock
