@@ -1,0 +1,15 @@
+# enforce consistent line endings
+* text=auto
+# treat build artifacts as binary (optional)
+*.png binary
+*.jpg binary
+*.woff2 binary
+
+# ensure js/ts files use LF in repository
+*.js text eol=lf
+*.ts text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+
+# lock files may be updated by OS
+web/.next/** -text
