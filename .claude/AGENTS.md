@@ -109,3 +109,16 @@ When a mistake is caught (by user, tests, or verification agent):
 2. Fix the issue
 3. Add to LEARNED.md
 4. Re-verify the fix
+
+## Agent Registry Extension
+
+### BettorsACE Platform Agent (TypeScript)
+
+- **File**: `src/ai/bettorsace-agent.ts`
+- **Goal**: Provide platform-specific diagnostics, feature blueprints, and strategic recommendations for BettorsACE.
+- **Capabilities**:
+   - `diagnosePlatformIssue(issue, focus, context)`
+   - `createFeatureBlueprint(featureRequest, context)`
+   - `generatePlatformStrategy(objective, context)`
+- **Focus areas**: `auth`, `wallet`, `odds`, `analytics`, `performance`, `security`, `growth`
+- **Notes**: Uses existing Claude orchestration primitives from `src/ai/claude.ts`.

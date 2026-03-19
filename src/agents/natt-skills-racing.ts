@@ -216,7 +216,9 @@ async function censysSearchRacingPlatform(query: string): Promise<CensysRacingRe
           ? {
               title: svc.http.response.html_title,
               serverHeader: svc.http.response.headers?.server,
-              responseHeaders: svc.http.response.headers,
+              responseHeaders: svc.http.response.headers ? Object.fromEntries(
+                Object.entries(svc.http.response.headers).filter(([_, v]) => v !== undefined)
+              ) : undefined,
             }
           : undefined,
       })),

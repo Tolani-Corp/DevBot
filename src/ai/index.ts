@@ -33,3 +33,14 @@ export {
   generateInfrastructure,
   generateDocumentation,
 } from "./beyond.js";
+
+// BettorsACE platform agent
+export {
+  diagnosePlatformIssue,
+  createFeatureBlueprint,
+  generatePlatformStrategy,
+  type BettorsAceFocus,
+  type BettorsAceAgentContext,
+  type BettorsAceDiagnosis,
+  type BettorsAceFeatureBlueprint,
+} from "./bettorsace-agent.js";

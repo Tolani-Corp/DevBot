@@ -71,6 +71,7 @@
     "pentest": "tsx scripts/pentest-demo.ts",
     "test:kali-mcp": "tsx scripts/test-kali-mcp.ts",
     "show-reasoning": "tsx scripts/show-reasoning.ts",
+    "test:discord-webhook": "tsx scripts/test-discord-webhook.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate"
   },

@@ -56,6 +56,10 @@ export function registerInteractiveHandlers(app: App) {
   // CLLM Feedback buttons
   app.action("feedback_positive", handleFeedbackPositive);
   app.action("feedback_negative", handleFeedbackNegative);
+
+  // FreakMe Creator App Approvals
+  app.action("approve_creator_app", handleApproveCreatorApp);
+  app.action("reject_creator_app", handleRejectCreatorApp);
 }
 
 /**
@@ -585,3 +589,77 @@ async function handleFeedbackNegative({ ack, body, client, respond }: any) {
     replace_original: false,
   });
 }
+
+
+// --- FreakMe Creator Applications ---------------------------------------------
+
+async function handleApproveCreatorApp({ ack, body, client }: any) {
+  await ack();
+  const rawValue = body.actions[0].value; // e.g. approve_12345
+  const applicationId = rawValue.replace('approve_', '');
+
+  try {
+    // Attempt to call Convex to update the application status
+    if (process.env.CONVEX_URL) {
+      await fetch(process.env.CONVEX_URL + '/api/mutation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: 'creatorApplications:approve', args: { applicationId } })
+      }).catch(e => console.error('Convex approve failed', e));
+    }
+
+    await client.chat.update({
+      channel: body.channel.id,
+      ts: body.message.ts,
+      text: `✅ *Creator Application Approved* (ID: ${applicationId}) by <@${body.user.id}>`,
+      blocks: [
+        ...body.message.blocks.slice(0, -1),
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `✅ *Approved* by <@${body.user.id}>`
+          }
+        }
+      ]
+    });
+  } catch (error) {
+    console.error('Failed to handle approve_creator_app', error);
+  }
+}
+
+async function handleRejectCreatorApp({ ack, body, client }: any) {
+  await ack();
+  const rawValue = body.actions[0].value;
+  const applicationId = rawValue.replace('reject_', '');
+
+  try {
+    // Attempt to call Convex to update the application status
+    if (process.env.CONVEX_URL) {
+      await fetch(process.env.CONVEX_URL + '/api/mutation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: 'creatorApplications:reject', args: { applicationId } })
+      }).catch(e => console.error('Convex reject failed', e));
+    }
+
+    await client.chat.update({
+      channel: body.channel.id,
+      ts: body.message.ts,
+      text: `❌ *Creator Application Rejected* (ID: ${applicationId}) by <@${body.user.id}>`,
+      blocks: [
+        ...body.message.blocks.slice(0, -1),
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `❌ *Rejected* by <@${body.user.id}>`
+          }
+        }
+      ]
+    });
+  } catch (error) {
+    console.error('Failed to handle reject_creator_app', error);
+  }
+}
+

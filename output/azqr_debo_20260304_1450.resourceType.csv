@@ -1,0 +1,9 @@
+Subscription Name,Resource Type,Number of Resources
+Debo,microsoft.web/sites,2
+Debo,microsoft.web/serverfarms,1
+Debo,microsoft.operationalinsights/workspaces,2
+Debo,microsoft.keyvault/vaults,1
+Debo,microsoft.insights/components,1
+Debo,microsoft.cache/redis,1
+Debo,microsoft.app/managedenvironments,1
+Debo,microsoft.apimanagement/service,1

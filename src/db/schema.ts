@@ -346,3 +346,38 @@ export const approvalRequests = pgTable("approval_requests", {
 
 export type ApprovalRequestRow = typeof approvalRequests.$inferSelect;
 export type NewApprovalRequestRow = typeof approvalRequests.$inferInsert;
+
+// ─── Feedback Loop Tickets ───────────────────────────────────
+// Persistent tracking for user-reported issues from Slack/Discord mention flows.
+
+export const feedbackTickets = pgTable("feedback_tickets", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+
+  platformType: text("platform_type").notNull(), // slack | discord | ...
+  slackTeamId: text("slack_team_id"),
+  discordGuildId: text("discord_guild_id"),
+  channelId: text("channel_id"),
+  threadTs: text("thread_ts"),
+  reporterId: text("reporter_id"),
+
+  topic: text("topic").notNull().default("general"), // weather-data | gamecade-delivery | general
+  requestText: text("request_text").notNull(),
+  status: text("status").notNull().default("triaged"), // triaged | investigating | resolved
+  nextStep: text("next_step"),
+  resolutionNote: text("resolution_note"),
+
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+}, (t) => ({
+  statusIdx: index("idx_feedback_tickets_status").on(t.status),
+  platformIdx: index("idx_feedback_tickets_platform").on(t.platformType),
+  createdIdx: index("idx_feedback_tickets_created").on(t.createdAt),
+}));
+
+export type FeedbackTicket = typeof feedbackTickets.$inferSelect;
+export type NewFeedbackTicket = typeof feedbackTickets.$inferInsert;

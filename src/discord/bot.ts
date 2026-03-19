@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Events } from 'discord.js';
+import { Client, GatewayIntentBits, Events, Message } from 'discord.js';
 import { answerQuestion } from '../ai/claude';
 import { postTweet } from '../twitter/bot';
 import {
@@ -11,12 +11,45 @@ import {
   getNameConfirmationMessage,
   getHelpMessage,
 } from '@/services/onboarding';
+import {
+    parseMentionCommand,
+    formatMentionCommandResponse,
+} from '@/services/mention-parser';
+import { executeLiveMentionCommand } from '@/services/live-mentions';
+import {
+    createFeedbackTicket,
+    getFeedbackTicket,
+    updateFeedbackStatus,
+    formatFeedbackTicketReceipt,
+    formatFeedbackTicketStatus,
+} from '@/services/feedback-loop';
 
 // Store pending onboarding and rename states
 const pendingOnboarding = new Set<string>();
 const pendingRename = new Set<string>();
 
+/**
+ * Check if a message is a reply to one of the bot's messages
+ */
+async function isReplyToBotMessage(message: Message, client: Client): Promise<boolean> {
+    if (!message.reference?.messageId) return false;
+
+    try {
+        // Fetch the referenced message
+        const referencedMessage = await message.channel.messages.fetch(message.reference.messageId);
+
+        // Check if the referenced message is from the bot
+        return referencedMessage.author.id === client.user!.id;
+    } catch (error) {
+        // If we can't fetch the message, assume it's not a reply to the bot
+        console.warn('Failed to fetch referenced message:', error);
+        return false;
+    }
+}
+
 export function startDiscordBot(token: string) {
+    console.log('🤖 Starting Discord bot...');
+
     const client = new Client({
         intents: [
             GatewayIntentBits.Guilds,
@@ -26,7 +59,20 @@ export function startDiscordBot(token: string) {
     });
 
     client.once(Events.ClientReady, (c) => {
-        console.log(`Ready! Logged in as ${c.user.tag}`);
+        console.log(`✅ Ready! Logged in as ${c.user.tag}`);
+    });
+
+    client.on('error', (error) => {
+        console.error('❌ Discord client error:', error);
+    });
+
+    client.on('disconnect', () => {
+        console.log('🔌 Discord bot disconnected');
+    });
+
+    // Login with error handling
+    client.login(token).catch((error) => {
+        console.error('❌ Failed to login to Discord:', error);
     });
 
     client.on(Events.MessageCreate, async (message) => {
@@ -35,8 +81,13 @@ export function startDiscordBot(token: string) {
         const guildId = message.guildId;
         if (!guildId) return;
 
-        // Check if the bot is mentioned
-        if (message.mentions.has(client.user!.id)) {
+        const containsAgentAlias = /(^|\s)@(shark|ace|ice|linemd)\b|^\/?(shark|ace|ice|linemd)\/picks\//i.test(message.content.trim());
+
+        // Check if the bot is mentioned OR if this is a reply to the bot
+        const isReplyToBot = message.reference?.messageId ? await isReplyToBotMessage(message, client) : false;
+        const shouldRespond = message.mentions.has(client.user!.id) || containsAgentAlias || isReplyToBot;
+
+        if (shouldRespond) {
             try {
                 // Check if onboarding is needed
                 const requiresOnboarding = await needsOnboarding({
@@ -72,6 +123,79 @@ export function startDiscordBot(token: string) {
 
                 if (!content) {
                     await message.reply(getHelpMessage(botName));
+                    return;
+                }
+
+                if (content.toLowerCase() === 'feedback help') {
+                    await message.reply(
+                        "📝 Feedback commands:\n" +
+                        "• @feedback, I requested a weather report for pick #4535 and it returned 'no data'.\n" +
+                        "• @feedback, I did not receive my free picks from gamecade.\n" +
+                        "• /feedback <issue>\n" +
+                        "• /feedback/status/<feedback_id>"
+                    );
+                    return;
+                }
+
+                const mentionCommand = parseMentionCommand(content);
+                if (mentionCommand.kind !== 'unknown') {
+                    if (mentionCommand.kind === 'feedback_report') {
+                        const ticket = await createFeedbackTicket({
+                            text: mentionCommand.feedbackText?.trim() || mentionCommand.normalized || 'No feedback details provided.',
+                            context: {
+                                platformType: 'discord',
+                                discordGuildId: guildId,
+                                channelId: message.channelId,
+                                threadTs: message.id,
+                                reporterId: message.author.id,
+                            },
+                        });
+                        await message.reply(formatFeedbackTicketReceipt(ticket));
+                        return;
+                    }
+
+                    if (mentionCommand.kind === 'feedback_status') {
+                        const ticket = await getFeedbackTicket(mentionCommand.feedbackId ?? '');
+                        await message.reply(
+                            ticket
+                                ? formatFeedbackTicketStatus(ticket)
+                                : `❌ Feedback ticket \`${mentionCommand.feedbackId ?? 'UNKNOWN'}\` was not found.`
+                        );
+                        return;
+                    }
+
+                    if (mentionCommand.kind === 'feedback_update') {
+                        const feedbackId = mentionCommand.feedbackId ?? '';
+                        const targetStatus = mentionCommand.feedbackStatus;
+                        if (!feedbackId || !targetStatus) {
+                            await message.reply('❌ Feedback update requires both feedback ID and status.');
+                            return;
+                        }
+
+                        const updated = await updateFeedbackStatus({
+                            feedbackId,
+                            status: targetStatus,
+                            resolutionNote:
+                                targetStatus === 'resolved'
+                                    ? 'Resolved via Discord mention feedback command.'
+                                    : `Moved to ${targetStatus} via Discord mention feedback command.`,
+                        });
+
+                        await message.reply(
+                            updated
+                                ? `✅ Updated **${updated.id}** to **${updated.status}**.`
+                                : `❌ Feedback ticket \`${feedbackId}\` was not found.`
+                        );
+                        return;
+                    }
+
+                    const liveResponse = await executeLiveMentionCommand(mentionCommand);
+                    if (liveResponse) {
+                        await message.reply(liveResponse);
+                        return;
+                    }
+
+                    await message.reply(formatMentionCommandResponse(mentionCommand, botName));
                     return;
                 }
 

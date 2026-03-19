@@ -28,6 +28,21 @@ import {
 import { RateLimiter } from "@/middleware/rate-limiter";
 import Redis from "ioredis";
 import { computeAgentROI, formatROIReportBlocks } from "@/services/agent-roi";
+import {
+  parseMentionCommand,
+  formatMentionCommandResponse,
+  getMentionCommandIndex,
+} from "@/services/mention-parser";
+import { executeLiveMentionCommand } from "@/services/live-mentions";
+import {
+  createFeedbackTicket,
+  getFeedbackTicket,
+  listRecentFeedback,
+  updateFeedbackStatus,
+  formatFeedbackTicketReceipt,
+  formatFeedbackTicketStatus,
+  type FeedbackStatus,
+} from "@/services/feedback-loop";
 
 // ─── RBAC: security-sensitive command roles ──────────────────
 const NATT_AUTHORIZED_USERS = new Set(
@@ -60,6 +75,79 @@ export const app = new App({
 registerInteractiveHandlers(app);
 
 const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo";
+
+async function respondToFeedbackCommand(options: {
+  teamId: string;
+  channelId: string;
+  threadTs: string;
+  userId?: string;
+  command: ReturnType<typeof parseMentionCommand>;
+  say: (message: { thread_ts: string; text: string }) => Promise<unknown>;
+}): Promise<boolean> {
+  const { command } = options;
+
+  if (command.kind === "feedback_report") {
+    const ticket = await createFeedbackTicket({
+      text: command.feedbackText?.trim() || command.normalized || "No feedback details provided.",
+      context: {
+        platformType: "slack",
+        slackTeamId: options.teamId,
+        channelId: options.channelId,
+        threadTs: options.threadTs,
+        reporterId: options.userId,
+      },
+    });
+
+    await options.say({
+      thread_ts: options.threadTs,
+      text: formatFeedbackTicketReceipt(ticket),
+    });
+    return true;
+  }
+
+  if (command.kind === "feedback_status") {
+    const feedbackId = command.feedbackId ?? "";
+    const ticket = await getFeedbackTicket(feedbackId);
+    await options.say({
+      thread_ts: options.threadTs,
+      text: ticket
+        ? formatFeedbackTicketStatus(ticket)
+        : `❌ Feedback ticket \`${feedbackId}\` was not found.`,
+    });
+    return true;
+  }
+
+  if (command.kind === "feedback_update") {
+    const feedbackId = command.feedbackId ?? "";
+    const targetStatus = command.feedbackStatus;
+    if (!feedbackId || !targetStatus) {
+      await options.say({
+        thread_ts: options.threadTs,
+        text: "❌ Feedback update requires both feedback ID and status.",
+      });
+      return true;
+    }
+
+    const updated = await updateFeedbackStatus({
+      feedbackId,
+      status: targetStatus,
+      resolutionNote:
+        targetStatus === "resolved"
+          ? "Resolved via mention feedback command."
+          : `Moved to ${targetStatus} via mention feedback command.`,
+    });
+
+    await options.say({
+      thread_ts: options.threadTs,
+      text: updated
+        ? `✅ Updated **${updated.id}** to **${updated.status}**.`
+        : `❌ Feedback ticket \`${feedbackId}\` was not found.`,
+    });
+    return true;
+  }
+
+  return false;
+}
 
 // Listen for app mentions
 app.event("app_mention", async ({ event, say, client }) => {
@@ -149,6 +237,37 @@ app.event("app_mention", async ({ event, say, client }) => {
       await say({
         thread_ts: event.ts,
         text: getHelpMessage(botName),
+      });
+      return;
+    }
+
+    const mentionCommand = parseMentionCommand(text);
+    if (mentionCommand.kind !== "unknown") {
+      const handledFeedback = await respondToFeedbackCommand({
+        teamId,
+        channelId: event.channel,
+        threadTs: event.ts,
+        userId: event.user,
+        command: mentionCommand,
+        say,
+      });
+
+      if (handledFeedback) {
+        return;
+      }
+
+      const liveResponse = await executeLiveMentionCommand(mentionCommand);
+      if (liveResponse) {
+        await say({
+          thread_ts: event.ts,
+          text: liveResponse,
+        });
+        return;
+      }
+
+      await say({
+        thread_ts: event.ts,
+        text: formatMentionCommandResponse(mentionCommand, botName),
       });
       return;
     }
@@ -312,11 +431,48 @@ app.event("message", async ({ event, say, client }) => {
     }
 
     // Check if DevBot was mentioned in the thread
-    if (!messageText.includes(DEVBOT_MENTION) && !messageText.includes("<@")) {
+    const isFeedbackRequest = /(^|\s)@feedback\b|^\/?feedback\b/i.test(messageText.trim());
+    const isAgentMentionRequest = /(^|\s)@(shark|ace|ice|linemd)\b|^\/?(shark|ace|ice|linemd)\/picks\//i.test(messageText.trim());
+    if (!messageText.includes(DEVBOT_MENTION) && !messageText.includes("<@") && !isFeedbackRequest && !isAgentMentionRequest) {
       return;
     }
 
     const cleanText = messageText.replace(/<@[A-Z0-9]+>/g, "").trim();
+
+    const threadCommand = parseMentionCommand(cleanText);
+    if (threadCommand.kind !== "unknown") {
+      const handledFeedback = await respondToFeedbackCommand({
+        teamId,
+        channelId: event.channel,
+        threadTs: event.thread_ts,
+        userId: event.user,
+        command: threadCommand,
+        say,
+      });
+
+      if (handledFeedback) {
+        return;
+      }
+
+      const liveResponse = await executeLiveMentionCommand(threadCommand);
+      if (liveResponse) {
+        await say({
+          thread_ts: event.thread_ts,
+          text: liveResponse,
+        });
+        return;
+      }
+
+      const botName = await getBotName({
+        platformType: "slack",
+        teamId,
+      });
+      await say({
+        thread_ts: event.thread_ts,
+        text: formatMentionCommandResponse(threadCommand, botName),
+      });
+      return;
+    }
 
     // Find existing conversation
     const [conversation] = await db
@@ -433,10 +589,104 @@ app.command("/debo-help", async ({ ack, say }) => {
 ✅ Run security scans (pentest)
 ✅ Manage ClickUp tasks
 
+${getMentionCommandIndex("Debo")}
+
 **Repositories I have access to:**
 ${process.env.ALLOWED_REPOS ?? "All repositories"}`;
 
   await say(helpText);
+});
+
+// Command: /debo-feedback <issue>
+app.command("/debo-feedback", async ({ command, ack, say }) => {
+  await ack();
+
+  const issue = command.text.trim();
+  if (!issue) {
+    await say("❌ Usage: `/debo-feedback <issue details>`");
+    return;
+  }
+
+  const feedbackCommand = parseMentionCommand(`/feedback ${issue}`);
+  const ticket = await createFeedbackTicket({
+    text: issue,
+    context: {
+      platformType: "slack",
+      channelId: command.channel_id,
+      threadTs: command.ts,
+      reporterId: command.user_id,
+    },
+  });
+  await say(formatFeedbackTicketReceipt(ticket));
+});
+
+// Command: /debo-feedback-status <feedback_id>
+app.command("/debo-feedback-status", async ({ command, ack, say }) => {
+  await ack();
+
+  const feedbackId = command.text.trim();
+  if (!feedbackId) {
+    await say("❌ Usage: `/debo-feedback-status <feedback_id>`");
+    return;
+  }
+
+  const ticket = await getFeedbackTicket(feedbackId);
+  if (!ticket) {
+    await say(`❌ Feedback ticket \`${feedbackId}\` was not found.`);
+    return;
+  }
+
+  await say(formatFeedbackTicketStatus(ticket));
+});
+
+// Command: /debo-feedback-update <feedback_id> <triaged|investigating|resolved>
+app.command("/debo-feedback-update", async ({ command, ack, say }) => {
+  await ack();
+
+  const [feedbackId, status, ...noteParts] = command.text.trim().split(/\s+/);
+  if (!feedbackId || !status) {
+    await say("❌ Usage: `/debo-feedback-update <feedback_id> <triaged|investigating|resolved> [note]`");
+    return;
+  }
+
+  const allowed = new Set<FeedbackStatus>(["triaged", "investigating", "resolved"]);
+  if (!allowed.has(status as FeedbackStatus)) {
+    await say("❌ Invalid status. Use one of: triaged, investigating, resolved.");
+    return;
+  }
+
+  const updated = await updateFeedbackStatus({
+    feedbackId,
+    status: status as FeedbackStatus,
+    resolutionNote: noteParts.join(" ") || undefined,
+  });
+
+  if (!updated) {
+    await say(`❌ Feedback ticket \`${feedbackId}\` was not found.`);
+    return;
+  }
+
+  await say(`✅ Updated \`${updated.id}\` to **${updated.status}**.`);
+});
+
+// Command: /debo-feedback-list [limit]
+app.command("/debo-feedback-list", async ({ command, ack, say }) => {
+  await ack();
+
+  const requested = Number.parseInt(command.text.trim() || "5", 10);
+  const limit = Number.isFinite(requested) ? Math.max(1, Math.min(requested, 20)) : 5;
+  const tickets = await listRecentFeedback(limit);
+
+  if (tickets.length === 0) {
+    await say("No feedback tickets found.");
+    return;
+  }
+
+  const lines = tickets.map((ticket) =>
+    `• \`${ticket.id}\` | ${ticket.status} | ${ticket.topic} | ${ticket.requestText.slice(0, 80)}`
+  );
+
+  await say(`🗂️ Recent feedback tickets:\n${lines.join("\n")}`);
 });
 
 // Command: /debo-roi [days]

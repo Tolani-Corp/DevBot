@@ -1,4 +1,5 @@
 import { app } from "./bot";
+import { sendDiscordAlert } from "../services/discord-webhook";
 
 export async function updateSlackThread(
   channelId: string,
@@ -20,18 +21,24 @@ export async function updateSlackThread(
 
 export async function sendAlert(message: string): Promise<void> {
   const alertChannel = process.env.SLACK_ALERT_CHANNEL;
-  
+
   if (!alertChannel) {
-    console.warn("SLACK_ALERT_CHANNEL not configured, skipping alert");
-    return;
+    console.warn("SLACK_ALERT_CHANNEL not configured, skipping Slack alert");
+  } else {
+    try {
+      await app.client.chat.postMessage({
+        channel: alertChannel,
+        text: `🚨 *FunBot Alert*\n${message}`,
+      });
+    } catch (error) {
+      console.error("Failed to send Slack alert:", error);
+    }
   }
 
+  // Also send to Discord if webhook is configured
   try {
-    await app.client.chat.postMessage({
-      channel: alertChannel,
-      text: `🚨 *FunBot Alert*\n${message}`,
-    });
+    await sendDiscordAlert(message);
   } catch (error) {
-    console.error("Failed to send alert:", error);
+    console.error("Failed to send Discord alert:", error);
   }
 }

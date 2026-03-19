@@ -1,9 +1,18 @@
 import "dotenv/config";
+import { getStartupSummary, loadRuntimeConfig } from "./config";
 import { worker } from "./queue/worker";
 
-console.log("🔄 FunBot worker started");
-console.log(`📊 Concurrency: ${process.env.MAX_CONCURRENT_TASKS ?? 3}`);
-console.log(`⏱️ Task timeout: ${process.env.TASK_TIMEOUT_MS ?? 300000}ms`);
+const runtimeConfig = loadRuntimeConfig();
+const startupSummary = getStartupSummary(runtimeConfig);
+
+console.log("--------------------------------------------------");
+console.log(`  DevBot Worker v${startupSummary.version}`);
+console.log("--------------------------------------------------");
+console.log(`  Redis:       ${runtimeConfig.redisUrl ?? "default/local"}`);
+console.log(`  Concurrency: ${startupSummary.worker.maxConcurrentTasks}`);
+console.log(`  Timeout:     ${startupSummary.worker.taskTimeoutMs}ms`);
+console.log(`  Cron:        ${startupSummary.runtime.cronEnabled ? "enabled" : "disabled"}`);
+console.log("--------------------------------------------------");
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {

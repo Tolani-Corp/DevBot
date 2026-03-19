@@ -1,0 +1,5 @@
+Subscription Id,Resource Group,Location,Resource Type,Resource Name,Sku Name,Sku Tier,Kind,SLA,Resource Id
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,eastus,microsoft.apimanagement/service,apim-mcp-tc-dev,BasicV2,,,99.95% (SKU: BasicV2),/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiManagement/service/apim-mcp-tc-dev
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,eastus,microsoft.insights/components,appi-mcp-dev,,,web,99.9%,/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.Insights/components/appi-mcp-dev
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,eastus,microsoft.keyvault/vaults,kv-mcp-tc-dev,,,,99.99%,/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.KeyVault/vaults/kv-mcp-tc-dev
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,eastus,microsoft.operationalinsights/workspaces,log-mcp-dev,,,,99.9%,/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.OperationalInsights/workspaces/log-mcp-dev

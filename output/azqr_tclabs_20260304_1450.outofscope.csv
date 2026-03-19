@@ -1,0 +1,3 @@
+Subscription Id,Resource Group,Location,Resource Type,Resource Name,Sku Name,Sku Tier,Kind,SLA,Resource Id
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,eastus,microsoft.apicenter/services,apic-mcp-tc-org,Standard,,,,/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiCenter/services/apic-mcp-tc-org
+xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766,rg-mcp-dev,global,microsoft.insights/actiongroups,Application Insights Smart Detection,,,,,/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx0fd7766/resourceGroups/rg-mcp-dev/providers/microsoft.insights/actiongroups/Application Insights Smart Detection

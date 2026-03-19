@@ -1,0 +1,5 @@
+Subscription Name,Resource Type,Number of Resources
+TC labs,microsoft.operationalinsights/workspaces,1
+TC labs,microsoft.keyvault/vaults,1
+TC labs,microsoft.insights/components,1
+TC labs,microsoft.apimanagement/service,1

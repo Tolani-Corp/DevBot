@@ -5,7 +5,7 @@ initTracing("devbot-agents");
 import "dotenv/config";
 import { app } from "./slack/bot";
 import { createServer, type Server } from "http";
-
+import { getStartupSummary, loadRuntimeConfig } from "./config";
 import { startDiscordBot } from "./discord/bot";
 
 // Cron worker cleanup reference
@@ -13,7 +13,21 @@ let stopCronWorker: (() => Promise<void>) | null = null;
 let webhookServer: Server | null = null;
 
 async function main() {
-  const port = Number(process.env.PORT ?? 3100);
+  const runtimeConfig = loadRuntimeConfig();
+  const startupSummary = getStartupSummary(runtimeConfig);
+  const appPort = runtimeConfig.listenTarget;
+
+  console.log("--------------------------------------------------");
+  console.log(`  DevBot Runtime v${startupSummary.version}`);
+  console.log("--------------------------------------------------");
+  console.log(`  Listen:      ${startupSummary.listenTarget}`);
+  console.log(`  WebSocket:   ${startupSummary.ports.websocket}`);
+  console.log(`  Discord:     ${startupSummary.runtime.discordEnabled ? "enabled" : "disabled"}`);
+  console.log(`  Cron:        ${startupSummary.runtime.cronEnabled ? "enabled" : "disabled"}`);
+  console.log(`  Workspace:   ${startupSummary.workspace.root}`);
+  console.log(`  Repos:       ${startupSummary.workspace.allowedRepos.join(", ")}`);
+  console.log(`  Mention:     ${startupSummary.workspace.mentionTrigger}`);
+  console.log("--------------------------------------------------");
 
   // Start Slack App
   // Start Slack App
@@ -27,15 +41,15 @@ async function main() {
   */
 
   // Start Discord Bot
-  if (process.env.DISCORD_TOKEN) {
-    startDiscordBot(process.env.DISCORD_TOKEN);
+  if (runtimeConfig.discordToken) {
+    startDiscordBot(runtimeConfig.discordToken);
     console.log(`🤖 FunBot Discord integration enabled`);
   } else {
     console.log(`⚠️ DISCORD_TOKEN not found, skipping Discord integration`);
   }
 
   // Start WebSocket Server
-  const wsPort = Number(process.env.WS_PORT ?? 8080);
+  const wsPort = runtimeConfig.wsPort;
   console.log(`📡 Starting WebSocket Server on port ${wsPort}...`);
   try {
     const { startWebSocketServer } = await import('./websocket');
@@ -46,7 +60,7 @@ async function main() {
   }
 
   // Start NATT Report Cron Worker
-  if (process.env.REDIS_URL || process.env.SKIP_CRON !== "true") {
+  if (runtimeConfig.cronEnabled) {
     try {
       const { startCronWorker } = await import("./agents/natt-report-cron");
       stopCronWorker = startCronWorker();
@@ -56,50 +70,64 @@ async function main() {
     }
   }
 
+  let selfUpdateQueue: Awaited<ReturnType<typeof import("./services/self-updater.js")["createSelfUpdateQueue"]>> | null = null;
+
   // ── Autonomous Self-Update Pipeline ───────────────────────────────────────
-  // Starts a webhook HTTP server on WEBHOOK_PORT (default 3101) that accepts
-  // GitHub push events, enqueues a BullMQ self-update job, and spawns
-  // pi5/update.sh detached so it survives the subsequent systemctl restart.
+  // Starts queue/worker components used by webhook handlers.
   try {
     const {
       createSelfUpdateQueue,
       startSelfUpdateWorker,
     } = await import("./services/self-updater.js");
-    const { handleGitHubWebhook } = await import("./webhooks/github.js");
 
-    const selfUpdateQueue = createSelfUpdateQueue();
+    selfUpdateQueue = createSelfUpdateQueue();
     startSelfUpdateWorker();
-
-    const webhookPort = Number(process.env.WEBHOOK_PORT ?? 3101);
-    webhookServer = createServer(async (req, res) => {
-      try {
-        if (req.method === "POST" && req.url === "/webhooks/github") {
-          await handleGitHubWebhook(req, res, selfUpdateQueue);
-        } else if (req.method === "POST" && req.url === "/webhooks/stripe") {
-          const { handleStripeWebhook } = await import("./webhooks/stripe.js");
-          await handleStripeWebhook(req, res);
-        } else if (req.url === "/health") {
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ status: "ok", pid: process.pid, ts: Date.now() }));
-        } else {
-          res.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
-        }
-      } catch (err) {
-        console.error("[webhook-server] Unhandled error:", err);
-        if (!res.headersSent) res.writeHead(500).end("Internal server error");
-      }
-    });
-
-    webhookServer.listen(webhookPort, "0.0.0.0", () => {
-      console.log(`🔗 Webhook + health server listening on port ${webhookPort}`);
-    });
   } catch (error) {
     console.warn("⚠️ Self-update pipeline failed to start (Redis unavailable?):", error);
   }
 
-  console.log(`🤖 Mention trigger: ${process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo"}`);
-  console.log(`📂 Workspace: ${process.env.WORKSPACE_ROOT ?? process.cwd()}`);
-  console.log(`🔧 Allowed repos: ${process.env.ALLOWED_REPOS ?? "*"}`);
+  webhookServer = createServer(async (req, res) => {
+    try {
+      if (req.method === "POST" && req.url === "/webhooks/github") {
+        if (!selfUpdateQueue) {
+          res.writeHead(503, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "self_update_unavailable" }));
+          return;
+        }
+
+        const { handleGitHubWebhook } = await import("./webhooks/github.js");
+        await handleGitHubWebhook(req, res, selfUpdateQueue);
+      } else if (req.method === "POST" && req.url === "/webhooks/stripe") {
+        const { handleStripeWebhook } = await import("./webhooks/stripe.js");
+        await handleStripeWebhook(req, res);
+      } else if (req.method === "POST" && req.url === "/webhooks/creators") {
+        const { handleCreatorsWebhook } = await import("./webhooks/creators.js");
+        await handleCreatorsWebhook(req, res);
+      } else if (req.url === "/health" || req.url === "/status") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "ok", pid: process.pid, ts: Date.now() }));
+      } else {
+        res.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
+      }
+    } catch (err) {
+      console.error("[webhook-server] Unhandled error:", err);
+      if (!res.headersSent) res.writeHead(500).end("Internal server error");
+    }
+  });
+
+  if (typeof appPort === "number") {
+    webhookServer.listen(appPort, "0.0.0.0", () => {
+      console.log(`🔗 Webhook + health server listening on port ${appPort}`);
+    });
+  } else {
+    webhookServer.listen(appPort, () => {
+      console.log(`🔗 Webhook + health server listening on ${appPort}`);
+    });
+  }
+
+  console.log(`🤖 Mention trigger: ${startupSummary.workspace.mentionTrigger}`);
+  console.log(`📂 Workspace: ${startupSummary.workspace.root}`);
+  console.log(`🔧 Allowed repos: ${startupSummary.workspace.allowedRepos.join(", ")}`);
 }
 
 // Graceful shutdown

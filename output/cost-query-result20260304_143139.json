@@ -1,0 +1,946 @@
+﻿[
+    {
+        "subscription":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+        "timeframe":  {
+                          "to":  "2026-03-04T19:31:39Z",
+                          "from":  "2026-02-02T19:31:39Z"
+                      },
+        "costQuery":  {
+                          "timeframe":  "Custom",
+                          "timePeriod":  {
+                                             "to":  "2026-03-04T19:31:39Z",
+                                             "from":  "2026-02-02T19:31:39Z"
+                                         },
+                          "dataset":  {
+                                          "aggregation":  {
+                                                              "totalCost":  {
+                                                                                "function":  "Sum",
+                                                                                "name":  "Cost"
+                                                                            }
+                                                          },
+                                          "grouping":  [
+                                                           {
+                                                               "name":  "ResourceId",
+                                                               "type":  "Dimension"
+                                                           }
+                                                       ],
+                                          "granularity":  "None"
+                                      },
+                          "type":  "ActualCost"
+                      },
+        "costResponse":  {
+                             "eTag":  null,
+                             "id":  "subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.CostManagement/query/222d9aa5-e2ab-467d-9534-94fada9dafcf",
+                             "location":  null,
+                             "name":  "222d9aa5-e2ab-467d-9534-94fada9dafcf",
+                             "properties":  {
+                                                "columns":  [
+                                                                {
+                                                                    "name":  "Cost",
+                                                                    "type":  "Number"
+                                                                },
+                                                                {
+                                                                    "name":  "ResourceId",
+                                                                    "type":  "String"
+                                                                },
+                                                                {
+                                                                    "name":  "Currency",
+                                                                    "type":  "String"
+                                                                }
+                                                            ],
+                                                "nextLink":  null,
+                                                "rows":  [
+                                                             [
+                                                                 2.6059,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/debo-east2-rg/providers/microsoft.cache/redis/debo-redis",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.000366666666666667,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/debo-rg/providers/microsoft.cache/redis/debo-redis",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 16.8089469975,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/prod-rg/providers/microsoft.web/serverfarms/plan-wtunmw4mafbha",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.0,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/prod-rg/providers/microsoft.web/sites/app-wtunmw4mafbha",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.0,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/prod-rg/providers/microsoft.web/sites/natt-mcp-7updxksg",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.9575,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/rg-mcp-dev/providers/microsoft.apicenter/service/apic-mcp-org",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 7.1918,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/rg-mcp-dev/providers/microsoft.apimanagement/service/apim-mcp-dev-thines",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.0,
+                                                                 "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourcegroups/rg-mcp-dev/providers/microsoft.operationalinsights/workspaces/log-mcp-dev",
+                                                                 "USD"
+                                                             ]
+                                                         ]
+                                            },
+                             "sku":  null,
+                             "type":  "Microsoft.CostManagement/query"
+                         },
+        "advisorRecommendations":  {
+                                       "value":  [
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "336",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "7",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "28",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P1Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/874b1ee7-5f61-0691-bed1-fe22389c3359",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "874b1ee7-5f61-0691-bed1-fe22389c3359",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "529",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "7",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "44",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P3Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/9ae21772-ab75-ea64-fd36-da4578581508",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "9ae21772-ab75-ea64-fd36-da4578581508",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "529",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "30",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "44",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P3Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/8028b980-ab61-a654-5328-7dc958608bff",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "8028b980-ab61-a654-5328-7dc958608bff",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "336",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "60",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "28",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P1Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/dbf7c946-7f83-bb19-65aa-472ef912b2ff",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "dbf7c946-7f83-bb19-65aa-472ef912b2ff",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "529",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "60",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "44",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P3Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/09e41fb9-9675-496d-823b-5ce4441fca5b",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "09e41fb9-9675-496d-823b-5ce4441fca5b",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "336",
+                                                                                    "displayQty":  "1",
+                                                                                    "displaySKU":  "Standard_P0_v3_Windows",
+                                                                                    "lookbackPeriod":  "30",
+                                                                                    "qty":  "1",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "Reservations",
+                                                                                    "region":  "eastus",
+                                                                                    "reservedResourceType":  "AppService",
+                                                                                    "savingsAmount":  "28",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Standard_P0_v3_Windows",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P1Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/9ab065fe-8a33-6ae9-bba5-5f8a05567371",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T17:51:56.898648+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "9ab065fe-8a33-6ae9-bba5-5f8a05567371",
+                                                         "recommendationTypeId":  "5b8ddf04-be28-44ec-ab2c-a63a34d1de13",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider App Service reserved instance to save over the on-demand costs",
+                                                                                  "solution":  "Consider App Service reserved instance to save over the on-demand costs"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "297",
+                                                                                    "commitment":  "0.122",
+                                                                                    "lookbackPeriod":  "30",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "SavingsPlan",
+                                                                                    "savingsAmount":  "24",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Compute_Savings_Plan",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P3Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/f81965ba-c19e-2104-3ac0-b4cb2ceac437",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T08:36:06.708981+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "f81965ba-c19e-2104-3ac0-b4cb2ceac437",
+                                                         "recommendationTypeId":  "89515250-1243-43d1-b4e7-f9437cedffd8",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider purchasing a savings plan for compute to unlock lower prices",
+                                                                                  "solution":  "Consider purchasing a savings plan for compute to unlock lower prices"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     },
+                                                     {
+                                                         "category":  "Cost",
+                                                         "extendedProperties":  {
+                                                                                    "annualSavingsAmount":  "163",
+                                                                                    "commitment":  "0.138",
+                                                                                    "lookbackPeriod":  "30",
+                                                                                    "recommendationOfferingId":  "07649cbd-2ee4-4992-898b-f5f16bad1b36",
+                                                                                    "recommendationSubCategory":  "SavingsPlan",
+                                                                                    "savingsAmount":  "13",
+                                                                                    "savingsCurrency":  "USD",
+                                                                                    "scope":  "Single",
+                                                                                    "sku":  "Compute_Savings_Plan",
+                                                                                    "subId":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                    "term":  "P1Y"
+                                                                                },
+                                                         "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/providers/Microsoft.Advisor/recommendations/3e6507bf-4aa4-4408-f26c-337cdf3a8666",
+                                                         "impact":  "High",
+                                                         "impactedField":  "Microsoft.Subscriptions/subscriptions",
+                                                         "impactedValue":  "5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                         "lastUpdated":  "2026-03-04T08:36:06.708981+00:00",
+                                                         "metadata":  null,
+                                                         "name":  "3e6507bf-4aa4-4408-f26c-337cdf3a8666",
+                                                         "recommendationTypeId":  "89515250-1243-43d1-b4e7-f9437cedffd8",
+                                                         "resourceMetadata":  {
+                                                                                  "resourceId":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef",
+                                                                                  "source":  null
+                                                                              },
+                                                         "risk":  null,
+                                                         "shortDescription":  {
+                                                                                  "problem":  "Consider purchasing a savings plan for compute to unlock lower prices",
+                                                                                  "solution":  "Consider purchasing a savings plan for compute to unlock lower prices"
+                                                                              },
+                                                         "suppressionIds":  null,
+                                                         "type":  "Microsoft.Advisor/recommendations"
+                                                     }
+                                                 ],
+                                       "Count":  8
+                                   },
+        "resources":  {
+                          "value":  [
+                                        {
+                                            "changedTime":  "2026-02-27T15:42:29.139356+00:00",
+                                            "createdTime":  "2026-02-27T15:13:56.067849+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/debo-east2-rg/providers/Microsoft.Cache/Redis/debo-redis",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus2",
+                                            "managedBy":  null,
+                                            "name":  "debo-redis",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "debo-east2-rg",
+                                            "sku":  null,
+                                            "tags":  {
+
+                                                     },
+                                            "type":  "Microsoft.Cache/Redis"
+                                        },
+                                        {
+                                            "changedTime":  "2026-02-27T15:24:23.676780+00:00",
+                                            "createdTime":  "2026-02-27T15:13:56.067901+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/debo-east2-rg/providers/Microsoft.OperationalInsights/workspaces/debo-logs",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus2",
+                                            "managedBy":  null,
+                                            "name":  "debo-logs",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "debo-east2-rg",
+                                            "sku":  null,
+                                            "tags":  null,
+                                            "type":  "Microsoft.OperationalInsights/workspaces"
+                                        },
+                                        {
+                                            "changedTime":  "2026-02-27T15:24:54.497116+00:00",
+                                            "createdTime":  "2026-02-27T15:14:17.103879+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/debo-east2-rg/providers/Microsoft.App/managedEnvironments/debo-env",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus2",
+                                            "managedBy":  null,
+                                            "name":  "debo-env",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "debo-east2-rg",
+                                            "sku":  null,
+                                            "systemData":  {
+                                                               "createdAt":  "2026-02-27T15:14:17.126623Z",
+                                                               "createdBy":  "T.Hines5@student.evergladesuniversity.edu",
+                                                               "createdByType":  "User",
+                                                               "lastModifiedAt":  "2026-02-27T15:14:17.126623Z",
+                                                               "lastModifiedBy":  "T.Hines5@student.evergladesuniversity.edu",
+                                                               "lastModifiedByType":  "User"
+                                                           },
+                                            "tags":  null,
+                                            "type":  "Microsoft.App/managedEnvironments"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-02T16:35:13.936603+00:00",
+                                            "createdTime":  "2026-02-28T03:16:26.563256+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/prod-rg/providers/Microsoft.Web/serverFarms/plan-wtunmw4mafbha",
+                                            "identity":  null,
+                                            "kind":  "app",
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "plan-wtunmw4mafbha",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "prod-rg",
+                                            "sku":  {
+                                                        "capacity":  1,
+                                                        "family":  "Pv3",
+                                                        "model":  null,
+                                                        "name":  "P0v3",
+                                                        "size":  "P0v3",
+                                                        "tier":  "Premium0V3"
+                                                    },
+                                            "tags":  null,
+                                            "type":  "Microsoft.Web/serverFarms"
+                                        },
+                                        {
+                                            "changedTime":  "2026-02-28T03:26:37.716775+00:00",
+                                            "createdTime":  "2026-02-28T03:16:37.416657+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/prod-rg/providers/Microsoft.Web/sites/app-wtunmw4mafbha",
+                                            "identity":  null,
+                                            "kind":  "app",
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "app-wtunmw4mafbha",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "prod-rg",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "prod",
+                                                         "azd-service-name":  "web",
+                                                         "project":  "devbot-mcp",
+                                                         "tier":  "student-access"
+                                                     },
+                                            "type":  "Microsoft.Web/sites"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-02T16:21:09.726483+00:00",
+                                            "createdTime":  "2026-03-02T16:09:22.956203+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/prod-rg/providers/Microsoft.Web/sites/natt-mcp-7updxksg",
+                                            "identity":  null,
+                                            "kind":  "app",
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "natt-mcp-7updxksg",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "prod-rg",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "natt",
+                                                         "azd-service-name":  "natt-web"
+                                                     },
+                                            "type":  "Microsoft.Web/sites"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:50:22.089147+00:00",
+                                            "createdTime":  "2026-03-03T04:34:47.182576+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/Microsoft.OperationalInsights/workspaces/log-mcp-dev",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "log-mcp-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.OperationalInsights/workspaces"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:50:01.815903+00:00",
+                                            "createdTime":  "2026-03-03T04:35:49.652611+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiCenter/services/apic-mcp-org",
+                                            "identity":  {
+                                                             "principalId":  "8fb9038d-d9f3-470d-bfaf-09f28ac2fd6b",
+                                                             "tenantId":  "0c38b3fe-18e2-4515-9ea0-b98d07b93f33",
+                                                             "type":  "SystemAssigned",
+                                                             "userAssignedIdentities":  null
+                                                         },
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "apic-mcp-org",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  {
+                                                        "capacity":  null,
+                                                        "family":  null,
+                                                        "model":  null,
+                                                        "name":  "Standard",
+                                                        "size":  null,
+                                                        "tier":  null
+                                                    },
+                                            "systemData":  {
+                                                               "createdAt":  "2026-03-03T04:35:50.8304213Z",
+                                                               "lastModifiedAt":  "2026-03-03T04:40:02.1021512Z"
+                                                           },
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.ApiCenter/services"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:46:11.760175+00:00",
+                                            "createdTime":  "2026-03-03T04:36:11.528154+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/Microsoft.Insights/components/appi-mcp-dev",
+                                            "identity":  null,
+                                            "kind":  "web",
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "appi-mcp-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.Insights/components"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:47:05.384015+00:00",
+                                            "createdTime":  "2026-03-03T04:37:05.116776+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/Microsoft.KeyVault/vaults/kvmcpdevthines",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "kvmcpdevthines",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.KeyVault/vaults"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:50:23.562504+00:00",
+                                            "createdTime":  "2026-03-03T04:37:05.131016+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiManagement/service/apim-mcp-dev-thines",
+                                            "identity":  {
+                                                             "principalId":  "e1aa44b6-2b92-45c1-b210-cfd22d7a1739",
+                                                             "tenantId":  "0c38b3fe-18e2-4515-9ea0-b98d07b93f33",
+                                                             "type":  "SystemAssigned",
+                                                             "userAssignedIdentities":  null
+                                                         },
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "apim-mcp-dev-thines",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  {
+                                                        "capacity":  1,
+                                                        "family":  null,
+                                                        "model":  null,
+                                                        "name":  "BasicV2",
+                                                        "size":  null,
+                                                        "tier":  null
+                                                    },
+                                            "systemData":  {
+                                                               "lastModifiedAt":  "2026-03-03T04:40:01.4981894Z",
+                                                               "lastModifiedBy":  "T.Hines5@student.evergladesuniversity.edu",
+                                                               "lastModifiedByType":  "User"
+                                                           },
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.ApiManagement/service"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T04:56:13.018834+00:00",
+                                            "createdTime":  "2026-03-03T04:46:12.837066+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/5b11891c-7666-4552-afe2-44d211fa1cef/resourceGroups/rg-mcp-dev/providers/microsoft.insights/actiongroups/Application Insights Smart Detection",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "global",
+                                            "managedBy":  null,
+                                            "name":  "Application Insights Smart Detection",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  null,
+                                            "type":  "microsoft.insights/actiongroups"
+                                        }
+                                    ],
+                          "Count":  12
+                      }
+    },
+    {
+        "subscription":  "be2bf9c0-f59a-48be-9047-760a20fd7766",
+        "timeframe":  {
+                          "to":  "2026-03-04T19:31:39Z",
+                          "from":  "2026-02-02T19:31:39Z"
+                      },
+        "costQuery":  {
+                          "timeframe":  "Custom",
+                          "timePeriod":  {
+                                             "to":  "2026-03-04T19:31:39Z",
+                                             "from":  "2026-02-02T19:31:39Z"
+                                         },
+                          "dataset":  {
+                                          "aggregation":  {
+                                                              "totalCost":  {
+                                                                                "function":  "Sum",
+                                                                                "name":  "Cost"
+                                                                            }
+                                                          },
+                                          "grouping":  [
+                                                           {
+                                                               "name":  "ResourceId",
+                                                               "type":  "Dimension"
+                                                           }
+                                                       ],
+                                          "granularity":  "None"
+                                      },
+                          "type":  "ActualCost"
+                      },
+        "costResponse":  {
+                             "eTag":  null,
+                             "id":  "subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/providers/Microsoft.CostManagement/query/3e8cc79e-7efa-41bc-a2c0-18e11a6a4c3b",
+                             "location":  null,
+                             "name":  "3e8cc79e-7efa-41bc-a2c0-18e11a6a4c3b",
+                             "properties":  {
+                                                "columns":  [
+                                                                {
+                                                                    "name":  "Cost",
+                                                                    "type":  "Number"
+                                                                },
+                                                                {
+                                                                    "name":  "ResourceId",
+                                                                    "type":  "String"
+                                                                },
+                                                                {
+                                                                    "name":  "Currency",
+                                                                    "type":  "String"
+                                                                }
+                                                            ],
+                                                "nextLink":  null,
+                                                "rows":  [
+                                                             [
+                                                                 0.9575,
+                                                                 "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourcegroups/rg-mcp-dev/providers/microsoft.apicenter/service/apic-mcp-tc-org",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 4.93152,
+                                                                 "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourcegroups/rg-mcp-dev/providers/microsoft.apimanagement/service/apim-mcp-tc-dev",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 3E-06,
+                                                                 "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourcegroups/rg-mcp-dev/providers/microsoft.keyvault/vaults/kv-mcp-tc-dev",
+                                                                 "USD"
+                                                             ],
+                                                             [
+                                                                 0.0,
+                                                                 "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourcegroups/rg-mcp-dev/providers/microsoft.operationalinsights/workspaces/log-mcp-dev",
+                                                                 "USD"
+                                                             ]
+                                                         ]
+                                            },
+                             "sku":  null,
+                             "type":  "Microsoft.CostManagement/query"
+                         },
+        "advisorRecommendations":  {
+                                       "value":  [
+
+                                                 ],
+                                       "Count":  0
+                                   },
+        "resources":  {
+                          "value":  [
+                                        {
+                                            "changedTime":  "2026-03-03T15:27:32.909001+00:00",
+                                            "createdTime":  "2026-03-03T15:17:32.735241+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.KeyVault/vaults/kv-mcp-tc-dev",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "kv-mcp-tc-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.KeyVault/vaults"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T15:30:24.641702+00:00",
+                                            "createdTime":  "2026-03-03T15:17:33.400145+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiManagement/service/apim-mcp-tc-dev",
+                                            "identity":  {
+                                                             "principalId":  "57cf2750-22e8-4f3f-8003-d022999cd688",
+                                                             "tenantId":  "0c38b3fe-18e2-4515-9ea0-b98d07b93f33",
+                                                             "type":  "SystemAssigned",
+                                                             "userAssignedIdentities":  null
+                                                         },
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "apim-mcp-tc-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  {
+                                                        "capacity":  1,
+                                                        "family":  null,
+                                                        "model":  null,
+                                                        "name":  "BasicV2",
+                                                        "size":  null,
+                                                        "tier":  null
+                                                    },
+                                            "systemData":  {
+                                                               "lastModifiedAt":  "2026-03-03T15:20:02.7160879Z",
+                                                               "lastModifiedBy":  "T.Hines5@student.evergladesuniversity.edu",
+                                                               "lastModifiedByType":  "User"
+                                                           },
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.ApiManagement/service"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T15:30:23.511188+00:00",
+                                            "createdTime":  "2026-03-03T15:17:37.625141+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.OperationalInsights/workspaces/log-mcp-dev",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "log-mcp-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.OperationalInsights/workspaces"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T15:27:58.814845+00:00",
+                                            "createdTime":  "2026-03-03T15:17:58.439124+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.Insights/components/appi-mcp-dev",
+                                            "identity":  null,
+                                            "kind":  "web",
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "appi-mcp-dev",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.Insights/components"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T15:30:02.995762+00:00",
+                                            "createdTime":  "2026-03-03T15:20:02.718831+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/Microsoft.ApiCenter/services/apic-mcp-tc-org",
+                                            "identity":  {
+                                                             "principalId":  "419f7dda-ea35-4877-b3dc-3b4ba2f39b66",
+                                                             "tenantId":  "0c38b3fe-18e2-4515-9ea0-b98d07b93f33",
+                                                             "type":  "SystemAssigned",
+                                                             "userAssignedIdentities":  null
+                                                         },
+                                            "kind":  null,
+                                            "location":  "eastus",
+                                            "managedBy":  null,
+                                            "name":  "apic-mcp-tc-org",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  {
+                                                        "capacity":  null,
+                                                        "family":  null,
+                                                        "model":  null,
+                                                        "name":  "Standard",
+                                                        "size":  null,
+                                                        "tier":  null
+                                                    },
+                                            "systemData":  {
+                                                               "createdAt":  "2026-03-03T15:20:03.9674434Z",
+                                                               "lastModifiedAt":  "2026-03-03T15:20:09.2342028Z"
+                                                           },
+                                            "tags":  {
+                                                         "azd-env-name":  "dev",
+                                                         "workload":  "mcp-governance"
+                                                     },
+                                            "type":  "Microsoft.ApiCenter/services"
+                                        },
+                                        {
+                                            "changedTime":  "2026-03-03T15:38:00.062270+00:00",
+                                            "createdTime":  "2026-03-03T15:27:59.759855+00:00",
+                                            "extendedLocation":  null,
+                                            "id":  "/subscriptions/be2bf9c0-f59a-48be-9047-760a20fd7766/resourceGroups/rg-mcp-dev/providers/microsoft.insights/actiongroups/Application Insights Smart Detection",
+                                            "identity":  null,
+                                            "kind":  null,
+                                            "location":  "global",
+                                            "managedBy":  null,
+                                            "name":  "Application Insights Smart Detection",
+                                            "plan":  null,
+                                            "properties":  null,
+                                            "provisioningState":  "Succeeded",
+                                            "resourceGroup":  "rg-mcp-dev",
+                                            "sku":  null,
+                                            "tags":  null,
+                                            "type":  "microsoft.insights/actiongroups"
+                                        }
+                                    ],
+                          "Count":  6
+                      }
+    }
+]

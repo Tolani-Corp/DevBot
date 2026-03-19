@@ -74,6 +74,8 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createServer, type Server as HttpServer } from "node:http";
+import { buildUxResponse } from "./ux-response.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -1116,6 +1118,59 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ["target"],
       },
     },
+    {
+      name: "bettorsace_diagnose_issue",
+      description:
+        "Invoke the BettorsACE platform TypeScript agent to diagnose a platform issue with actionable root causes and next actions.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          issue: { type: "string", description: "Issue description to diagnose" },
+          focus: {
+            type: "string",
+            enum: ["auth", "wallet", "odds", "analytics", "performance", "security", "growth"],
+            description: "Primary focus area for diagnosis",
+          },
+          repository: { type: "string", description: "Optional repository context" },
+          userId: { type: "string", description: "Optional user id for cost attribution" },
+          workspaceId: { type: "string", description: "Optional workspace id for tier/model routing" },
+          preferredModel: { type: "string", description: "Optional model override (tier allowing)" },
+        },
+        required: ["issue", "focus"],
+      },
+    },
+    {
+      name: "bettorsace_create_blueprint",
+      description:
+        "Invoke the BettorsACE platform TypeScript agent to generate an implementation blueprint for a feature request.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          feature_request: { type: "string", description: "Feature request to blueprint" },
+          repository: { type: "string", description: "Optional repository context" },
+          userId: { type: "string", description: "Optional user id for cost attribution" },
+          workspaceId: { type: "string", description: "Optional workspace id for tier/model routing" },
+          preferredModel: { type: "string", description: "Optional model override (tier allowing)" },
+        },
+        required: ["feature_request"],
+      },
+    },
+    {
+      name: "bettorsace_generate_strategy",
+      description:
+        "Invoke the BettorsACE platform TypeScript agent to generate strategy recommendations for a platform objective.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          objective: { type: "string", description: "Business or technical objective" },
+          repository: { type: "string", description: "Optional repository context" },
+          userId: { type: "string", description: "Optional user id for cost attribution" },
+          workspaceId: { type: "string", description: "Optional workspace id for tier/model routing" },
+          preferredModel: { type: "string", description: "Optional model override (tier allowing)" },
+        },
+        required: ["objective"],
+      },
+    },
   ],
 }));
 
@@ -1129,48 +1184,77 @@ const MAX_RESPONSE_LENGTH = 16000; // 16KB limit for context window optimization
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
+  const startedAt = Date.now();
 
   try {
     const cacheKey = `${name}:${JSON.stringify(args || {})}`;
     if (toolCache.has(cacheKey)) {
-      return toolCache.get(cacheKey);
+      return buildUxResponse({
+        toolName: name,
+        result: toolCache.get(cacheKey),
+        startedAt,
+        cached: true,
+        truncated: false,
+      });
     }
 
     try {
       const handler = await import(`./handlers/${name}.js`);
       const result = await handler.handle(args);
+      let truncated = false;
       
       // Context Window Optimization: Truncate large text responses
       if (result && result.content && Array.isArray(result.content)) {
         for (const item of result.content) {
           if (item.type === "text" && typeof item.text === "string" && item.text.length > MAX_RESPONSE_LENGTH) {
+            truncated = true;
             item.text = item.text.substring(0, MAX_RESPONSE_LENGTH) + 
               "\n\n... [TRUNCATED FOR CONTEXT WINDOW OPTIMIZATION. PLEASE USE MORE SPECIFIC QUERIES] ...";
           }
         }
       }
 
+      const normalized = buildUxResponse({
+        toolName: name,
+        result,
+        startedAt,
+        cached: false,
+        truncated,
+      });
+
       if (toolCache.size >= MAX_CACHE_SIZE) {
         const firstKey = toolCache.keys().next().value;
         if (firstKey) toolCache.delete(firstKey);
       }
-      toolCache.set(cacheKey, result);
+      toolCache.set(cacheKey, normalized);
       
-      return result;
+      return normalized;
     } catch (e: any) {
       if (e.code === 'ERR_MODULE_NOT_FOUND') {
-        return {
+        return buildUxResponse({
+          toolName: name,
+          startedAt,
+          cached: false,
+          truncated: false,
+          result: {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],
           isError: true,
-        };
+          },
+        });
       }
       throw e;
     }
   } catch (err) {
-    return {
+    return buildUxResponse({
+      toolName: name,
+      startedAt,
+      cached: false,
+      truncated: false,
+      result: {
       content: [{ type: "text", text: `Tool error: ${String(err)}` }],
       isError: true,
-    };
+      },
+    });
   }
 });
 
@@ -1406,11 +1490,94 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 //  Start Server
 // ─────────────────────────────────────────────────────────────────────────────
 
+let healthServer: HttpServer | null = null;
+
+async function startHealthServer(): Promise<void> {
+  const resolveListenTarget = (): number | string => {
+    const portValue = process.env.PORT?.trim();
+    if (portValue) {
+      const numeric = Number.parseInt(portValue, 10);
+      if (Number.isFinite(numeric) && numeric > 0) {
+        return numeric;
+      }
+
+      return portValue;
+    }
+
+    const webhookValue = process.env.WEBHOOK_PORT?.trim();
+    if (webhookValue) {
+      const numeric = Number.parseInt(webhookValue, 10);
+      if (Number.isFinite(numeric) && numeric > 0) {
+        return numeric;
+      }
+
+      return webhookValue;
+    }
+
+    return 3101;
+  };
+
+  const port = resolveListenTarget();
+
+  healthServer = createServer((req, res) => {
+    if (req.url === "/health" || req.url === "/status") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok", service: "natt-mcp", pid: process.pid, ts: Date.now() }));
+      return;
+    }
+
+    if (req.url === "/") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ service: "natt-mcp", health: "/health", status: "/status" }));
+      return;
+    }
+
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "not_found" }));
+  });
+
+  await new Promise<void>((resolve) => {
+    if (typeof port === "number") {
+      healthServer?.listen(port, "0.0.0.0", () => {
+        console.error(`[NATT MCP] Health server listening on port ${port}`);
+        resolve();
+      });
+      return;
+    }
+
+    healthServer?.listen(port, () => {
+      console.error(`[NATT MCP] Health server listening on ${port}`);
+      resolve();
+    });
+  });
+}
+
+async function shutdown(): Promise<void> {
+  if (!healthServer) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    healthServer?.close(() => resolve());
+  });
+}
+
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  await startHealthServer();
   console.error("[NATT MCP] 👻 NATT Knowledge Server running");
 }
+
+process.on("SIGINT", async () => {
+  await shutdown();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await shutdown();
+  process.exit(0);
+});
 
 main().catch((err) => {
   console.error("Fatal:", err);

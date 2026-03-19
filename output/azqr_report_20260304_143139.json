@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-03-04T19:31:39Z",
+  "status": "not_executed",
+  "reason": "Azure Quick Review CLI (azqr) executable not found in PATH",
+  "details": "Install azqr from https://aka.ms/azqr and rerun for orphaned-resource detection.",
+  "subscriptions": [
+    "5b11891c-7666-4552-afe2-44d211fa1cef",
+    "be2bf9c0-f59a-48be-9047-760a20fd7766"
+  ]
+}

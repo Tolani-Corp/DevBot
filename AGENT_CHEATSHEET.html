@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FunBot / DevBot — Agent Cheat Sheet for Dummies</title>
+<title>FunBot / DevBot â€” Agent Cheat Sheet for Dummies</title>
 <style>
   :root {
     --bg: #0d0d14;
@@ -22,19 +22,19 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-  /* ── Layout ── */
+  /* â”€â”€ Layout â”€â”€ */
   .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
   @media(max-width:900px){ .two-col, .three-col { grid-template-columns: 1fr; } }
 
-  /* ── Hero ── */
+  /* â”€â”€ Hero â”€â”€ */
   .hero { text-align: center; padding: 3rem 1rem 2.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 16px; margin-bottom: 2.5rem; border: 1px solid var(--border); }
   .hero h1 { font-size: 2.8rem; font-weight: 800; background: linear-gradient(90deg, #7c6af5, #4fc3f7, #81c784); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .hero .subtitle { font-size: 1.15rem; color: var(--muted); margin-top: .5rem; }
   .hero .version { display: inline-block; margin-top: 1rem; background: var(--accent); color: white; font-size: .75rem; padding: .25rem .9rem; border-radius: 20px; font-weight: 600; letter-spacing: .05em; }
 
-  /* ── TOC / Index ── */
+  /* â”€â”€ TOC / Index â”€â”€ */
   .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
   .toc h2 { font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; }
   .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .5rem .5rem; }
@@ -42,7 +42,7 @@
   .toc a:hover { color: var(--text); }
   .toc-num { color: var(--muted); font-size: .75rem; width: 1.5rem; }
 
-  /* ── Section Headers ── */
+  /* â”€â”€ Section Headers â”€â”€ */
   .section { margin-bottom: 3rem; }
   .section-header { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.5rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
   .section-header .icon { font-size: 1.5rem; width: 2.5rem; height: 2.5rem; background: var(--surface2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
@@ -52,7 +52,7 @@
   .tag-natt { background: #1f2d1f; color: var(--accent3); }
   .tag-ref  { background: #2d1f3f; color: var(--accent); }
 
-  /* ── Cards ── */
+  /* â”€â”€ Cards â”€â”€ */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.4rem; }
   .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .75rem; display: flex; align-items: center; gap: .5rem; }
   .card p { font-size: .88rem; color: var(--muted); margin-bottom: .75rem; }
@@ -61,7 +61,7 @@
   .card.success { border-color: var(--accent3); }
   .card.danger { border-color: var(--danger); }
 
-  /* ── Code blocks ── */
+  /* â”€â”€ Code blocks â”€â”€ */
   code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
   .cmd { display: block; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: .8rem 1rem; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: .82rem; color: #a8d8ff; margin: .5rem 0; position: relative; overflow-x: auto; white-space: pre; }
   .cmd .kw  { color: #7c6af5; }
@@ -70,7 +70,7 @@
   .cmd .com { color: var(--muted); }
   .inline-code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: .1rem .4rem; font-size: .82rem; color: #a8d8ff; font-family: monospace; }
 
-  /* ── Tables ── */
+  /* â”€â”€ Tables â”€â”€ */
   table { width: 100%; border-collapse: collapse; font-size: .85rem; }
   thead th { background: var(--surface2); color: var(--muted); text-transform: uppercase; font-size: .72rem; letter-spacing: .06em; padding: .6rem .85rem; text-align: left; border-bottom: 1px solid var(--border); }
   tbody td { padding: .6rem .85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -78,7 +78,7 @@
   tbody tr:hover td { background: var(--surface2); }
   .table-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 
-  /* ── Badges ── */
+  /* â”€â”€ Badges â”€â”€ */
   .badge { display: inline-block; font-size: .7rem; padding: .15rem .55rem; border-radius: 10px; font-weight: 600; letter-spacing: .03em; }
   .b-green { background: #1a3320; color: #81c784; }
   .b-blue  { background: #0d2840; color: #4fc3f7; }
@@ -86,7 +86,7 @@
   .b-red   { background: #3d1a1a; color: #f87171; }
   .b-yellow{ background: #3d2e00; color: #fbbf24; }
 
-  /* ── Flow Diagrams ── */
+  /* â”€â”€ Flow Diagrams â”€â”€ */
   .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin: 1rem 0; }
   .flow-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .9rem; font-size: .8rem; font-weight: 600; white-space: nowrap; }
   .flow-box.accent { border-color: var(--accent); color: var(--accent); }
@@ -98,7 +98,7 @@
   .flow-vert .flow-box { align-self: flex-start; }
   .flow-vert .flow-arrow { align-self: flex-start; padding-left: 1rem; }
 
-  /* ── Step Lists ── */
+  /* â”€â”€ Step Lists â”€â”€ */
   .steps { counter-reset: step; list-style: none; display: flex; flex-direction: column; gap: .8rem; }
   .steps li { counter-increment: step; display: flex; gap: 1rem; align-items: flex-start; }
   .steps li::before { content: counter(step); min-width: 2rem; height: 2rem; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0; margin-top: .1rem; }
@@ -106,41 +106,41 @@
   .steps li .step-title { font-weight: 600; font-size: .95rem; }
   .steps li .step-desc { font-size: .83rem; color: var(--muted); margin-top: .2rem; }
 
-  /* ── Tip boxes ── */
+  /* â”€â”€ Tip boxes â”€â”€ */
   .tip  { background: #0d1f2a; border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0; padding: .75rem 1rem; font-size: .84rem; margin: .75rem 0; }
   .warn-box { background: #2a200a; border-left: 3px solid var(--warn); border-radius: 0 8px 8px 0; padding: .75rem 1rem; font-size: .84rem; margin: .75rem 0; }
   .danger-box { background: #2a0d0d; border-left: 3px solid var(--danger); border-radius: 0 8px 8px 0; padding: .75rem 1rem; font-size: .84rem; margin: .75rem 0; }
   .tip strong, .warn-box strong, .danger-box strong { display: block; margin-bottom: .2rem; }
 
-  /* ── Quick Reference Bar ── */
+  /* â”€â”€ Quick Reference Bar â”€â”€ */
   .quick-bar { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; }
   .qb { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .4rem .85rem; font-size: .78rem; font-family: monospace; color: var(--accent2); cursor: default; }
   .qb:hover { border-color: var(--accent2); }
 
-  /* ── Arch Diagram ── */
+  /* â”€â”€ Arch Diagram â”€â”€ */
   .arch { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .arch table { font-size: .78rem; }
   .arch thead th { background: #0f0f1f; }
   .arch .layer-label { font-size: .7rem; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; padding-top: 1rem; }
 
-  /* ── Annex ── */
+  /* â”€â”€ Annex â”€â”€ */
   .annex-entry { padding: .75rem 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 180px 1fr; gap: 1rem; }
   .annex-entry:last-child { border-bottom: none; }
   .annex-term { font-family: monospace; font-size: .85rem; color: var(--accent2); font-weight: 700; }
   .annex-def { font-size: .85rem; color: var(--muted); }
 
-  /* ── Footer ── */
+  /* â”€â”€ Footer â”€â”€ */
   footer { text-align: center; color: var(--muted); font-size: .78rem; padding: 3rem 0 1rem; }
 
-  /* ── Scrollbar ── */
+  /* â”€â”€ Scrollbar â”€â”€ */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-  /* ── Anchor targets ── */
+  /* â”€â”€ Anchor targets â”€â”€ */
   [id] { scroll-margin-top: 1.5rem; }
 
-  /* ── Risk pills ── */
+  /* â”€â”€ Risk pills â”€â”€ */
   .risk { font-size: .7rem; padding: .15rem .55rem; border-radius: 10px; font-weight: 700; }
   .r-crit { background: #5c0a0a; color: #ff8080; }
   .r-high { background: #4d2600; color: #ffaa55; }
@@ -148,7 +148,7 @@
   .r-low  { background: #1a3320; color: #81c784; }
   .r-info { background: #0d2840; color: #4fc3f7; }
 
-  /* ── Mini chart bars ── */
+  /* â”€â”€ Mini chart bars â”€â”€ */
   .bar-chart { display: flex; flex-direction: column; gap: .4rem; margin: .75rem 0; }
   .bar-row { display: flex; align-items: center; gap: .6rem; font-size: .77rem; }
   .bar-label { width: 100px; color: var(--muted); text-align: right; flex-shrink: 0; }
@@ -164,16 +164,16 @@
 <body>
 <div class="container">
 
-  <!-- ── HERO ── -->
+  <!-- â”€â”€ HERO â”€â”€ -->
   <div class="hero">
-    <h1>🤖 FunBot / DevBot</h1>
-    <div class="subtitle">Complete Agent Cheat Sheet — Slack Commands, NATT Ghost, Reports &amp; Cron Scheduler</div>
-    <div class="version">v2.0 · Feb 2026 · For End Users</div>
+    <h1>ðŸ¤– FunBot / DevBot</h1>
+    <div class="subtitle">Complete Agent Cheat Sheet â€” Slack Commands, NATT Ghost, Reports &amp; Cron Scheduler</div>
+    <div class="version">v2.0 Â· Feb 2026 Â· For End Users</div>
   </div>
 
-  <!-- ── INDEX / TOC ── -->
+  <!-- â”€â”€ INDEX / TOC â”€â”€ -->
   <div class="toc" id="top">
-    <h2>📑 Index</h2>
+    <h2>ðŸ“‘ Index</h2>
     <div class="toc-grid">
       <a href="#what-is-it"><span class="toc-num">01</span> What Is FunBot?</a>
       <a href="#how-it-works"><span class="toc-num">02</span> How It Works</a>
@@ -187,111 +187,111 @@
       <a href="#mentions"><span class="toc-num">10</span> @Mention Shortcuts</a>
       <a href="#flow-diagrams"><span class="toc-num">11</span> Flow Diagrams</a>
       <a href="#risk-guide"><span class="toc-num">12</span> Risk Rating Guide</a>
-      <a href="#annex-a"><span class="toc-num">A</span> Annex A — Definitions</a>
-      <a href="#annex-b"><span class="toc-num">B</span> Annex B — Cron Expressions</a>
-      <a href="#annex-c"><span class="toc-num">C</span> Annex C — Error Reference</a>
+      <a href="#annex-a"><span class="toc-num">A</span> Annex A â€” Definitions</a>
+      <a href="#annex-b"><span class="toc-num">B</span> Annex B â€” Cron Expressions</a>
+      <a href="#annex-c"><span class="toc-num">C</span> Annex C â€” Error Reference</a>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 1 — WHAT IS IT
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 1 â€” WHAT IS IT
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="what-is-it">
     <div class="section-header">
-      <div class="icon">🤖</div>
-      <h2>01 — What Is FunBot?</h2>
+      <div class="icon">ðŸ¤–</div>
+      <h2>01 â€” What Is FunBot?</h2>
       <span class="tag tag-core">CORE</span>
     </div>
 
     <div class="three-col">
       <div class="card success">
-        <h3>🧠 AI Engineer</h3>
+        <h3>ðŸ§  AI Engineer</h3>
         <p>FunBot is an autonomous AI software engineer living inside your Slack workspace. Mention it and it fixes bugs, writes code, opens PRs.</p>
       </div>
       <div class="card highlight">
-        <h3>👻 Security Agent</h3>
+        <h3>ðŸ‘» Security Agent</h3>
         <p>NATT (Network Attack &amp; Testing Toolkit) is a ghost-mode ethical hacker. Run recon, find vulnerabilities, get PowerPoint reports.</p>
       </div>
       <div class="card">
-        <h3>⏱️ Cron Scheduler</h3>
-        <p>Schedule automated security reports delivered to Slack channels — daily, weekly, monthly, or custom cron expressions.</p>
+        <h3>â±ï¸ Cron Scheduler</h3>
+        <p>Schedule automated security reports delivered to Slack channels â€” daily, weekly, monthly, or custom cron expressions.</p>
       </div>
     </div>
 
-    <div class="tip" style="margin-top:1.5rem;">
-      <strong>💡 Two names, one bot</strong>
+    <div class="tip">
+      <strong>ðŸ’¡ Two names, one bot</strong>
       FunBot is the brand name shown to end users. DevBot is the internal/GitHub name. They are the same system.
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 2 — HOW IT WORKS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 2 â€” HOW IT WORKS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="how-it-works">
     <div class="section-header">
-      <div class="icon">⚙️</div>
-      <h2>02 — How It Works</h2>
+      <div class="icon">âš™ï¸</div>
+      <h2>02 â€” How It Works</h2>
       <span class="tag tag-core">CORE</span>
     </div>
 
     <div class="two-col">
       <div>
-        <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;">When you send a message, here's what happens behind the scenes:</p>
+        <p>When you send a message, here's what happens behind the scenes:</p>
         <div class="flow-vert">
-          <div class="flow-box accent">👤 You type a message / command in Slack</div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-box blue">📨 Slack sends it to FunBot's listener</div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-box">🧠 Claude AI analyzes &amp; plans the work</div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-box yellow">📋 Task queued in BullMQ (Redis)</div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-box">🔨 Worker processes: reads code, makes changes</div>
-          <div class="flow-arrow">↓</div>
-          <div class="flow-box green">✅ Result posted back to your Slack thread</div>
+          <div class="flow-box accent">ðŸ‘¤ You type a message / command in Slack</div>
+          <div class="flow-arrow">â†“</div>
+          <div class="flow-box blue">ðŸ“¨ Slack sends it to FunBot's listener</div>
+          <div class="flow-arrow">â†“</div>
+          <div class="flow-box">ðŸ§  Claude AI analyzes &amp; plans the work</div>
+          <div class="flow-arrow">â†“</div>
+          <div class="flow-box yellow">ðŸ“‹ Task queued in BullMQ (Redis)</div>
+          <div class="flow-arrow">â†“</div>
+          <div class="flow-box">ðŸ”¨ Worker processes: reads code, makes changes</div>
+          <div class="flow-arrow">â†“</div>
+          <div class="flow-box green">âœ… Result posted back to your Slack thread</div>
         </div>
       </div>
       <div>
-        <div class="card" style="margin-bottom:1rem;">
-          <h3>🏗️ System Architecture</h3>
+        <div class="card">
+          <h3>ðŸ—ï¸ System Architecture</h3>
           <div class="bar-chart">
             <div class="bar-row">
               <span class="bar-label">Slack Layer</span>
-              <div class="bar-track"><div class="bar-fill bf-purple" style="width:85%">Bolt SDK</div></div>
+              <div class="bar-track"><div class="bar-fill bf-purple">Bolt SDK</div></div>
             </div>
             <div class="bar-row">
               <span class="bar-label">AI Layer</span>
-              <div class="bar-track"><div class="bar-fill bf-blue" style="width:75%">Claude (Anthropic)</div></div>
+              <div class="bar-track"><div class="bar-fill bf-blue">Claude (Anthropic)</div></div>
             </div>
             <div class="bar-row">
               <span class="bar-label">Queue</span>
-              <div class="bar-track"><div class="bar-fill bf-yellow" style="width:65%">BullMQ + Redis</div></div>
+              <div class="bar-track"><div class="bar-fill bf-yellow">BullMQ + Redis</div></div>
             </div>
             <div class="bar-row">
               <span class="bar-label">Database</span>
-              <div class="bar-track"><div class="bar-fill bf-green" style="width:60%">PostgreSQL / Drizzle</div></div>
+              <div class="bar-track"><div class="bar-fill bf-green">PostgreSQL / Drizzle</div></div>
             </div>
             <div class="bar-row">
               <span class="bar-label">Git / GitHub</span>
-              <div class="bar-track"><div class="bar-fill bf-red" style="width:55%">Octokit API</div></div>
+              <div class="bar-track"><div class="bar-fill bf-red">Octokit API</div></div>
             </div>
           </div>
         </div>
         <div class="warn-box">
-          <strong>⚠️ Requires authorization</strong>
+          <strong>âš ï¸ Requires authorization</strong>
           Active scans (NATT active mode, pentest) require <span class="inline-code">--auth=</span> proof that you own the target. FunBot will refuse unauthorized scans.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 3 — QUICK REFERENCE
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 3 â€” QUICK REFERENCE
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="quick-ref">
     <div class="section-header">
-      <div class="icon">⚡</div>
-      <h2>03 — Quick Reference Card</h2>
+      <div class="icon">âš¡</div>
+      <h2>03 â€” Quick Reference Card</h2>
       <span class="tag tag-core">CORE</span>
     </div>
     <div class="table-wrap">
@@ -320,40 +320,40 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 4 — CORE COMMANDS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 4 â€” CORE COMMANDS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="devbot-commands">
     <div class="section-header">
-      <div class="icon">🤖</div>
-      <h2>04 — Core Commands</h2>
+      <div class="icon">ðŸ¤–</div>
+      <h2>04 â€” Core Commands</h2>
       <span class="tag tag-core">CORE</span>
     </div>
 
     <div class="two-col">
       <div>
-        <div class="card success" style="margin-bottom:1rem;">
-          <h3>📋 /devbot-help</h3>
+        <div class="card success">
+          <h3>ðŸ“‹ /devbot-help</h3>
           <p>Shows the full help menu with all available commands and examples.</p>
           <div class="cmd">/devbot-help</div>
         </div>
-        <div class="card" style="margin-bottom:1rem;">
-          <h3>📊 /devbot-status</h3>
+        <div class="card">
+          <h3>ðŸ“Š /devbot-status</h3>
           <p>Lists your 10 most recent tasks with their current status.</p>
           <div class="cmd">/devbot-status</div>
-          <p style="margin-top:.5rem;">Status icons:</p>
-          <div style="font-size:.82rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-top:.4rem;">
-            <span>⏳ <code>pending</code> — queued</span>
-            <span>🔍 <code>analyzing</code> — planning</span>
-            <span>⚙️ <code>working</code> — in progress</span>
-            <span>✅ <code>completed</code> — done</span>
-            <span>❌ <code>failed</code> — errored</span>
+          <p>Status icons:</p>
+          <div>
+            <span>â³ <code>pending</code> â€” queued</span>
+            <span>ðŸ” <code>analyzing</code> â€” planning</span>
+            <span>âš™ï¸ <code>working</code> â€” in progress</span>
+            <span>âœ… <code>completed</code> â€” done</span>
+            <span>âŒ <code>failed</code> â€” errored</span>
           </div>
         </div>
       </div>
       <div>
         <div class="card highlight">
-          <h3>💬 @FunBot Mentions</h3>
+          <h3>ðŸ’¬ @FunBot Mentions</h3>
           <p>The most natural way to use FunBot. Just tag it anywhere in a channel.</p>
           <div class="cmd"><span class="com"># Software engineering tasks</span>
 @FunBot fix the authentication bug in HookTravel
@@ -366,44 +366,44 @@
 @DevBot generate report Jan 2 to Feb 5 with pivot tables
 @natt slides for all missions last month</div>
           <div class="tip">
-            <strong>💡 FunBot always replies in a thread</strong>
+            <strong>ðŸ’¡ FunBot always replies in a thread</strong>
             Watch the thread under your message for progress updates.
           </div>
         </div>
       </div>
     </div>
 
-    <div style="margin-top:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Step-by-Step: Ask FunBot to Fix a Bug</h3>
+    <div>
+      <h3>Step-by-Step: Ask FunBot to Fix a Bug</h3>
       <ol class="steps">
         <li><div class="step-content"><div class="step-title">Go to the channel where the project lives</div><div class="step-desc">Any public or private channel where FunBot is a member works.</div></div></li>
         <li><div class="step-content"><div class="step-title">Type your request mentioning the bot</div><div class="step-desc"><span class="inline-code">@FunBot fix the login redirect bug in src/auth/session.ts</span></div></div></li>
-        <li><div class="step-content"><div class="step-title">FunBot acknowledges and starts working</div><div class="step-desc">You'll see a thread reply: "🔍 Analyzing..." — this means the task is queued.</div></div></li>
+        <li><div class="step-content"><div class="step-title">FunBot acknowledges and starts working</div><div class="step-desc">You'll see a thread reply: "ðŸ” Analyzing..." â€” this means the task is queued.</div></div></li>
         <li><div class="step-content"><div class="step-title">Wait for the result</div><div class="step-desc">FunBot posts progress updates. When done, you get a summary and optionally a PR link.</div></div></li>
         <li><div class="step-content"><div class="step-title">Review the PR on GitHub</div><div class="step-desc">FunBot creates a pull request. Review it, merge it, or ask for changes with another @mention.</div></div></li>
       </ol>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 5 — PENTEST
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 5 â€” PENTEST
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="pentest">
     <div class="section-header">
-      <div class="icon">🔒</div>
-      <h2>05 — Security Scanner (/pentest)</h2>
+      <div class="icon">ðŸ”’</div>
+      <h2>05 â€” Security Scanner (/pentest)</h2>
       <span class="tag tag-natt">SECURITY</span>
     </div>
 
     <div class="two-col">
       <div>
         <div class="card">
-          <h3>🔒 Command Syntax</h3>
+          <h3>ðŸ”’ Command Syntax</h3>
           <div class="cmd"><span class="kw">/pentest</span> <span class="arg">&lt;target&gt;</span> [<span class="arg">--type=</span><span class="val">scan_type</span>] [<span class="arg">--repo=</span><span class="val">owner/repo</span>]</div>
         </div>
 
-        <div class="card" style="margin-top:1rem;">
-          <h3>🎯 Scan Types</h3>
+        <div class="card">
+          <h3>ðŸŽ¯ Scan Types</h3>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Flag</th><th>What It Scans</th></tr></thead>
@@ -420,7 +420,7 @@
       </div>
       <div>
         <div class="card">
-          <h3>📝 Examples</h3>
+          <h3>ðŸ“ Examples</h3>
           <div class="cmd"><span class="com"># Full scan (default)</span>
 <span class="kw">/pentest</span> <span class="val">freakme.fun</span>
 
@@ -434,68 +434,68 @@
 <span class="kw">/pentest</span> <span class="val">myapp.com</span> <span class="arg">--type=</span><span class="val">secret-scan</span></div>
         </div>
 
-        <div class="warn-box" style="margin-top:1rem;">
-          <strong>⚠️ Authorization Rule</strong>
+        <div class="warn-box">
+          <strong>âš ï¸ Authorization Rule</strong>
           Only scan domains, IPs, and repos you own or have written permission to test. Pentest will refuse unauthorized targets.
         </div>
 
-        <div class="tip" style="margin-top:.5rem;">
-          <strong>💡 Auto GitHub Issue</strong>
+        <div class="tip">
+          <strong>ðŸ’¡ Auto GitHub Issue</strong>
           If you provide <span class="inline-code">--repo=</span> and critical/high findings are found, FunBot automatically creates a GitHub issue with the full report.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 6 — NATT
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 6 â€” NATT
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="natt">
     <div class="section-header">
-      <div class="icon">👻</div>
-      <h2>06 — NATT Ghost Agent (/natt)</h2>
+      <div class="icon">ðŸ‘»</div>
+      <h2>06 â€” NATT Ghost Agent (/natt)</h2>
       <span class="tag tag-natt">GHOST</span>
     </div>
 
-    <div class="card highlight" style="margin-bottom:1.5rem;">
-      <h3>👻 What Is NATT?</h3>
+    <div class="card highlight">
+      <h3>ðŸ‘» What Is NATT?</h3>
       <p>NATT = <strong>Network Attack &amp; Testing Toolkit</strong>. It's a ghost-mode ethical hacker agent that infiltrates targets with minimal footprint and produces detailed security intelligence.</p>
     </div>
 
-    <div class="two-col" style="margin-bottom:1.5rem;">
+    <div class="two-col">
       <div>
         <div class="card">
-          <h3>📡 Command Syntax</h3>
+          <h3>ðŸ“¡ Command Syntax</h3>
           <div class="cmd"><span class="kw">/natt</span> <span class="arg">&lt;target&gt;</span>
   [<span class="arg">--mode=</span><span class="val">passive|stealth|active</span>]
   [<span class="arg">--mission=</span><span class="val">mission_type</span>]
   [<span class="arg">--auth=</span><span class="val">proof_string</span>]
   [<span class="arg">--type=</span><span class="val">url|ip|domain|api-endpoint</span>]</div>
 
-          <h3 style="margin-top:1rem;">🎯 Target Types</h3>
-          <div style="font-size:.83rem;display:grid;gap:.3rem;margin-top:.4rem;">
-            <span>🌐 <code>https://example.com</code> → auto-detected as URL</span>
-            <span>🔢 <code>192.168.1.1</code> → auto-detected as IP</span>
-            <span>🔤 <code>api.example.com</code> → auto-detected as domain</span>
-            <span>🔗 <code>https://api.x.com/v1/users</code> → API endpoint</span>
+          <h3>ðŸŽ¯ Target Types</h3>
+          <div>
+            <span>ðŸŒ <code>https://example.com</code> â†’ auto-detected as URL</span>
+            <span>ðŸ”¢ <code>192.168.1.1</code> â†’ auto-detected as IP</span>
+            <span>ðŸ”¤ <code>api.example.com</code> â†’ auto-detected as domain</span>
+            <span>ðŸ”— <code>https://api.x.com/v1/users</code> â†’ API endpoint</span>
           </div>
         </div>
       </div>
       <div>
         <div class="card">
-          <h3>⚡ Ghost Modes</h3>
-          <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.4rem;">
-            <div style="display:flex;align-items:flex-start;gap:.75rem;">
-              <span class="badge b-green" style="margin-top:.1rem;min-width:60px;text-align:center;">passive</span>
-              <span style="font-size:.83rem;color:var(--muted);">Observation only. No traffic sent to target. Reads public data, DNS, WHOIS. <strong style="color:var(--accent3);">Safest.</strong></span>
+          <h3>âš¡ Ghost Modes</h3>
+          <div>
+            <div>
+              <span class="badge b-green">passive</span>
+              <span>Observation only. No traffic sent to target. Reads public data, DNS, WHOIS. <strong>Safest.</strong></span>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:.75rem;">
-              <span class="badge b-blue" style="margin-top:.1rem;min-width:60px;text-align:center;">stealth</span>
-              <span style="font-size:.83rem;color:var(--muted);">Light probing. Minimal footprint. Avoids triggering alerts. <strong style="color:var(--accent2);">Default mode.</strong></span>
+            <div>
+              <span class="badge b-blue">stealth</span>
+              <span>Light probing. Minimal footprint. Avoids triggering alerts. <strong>Default mode.</strong></span>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:.75rem;">
-              <span class="badge b-red" style="margin-top:.1rem;min-width:60px;text-align:center;">active</span>
-              <span style="font-size:.83rem;color:var(--muted);">Full exploitation simulation. Requires <span class="inline-code">--auth=</span> proof. <strong style="color:var(--danger);">Requires authorization.</strong></span>
+            <div>
+              <span class="badge b-red">active</span>
+              <span>Full exploitation simulation. Requires <span class="inline-code">--auth=</span> proof. <strong>Requires authorization.</strong></span>
             </div>
           </div>
         </div>
@@ -505,8 +505,8 @@
     <div class="two-col">
       <div>
         <div class="card">
-          <h3>🎯 Mission Types</h3>
-          <div class="table-wrap" style="margin-top:.5rem;">
+          <h3>ðŸŽ¯ Mission Types</h3>
+          <div class="table-wrap">
             <table>
               <thead><tr><th>Mission</th><th>Description</th></tr></thead>
               <tbody>
@@ -524,8 +524,8 @@
       </div>
       <div>
         <div class="card">
-          <h3>📝 Examples</h3>
-          <div class="cmd"><span class="com"># Simple recon (stealth, full-ghost — defaults)</span>
+          <h3>ðŸ“ Examples</h3>
+          <div class="cmd"><span class="com"># Simple recon (stealth, full-ghost â€” defaults)</span>
 <span class="kw">/natt</span> <span class="val">https://example.com</span>
 
 <span class="com"># API recon in stealth</span>
@@ -543,10 +543,10 @@
       </div>
     </div>
 
-    <div style="margin-top:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Step-by-Step: Run Your First NATT Mission</h3>
+    <div>
+      <h3>Step-by-Step: Run Your First NATT Mission</h3>
       <ol class="steps">
-        <li><div class="step-content"><div class="step-title">Confirm you have authorization</div><div class="step-desc">You must own the target or have written permission. NATT checks this — no auth = no mission.</div></div></li>
+        <li><div class="step-content"><div class="step-title">Confirm you have authorization</div><div class="step-desc">You must own the target or have written permission. NATT checks this â€” no auth = no mission.</div></div></li>
         <li><div class="step-content"><div class="step-title">Choose your mode</div><div class="step-desc">Start with <span class="inline-code">passive</span> or <span class="inline-code">stealth</span> (default). Only use <span class="inline-code">active</span> with explicit <span class="inline-code">--auth=</span> proof.</div></div></li>
         <li><div class="step-content"><div class="step-title">Pick a mission type (optional)</div><div class="step-desc">Leave blank for <span class="inline-code">full-ghost</span>. Use a specific type like <span class="inline-code">api-recon</span> to focus the scan.</div></div></li>
         <li><div class="step-content"><div class="step-title">Run the command</div><div class="step-desc"><span class="inline-code">/natt https://yourapp.com --mode=stealth --mission=web-app</span></div></div></li>
@@ -556,49 +556,49 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 7 — NATT REPORT
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 7 â€” NATT REPORT
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="natt-report">
     <div class="section-header">
-      <div class="icon">📊</div>
-      <h2>07 — Report Generator (/natt-report)</h2>
+      <div class="icon">ðŸ“Š</div>
+      <h2>07 â€” Report Generator (/natt-report)</h2>
       <span class="tag tag-natt">REPORTS</span>
     </div>
 
     <div class="two-col">
       <div>
         <div class="card">
-          <h3>📊 Command Syntax</h3>
+          <h3>ðŸ“Š Command Syntax</h3>
           <div class="cmd"><span class="kw">/natt-report</span> <span class="arg">from=</span><span class="val">&lt;date&gt;</span> <span class="arg">to=</span><span class="val">&lt;date&gt;</span> [<span class="arg">operator=</span><span class="val">&lt;slack:USERID&gt;</span>]</div>
 
-          <h3 style="margin-top:1rem;">📅 Date Formats Accepted</h3>
-          <div style="font-size:.83rem;display:grid;gap:.3rem;margin-top:.4rem;">
-            <span>✔ <code>from=2026-01-02 to=2026-02-05</code> &nbsp;<span class="badge b-green">ISO format</span></span>
-            <span>✔ <code>from="02 January 2026" to="5 February 2026"</code> &nbsp;<span class="badge b-blue">natural</span></span>
-            <span>✔ <code>from=Jan-2 to=Feb-5</code> &nbsp;<span class="badge b-purple">shorthand</span></span>
+          <h3>ðŸ“… Date Formats Accepted</h3>
+          <div>
+            <span>âœ” <code>from=2026-01-02 to=2026-02-05</code> &nbsp;<span class="badge b-green">ISO format</span></span>
+            <span>âœ” <code>from="02 January 2026" to="5 February 2026"</code> &nbsp;<span class="badge b-blue">natural</span></span>
+            <span>âœ” <code>from=Jan-2 to=Feb-5</code> &nbsp;<span class="badge b-purple">shorthand</span></span>
           </div>
         </div>
 
-        <div class="card" style="margin-top:1rem;">
-          <h3>🖥️ Slides Included in Every Report</h3>
-          <div style="font-size:.82rem;display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-top:.4rem;">
-            <span>📌 Executive Summary</span>
-            <span>📈 Risk Charts</span>
-            <span>📅 Mission Timeline</span>
-            <span>📊 Severity Pivot Table</span>
-            <span>🔍 Findings Analysis</span>
-            <span>🗺️ Attack Surface Map</span>
-            <span>👤 Operator Activity</span>
-            <span>💡 Recommendations</span>
-            <span>📋 Full Finding Details</span>
-            <span>🎯 Mission Summary</span>
+        <div class="card">
+          <h3>ðŸ–¥ï¸ Slides Included in Every Report</h3>
+          <div>
+            <span>ðŸ“Œ Executive Summary</span>
+            <span>ðŸ“ˆ Risk Charts</span>
+            <span>ðŸ“… Mission Timeline</span>
+            <span>ðŸ“Š Severity Pivot Table</span>
+            <span>ðŸ” Findings Analysis</span>
+            <span>ðŸ—ºï¸ Attack Surface Map</span>
+            <span>ðŸ‘¤ Operator Activity</span>
+            <span>ðŸ’¡ Recommendations</span>
+            <span>ðŸ“‹ Full Finding Details</span>
+            <span>ðŸŽ¯ Mission Summary</span>
           </div>
         </div>
       </div>
       <div>
         <div class="card">
-          <h3>📝 Examples</h3>
+          <h3>ðŸ“ Examples</h3>
           <div class="cmd"><span class="com"># Date range report</span>
 <span class="kw">/natt-report</span> <span class="arg">from=</span><span class="val">2026-01-02</span> <span class="arg">to=</span><span class="val">2026-02-05</span>
 
@@ -612,9 +612,9 @@
 <span class="kw">/natt-report</span> help</div>
         </div>
 
-        <div class="card" style="margin-top:1rem;">
-          <h3>💬 Natural Language Alternative</h3>
-          <p>You can also just @mention the bot — no command needed:</p>
+        <div class="card">
+          <h3>ðŸ’¬ Natural Language Alternative</h3>
+          <p>You can also just @mention the bot â€” no command needed:</p>
           <div class="cmd">@DevBot presentation from 02 Jan 2026 to 5 Feb 2026 in powerpoint
 
 @natt generate report jan 2 to feb 5 with pivot tables
@@ -625,26 +625,26 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 8 — NATT CRON
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 8 â€” NATT CRON
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="natt-cron">
     <div class="section-header">
-      <div class="icon">⏱️</div>
-      <h2>08 — Cron Scheduler (/natt-cron)</h2>
+      <div class="icon">â±ï¸</div>
+      <h2>08 â€” Cron Scheduler (/natt-cron)</h2>
       <span class="tag tag-natt">CRON</span>
     </div>
 
-    <div class="card highlight" style="margin-bottom:1.5rem;">
-      <h3>⏱️ What Is the Cron Scheduler?</h3>
-      <p>Schedule NATT reports to be generated and delivered to Slack channels automatically — hourly, daily, weekly, monthly, or on any cron expression you choose. Reports appear as PowerPoint files in the scheduled channel.</p>
+    <div class="card highlight">
+      <h3>â±ï¸ What Is the Cron Scheduler?</h3>
+      <p>Schedule NATT reports to be generated and delivered to Slack channels automatically â€” hourly, daily, weekly, monthly, or on any cron expression you choose. Reports appear as PowerPoint files in the scheduled channel.</p>
     </div>
 
-    <div class="two-col" style="margin-bottom:1.5rem;">
+    <div class="two-col">
       <div>
         <div class="card">
-          <h3>📋 All Subcommands</h3>
-          <div class="table-wrap" style="margin-top:.5rem;">
+          <h3>ðŸ“‹ All Subcommands</h3>
+          <div class="table-wrap">
             <table>
               <thead><tr><th>Subcommand</th><th>Action</th></tr></thead>
               <tbody>
@@ -662,8 +662,8 @@
       </div>
       <div>
         <div class="card">
-          <h3>📅 Cadences &amp; Default Times</h3>
-          <div class="table-wrap" style="margin-top:.5rem;">
+          <h3>ðŸ“… Cadences &amp; Default Times</h3>
+          <div class="table-wrap">
             <table>
               <thead><tr><th>Cadence</th><th>Default Schedule</th></tr></thead>
               <tbody>
@@ -680,11 +680,11 @@
       </div>
     </div>
 
-    <div class="two-col" style="margin-bottom:1.5rem;">
+    <div class="two-col">
       <div>
         <div class="card">
-          <h3>🔧 Add Parameters</h3>
-          <div class="table-wrap" style="margin-top:.5rem;">
+          <h3>ðŸ”§ Add Parameters</h3>
+          <div class="table-wrap">
             <table>
               <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
               <tbody>
@@ -704,8 +704,8 @@
       </div>
       <div>
         <div class="card">
-          <h3>📅 Window Values</h3>
-          <div class="table-wrap" style="margin-top:.5rem;">
+          <h3>ðŸ“… Window Values</h3>
+          <div class="table-wrap">
             <table>
               <thead><tr><th>Window</th><th>Date Range Used</th></tr></thead>
               <tbody>
@@ -713,8 +713,8 @@
                 <tr><td><span class="inline-code">last-7-days</span></td><td>Last 7 days</td></tr>
                 <tr><td><span class="inline-code">last-30-days</span></td><td>Last 30 days</td></tr>
                 <tr><td><span class="inline-code">last-month</span></td><td>Full previous calendar month</td></tr>
-                <tr><td><span class="inline-code">mtd</span></td><td>Month-to-date (1st → today)</td></tr>
-                <tr><td><span class="inline-code">ytd</span></td><td>Year-to-date (Jan 1 → today)</td></tr>
+                <tr><td><span class="inline-code">mtd</span></td><td>Month-to-date (1st â†’ today)</td></tr>
+                <tr><td><span class="inline-code">ytd</span></td><td>Year-to-date (Jan 1 â†’ today)</td></tr>
                 <tr><td><span class="inline-code">custom</span></td><td>Use <code>from=</code> and <code>to=</code> dates</td></tr>
               </tbody>
             </table>
@@ -723,18 +723,18 @@
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:1.5rem;">
-      <h3>📝 cron add Examples</h3>
-      <div class="cmd"><span class="com"># Weekly report every Monday — last 7 days — delivered to #security</span>
+    <div class="card">
+      <h3>ðŸ“ cron add Examples</h3>
+      <div class="cmd"><span class="com"># Weekly report every Monday â€” last 7 days â€” delivered to #security</span>
 <span class="kw">/natt-cron</span> add <span class="arg">name=</span><span class="val">"Weekly Security Report"</span> <span class="arg">cadence=</span><span class="val">weekly</span> <span class="arg">window=</span><span class="val">last-7-days</span> <span class="arg">channel=</span><span class="val">#security</span>
 
-<span class="com"># Daily standup brief at 8 AM — last 24 hours</span>
+<span class="com"># Daily standup brief at 8 AM â€” last 24 hours</span>
 <span class="kw">/natt-cron</span> add <span class="arg">name=</span><span class="val">"Daily Standup Brief"</span> <span class="arg">cadence=</span><span class="val">daily</span> <span class="arg">window=</span><span class="val">last-24h</span> <span class="arg">channel=</span><span class="val">#natt-reports</span>
 
-<span class="com"># Monthly executive summary — full previous month</span>
+<span class="com"># Monthly executive summary â€” full previous month</span>
 <span class="kw">/natt-cron</span> add <span class="arg">name=</span><span class="val">"Monthly Executive"</span> <span class="arg">cadence=</span><span class="val">monthly</span> <span class="arg">window=</span><span class="val">last-month</span> <span class="arg">channel=</span><span class="val">#security-mgmt</span>
 
-<span class="com"># Mon/Wed/Fri 9 AM custom cron — month-to-date</span>
+<span class="com"># Mon/Wed/Fri 9 AM custom cron â€” month-to-date</span>
 <span class="kw">/natt-cron</span> add <span class="arg">name=</span><span class="val">"MWF MTD Brief"</span> <span class="arg">cadence=</span><span class="val">custom</span> <span class="arg">cron=</span><span class="val">"0 9 * * 1,3,5"</span> <span class="arg">window=</span><span class="val">mtd</span> <span class="arg">channel=</span><span class="val">#security</span>
 
 <span class="com"># Biweekly with specific time zone</span>
@@ -742,11 +742,11 @@
     </div>
 
     <div class="card">
-      <h3>📝 Managing Jobs</h3>
+      <h3>ðŸ“ Managing Jobs</h3>
       <div class="cmd"><span class="com"># See all jobs and queue stats</span>
 <span class="kw">/natt-cron</span> list
 
-<span class="com"># Check health — see error/overdue jobs</span>
+<span class="com"># Check health â€” see error/overdue jobs</span>
 <span class="kw">/natt-cron</span> health
 
 <span class="com"># Trigger immediately (by job ID shown in /natt-cron list)</span>
@@ -762,42 +762,42 @@
 <span class="kw">/natt-cron</span> remove cron-1740234567-abc12</div>
     </div>
 
-    <div style="margin-top:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Step-by-Step: Schedule Your First NATT Report</h3>
+    <div>
+      <h3>Step-by-Step: Schedule Your First NATT Report</h3>
       <ol class="steps">
         <li><div class="step-content"><div class="step-title">Decide on cadence and window</div><div class="step-desc">Example: <em>every Monday</em> covering <em>last 7 days</em>.</div></div></li>
         <li><div class="step-content"><div class="step-title">Pick the Slack channel for delivery</div><div class="step-desc">The PowerPoint file will be posted here automatically.</div></div></li>
         <li><div class="step-content"><div class="step-title">Create the job</div><div class="step-desc"><span class="inline-code">/natt-cron add name="Weekly Intel" cadence=weekly window=last-7-days channel=#security</span></div></div></li>
-        <li><div class="step-content"><div class="step-title">Verify it's scheduled</div><div class="step-desc"><span class="inline-code">/natt-cron list</span> — your job should appear with status Active.</div></div></li>
+        <li><div class="step-content"><div class="step-title">Verify it's scheduled</div><div class="step-desc"><span class="inline-code">/natt-cron list</span> â€” your job should appear with status Active.</div></div></li>
         <li><div class="step-content"><div class="step-title">Test it right now</div><div class="step-desc">Copy the job ID from the list and run <span class="inline-code">/natt-cron run &lt;jobId&gt;</span> to trigger immediately.</div></div></li>
-        <li><div class="step-content"><div class="step-title">Check health periodically</div><div class="step-desc"><span class="inline-code">/natt-cron health</span> — FunBot also alerts you automatically on failure.</div></div></li>
+        <li><div class="step-content"><div class="step-title">Check health periodically</div><div class="step-desc"><span class="inline-code">/natt-cron health</span> â€” FunBot also alerts you automatically on failure.</div></div></li>
       </ol>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 9 — CLICKUP
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 9 â€” CLICKUP
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="clickup">
     <div class="section-header">
-      <div class="icon">✅</div>
-      <h2>09 — ClickUp Integration</h2>
+      <div class="icon">âœ…</div>
+      <h2>09 â€” ClickUp Integration</h2>
       <span class="tag tag-core">TASKS</span>
     </div>
     <div class="three-col">
       <div class="card">
-        <h3>📋 /clickup-tasks</h3>
+        <h3>ðŸ“‹ /clickup-tasks</h3>
         <p>Lists your 10 most recent ClickUp tasks with status and priority.</p>
         <div class="cmd">/clickup-tasks</div>
       </div>
       <div class="card">
-        <h3>➕ /clickup-create</h3>
+        <h3>âž• /clickup-create</h3>
         <p>Creates a new ClickUp task. Priority is auto-detected from keywords in the title.</p>
         <div class="cmd">/clickup-create Fix login bug
 /clickup-create URGENT: API down</div>
       </div>
       <div class="card">
-        <h3>✏️ /clickup-update</h3>
+        <h3>âœï¸ /clickup-update</h3>
         <p>Update the status of an existing task by its ID.</p>
         <div class="cmd">/clickup-update abc123 in progress
 /clickup-update abc123 complete</div>
@@ -805,17 +805,17 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 10 — MENTIONS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 10 â€” MENTIONS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="mentions">
     <div class="section-header">
-      <div class="icon">💬</div>
-      <h2>10 — @Mention Shortcuts</h2>
+      <div class="icon">ðŸ’¬</div>
+      <h2>10 â€” @Mention Shortcuts</h2>
       <span class="tag tag-core">CORE</span>
     </div>
     <div class="card">
-      <p>These natural-language patterns are auto-detected when you @mention the bot — no slash command needed:</p>
+      <p>These natural-language patterns are auto-detected when you @mention the bot â€” no slash command needed:</p>
       <div class="cmd"><span class="com"># PowerPoint report</span>
 @FunBot presentation from 02 January 2026 to 5 February 2026 in powerpoint format
 @DevBot report jan 2 to feb 5 with pivot tables and visual graphs
@@ -830,88 +830,88 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 11 — FLOW DIAGRAMS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 11 â€” FLOW DIAGRAMS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="flow-diagrams">
     <div class="section-header">
-      <div class="icon">🔀</div>
-      <h2>11 — Flow Diagrams</h2>
+      <div class="icon">ðŸ”€</div>
+      <h2>11 â€” Flow Diagrams</h2>
       <span class="tag tag-ref">VISUAL</span>
     </div>
 
     <div class="two-col">
       <div class="card">
-        <h3>🤖 Code Task Flow</h3>
+        <h3>ðŸ¤– Code Task Flow</h3>
         <div class="flow-vert">
           <div class="flow-box accent">@FunBot fix X in repo Y</div>
-          <div class="flow-arrow">↓ Slack app_mention event</div>
+          <div class="flow-arrow">â†“ Slack app_mention event</div>
           <div class="flow-box blue">Claude AI: Analyze + Plan</div>
-          <div class="flow-arrow">↓ Create task record (PostgreSQL)</div>
+          <div class="flow-arrow">â†“ Create task record (PostgreSQL)</div>
           <div class="flow-box yellow">BullMQ Worker picks up job</div>
-          <div class="flow-arrow">↓ Clone/read repo via GitHub API</div>
+          <div class="flow-arrow">â†“ Clone/read repo via GitHub API</div>
           <div class="flow-box">Generate code changes</div>
-          <div class="flow-arrow">↓ git commit (execFileSync)</div>
+          <div class="flow-arrow">â†“ git commit (execFileSync)</div>
           <div class="flow-box">Open Pull Request via Octokit</div>
-          <div class="flow-arrow">↓ Post result to Slack thread</div>
-          <div class="flow-box green">✅ Done — PR link in thread</div>
+          <div class="flow-arrow">â†“ Post result to Slack thread</div>
+          <div class="flow-box green">âœ… Done â€” PR link in thread</div>
         </div>
       </div>
 
       <div class="card">
-        <h3>👻 NATT Mission Flow</h3>
+        <h3>ðŸ‘» NATT Mission Flow</h3>
         <div class="flow-vert">
           <div class="flow-box accent">/natt https://target.com --mode=stealth</div>
-          <div class="flow-arrow">↓ Validate target + ROE check</div>
+          <div class="flow-arrow">â†“ Validate target + ROE check</div>
           <div class="flow-box blue">Detect target type (URL/IP/domain)</div>
-          <div class="flow-arrow">↓ Select ghost skills by mission type</div>
+          <div class="flow-arrow">â†“ Select ghost skills by mission type</div>
           <div class="flow-box yellow">Execute recon in ghostMode</div>
-          <div class="flow-arrow">↓ Aggregate findings + risk rating</div>
+          <div class="flow-arrow">â†“ Aggregate findings + risk rating</div>
           <div class="flow-box">Generate mission report + codename</div>
-          <div class="flow-arrow">↓ Store in NATT Vault (.natt/vault/)</div>
-          <div class="flow-box green">📊 Post finding summary to Slack</div>
+          <div class="flow-arrow">â†“ Store in NATT Vault (.natt/vault/)</div>
+          <div class="flow-box green">ðŸ“Š Post finding summary to Slack</div>
         </div>
       </div>
 
       <div class="card">
-        <h3>⏱️ Cron Report Flow</h3>
+        <h3>â±ï¸ Cron Report Flow</h3>
         <div class="flow-vert">
           <div class="flow-box accent">/natt-cron add cadence=weekly window=last-7-days</div>
-          <div class="flow-arrow">↓ Save config to .natt/cron/schedules.json</div>
+          <div class="flow-arrow">â†“ Save config to .natt/cron/schedules.json</div>
           <div class="flow-box blue">BullMQ repeatable job registered</div>
-          <div class="flow-arrow">↓ Wait for schedule (e.g. Monday 8 AM)</div>
+          <div class="flow-arrow">â†“ Wait for schedule (e.g. Monday 8 AM)</div>
           <div class="flow-box yellow">processCronJob() fires</div>
-          <div class="flow-arrow">↓ Resolve date window → query vault</div>
-          <div class="flow-box">generateMissionReport() → PPTX buffer</div>
-          <div class="flow-arrow">↓ files.uploadV2() to Slack channel</div>
-          <div class="flow-box green">📊 PowerPoint delivered to #channel</div>
+          <div class="flow-arrow">â†“ Resolve date window â†’ query vault</div>
+          <div class="flow-box">generateMissionReport() â†’ PPTX buffer</div>
+          <div class="flow-arrow">â†“ files.uploadV2() to Slack channel</div>
+          <div class="flow-box green">ðŸ“Š PowerPoint delivered to #channel</div>
         </div>
       </div>
 
       <div class="card">
-        <h3>🔒 Pentest Flow</h3>
+        <h3>ðŸ”’ Pentest Flow</h3>
         <div class="flow-vert">
           <div class="flow-box accent">/pentest target.com --type=full</div>
-          <div class="flow-arrow">↓ Verify workspace team ID</div>
+          <div class="flow-arrow">â†“ Verify workspace team ID</div>
           <div class="flow-box blue">runPentestScan(target, scanType)</div>
-          <div class="flow-arrow">↓ Parallel: deps | secrets | web | ports</div>
+          <div class="flow-arrow">â†“ Parallel: deps | secrets | web | ports</div>
           <div class="flow-box yellow">Aggregate findings + risk summary</div>
-          <div class="flow-arrow">↓ formatReportForSlack() → Block Kit</div>
+          <div class="flow-arrow">â†“ formatReportForSlack() â†’ Block Kit</div>
           <div class="flow-box">Post structured report to Slack</div>
-          <div class="flow-arrow">↓ If critical/high + --repo= provided</div>
-          <div class="flow-box green">📋 Auto-create GitHub security issue</div>
+          <div class="flow-arrow">â†“ If critical/high + --repo= provided</div>
+          <div class="flow-box green">ðŸ“‹ Auto-create GitHub security issue</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       SECTION 12 — RISK GUIDE
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SECTION 12 â€” RISK GUIDE
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="risk-guide">
     <div class="section-header">
-      <div class="icon">🎯</div>
-      <h2>12 — Risk Rating Guide</h2>
+      <div class="icon">ðŸŽ¯</div>
+      <h2>12 â€” Risk Rating Guide</h2>
       <span class="tag tag-ref">REFERENCE</span>
     </div>
     <div class="table-wrap">
@@ -923,13 +923,13 @@
           <tr>
             <td><span class="risk r-crit">CRITICAL</span></td>
             <td>Immediate exploitation possible. Data breach or system takeover likely.</td>
-            <td><strong style="color:var(--danger);">Fix immediately. Do not delay.</strong></td>
+            <td><strong>Fix immediately. Do not delay.</strong></td>
             <td>Unauthenticated RCE, hardcoded root passwords</td>
           </tr>
           <tr>
             <td><span class="risk r-high">HIGH</span></td>
             <td>Significant vulnerability with high impact if exploited.</td>
-            <td><strong style="color:var(--warn);">Fix within 24–48 hours.</strong></td>
+            <td><strong>Fix within 24â€“48 hours.</strong></td>
             <td>SQL injection, broken authentication, leaked API keys</td>
           </tr>
           <tr>
@@ -955,13 +955,13 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       ANNEX A — DEFINITIONS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       ANNEX A â€” DEFINITIONS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="annex-a">
     <div class="section-header">
-      <div class="icon">📖</div>
-      <h2>Annex A — Definitions &amp; Glossary</h2>
+      <div class="icon">ðŸ“–</div>
+      <h2>Annex A â€” Definitions &amp; Glossary</h2>
       <span class="tag tag-ref">REF</span>
     </div>
     <div class="card">
@@ -999,7 +999,7 @@
       </div>
       <div class="annex-entry">
         <span class="annex-term">Window</span>
-        <span class="annex-def">The date range a report covers — e.g. <code>last-7-days</code>, <code>mtd</code> (month to date), <code>ytd</code> (year to date).</span>
+        <span class="annex-def">The date range a report covers â€” e.g. <code>last-7-days</code>, <code>mtd</code> (month to date), <code>ytd</code> (year to date).</span>
       </div>
       <div class="annex-entry">
         <span class="annex-term">Cadence</span>
@@ -1011,11 +1011,11 @@
       </div>
       <div class="annex-entry">
         <span class="annex-term">jobId</span>
-        <span class="annex-def">Unique identifier for a cron job — looks like <code>cron-1740234567-abc12</code>. Get it from <code>/natt-cron list</code>.</span>
+        <span class="annex-def">Unique identifier for a cron job â€” looks like <code>cron-1740234567-abc12</code>. Get it from <code>/natt-cron list</code>.</span>
       </div>
       <div class="annex-entry">
         <span class="annex-term">Risk Rating</span>
-        <span class="annex-def">Severity level of security findings: Critical → High → Medium → Low → Info.</span>
+        <span class="annex-def">Severity level of security findings: Critical â†’ High â†’ Medium â†’ Low â†’ Info.</span>
       </div>
       <div class="annex-entry">
         <span class="annex-term">PR / Pull Request</span>
@@ -1035,36 +1035,36 @@
       </div>
       <div class="annex-entry">
         <span class="annex-term">ESM / TypeScript</span>
-        <span class="annex-def">The code is TypeScript compiled to ES Modules. Internal detail — not relevant to end users.</span>
+        <span class="annex-def">The code is TypeScript compiled to ES Modules. Internal detail â€” not relevant to end users.</span>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       ANNEX B — CRON EXPRESSIONS
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       ANNEX B â€” CRON EXPRESSIONS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="annex-b">
     <div class="section-header">
-      <div class="icon">🕐</div>
-      <h2>Annex B — Cron Expression Reference</h2>
+      <div class="icon">ðŸ•</div>
+      <h2>Annex B â€” Cron Expression Reference</h2>
       <span class="tag tag-ref">REF</span>
     </div>
 
-    <div class="card" style="margin-bottom:1.5rem;">
-      <h3>📖 Format</h3>
-      <div class="cmd"><span class="com"># ┌─ minute (0-59)
-# │  ┌─ hour (0-23)
-# │  │  ┌─ day of month (1-31)
-# │  │  │  ┌─ month (1-12)
-# │  │  │  │  ┌─ day of week (0=Sun, 1=Mon ... 6=Sat)
-# │  │  │  │  │</span>
-  <span class="val">*  *  *  *  *</span>   ← every minute</div>
+    <div class="card">
+      <h3>ðŸ“– Format</h3>
+      <div class="cmd"><span class="com"># â”Œâ”€ minute (0-59)
+# â”‚  â”Œâ”€ hour (0-23)
+# â”‚  â”‚  â”Œâ”€ day of month (1-31)
+# â”‚  â”‚  â”‚  â”Œâ”€ month (1-12)
+# â”‚  â”‚  â”‚  â”‚  â”Œâ”€ day of week (0=Sun, 1=Mon ... 6=Sat)
+# â”‚  â”‚  â”‚  â”‚  â”‚</span>
+  <span class="val">*  *  *  *  *</span>   â† every minute</div>
     </div>
 
     <div class="two-col">
       <div class="card">
-        <h3>📋 Common Examples</h3>
-        <div class="table-wrap" style="margin-top:.5rem;">
+        <h3>ðŸ“‹ Common Examples</h3>
+        <div class="table-wrap">
           <table>
             <thead><tr><th>Expression</th><th>When It Runs</th></tr></thead>
             <tbody>
@@ -1076,14 +1076,14 @@
               <tr><td><span class="inline-code">0 * * * *</span></td><td>Every hour on the hour</td></tr>
               <tr><td><span class="inline-code">0 6,18 * * *</span></td><td>6 AM and 6 PM daily</td></tr>
               <tr><td><span class="inline-code">30 7 * * 5</span></td><td>Every Friday at 7:30 AM</td></tr>
-              <tr><td><span class="inline-code">0 9 * * 1-5</span></td><td>Weekdays (Mon–Fri) at 9 AM</td></tr>
+              <tr><td><span class="inline-code">0 9 * * 1-5</span></td><td>Weekdays (Monâ€“Fri) at 9 AM</td></tr>
               <tr><td><span class="inline-code">0 0 1 1 *</span></td><td>January 1st at midnight (yearly)</td></tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="card">
-        <h3>🛠️ Using Custom Cron in /natt-cron</h3>
+        <h3>ðŸ› ï¸ Using Custom Cron in /natt-cron</h3>
         <p>Use <span class="inline-code">cadence=custom</span> and provide the expression in quotes:</p>
         <div class="cmd"><span class="com"># Every weekday at 9 AM</span>
 /natt-cron add name="Daily MTD" cadence=custom <span class="arg">cron=</span><span class="val">"0 9 * * 1-5"</span> window=mtd channel=#security
@@ -1093,21 +1093,21 @@
 
 <span class="com"># 1st and 15th exec briefing</span>
 /natt-cron add name="Biweekly Exec" cadence=custom <span class="arg">cron=</span><span class="val">"0 8 1,15 * *"</span> window=last-30-days channel=#exec</div>
-        <div class="tip" style="margin-top:1rem;">
-          <strong>💡 Time Zone Matters</strong>
+        <div class="tip">
+          <strong>ðŸ’¡ Time Zone Matters</strong>
           Default is UTC. Add <span class="inline-code">tz=America/New_York</span> (or your TZ) to get local-time scheduling.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       ANNEX C — ERROR REFERENCE
-  ═════════════════════════════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       ANNEX C â€” ERROR REFERENCE
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="section" id="annex-c">
     <div class="section-header">
-      <div class="icon">🚨</div>
-      <h2>Annex C — Error Reference</h2>
+      <div class="icon">ðŸš¨</div>
+      <h2>Annex C â€” Error Reference</h2>
       <span class="tag tag-ref">REF</span>
     </div>
     <div class="table-wrap">
@@ -1124,7 +1124,7 @@
           <tr>
             <td><span class="inline-code">No tasks found. Tag @FunBot to get started!</span></td>
             <td><span class="inline-code">/devbot-status</span> with no history</td>
-            <td>Use the bot — send an @FunBot mention first</td>
+            <td>Use the bot â€” send an @FunBot mention first</td>
           </tr>
           <tr>
             <td><span class="inline-code">No missions found in vault for the requested period</span></td>
@@ -1152,9 +1152,9 @@
             <td>Check FunBot's Slack permissions; re-run the command</td>
           </tr>
           <tr>
-            <td><span class="inline-code">❌ Error fetching status</span></td>
+            <td><span class="inline-code">âŒ Error fetching status</span></td>
             <td>Database connection issue</td>
-            <td>Contact your FunBot administrator — likely a DB/env issue</td>
+            <td>Contact your FunBot administrator â€” likely a DB/env issue</td>
           </tr>
           <tr>
             <td><span class="inline-code">File upload failed</span></td>
@@ -1165,18 +1165,19 @@
       </table>
     </div>
 
-    <div class="danger-box" style="margin-top:1.5rem;">
-      <strong>🚨 If FunBot stops responding entirely</strong>
+    <div class="danger-box">
+      <strong>ðŸš¨ If FunBot stops responding entirely</strong>
       The most common causes: Redis is down (cron/queue won't work), environment variables are missing, or the Slack token expired. Contact your FunBot administrator.
     </div>
   </div>
 
-  <!-- ── FOOTER ── -->
+  <!-- â”€â”€ FOOTER â”€â”€ -->
   <footer>
-    <div style="margin-bottom:.5rem;font-size:1.2rem;">🤖 FunBot / DevBot · Agent Cheat Sheet</div>
-    <div>Tolani Labs · v2.0 · Feb 2026 · <a href="#top" style="color:var(--accent2);text-decoration:none;">Back to top ↑</a></div>
+    <div>ðŸ¤– FunBot / DevBot Â· Agent Cheat Sheet</div>
+    <div>Tolani Labs Â· v2.0 Â· Feb 2026 Â· <a href="#top">Back to top â†‘</a></div>
   </footer>
 
 </div>
 </body>
 </html>
+

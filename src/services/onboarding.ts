@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { workspaces } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getMentionCommandIndex } from "@/services/mention-parser";
 
 /**
  * Onboarding Service
@@ -171,6 +172,8 @@ export function getHelpMessage(botName: string): string {
 • Use \`/pentest <target>\` for vulnerability scans
 • Supports dependency audits, secret detection, web security checks
 • Powered by Kali Linux pentesting knowledge base
+
+${getMentionCommandIndex(botName)}
 
 Want to change my name? Just say "rename bot" and I'll help you customize it!`;
 }

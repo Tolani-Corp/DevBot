@@ -1,0 +1,4 @@
+From,To,Subscription Id,Subscription Name,Service Name,Value,Currency
+2026-02-01,2026-02-28,xxxxxxxx-xxxx-xxxx-xxxx-xxxxx1fa1cef,,Azure App Service,7.0439469975,USD
+2026-02-01,2026-02-28,xxxxxxxx-xxxx-xxxx-xxxx-xxxxx1fa1cef,,Bandwidth,0,USD
+2026-02-01,2026-02-28,xxxxxxxx-xxxx-xxxx-xxxx-xxxxx1fa1cef,,Redis Cache,1.24226666666667,USD
