@@ -21,10 +21,10 @@ export function Header() {
             <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
                 <div className="flex lg:flex-1">
                     <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-400 flex items-center justify-center text-slate-950">
                             <CommandLineIcon className="h-5 w-5" />
                         </div>
-                        <span className="font-bold text-[var(--text-primary)]">Debo</span>
+                        <span className="font-bold text-[var(--text-primary)]">DevBot</span>
                     </Link>
                 </div>
 
@@ -48,9 +48,9 @@ export function Header() {
 
                     <Link
                         href="/dashboard"
-                        className="hidden lg:block rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-opacity"
+                        className="hidden lg:block rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
-                        Launch Console
+                        Launch Pilot
                     </Link>
 
                     <button
@@ -68,7 +68,7 @@ export function Header() {
                 <div className="lg:hidden fixed inset-0 z-50 bg-[var(--bg-page)] p-6">
                     <div className="flex items-center justify-between mb-8">
                         <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                            <span className="font-bold text-[var(--text-primary)]">Debo</span>
+                            <span className="font-bold text-[var(--text-primary)]">DevBot</span>
                         </Link>
                         <button
                             type="button"

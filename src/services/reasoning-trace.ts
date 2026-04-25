@@ -1,7 +1,8 @@
 import { db } from "@/db/index.js";
-import { reasoningTraces } from "@/db/schema.js";
+import { reasoningTraces, tasks } from "@/db/schema.js";
 import { eq } from "drizzle-orm";
 import type { ReasoningTrace } from "@/reasoning/trace.js";
+import { recordJourneySignal } from "@/services/journey-core.js";
 
 /**
  * Save a reasoning trace to the database.
@@ -27,6 +28,42 @@ export async function saveReasoningTrace(trace: ReasoningTrace): Promise<void> {
     success: trace.success,
     finalDecision: trace.finalDecision || null,
     metadata: trace.metadata || null,
+  });
+
+  const reflectionSteps = trace.steps.filter((step) => step.type === "reflection");
+  if (reflectionSteps.length === 0) {
+    return;
+  }
+
+  const [taskRow] = await db
+    .select({ workspaceId: tasks.workspaceId })
+    .from(tasks)
+    .where(eq(tasks.id, trace.taskId))
+    .limit(1);
+
+  if (!taskRow?.workspaceId) {
+    return;
+  }
+
+  await recordJourneySignal({
+    workspaceId: taskRow.workspaceId,
+    taskId: trace.taskId,
+    snapshotType: "reflection",
+    stage: "reasoning_trace_saved",
+    title: "Reasoning trace captured",
+    summary: trace.finalDecision ?? reflectionSteps[reflectionSteps.length - 1]?.content ?? "Reflection captured.",
+    data: {
+      traceId: trace.id,
+      agentRole: trace.agentRole ?? null,
+      reflectionCount: reflectionSteps.length,
+      reflections: reflectionSteps.map((step) => ({
+        content: step.content,
+        confidence: step.confidence ?? null,
+      })),
+    },
+    confidence: reflectionSteps[reflectionSteps.length - 1]?.confidence,
+    actorId: trace.agentRole ?? "reasoning-trace",
+    source: "reasoning-trace",
   });
 }
 

@@ -103,6 +103,9 @@ async function main() {
       } else if (req.method === "POST" && req.url === "/webhooks/creators") {
         const { handleCreatorsWebhook } = await import("./webhooks/creators.js");
         await handleCreatorsWebhook(req, res);
+      } else if ((req.url ?? "").startsWith("/api/")) {
+        const { handleApiRequest } = await import("./services/http-api.js");
+        await handleApiRequest(req, res);
       } else if (req.url === "/health" || req.url === "/status") {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ status: "ok", pid: process.pid, ts: Date.now() }));

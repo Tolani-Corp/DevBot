@@ -1,4 +1,4 @@
-# DevBot - Autonomous AI Software Engineer
+# DevBot - Governed Engineering Teammate
 
 ## Quick Links
 
@@ -7,7 +7,7 @@
 - Cloudflare infra: see [skills/cloudflare-infrastructure.md](./skills/cloudflare-infrastructure.md)
 
 ## Project Overview
-Debo v1 (short for Development Bot) is a Slack/Discord-integrated autonomous AI software engineer that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
+Debo v1 (short for Development Bot) is a Slack/Discord-integrated governed engineering teammate that responds to mentions, analyzes tasks, generates code changes, and creates PRs.
 
 ## Architecture
 - **Runtime**: Node.js 22+, TypeScript strict, ESM modules

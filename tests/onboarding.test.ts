@@ -48,8 +48,11 @@ async function testSlackOnboarding() {
   console.log(`  Platform: ${workspace.platformType}`);
   console.log(`  Default name: ${workspace.botName}`);
   console.log(`  Onboarding complete: ${workspace.onboardingCompleted}`);
+  console.log(`  Default memory mode: ${workspace.settings?.memoryPolicy?.mode}`);
   if (workspace.botName !== "DevBot") throw new Error("Default name should be DevBot");
   if (workspace.onboardingCompleted) throw new Error("Should not be onboarded yet");
+  if (workspace.settings?.memoryPolicy?.mode !== "minimal") throw new Error("Default memory mode should be minimal");
+  if (workspace.settings?.memoryPolicy?.allowMemoryLearning !== false) throw new Error("Passive memory learning should default to off");
   console.log("  ✅ PASS\n");
 
   // Test 3: Complete onboarding with custom name
@@ -69,8 +72,13 @@ async function testSlackOnboarding() {
   console.log(`  Bot name: ${updatedWorkspace[0].botName}`);
   console.log(`  Bot mention: ${updatedWorkspace[0].botMention}`);
   console.log(`  Onboarding complete: ${updatedWorkspace[0].onboardingCompleted}`);
+  console.log(`  Memory disclosure accepted: ${updatedWorkspace[0].memoryDisclosureAcceptedAt}`);
   if (updatedWorkspace[0].botName !== "Debo") throw new Error("Name should be Debo");
   if (!updatedWorkspace[0].onboardingCompleted) throw new Error("Should be onboarded");
+  if (!updatedWorkspace[0].memoryDisclosureAcceptedAt) throw new Error("Disclosure acceptance timestamp should be captured");
+  if (updatedWorkspace[0].settings?.memoryPolicy?.disclosureAcceptedAt == null) {
+    throw new Error("Disclosure acceptance should be mirrored into settings.memoryPolicy");
+  }
   console.log("  ✅ PASS\n");
 
   // Test 4: Check onboarding no longer needed
@@ -151,6 +159,7 @@ async function testMessages() {
   console.log(onboardMsg.substring(0, 100) + "...");
   if (!onboardMsg.includes("DevBot")) throw new Error("Should mention DevBot");
   if (!onboardMsg.includes("call me whatever you like")) throw new Error("Should mention customization");
+  if (!onboardMsg.includes("lightweight journey snapshots")) throw new Error("Should disclose default memory behavior");
   console.log("  ✅ PASS\n");
 
   // Test confirmation message
@@ -159,6 +168,7 @@ async function testMessages() {
   console.log("  Message preview:");
   console.log(confirmMsg.substring(0, 100) + "...");
   if (!confirmMsg.includes("Debo")) throw new Error("Should mention custom name");
+  if (!confirmMsg.includes("Default memory mode is")) throw new Error("Should mention default memory mode");
   console.log("  ✅ PASS\n");
 
   // Test help message

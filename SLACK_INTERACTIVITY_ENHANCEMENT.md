@@ -236,7 +236,7 @@ await say({
 ║ 👋 Hi, I'm DevBot, but you can call me      ║
 ║ whatever you like!                           ║
 ║                                              ║
-║ I'm your autonomous AI software engineer.   ║
+║ I'm your governed engineering teammate.     ║
 ║ I can help you with:                         ║
 ║ • 🐛 Bug fixes and debugging                 ║
 ║ • ✨ New feature implementation              ║

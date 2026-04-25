@@ -2,6 +2,12 @@ import { db } from "@/db";
 import { workspaces } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getMentionCommandIndex } from "@/services/mention-parser";
+import {
+  acknowledgeWorkspaceDisclosure,
+  buildDefaultWorkspaceMemoryPolicy,
+  normalizeWorkspaceMemoryPolicy,
+  recordJourneySignal,
+} from "@/services/journey-core";
 
 /**
  * Onboarding Service
@@ -54,6 +60,7 @@ export async function ensureWorkspace(options: OnboardingOptions) {
   let workspace = await getWorkspace(options);
   
   if (!workspace) {
+    const defaultPolicy = buildDefaultWorkspaceMemoryPolicy();
     const [newWorkspace] = await db
       .insert(workspaces)
       .values({
@@ -62,9 +69,38 @@ export async function ensureWorkspace(options: OnboardingOptions) {
         discordGuildId: options.guildId,
         botName: "DevBot",
         onboardingCompleted: false,
+        memoryPolicyUpdatedAt: new Date(),
+        settings: {
+          memoryPolicy: {
+            ...defaultPolicy,
+            retentionDays: defaultPolicy.retentionDays ?? undefined,
+            disclosureAcceptedAt: defaultPolicy.disclosureAcceptedAt ?? undefined,
+            updatedAt: defaultPolicy.updatedAt ?? undefined,
+            updatedBy: defaultPolicy.updatedBy ?? undefined,
+          },
+          consentVersion: defaultPolicy.disclosureVersion,
+        },
       })
       .returning();
     workspace = newWorkspace;
+
+    void recordJourneySignal({
+      workspaceId: workspace.id,
+      snapshotType: "onboarding",
+      stage: "workspace_created",
+      title: "Workspace created",
+      summary: `Created ${options.platformType} workspace with minimal memory defaults.`,
+      data: {
+        platformType: options.platformType,
+        botName: workspace.botName,
+        policy: defaultPolicy,
+      },
+      source: "onboarding",
+      actorId: "system",
+      forceSnapshot: true,
+    }).catch((error) => {
+      console.warn("[onboarding] Failed to record workspace_created journey snapshot:", error);
+    });
   }
   
   return workspace;
@@ -78,6 +114,7 @@ export async function completeOnboarding(
   customName: string
 ): Promise<void> {
   const workspace = await ensureWorkspace(options);
+  const currentPolicy = normalizeWorkspaceMemoryPolicy(workspace.settings);
   
   // Generate custom mention handle from name
   const botMention = `@${customName.replace(/\s+/g, "")}`;
@@ -92,6 +129,12 @@ export async function completeOnboarding(
       updatedAt: new Date(),
     })
     .where(eq(workspaces.id, workspace.id));
+
+  await acknowledgeWorkspaceDisclosure(
+    { workspaceId: workspace.id },
+    `onboarding:${options.platformType}`,
+    `Workspace onboarded as ${customName}. Default memory mode is ${currentPolicy.mode}: journey snapshots stay on, passive learning stays off until explicitly enabled or taught.`,
+  );
 }
 
 /**
@@ -128,12 +171,17 @@ export async function updateBotName(
 export function getOnboardingMessage(): string {
   return `👋 **Hi, I'm DevBot, but you can call me whatever you like!**
 
-I'm your autonomous AI software engineer. I can help you with:
+I'm your governed engineering teammate. I can help you with:
 • 🐛 Bug fixes and debugging
 • ✨ New feature implementation
 • 📝 Code reviews and suggestions
 • 💬 Questions about your codebase
 • 🔄 Automated pull requests
+
+**Memory & trust defaults**
+• I keep lightweight journey snapshots and approval history so I stay consistent in this workspace.
+• I do **not** turn rejected work into reusable memory unless someone explicitly teaches me.
+• You can change the workspace memory policy later if you want deeper assistive memory.
 
 **What would you like to call me?**
 
@@ -148,6 +196,8 @@ export function getNameConfirmationMessage(customName: string): string {
 
 You can mention me anytime with @${customName.replace(/\s+/g, "")} and I'll help you with your development tasks.
 
+Default memory mode is **minimal**: I keep journey snapshots for continuity, and I only turn human feedback into durable memory when you explicitly teach me.
+
 Try it out by mentioning me with a task or question!`;
 }
 
@@ -161,6 +211,7 @@ export function getHelpMessage(botName: string): string {
 • Mention me (@${botName.replace(/\s+/g, "")}) with your request
 • I can fix bugs, add features, review code, or answer questions
 • I'll create PRs for code changes and keep you updated
+• Workspace memory defaults to minimal snapshots until you explicitly teach or expand policy
 
 **Example commands:**
 • "@${botName.replace(/\s+/g, "")} fix the login bug in user-service"

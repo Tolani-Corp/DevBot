@@ -184,6 +184,11 @@ app.event("app_mention", async ({ event, say, client }) => {
       return;
     }
 
+    const workspace = await ensureWorkspace({
+      platformType: "slack",
+      teamId,
+    });
+
     // Get custom bot name for this workspace
     const botName = await getBotName({
       platformType: "slack",
@@ -283,6 +288,7 @@ app.event("app_mention", async ({ event, say, client }) => {
     const [task] = await db
       .insert(tasks)
       .values({
+        workspaceId: workspace.id,
         slackThreadTs: event.ts,
         slackChannelId: event.channel,
         slackUserId: event.user!,
@@ -390,6 +396,11 @@ app.event("message", async ({ event, say, client }) => {
       return;
     }
 
+    const workspace = await ensureWorkspace({
+      platformType: "slack",
+      teamId,
+    });
+
     // Check if this is a rename response in an existing thread
     // Look for the last bot message in the thread
     const botUserId = (await client.auth.test()).user_id;
@@ -488,6 +499,7 @@ app.event("message", async ({ event, say, client }) => {
     const [task] = await db
       .insert(tasks)
       .values({
+        workspaceId: workspace.id,
         slackThreadTs: event.thread_ts!,
         slackChannelId: event.channel,
         slackUserId: event.user!,

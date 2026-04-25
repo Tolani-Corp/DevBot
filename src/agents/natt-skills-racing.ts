@@ -84,6 +84,63 @@ export interface CensysRacingResult {
   }>;
 }
 
+type RacingFindingCategory = "data-source" | "osint" | "auth" | "connectivity";
+
+function stringifyFindingEvidence(evidence: unknown): string {
+  if (typeof evidence === "string") {
+    return evidence;
+  }
+
+  return JSON.stringify(evidence, null, 2);
+}
+
+function normalizeRacingCategory(
+  category: RacingFindingCategory,
+): NATTFinding["category"] {
+  switch (category) {
+    case "data-source":
+      return "platform-specific";
+    case "osint":
+      return "osint-exposure";
+    case "auth":
+      return "broken-auth";
+    case "connectivity":
+      return "network-exposure";
+  }
+}
+
+function buildRacingFinding(input: {
+  title: string;
+  severity: NATTSeverity;
+  category: RacingFindingCategory;
+  description: string;
+  evidence: unknown;
+  remediation: string;
+  references?: string[];
+  location?: string;
+  reproduction?: string;
+}): NATTFinding {
+  const references = input.references?.filter(Boolean) ?? [];
+
+  return {
+    id: crypto.randomUUID(),
+    title: input.title,
+    severity: input.severity,
+    category: normalizeRacingCategory(input.category),
+    description: input.description,
+    evidence: stringifyFindingEvidence(input.evidence),
+    location: input.location ?? "racing-recon",
+    reproduction:
+      input.reproduction ??
+      "Review the reported endpoint, metadata, and infrastructure details.",
+    remediation: input.remediation,
+    ghostNotes:
+      references.length > 0
+        ? `References: ${references.join(", ")}`
+        : undefined,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Known Racing Data Providers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,7 +168,8 @@ const KNOWN_RACING_PROVIDERS: RacingDataSource[] = [
     ],
     authRequired: true,
     rateLimit: "Subscription-based tiers",
-    documentation: "https://www.equibase.com/about/content.cfm?SAP=TN_DataProducts",
+    documentation:
+      "https://www.equibase.com/about/content.cfm?SAP=TN_DataProducts",
   },
   {
     name: "USTA (United States Trotting Association)",
@@ -173,7 +231,9 @@ function getCensysCredentials(): { id: string; secret: string } | null {
   return { id, secret };
 }
 
-async function censysSearchRacingPlatform(query: string): Promise<CensysRacingResult | null> {
+async function censysSearchRacingPlatform(
+  query: string,
+): Promise<CensysRacingResult | null> {
   const creds = getCensysCredentials();
   if (!creds) return null;
 
@@ -199,7 +259,10 @@ async function censysSearchRacingPlatform(query: string): Promise<CensysRacingRe
             http?: {
               response?: {
                 html_title?: string;
-                headers?: { server?: string; [key: string]: string | undefined };
+                headers?: {
+                  server?: string;
+                  [key: string]: string | undefined;
+                };
               };
             };
           }>;
@@ -216,9 +279,14 @@ async function censysSearchRacingPlatform(query: string): Promise<CensysRacingRe
           ? {
               title: svc.http.response.html_title,
               serverHeader: svc.http.response.headers?.server,
-              responseHeaders: svc.http.response.headers ? Object.fromEntries(
-                Object.entries(svc.http.response.headers).filter(([_, v]) => v !== undefined)
-              ) : undefined,
+              responseHeaders: svc.http.response.headers
+                ? Object.fromEntries(
+                    Object.entries(svc.http.response.headers).filter(
+                      (entry): entry is [string, string] =>
+                        entry[1] !== undefined,
+                    ),
+                  )
+                : undefined,
             }
           : undefined,
       })),
@@ -234,56 +302,66 @@ async function censysSearchRacingPlatform(query: string): Promise<CensysRacingRe
 //  Racing Platform Recon
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function racingPlatformRecon(platform: string): Promise<RacingReconResult> {
+export async function racingPlatformRecon(
+  platform: string,
+): Promise<RacingReconResult> {
   const findings: NATTFinding[] = [];
   const discoveredEndpoints: string[] = [];
   const dataProviders: RacingDataSource[] = [];
 
   // Known provider lookup
   const knownProvider = KNOWN_RACING_PROVIDERS.find(
-    (p) => p.name.toLowerCase().includes(platform.toLowerCase()) || platform.toLowerCase().includes(p.name.toLowerCase())
+    (p) =>
+      p.name.toLowerCase().includes(platform.toLowerCase()) ||
+      platform.toLowerCase().includes(p.name.toLowerCase()),
   );
 
   if (knownProvider) {
     dataProviders.push(knownProvider);
     discoveredEndpoints.push(...knownProvider.endpoints);
 
-    findings.push({
-      id: crypto.randomUUID(),
-      title: `Known Racing Data Provider: ${knownProvider.name}`,
-      severity: "info",
-      category: "data-source",
-      description: `${knownProvider.name} is a known ${knownProvider.type} racing data provider.`,
-      evidence: {
-        endpoints: knownProvider.endpoints,
-        authRequired: knownProvider.authRequired,
-        rateLimit: knownProvider.rateLimit || "Unknown",
-        documentation: knownProvider.documentation || "None",
-      },
-      remediation: knownProvider.authRequired
-        ? "API access requires account registration and API key generation."
-        : "Free access available with rate limiting.",
-      references: [knownProvider.documentation || "N/A"],
-    });
+    findings.push(
+      buildRacingFinding({
+        title: `Known Racing Data Provider: ${knownProvider.name}`,
+        severity: "info",
+        category: "data-source",
+        description: `${knownProvider.name} is a known ${knownProvider.type} racing data provider.`,
+        evidence: {
+          endpoints: knownProvider.endpoints,
+          authRequired: knownProvider.authRequired,
+          rateLimit: knownProvider.rateLimit || "Unknown",
+          documentation: knownProvider.documentation || "None",
+        },
+        remediation: knownProvider.authRequired
+          ? "API access requires account registration and API key generation."
+          : "Free access available with rate limiting.",
+        references: [knownProvider.documentation || "N/A"],
+      }),
+    );
   }
 
   // Censys search for infrastructure
-  const censysData = await censysSearchRacingPlatform(`services.http.response.html_title:"${platform}"`);
+  const censysData = await censysSearchRacingPlatform(
+    `services.http.response.html_title:"${platform}"`,
+  );
   if (censysData && censysData.hosts.length > 0) {
     for (const host of censysData.hosts) {
-      findings.push({
-        id: crypto.randomUUID(),
-        title: `Censys Discovery: ${platform} Infrastructure`,
-        severity: "info",
-        category: "osint",
-        description: `Discovered ${host.services.length} services on ${host.ip} associated with ${platform}.`,
-        evidence: {
-          ip: host.ip,
-          services: host.services,
-        },
-        remediation: "Analyze services for API endpoints, authentication methods, and version information.",
-        references: ["https://search.censys.io/"],
-      });
+      findings.push(
+        buildRacingFinding({
+          title: `Censys Discovery: ${platform} Infrastructure`,
+          severity: "info",
+          category: "osint",
+          description: `Discovered ${host.services.length} services on ${host.ip} associated with ${platform}.`,
+          evidence: {
+            ip: host.ip,
+            services: host.services,
+          },
+          remediation:
+            "Analyze services for API endpoints, authentication methods, and version information.",
+          references: ["https://search.censys.io/"],
+          location: host.ip,
+        }),
+      );
 
       // Extract HTTP endpoints
       for (const svc of host.services) {
@@ -447,7 +525,11 @@ export const MAJOR_TRACKS: TrackLocation[] = [
 ];
 
 export function getTracksByProvider(provider: string): TrackLocation[] {
-  return MAJOR_TRACKS.filter((track) => track.dataProviders.some((p) => p.toLowerCase().includes(provider.toLowerCase())));
+  return MAJOR_TRACKS.filter((track) =>
+    track.dataProviders.some((p) =>
+      p.toLowerCase().includes(provider.toLowerCase()),
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -460,7 +542,9 @@ export interface APIAuthFindings {
   findings: NATTFinding[];
 }
 
-export async function discoverRacingAPIAuth(endpoint: string): Promise<APIAuthFindings> {
+export async function discoverRacingAPIAuth(
+  endpoint: string,
+): Promise<APIAuthFindings> {
   const findings: NATTFinding[] = [];
   const methods: string[] = [];
 
@@ -473,16 +557,18 @@ export async function discoverRacingAPIAuth(endpoint: string): Promise<APIAuthFi
 
     const authHeader = res.headers.get("www-authenticate");
     if (authHeader) {
-      findings.push({
-        id: crypto.randomUUID(),
-        title: "Authentication Required",
-        severity: "info",
-        category: "auth",
-        description: `Endpoint requires authentication: ${authHeader}`,
-        evidence: { wwwAuthenticate: authHeader },
-        remediation: "Obtain valid credentials or API key.",
-        references: [],
-      });
+      findings.push(
+        buildRacingFinding({
+          title: "Authentication Required",
+          severity: "info",
+          category: "auth",
+          description: `Endpoint requires authentication: ${authHeader}`,
+          evidence: { wwwAuthenticate: authHeader },
+          remediation: "Obtain valid credentials or API key.",
+          references: [],
+          location: endpoint,
+        }),
+      );
 
       if (authHeader.toLowerCase().includes("bearer")) {
         methods.push("bearer-token");
@@ -497,30 +583,34 @@ export async function discoverRacingAPIAuth(endpoint: string): Promise<APIAuthFi
       const testUrl = `${endpoint}?${param}=test`;
       const testRes = await fetch(testUrl, { method: "GET" });
       if (testRes.status === 401 || testRes.status === 403) {
-        findings.push({
-          id: crypto.randomUUID(),
-          title: `API Key Parameter Detected: ${param}`,
-          severity: "info",
-          category: "auth",
-          description: `Endpoint expects API key via query parameter: ${param}`,
-          evidence: { parameter: param, statusCode: testRes.status },
-          remediation: "Register for API access and obtain key.",
-          references: [],
-        });
+        findings.push(
+          buildRacingFinding({
+            title: `API Key Parameter Detected: ${param}`,
+            severity: "info",
+            category: "auth",
+            description: `Endpoint expects API key via query parameter: ${param}`,
+            evidence: { parameter: param, statusCode: testRes.status },
+            remediation: "Register for API access and obtain key.",
+            references: [],
+            location: endpoint,
+          }),
+        );
         methods.push(`query-param-${param}`);
       }
     }
   } catch (err: unknown) {
-    findings.push({
-      id: crypto.randomUUID(),
-      title: "Endpoint Unreachable",
-      severity: "low",
-      category: "connectivity",
-      description: `Failed to connect to ${endpoint}: ${(err as Error).message}`,
-      evidence: { error: (err as Error).message },
-      remediation: "Verify endpoint URL and network connectivity.",
-      references: [],
-    });
+    findings.push(
+      buildRacingFinding({
+        title: "Endpoint Unreachable",
+        severity: "low",
+        category: "connectivity",
+        description: `Failed to connect to ${endpoint}: ${(err as Error).message}`,
+        evidence: { error: (err as Error).message },
+        remediation: "Verify endpoint URL and network connectivity.",
+        references: [],
+        location: endpoint,
+      }),
+    );
   }
 
   return { endpoint, methods: [...new Set(methods)], findings };
@@ -537,12 +627,14 @@ export const RACING_RECON_CATALOG = {
     {
       name: "Platform Reconnaissance",
       function: "racingPlatformRecon",
-      description: "Discover racing platform infrastructure via Censys and enumerate API endpoints.",
+      description:
+        "Discover racing platform infrastructure via Censys and enumerate API endpoints.",
     },
     {
       name: "Track Location Database",
       function: "getTracksByProvider",
-      description: "Retrieve major track locations and associated data providers.",
+      description:
+        "Retrieve major track locations and associated data providers.",
     },
     {
       name: "API Authentication Discovery",

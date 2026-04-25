@@ -1,7 +1,7 @@
 {
   "name": "@tolani/debo",
   "version": "0.1.0",
-  "description": "DEBO - Autonomous AI software engineer for Slack & Discord - responds to mentions, executes code changes, and creates PRs",
+  "description": "DevBot - governed engineering teammate for scoped requests, reviewed code changes, and request-to-PR execution",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",
   "private": false,
@@ -54,7 +54,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE.md"
+    "LICENSE.md",
+    "EDUCATION-LICENSE.md"
   ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -72,6 +73,12 @@
     "test:kali-mcp": "tsx scripts/test-kali-mcp.ts",
     "show-reasoning": "tsx scripts/show-reasoning.ts",
     "test:discord-webhook": "tsx scripts/test-discord-webhook.ts",
+    "ops:azure:links": "node scripts/azure-resource-links.mjs list",
+    "ops:azure:social:slack": "node scripts/azure-resource-links.mjs slack",
+    "ops:azure:social:discord": "node scripts/azure-resource-links.mjs discord",
+    "ops:azure:open": "node scripts/azure-resource-links.mjs open",
+    "ops:azure:check": "node scripts/azure-resource-links.mjs check",
+    "ops:azure:policy": "node scripts/azure-resource-links.mjs policy",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate"
   },
@@ -92,6 +99,7 @@
     "drizzle-orm": "^0.38.0",
     "glob": "^13.0.1",
     "ioredis": "^5.4.2",
+    "mssql": "^12.2.1",
     "nanoid": "^5.0.9",
     "openai": "^6.19.0",
     "playwright": "^1.58.2",
@@ -117,6 +125,11 @@
     "node": ">=22.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "msgpackr-extract", "protobufjs", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msgpackr-extract",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }

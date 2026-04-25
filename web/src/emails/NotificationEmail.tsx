@@ -1,6 +1,6 @@
 import React from 'react';
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
     body: {
         backgroundColor: '#f4f4f5', // Zinc-100
         fontFamily: '"SF Mono", "Segoe UI Mono", "Roboto Mono", monospace', // Tech font
@@ -106,7 +106,7 @@ export const NotificationEmail = ({
     actionText = 'Review Pull Request',
 }: NotificationProps) => {
     return (
-        <div style={styles.body as any}>
+        <div style={styles.body}>
             <table role="presentation" cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
                 <tr>
                     <td align="center">

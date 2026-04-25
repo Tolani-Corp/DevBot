@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { tasks, auditLogs, approvalRequests as approvalTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { recordJourneySignal } from "@/services/journey-core";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,21 @@ export interface ApprovalChanges {
   diff: string;
   commitMessage: string;
   prDescription: string;
+  summary?: string;
+  blastRadius?: "low" | "medium" | "high";
+  guardrailResults?: Array<{
+    name: string;
+    status: "pass" | "warn" | "fail";
+    message: string;
+  }>;
+  memorySources?: Array<{
+    id: string;
+    type: string;
+    title: string;
+    confidence: number;
+  }>;
+  confidenceScore?: number;
+  rejectTeachHint?: string;
 }
 
 export interface ApprovalRequest {
@@ -84,6 +100,53 @@ function rowToRequest(row: typeof approvalTable.$inferSelect): ApprovalRequest {
   };
 }
 
+async function getTaskWorkspaceId(taskId: string): Promise<string | null> {
+  const [taskRow] = await db
+    .select({ workspaceId: tasks.workspaceId })
+    .from(tasks)
+    .where(eq(tasks.id, taskId))
+    .limit(1);
+
+  return taskRow?.workspaceId ?? null;
+}
+
+async function recordApprovalJourney(input: {
+  taskId: string;
+  stage: string;
+  title: string;
+  summary: string;
+  actorId: string;
+  data?: Record<string, unknown>;
+  memoryEventType?: string;
+  forceMemory?: boolean;
+}) {
+  const workspaceId = await getTaskWorkspaceId(input.taskId);
+  if (!workspaceId) {
+    return;
+  }
+
+  try {
+    await recordJourneySignal({
+      workspaceId,
+      taskId: input.taskId,
+      snapshotType: "approval",
+      stage: input.stage,
+      title: input.title,
+      summary: input.summary,
+      data: input.data,
+      actorId: input.actorId,
+      source: "approval-service",
+      memoryEventType: input.memoryEventType ?? input.stage,
+      memoryContent: input.summary,
+      importance: input.forceMemory ? 90 : 65,
+      forceSnapshot: true,
+      forceMemory: input.forceMemory,
+    });
+  } catch (error) {
+    console.warn("[approval] Failed to record approval journey signal:", error);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Core API
 // ---------------------------------------------------------------------------
@@ -146,8 +209,29 @@ export async function requestApproval(
       approvers,
       files: changes.files,
       commitMessage: changes.commitMessage,
+      summary: changes.summary ?? changes.commitMessage,
+      blastRadius: changes.blastRadius ?? "medium",
+      guardrailResults: changes.guardrailResults ?? [],
+      memorySources: changes.memorySources ?? [],
+      confidenceScore: changes.confidenceScore ?? 50,
+      rejectTeachHint: changes.rejectTeachHint ?? null,
     },
     timestamp: new Date(),
+  });
+
+  await recordApprovalJourney({
+    taskId,
+    stage: "approval_requested",
+    title: "Approval requested",
+    summary: changes.summary ?? changes.commitMessage,
+    actorId: "devbot",
+    data: {
+      approvers,
+      files: changes.files,
+      blastRadius: changes.blastRadius ?? "medium",
+      confidenceScore: changes.confidenceScore ?? 50,
+      rejectTeachHint: changes.rejectTeachHint ?? null,
+    },
   });
 
   return request;
@@ -213,6 +297,18 @@ export async function approveTask(
     timestamp: new Date(),
   });
 
+  await recordApprovalJourney({
+    taskId,
+    stage: "approval_approved",
+    title: "Human approval granted",
+    summary: reason ?? "Approved from human review.",
+    actorId: approvedBy,
+    data: {
+      approvedBy,
+      files: (row.changes as ApprovalChanges).files,
+    },
+  });
+
   return rowToRequest({ ...row, status: "approved", reviewedBy: approvedBy, reviewedAt: new Date(), reason: reason ?? null });
 }
 
@@ -269,7 +365,63 @@ export async function rejectTask(
     timestamp: new Date(),
   });
 
+  await recordApprovalJourney({
+    taskId,
+    stage: "approval_rejected",
+    title: "Human approval rejected",
+    summary: reason,
+    actorId: rejectedBy,
+    data: {
+      rejectedBy,
+      files: (row.changes as ApprovalChanges).files,
+    },
+  });
+
   return rowToRequest({ ...row, status: "rejected", reviewedBy: rejectedBy, reviewedAt: new Date(), reason });
+}
+
+/**
+ * Reject a task and explicitly turn the reviewer guidance into durable workspace memory.
+ */
+export async function teachTask(
+  taskId: string,
+  taughtBy: string,
+  lesson: string,
+): Promise<ApprovalRequest> {
+  const trimmedLesson = lesson.trim();
+  if (!trimmedLesson) {
+    throw new Error("Teach feedback requires a non-empty lesson.");
+  }
+
+  const request = await rejectTask(taskId, taughtBy, trimmedLesson);
+
+  await db.insert(auditLogs).values({
+    id: nanoid(),
+    taskId,
+    action: "task_taught",
+    details: {
+      taughtBy,
+      lesson: trimmedLesson,
+    },
+    slackUserId: taughtBy,
+    timestamp: new Date(),
+  });
+
+  await recordApprovalJourney({
+    taskId,
+    stage: "approval_taught",
+    title: "Human taught a better approach",
+    summary: trimmedLesson,
+    actorId: taughtBy,
+    data: {
+      taughtBy,
+      lesson: trimmedLesson,
+    },
+    memoryEventType: "approval_taught",
+    forceMemory: true,
+  });
+
+  return request;
 }
 
 /**
@@ -280,7 +432,18 @@ export async function autoApprove(
   reason: string,
 ): Promise<ApprovalRequest> {
   // Upsert: create or update the approval record
-  const defaultChanges = { files: [], diff: "", commitMessage: "", prDescription: "" };
+  const defaultChanges: ApprovalChanges = {
+    files: [],
+    diff: "",
+    commitMessage: "",
+    prDescription: "",
+    summary: "Auto-approved low-risk change set",
+    blastRadius: "low",
+    guardrailResults: [],
+    memorySources: [],
+    confidenceScore: 90,
+    rejectTeachHint: "Promote to manual review if scope expands beyond docs/tests.",
+  };
   
   await db.insert(approvalTable).values({
     taskId,
@@ -318,6 +481,17 @@ export async function autoApprove(
     action: "task_auto_approved",
     details: { reason },
     timestamp: new Date(),
+  });
+
+  await recordApprovalJourney({
+    taskId,
+    stage: "approval_auto_approved",
+    title: "Low-risk change auto-approved",
+    summary: reason,
+    actorId: "devbot",
+    data: {
+      reason,
+    },
   });
 
   const [row] = await db.select().from(approvalTable).where(eq(approvalTable.taskId, taskId));
@@ -361,6 +535,47 @@ export function shouldAutoApprove(changes: ApprovalChanges): boolean {
 
   const totalLines = countDiffLines(changes.diff);
   return totalLines < 50;
+}
+
+export function shouldAutoApproveForPolicy(
+  changes: ApprovalChanges,
+  policy?: {
+    mode?: "strict" | "balanced" | "auto_low_risk";
+    requireHumanReview?: boolean;
+    maxAutoApproveFiles?: number;
+    maxAutoApproveDiffLines?: number;
+    autoApproveDocs?: boolean;
+    autoApproveTests?: boolean;
+  },
+): boolean {
+  if (policy?.mode === "strict" || policy?.requireHumanReview) {
+    return false;
+  }
+
+  if (changes.files.length === 0) {
+    return false;
+  }
+
+  const maxFiles = policy?.maxAutoApproveFiles ?? 4;
+  if (changes.files.length > maxFiles) {
+    return false;
+  }
+
+  const totalLines = countDiffLines(changes.diff);
+  const maxLines = policy?.maxAutoApproveDiffLines ?? 50;
+  if (totalLines >= maxLines) {
+    return false;
+  }
+
+  return changes.files.every((filePath) => {
+    if (policy?.autoApproveDocs === false && /\.(md|mdx|txt|rst)$/i.test(filePath)) {
+      return false;
+    }
+    if (policy?.autoApproveTests === false && (/\.test\.[jt]sx?$/.test(filePath) || /\.spec\.[jt]sx?$/.test(filePath))) {
+      return false;
+    }
+    return isLowRiskFile(filePath);
+  });
 }
 
 /**

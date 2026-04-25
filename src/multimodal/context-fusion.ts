@@ -236,7 +236,7 @@ export class ContextFusion {
   }
 
   private _buildSystemPrompt(fusedContext: FusedContext, options?: any): string {
-    let prompt = "You are DevBot, an autonomous AI software engineer with multi-modal capabilities.\n\n";
+    let prompt = "You are DevBot, a governed engineering teammate with multi-modal capabilities.\n\n";
 
     if (fusedContext.modalityBreakdown.imageCount > 0 && this.visionEnabled) {
       prompt += "You have access to visual context from screenshots and diagrams.\n";

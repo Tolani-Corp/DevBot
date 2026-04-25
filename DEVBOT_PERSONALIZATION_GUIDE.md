@@ -11,7 +11,7 @@ When DevBot is first added to a Slack workspace or Discord server, it will intro
 ```
 👋 Hi, I'm DevBot, but you can call me whatever you like!
 
-I'm your autonomous AI software engineer. I can help you with:
+I'm your governed engineering teammate. I can help you with:
 • 🐛 Bug fixes and debugging
 • ✨ New feature implementation
 • 📝 Code reviews and suggestions

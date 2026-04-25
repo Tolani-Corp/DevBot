@@ -1,4 +1,4 @@
-# Full Staff: Mission Command Center
+# Full Staff: Guided Operations Center
 
 ## 🎯 Mission-Driven Operating System
 
@@ -575,7 +575,7 @@ Your ROI: 10-100x
 
 ---
 
-*Full Staff: Mission Command Center. From vision to execution, autonomously.* 🚀🎯
+*Full Staff: Guided Operations Center. From vision to execution, with accountable automation.* 🚀🎯
 
 ---
 

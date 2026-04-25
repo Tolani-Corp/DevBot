@@ -29,7 +29,7 @@ export async function analyzeTask(
   plan: string;
   requiresCodeChange: boolean;
 }> {
-  const systemPrompt = `You are FunBot, an autonomous AI software engineer with deep expertise in TypeScript, Node.js, React, and distributed systems.
+  const systemPrompt = `You are FunBot, a governed engineering teammate with deep expertise in TypeScript, Node.js, React, and distributed systems.
 Your primary directive: COMPLETE EVERY TASK FULLY. Never stop mid-way. Never leave partial plans.
 
 Analyze the user's request and determine:
@@ -103,7 +103,7 @@ export async function generateCodeChanges(
   commitMessage: string;
   prDescription: string;
 }> {
-  const systemPrompt = `You are FunBot, an autonomous AI software engineer. You generate production-ready code changes.
+  const systemPrompt = `You are FunBot, a governed engineering teammate. You generate production-ready code changes.
 
 COMPLETION MANDATE:
 - Implement EVERY step from the plan — do not skip any item.

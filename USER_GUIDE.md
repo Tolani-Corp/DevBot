@@ -1,6 +1,6 @@
 # 🤖 FunBot User Guide
 
-> **FunBot** — Your autonomous AI software engineer  
+> **FunBot** — Your governed engineering teammate  
 > *By Tolani Corp*
 
 ---
@@ -22,7 +22,7 @@
 
 ## What is FunBot?
 
-FunBot is an AI-powered software engineer that lives in your Slack and Discord workspaces. Tag it with a request, and it will:
+FunBot is an AI-powered engineering teammate that lives in your Slack and Discord workspaces. Tag it with a request, and it will:
 
 - **Analyze** your request using Claude AI
 - **Read** the relevant source files in your repos

@@ -19,7 +19,7 @@ import { LearningService } from "../devtown/learning.js";
 
 /**
  * Enhanced CLLM cycle with meta-learning capabilities.
- * 
+ *
  * Phases:
  * 1. UNDERSTAND — Apply learned patterns
  * 2. ASSESS — Optimize strategy selection
@@ -48,17 +48,25 @@ export class EnhancedCLLM {
 
     // Apply learned patterns
     const learningContext = await this.learning.applyLearnedPatterns(context);
-    
+
     console.log(`  📊 Detected patterns:`);
-    console.log(`     - Sequences: ${learningContext.patterns.sequences.length}`);
-    console.log(`     - Success patterns: ${learningContext.patterns.successPatterns.length}`);
-    console.log(`     - Agent selections: ${learningContext.patterns.agentSelections.length}`);
+    console.log(
+      `     - Sequences: ${learningContext.patterns.sequences.length}`,
+    );
+    console.log(
+      `     - Success patterns: ${learningContext.patterns.successPatterns.length}`,
+    );
+    console.log(
+      `     - Agent selections: ${learningContext.patterns.agentSelections.length}`,
+    );
 
     // Recommend based on historical data
     if (learningContext.patterns.sequences.length > 0) {
       const topSeq = learningContext.patterns.sequences[0];
       console.log(`  🏆 Recommended sequence: ${topSeq.pattern.join(" → ")}`);
-      console.log(`     Success rate: ${(topSeq.avgSuccessRate * 100).toFixed(1)}%`);
+      console.log(
+        `     Success rate: ${(topSeq.avgSuccessRate * 100).toFixed(1)}%`,
+      );
     }
 
     return learningContext;
@@ -75,11 +83,18 @@ export class EnhancedCLLM {
     console.log(`  Anomalies: ${assessment.anomalies.length}`);
 
     // Optimize strategy based on current state
-    const recommendedStrategy = await this.learning.optimizeStrategySelection(context, assessment);
-    
+    const recommendedStrategy = await this.learning.optimizeStrategySelection(
+      context,
+      assessment,
+    );
+
     console.log(`  🎯 Recommended strategy: ${recommendedStrategy.name}`);
-    console.log(`     Max parallel: ${recommendedStrategy.config.maxParallelTasks}`);
-    console.log(`     Verification: ${recommendedStrategy.config.verificationLevel}`);
+    console.log(
+      `     Max parallel: ${recommendedStrategy.config.maxParallelTasks}`,
+    );
+    console.log(
+      `     Verification: ${recommendedStrategy.config.verificationLevel}`,
+    );
 
     return recommendedStrategy;
   }
@@ -98,11 +113,16 @@ export class EnhancedCLLM {
     console.log(`  Actions: ${actionPlan.actions.length}`);
 
     // Consult knowledge base for recommendations
-    const knowledge = await this.learning.consultKnowledgeBase(context, assessment);
-    
+    const knowledge = await this.learning.consultKnowledgeBase(
+      context,
+      assessment,
+    );
+
     console.log(`  📚 Relevant knowledge entries: ${knowledge.length}`);
     for (const match of knowledge.slice(0, 3)) {
-      console.log(`     - ${match.entry.title} (${(match.relevanceScore * 100).toFixed(0)}% relevant)`);
+      console.log(
+        `     - ${match.entry.title} (${(match.relevanceScore * 100).toFixed(0)}% relevant)`,
+      );
     }
 
     // Apply knowledge to refine plan
@@ -129,11 +149,20 @@ export class EnhancedCLLM {
         console.log(`  → ${action.targetRole}: ${action.description}`);
       } else {
         // Use multi-armed bandit to select optimal role
-        const availableRoles = ["frontend", "backend", "security", "devops", "general"] as const;
-        const selection = await this.learning.selectOptimalAgent(availableRoles);
-        
+        const availableRoles = [
+          "frontend",
+          "backend",
+          "security",
+          "devops",
+          "general",
+        ] as const;
+        const selection =
+          await this.learning.selectOptimalAgent(availableRoles);
+
         console.log(`  🎲 Bandit selected: ${selection.selectedRole}`);
-        console.log(`     Confidence: ${(selection.confidence * 100).toFixed(1)}%`);
+        console.log(
+          `     Confidence: ${(selection.confidence * 100).toFixed(1)}%`,
+        );
         console.log(`     ${selection.reasoning}`);
       }
     }
@@ -151,13 +180,19 @@ export class EnhancedCLLM {
     console.log("MONITOR: Supervising execution and learning...");
 
     // Original CLLM monitoring...
-    console.log(`  Directives completed: ${report.directivesCompleted}/${report.directivesIssued}`);
-    console.log(`  Health delta: ${report.healthDelta > 0 ? "+" : ""}${report.healthDelta.toFixed(1)}`);
-    console.log(`  Prediction accuracy: ${(report.predictionAccuracy * 100).toFixed(1)}%`);
+    console.log(
+      `  Directives completed: ${report.directivesCompleted}/${report.directivesIssued}`,
+    );
+    console.log(
+      `  Health delta: ${report.healthDelta > 0 ? "+" : ""}${report.healthDelta.toFixed(1)}`,
+    );
+    console.log(
+      `  Prediction accuracy: ${(report.predictionAccuracy * 100).toFixed(1)}%`,
+    );
 
     // Learn from this cycle
     await this.learning.learnFromCycle(context, assessment, plan, report);
-    
+
     console.log(`  🧠 Learning outcomes:`);
     if (report.healthDelta > 5) {
       console.log(`     ✅ Successful intervention recorded`);
@@ -197,7 +232,11 @@ export class EnhancedCLLM {
     console.log("");
 
     // 3. PLAN
-    const { actionPlan, knowledge } = await this.plan(context, assessment, plan);
+    const { actionPlan, knowledge } = await this.plan(
+      context,
+      assessment,
+      plan,
+    );
     console.log("");
 
     // 4. INFORM
@@ -312,13 +351,18 @@ export async function demonstrateEnhancedCLLM(
   const assessment: Assessment = {
     id: "assess-demo",
     timestamp: new Date(),
-    phase: "assessing",
+    phase: "assess",
     situationId: context.id,
     healthScore: 75,
+    healthTrend: "stable",
     riskLevel: "moderate",
+    riskFactors: [],
     predictions: [],
     anomalies: [],
-    reason: "System operating normally with moderate load",
+    formulaResult: null,
+    systemEntropy: 0.72,
+    maxEntropy: 1,
+    entropyRatio: 0.72,
   };
 
   const plan: ActionPlan = {
@@ -363,7 +407,10 @@ export async function demonstrateEnhancedCLLM(
     healthBefore: 75,
     healthAfter: 78,
     healthDelta: 3,
-    feedback: ["Successfully spawned backend agent", "Queue depth reduced by 15%"],
+    feedback: [
+      "Successfully spawned backend agent",
+      "Queue depth reduced by 15%",
+    ],
     adjustments: ["Continue monitoring queue trends"],
   };
 

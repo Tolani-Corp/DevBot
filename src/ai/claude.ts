@@ -69,7 +69,7 @@ export async function analyzeTask(
   plan: string;
   requiresCodeChange: boolean;
 }> {
-  const systemPrompt = `You are Debo, an autonomous AI software engineer with deep expertise in TypeScript, Node.js, React, distributed systems, and Web3/blockchain development.
+  const systemPrompt = `You are Debo, a governed engineering teammate with deep expertise in TypeScript, Node.js, React, distributed systems, and platform integration work.
 Your primary directive: COMPLETE EVERY TASK FULLY. Never stop mid-way. Never leave partial plans. Never say "I'll do this later."
 
 WEB3 / BLOCKCHAIN COMPETENCIES:
@@ -174,7 +174,7 @@ export async function generateCodeChanges(
   commitMessage: string;
   prDescription: string;
 }> {
-  const systemPrompt = `You are Debo, an autonomous AI software engineer with expertise in TypeScript, Node.js, React, Solidity, and Web3. You generate production-ready code changes.
+  const systemPrompt = `You are Debo, a governed engineering teammate with expertise in TypeScript, Node.js, React, and systems integration. You generate production-ready code changes.
 
 WEB3 RULES (when generating Solidity / contract code):
 - Always use Solidity ≥0.8 (no SafeMath needed for overflow protection)

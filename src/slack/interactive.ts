@@ -8,6 +8,12 @@ import {
   getBotName,
   getNameConfirmationMessage,
 } from "@/services/onboarding";
+import {
+  approveTask,
+  getApprovalStatus,
+  rejectTask,
+  teachTask,
+} from "@/services/approval";
 
 /**
  * Interactive Components Handler for DevBot
@@ -48,6 +54,8 @@ export function registerInteractiveHandlers(app: App) {
   // Task approval buttons
   app.action("approve_code_changes", handleApproveCodeChanges);
   app.action("reject_code_changes", handleRejectCodeChanges);
+  app.action("teach_code_changes", handleTeachCodeChanges);
+  app.view("teach_code_changes_modal", handleTeachCodeChangesModalSubmission);
 
   // Task action buttons
   app.action("view_pr", handleViewPR);
@@ -72,8 +80,27 @@ export function getOnboardingBlocks() {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: "👋 *Hi, I'm DevBot, but you can call me whatever you like!*\n\nI'm your autonomous AI software engineer. I can help you with:\n• 🐛 Bug fixes and debugging\n• ✨ New feature implementation\n• 📝 Code reviews and suggestions\n• 💬 Questions about your codebase\n• 🔄 Automated pull requests",
+          text: "👋 *Hi, I'm DevBot, but you can call me whatever you like!*\n\nI'm your governed engineering teammate. I can help you with:\n• 🐛 Bug fixes and debugging\n• ✨ New feature implementation\n• 📝 Code reviews and suggestions\n• 💬 Questions about your codebase\n• 🔄 Review-ready pull requests",
         },
+      },
+      {
+        type: "divider",
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "*Memory & trust defaults*\nâ€¢ I keep lightweight journey snapshots and approval history so I stay consistent in this workspace.\nâ€¢ I do *not* turn rejected work into reusable memory unless someone explicitly teaches me.\nâ€¢ You can expand or reduce workspace memory later without changing my name.",
+        },
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: "Minimal memory is the default. Explicit *Teach* feedback overrides passive learning and becomes durable workspace guidance.",
+          },
+        ],
       },
       {
         type: "divider",
@@ -426,6 +453,25 @@ async function handleRenameBotModalSubmission({ ack, view, client }: any) {
 /**
  * Get task approval blocks
  */
+function buildApprovalResolutionBlocks(status: "approved" | "rejected" | "taught", headline: string, detail: string) {
+  const prefix =
+    status === "approved"
+      ? "✅"
+      : status === "taught"
+        ? "🧠"
+        : "❌";
+
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `${prefix} *${headline}*\n\n${detail}`,
+      },
+    },
+  ];
+}
+
 export function getTaskApprovalBlocks(taskId: string, description: string, diff: string) {
   return {
     blocks: [
@@ -450,7 +496,7 @@ export function getTaskApprovalBlocks(taskId: string, description: string, diff:
             type: "button",
             text: {
               type: "plain_text",
-              text: "✅ Approve & Commit",
+              text: "Approve",
               emoji: true,
             },
             style: "primary",
@@ -461,22 +507,41 @@ export function getTaskApprovalBlocks(taskId: string, description: string, diff:
             type: "button",
             text: {
               type: "plain_text",
-              text: "👀 View Full Diff",
+              text: "Reject",
               emoji: true,
             },
-            action_id: "view_diff",
+            style: "danger",
+            action_id: "reject_code_changes",
             value: taskId,
           },
           {
             type: "button",
             text: {
               type: "plain_text",
-              text: "❌ Reject",
+              text: "Reject + Teach",
               emoji: true,
             },
-            style: "danger",
-            action_id: "reject_code_changes",
+            action_id: "teach_code_changes",
             value: taskId,
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "View Full Diff",
+              emoji: true,
+            },
+            action_id: "view_diff",
+            value: taskId,
+          },
+        ],
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: "Reject stops this changeset. *Reject + Teach* also stores your guidance as durable workspace memory.",
           },
         ],
       },
@@ -492,24 +557,30 @@ async function handleApproveCodeChanges({ ack, body, client, action }: any) {
 
   const taskId = action.value;
 
-  // Update message to show approval
-  await client.chat.update({
-    channel: body.channel?.id,
-    ts: body.message?.ts,
-    text: "✅ Code changes approved and committed!",
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "✅ *Code changes approved and committed!*\n\nCreating pull request...",
-        },
-      },
-    ],
-  });
-
-  // Trigger actual commit and PR creation
-  // This would connect to your existing task processing logic
+  try {
+    const approval = await approveTask(taskId, body.user.id, "Approved from Slack review.");
+    await client.chat.update({
+      channel: body.channel?.id,
+      ts: body.message?.ts,
+      text: "Approval granted",
+      blocks: buildApprovalResolutionBlocks(
+        "approved",
+        "Code changes approved",
+        approval.reason ?? "Human reviewer approved this changeset from Slack.",
+      ),
+    });
+  } catch (error) {
+    await client.chat.update({
+      channel: body.channel?.id,
+      ts: body.message?.ts,
+      text: "Approval failed",
+      blocks: buildApprovalResolutionBlocks(
+        "rejected",
+        "Approval action failed",
+        error instanceof Error ? error.message : String(error),
+      ),
+    });
+  }
 }
 
 /**
@@ -518,20 +589,128 @@ async function handleApproveCodeChanges({ ack, body, client, action }: any) {
 async function handleRejectCodeChanges({ ack, body, client, action }: any) {
   await ack();
 
-  await client.chat.update({
-    channel: body.channel?.id,
-    ts: body.message?.ts,
-    text: "❌ Code changes rejected",
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "❌ *Code changes rejected*\n\nTask cancelled. Let me know if you'd like me to try a different approach!",
-        },
+  try {
+    const approval = await rejectTask(
+      action.value,
+      body.user.id,
+      "Rejected from Slack review without additional teaching guidance.",
+    );
+    await client.chat.update({
+      channel: body.channel?.id,
+      ts: body.message?.ts,
+      text: "Changes rejected",
+      blocks: buildApprovalResolutionBlocks(
+        "rejected",
+        "Code changes rejected",
+        approval.reason ?? "Human reviewer rejected this changeset.",
+      ),
+    });
+  } catch (error) {
+    await client.chat.update({
+      channel: body.channel?.id,
+      ts: body.message?.ts,
+      text: "Reject action failed",
+      blocks: buildApprovalResolutionBlocks(
+        "rejected",
+        "Reject action failed",
+        error instanceof Error ? error.message : String(error),
+      ),
+    });
+  }
+}
+
+async function handleTeachCodeChanges({ ack, body, client, action }: any) {
+  await ack();
+
+  await client.views.open({
+    trigger_id: body.trigger_id,
+    view: {
+      type: "modal",
+      callback_id: "teach_code_changes_modal",
+      title: {
+        type: "plain_text",
+        text: "Reject + Teach",
       },
-    ],
+      submit: {
+        type: "plain_text",
+        text: "Save Lesson",
+      },
+      close: {
+        type: "plain_text",
+        text: "Cancel",
+      },
+      blocks: [
+        {
+          type: "input",
+          block_id: "teach_input",
+          element: {
+            type: "plain_text_input",
+            action_id: "lesson",
+            multiline: true,
+            min_length: 10,
+            placeholder: {
+              type: "plain_text",
+              text: "Explain what was wrong and what DevBot should remember next time.",
+            },
+          },
+          label: {
+            type: "plain_text",
+            text: "What should DevBot learn from this rejection?",
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: "This rejects the current changeset and stores your note as durable workspace guidance.",
+            },
+          ],
+        },
+      ],
+      private_metadata: JSON.stringify({
+        task_id: action.value,
+        channel_id: body.channel?.id,
+        message_ts: body.message?.ts,
+        user_id: body.user.id,
+      }),
+    },
   });
+}
+
+async function handleTeachCodeChangesModalSubmission({ ack, view, client }: any) {
+  await ack();
+
+  const metadata = JSON.parse(view.private_metadata);
+  const lesson = view.state.values.teach_input.lesson.value?.trim();
+
+  if (!lesson) {
+    return;
+  }
+
+  try {
+    const approval = await teachTask(metadata.task_id, metadata.user_id, lesson);
+    await client.chat.update({
+      channel: metadata.channel_id,
+      ts: metadata.message_ts,
+      text: "Reject + Teach saved",
+      blocks: buildApprovalResolutionBlocks(
+        "taught",
+        "Changes rejected and lesson stored",
+        approval.reason ?? lesson,
+      ),
+    });
+  } catch (error) {
+    await client.chat.postMessage({
+      channel: metadata.channel_id,
+      text: "Reject + Teach failed",
+      blocks: buildApprovalResolutionBlocks(
+        "rejected",
+        "Reject + Teach failed",
+        error instanceof Error ? error.message : String(error),
+      ),
+    });
+  }
 }
 
 /**
@@ -550,8 +729,41 @@ async function handleViewDiff({ ack, client, body, action }: any) {
   await ack();
 
   const taskId = action.value;
-  // Fetch full diff from database
-  // Open modal with full diff view
+  const approval = await getApprovalStatus(taskId);
+
+  await client.views.open({
+    trigger_id: body.trigger_id,
+    view: {
+      type: "modal",
+      callback_id: "view_diff_modal",
+      title: {
+        type: "plain_text",
+        text: "Full Diff",
+      },
+      close: {
+        type: "plain_text",
+        text: "Close",
+      },
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: approval
+              ? `*Task:* \`${taskId}\`\n*Summary:* ${approval.changes.summary ?? approval.changes.commitMessage}`
+              : `*Task:* \`${taskId}\`\nNo approval payload found for this task.`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `\`\`\`${(approval?.changes.diff ?? "No diff available.").slice(0, 2800)}\`\`\``,
+          },
+        },
+      ],
+    },
+  });
 }
 
 /**

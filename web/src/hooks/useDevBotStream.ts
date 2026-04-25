@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
+export type StreamTaskData = {
+  id?: string;
+  taskId?: string;
+  description?: string;
+  [key: string]: unknown;
+};
+
 export type LogMessage = {
   type: 'log' | 'task:started' | 'task:completed' | 'connected';
-  data?: any;
+  data?: StreamTaskData;
   message?: string;
   timestamp: string;
 };
@@ -25,8 +32,13 @@ export const useDevBotStream = (url: string = 'ws://localhost:8080') => {
 
     ws.current.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        addLog({ ...data, timestamp: new Date().toISOString() });
+        const raw = JSON.parse(event.data) as Partial<LogMessage>;
+        addLog({
+          type: raw.type ?? 'log',
+          data: raw.data,
+          message: raw.message,
+          timestamp: new Date().toISOString(),
+        });
       } catch (e) {
         console.error('Failed to parse WS message', e);
       }

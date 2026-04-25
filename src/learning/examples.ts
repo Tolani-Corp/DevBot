@@ -2,10 +2,10 @@
 // Learning System Integration Example
 // ──────────────────────────────────────────────────────────────
 
-import { PatternDetector } from "./learning/pattern-detector.js";
-import { StrategyOptimizer, BUILTIN_STRATEGIES } from "./learning/strategy-optimizer.js";
-import { KnowledgeBase } from "./learning/knowledge-base.js";
-import type { Task } from "./db/schema.js";
+import { PatternDetector } from "./pattern-detector.js";
+import { StrategyOptimizer, BUILTIN_STRATEGIES } from "./strategy-optimizer.js";
+import { KnowledgeBase } from "./knowledge-base.js";
+import type { Task } from "@/db/schema.js";
 
 // ─── Example 1: Pattern Detection ────────────────────────────
 
@@ -26,7 +26,9 @@ async function analyzeHistoricalPatterns(tasks: Task[]) {
   if (patterns.sequences.length > 0) {
     const topSeq = patterns.sequences[0];
     console.log(`🏆 Top sequence: ${topSeq.pattern.join(" → ")}`);
-    console.log(`   Success rate: ${(topSeq.avgSuccessRate * 100).toFixed(1)}%`);
+    console.log(
+      `   Success rate: ${(topSeq.avgSuccessRate * 100).toFixed(1)}%`,
+    );
     console.log(`   Frequency: ${topSeq.frequency} times`);
   }
 
@@ -44,16 +46,19 @@ async function runStrategyExperiment() {
     BUILTIN_STRATEGIES.sequential_safe,
   );
 
-  console.log(`🧪 Started experiment: ${experiment.strategyA.name} vs ${experiment.strategyB.name}`);
+  console.log(
+    `🧪 Started experiment: ${experiment.strategyA.name} vs ${experiment.strategyB.name}`,
+  );
 
   // Simulate 100 task executions
   for (let i = 0; i < 100; i++) {
     const variant = i % 2 === 0 ? "A" : "B";
-    
+
     // Aggressive strategy is faster but less reliable
-    const result = variant === "A"
-      ? { success: Math.random() > 0.15, durationMs: 5000, retried: false }
-      : { success: Math.random() > 0.08, durationMs: 8000, retried: false };
+    const result =
+      variant === "A"
+        ? { success: Math.random() > 0.15, durationMs: 5000, retried: false }
+        : { success: Math.random() > 0.08, durationMs: 8000, retried: false };
 
     optimizer.recordExperimentResult(experiment.id, variant, result);
   }
@@ -72,11 +77,13 @@ async function runStrategyExperiment() {
 
 function selectOptimalAgent(optimizer: StrategyOptimizer) {
   const availableRoles = ["frontend", "backend", "security", "devops"] as const;
-  
+
   // Select agent 10 times and record outcomes
   for (let i = 0; i < 10; i++) {
     const selection = optimizer.selectAgent(availableRoles, 0.1);
-    console.log(`🎯 Selected: ${selection.selectedRole} (confidence: ${(selection.confidence * 100).toFixed(1)}%)`);
+    console.log(
+      `🎯 Selected: ${selection.selectedRole} (confidence: ${(selection.confidence * 100).toFixed(1)}%)`,
+    );
     console.log(`   ${selection.reasoning}`);
 
     // Simulate task execution
@@ -89,7 +96,9 @@ function selectOptimalAgent(optimizer: StrategyOptimizer) {
   const stats = optimizer.getBanditStats();
   console.log("📊 Final Bandit Statistics:");
   for (const arm of stats) {
-    console.log(`   ${arm.role}: ${(arm.estimatedSuccessRate * 100).toFixed(1)}% success rate`);
+    console.log(
+      `   ${arm.role}: ${(arm.estimatedSuccessRate * 100).toFixed(1)}% success rate`,
+    );
   }
 }
 
@@ -120,7 +129,8 @@ function buildKnowledgeBase() {
   kb.add({
     type: "best_practice",
     title: "Use database indexes for frequent queries",
-    description: "Always add indexes on columns used in WHERE, JOIN, and ORDER BY clauses",
+    description:
+      "Always add indexes on columns used in WHERE, JOIN, and ORDER BY clauses",
     context: {
       taskTypes: ["performance", "bug_fix"],
       filePatterns: ["**/*.sql", "**/models/**"],
@@ -128,12 +138,15 @@ function buildKnowledgeBase() {
     confidence: "very_high",
     applicableRoles: ["backend", "devops"],
     tags: ["database", "performance", "optimization"],
-    examples: [{
-      scenario: "Slow user search query taking 3+ seconds",
-      solution: "Added index on users(email, created_at) - query now takes 50ms",
-      outcome: "success",
-      timestamp: new Date(),
-    }],
+    examples: [
+      {
+        scenario: "Slow user search query taking 3+ seconds",
+        solution:
+          "Added index on users(email, created_at) - query now takes 50ms",
+        outcome: "success",
+        timestamp: new Date(),
+      },
+    ],
   });
 
   // Query knowledge base

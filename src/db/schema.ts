@@ -1,10 +1,11 @@
-import { pgTable, text, timestamp, jsonb, boolean, integer, vector, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, jsonb, boolean, integer, vector, index, uniqueIndex, AnyPgColumn } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
 export const tasks = pgTable("tasks", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => nanoid()),
+  workspaceId: text("workspace_id").references((): AnyPgColumn => workspaces.id, { onDelete: "set null" }),
   slackThreadTs: text("slack_thread_ts").notNull(),
   slackChannelId: text("slack_channel_id").notNull(),
   slackUserId: text("slack_user_id").notNull(),
@@ -30,7 +31,9 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   completedAt: timestamp("completed_at"),
-});
+}, (t) => ({
+  workspaceIdx: index("idx_tasks_workspace_id").on(t.workspaceId),
+}));
 
 export const conversations = pgTable("conversations", {
   id: text("id")
@@ -116,6 +119,8 @@ export const workspaces = pgTable("workspaces", {
   // Onboarding
   onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  memoryDisclosureAcceptedAt: timestamp("memory_disclosure_accepted_at"),
+  memoryPolicyUpdatedAt: timestamp("memory_policy_updated_at"),
   
   // ── Billing / Tier ─────────────────────────────────────────────────────────
   tier: text("tier").$type<"free" | "pro" | "team" | "enterprise">().notNull().default("free"),
@@ -134,6 +139,41 @@ export const workspaces = pgTable("workspaces", {
     notificationPreferences?: string[];
     defaultRepository?: string;
     theme?: string;
+    memoryPolicy?: {
+      enabled?: boolean;
+      mode?: "minimal" | "assistive" | "disabled";
+      disclosureMode?: "default_on" | "disabled";
+      allowJourneySnapshots?: boolean;
+      allowMemoryLearning?: boolean;
+      retentionDays?: number;
+      allowToneSignals?: boolean;
+      promotionThreshold?: number;
+      allowForgetting?: boolean;
+      disclosureVersion?: string;
+      disclosureAcceptedAt?: string;
+      updatedAt?: string;
+      updatedBy?: string;
+      teachOverridesPassiveLearning?: boolean;
+    };
+    consentVersion?: string;
+    consentCapturedAt?: string;
+    toneProfile?: {
+      enabled?: boolean;
+      signals?: Array<"frustration" | "urgency" | "overconfidence">;
+      note?: string;
+    };
+    approvalPolicy?: {
+      mode?: "strict" | "balanced" | "auto_low_risk";
+      requireHumanReview?: boolean;
+      maxAutoApproveFiles?: number;
+      maxAutoApproveDiffLines?: number;
+    };
+    autoApproveDocs?: boolean;
+    autoApproveTests?: boolean;
+    trustMode?: "guarded" | "balanced" | "delegated";
+    requireHumanApprovalForUnchained?: boolean;
+    offensiveOperations?: "disabled" | "reviewed" | "enabled";
+    overageHandling?: "manual" | "preapproved";
     /**
      * Enterprise BYOK: encrypted Anthropic API key.
      * When set, DEBO uses this key instead of the shared platform key.
@@ -153,6 +193,59 @@ export const workspaces = pgTable("workspaces", {
 
 export type Workspace = typeof workspaces.$inferSelect;
 export type NewWorkspace = typeof workspaces.$inferInsert;
+
+export const journeySnapshots = pgTable("journey_snapshots", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  workspaceId: text("workspace_id")
+    .references(() => workspaces.id, { onDelete: "cascade" })
+    .notNull(),
+  taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
+  snapshotType: text("snapshot_type").notNull(), // onboarding | task | approval | reflection | policy
+  stage: text("stage").notNull(), // task_started | approval_taught | ...
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  snapshot: jsonb("snapshot").notNull().default({}).$type<Record<string, unknown>>(),
+  confidence: integer("confidence"),
+  source: text("source").notNull().default("system"),
+  actorId: text("actor_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  workspaceIdx: index("idx_journey_snapshots_workspace_id").on(t.workspaceId),
+  taskIdx: index("idx_journey_snapshots_task_id").on(t.taskId),
+  stageIdx: index("idx_journey_snapshots_stage").on(t.stage),
+  createdIdx: index("idx_journey_snapshots_created_at").on(t.createdAt),
+}));
+
+export type JourneySnapshot = typeof journeySnapshots.$inferSelect;
+export type NewJourneySnapshot = typeof journeySnapshots.$inferInsert;
+
+export const memoryEvents = pgTable("memory_events", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  workspaceId: text("workspace_id")
+    .references(() => workspaces.id, { onDelete: "cascade" })
+    .notNull(),
+  taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
+  journeySnapshotId: text("journey_snapshot_id").references(() => journeySnapshots.id, { onDelete: "set null" }),
+  eventType: text("event_type").notNull(), // disclosure_acknowledged | approval_taught | reflection_observed | ...
+  importance: integer("importance").notNull().default(50),
+  content: text("content").notNull(),
+  eventData: jsonb("event_data").notNull().default({}).$type<Record<string, unknown>>(),
+  source: text("source").notNull().default("system"),
+  actorId: text("actor_id"),
+  recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+}, (t) => ({
+  workspaceIdx: index("idx_memory_events_workspace_id").on(t.workspaceId),
+  taskIdx: index("idx_memory_events_task_id").on(t.taskId),
+  typeIdx: index("idx_memory_events_event_type").on(t.eventType),
+  recordedIdx: index("idx_memory_events_recorded_at").on(t.recordedAt),
+}));
+
+export type MemoryEvent = typeof memoryEvents.$inferSelect;
+export type NewMemoryEvent = typeof memoryEvents.$inferInsert;
 
 // Reasoning traces — captures agent decision-making steps for transparency
 export const reasoningTraces = pgTable("reasoning_traces", {
@@ -333,6 +426,21 @@ export const approvalRequests = pgTable("approval_requests", {
     diff: string;
     commitMessage: string;
     prDescription: string;
+    summary?: string;
+    blastRadius?: "low" | "medium" | "high";
+    guardrailResults?: Array<{
+      name: string;
+      status: "pass" | "warn" | "fail";
+      message: string;
+    }>;
+    memorySources?: Array<{
+      id: string;
+      type: string;
+      title: string;
+      confidence: number;
+    }>;
+    confidenceScore?: number;
+    rejectTeachHint?: string;
   }>().notNull(),
   status: text("status").notNull().default("pending_review"), // pending_review | approved | rejected | auto_approved
   reviewedBy: text("reviewed_by"),

@@ -1,18 +1,22 @@
-# DEBO Commercial License
+# DevBot Commercial License
 
-Copyright (c) 2024-2026 Tolani Corporation. All Rights Reserved.
+Copyright (c) 2024-2026 Tolani Labs. All Rights Reserved.
+
+Additional grant for education:
+
+- Authorized Tolani Labs education users may also use DevBot under the perpetual education grant in `EDUCATION-LICENSE.md`.
 
 ## License Grant
 
-This software is licensed, not sold. Subject to the terms of this license, Tolani Corporation grants you a limited, non-exclusive, non-transferable license to:
+This software is licensed, not sold. Subject to the terms of this license, Tolani Labs grants you a limited, non-exclusive, non-transferable license to:
 
 ### Free Tier
-- Use DEBO for personal and evaluation purposes
+- Use DevBot for personal and evaluation purposes
 - Process up to 50 tasks per month
 - Connect up to 2 repositories
 
 ### Pro Tier ($29/month)
-- Use DEBO for commercial purposes
+- Use DevBot for commercial purposes
 - Process up to 500 tasks per month
 - Connect up to 10 repositories
 - PR review automation
@@ -60,7 +64,7 @@ slsa-verifier verify-artifact debo-*.tar.gz --provenance-path debo-*.intoto.json
 
 ## Warranty Disclaimer
 
-THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. TOLANI CORPORATION DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED.
+THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. TOLANI LABS DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED.
 
 ## Contact
 

@@ -19,6 +19,7 @@ import {
 import { writeChangelogEntry, updateTaskStatus as notionUpdateStatus } from "@/integrations/notion";
 import { onTaskComplete, onPRCreated, onHealthAlert } from "@/integrations/zapier";
 import { triggerBuildFailure } from "@/integrations/pagerduty";
+import { recordJourneySignal } from "@/services/journey-core";
 
 /** Fire all post-PR integration hooks in parallel — non-blocking */
 function fireIntegrationHooks(data: {
@@ -97,14 +98,48 @@ async function logAudit(taskId: string, action: string, details: Record<string, 
   });
 }
 
+async function recordTaskJourney(
+  workspaceId: string | null | undefined,
+  input: Omit<Parameters<typeof recordJourneySignal>[0], "workspaceId">,
+) {
+  if (!workspaceId) {
+    return;
+  }
+
+  try {
+    await recordJourneySignal({
+      workspaceId,
+      ...input,
+    });
+  } catch (error) {
+    console.warn("[journey] Failed to record worker journey signal:", error);
+  }
+}
+
 export async function processTask(job: Job<TaskData>) {
   const { taskId, slackThreadTs, slackChannelId, description, repository, clickUpTaskId } = job.data;
 
   // Fetch task to get userId for cost tracking
   const [taskRecord] = await db.select().from(tasks).where(eq(tasks.id, taskId));
   const userId = taskRecord?.slackUserId ?? "unknown";
+  const workspaceId = taskRecord?.workspaceId;
 
   try {
+    await recordTaskJourney(workspaceId, {
+      taskId,
+      snapshotType: "task",
+      stage: "task_started",
+      title: "Task started",
+      summary: description,
+      data: {
+        repository: repository ?? null,
+        clickUpTaskId: clickUpTaskId ?? null,
+      },
+      source: "worker",
+      actorId: userId,
+      confidence: 0.8,
+    });
+
     // Step 1: Analyze task
     await updateTaskStatus(taskId, "analyzing", 10);
     await updateSlackThread(slackChannelId, slackThreadTs, "🔍 Analyzing your request...");
@@ -112,13 +147,29 @@ export async function processTask(job: Job<TaskData>) {
     const analysis = await analyzeTask(description, { 
       repository, 
       userId, 
-      workspaceId: slackChannelId,
+      workspaceId: workspaceId ?? slackChannelId,
       filesContents: {}
     });
 
     await logAudit(taskId, "task_analyzed", { analysis });
     await updateTaskStatus(taskId, "analyzing", 25, {
       aiResponse: JSON.stringify(analysis)
+    });
+    await recordTaskJourney(workspaceId, {
+      taskId,
+      snapshotType: "task",
+      stage: "task_analyzed",
+      title: "Task analyzed",
+      summary: analysis.plan,
+      data: {
+        taskType: analysis.taskType,
+        repository: analysis.repository ?? repository ?? null,
+        filesNeeded: analysis.filesNeeded ?? [],
+        requiresCodeChange: analysis.requiresCodeChange,
+      },
+      source: "worker",
+      actorId: userId,
+      confidence: 0.72,
     });
 
     const targetRepo = analysis.repository ?? repository;
@@ -154,12 +205,26 @@ export async function processTask(job: Job<TaskData>) {
         repository: targetRepo,
         fileContents,
         userId,
-        workspaceId: slackChannelId
+        workspaceId: workspaceId ?? slackChannelId
       });
 
       await updateTaskStatus(taskId, "completed", 100, {
         aiResponse: answer,
         completedAt: new Date()
+      });
+      await recordTaskJourney(workspaceId, {
+        taskId,
+        snapshotType: "task",
+        stage: "task_answered",
+        title: "Question answered",
+        summary: answer.slice(0, 280),
+        data: {
+          repository: targetRepo,
+          filesRead: Object.keys(fileContents),
+        },
+        source: "worker",
+        actorId: userId,
+        confidence: 0.78,
       });
 
       await updateSlackThread(slackChannelId, slackThreadTs, `✅ ${answer}`);
@@ -312,6 +377,23 @@ export async function processTask(job: Job<TaskData>) {
           prUrl,
           completedAt: new Date(),
         });
+        await recordTaskJourney(workspaceId, {
+          taskId,
+          snapshotType: "task",
+          stage: "task_completed_with_pr",
+          title: "Task completed with pull request",
+          summary: `Created PR ${prUrl}`,
+          data: {
+            repository: targetRepo,
+            branchName,
+            prUrl,
+            commitSha,
+            filesChanged: changedFiles,
+          },
+          source: "worker",
+          actorId: userId,
+          confidence: 0.86,
+        });
 
         // Bidirectional link: post PR URL back to ClickUp task
         if (clickUpTaskId) {
@@ -375,6 +457,22 @@ export async function processTask(job: Job<TaskData>) {
         );
       } else {
         await updateTaskStatus(taskId, "completed", 100, { completedAt: new Date() });
+        await recordTaskJourney(workspaceId, {
+          taskId,
+          snapshotType: "task",
+          stage: "task_completed_without_pr",
+          title: "Task completed without pull request",
+          summary: `Committed ${changedFiles.length} file changes to ${branchName}`,
+          data: {
+            repository: targetRepo,
+            branchName,
+            commitSha,
+            filesChanged: changedFiles,
+          },
+          source: "worker",
+          actorId: userId,
+          confidence: 0.8,
+        });
         await updateSlackThread(
           slackChannelId,
           slackThreadTs,
@@ -423,6 +521,20 @@ export async function processTask(job: Job<TaskData>) {
         aiResponse: analysis.plan,
         completedAt: new Date(),
       });
+      await recordTaskJourney(workspaceId, {
+        taskId,
+        snapshotType: "task",
+        stage: "task_completed_without_code_changes",
+        title: "Task completed without code changes",
+        summary: analysis.plan,
+        data: {
+          repository: targetRepo,
+          taskType: analysis.taskType,
+        },
+        source: "worker",
+        actorId: userId,
+        confidence: 0.74,
+      });
 
       await updateSlackThread(
         slackChannelId,
@@ -436,6 +548,19 @@ export async function processTask(job: Job<TaskData>) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     await updateTaskStatus(taskId, "failed", 0, { error: errorMessage });
+    await recordTaskJourney(workspaceId, {
+      taskId,
+      snapshotType: "task",
+      stage: "task_failed",
+      title: "Task failed",
+      summary: errorMessage,
+      data: {
+        repository: repository ?? null,
+      },
+      source: "worker",
+      actorId: userId,
+      confidence: 0.4,
+    });
     await updateSlackThread(
       slackChannelId,
       slackThreadTs,
