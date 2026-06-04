@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { computeAgentROI } from "@/services/agent-roi";
+import { grantWatchAgent, runGrantWatchCycle, type GrantWatchRunInput } from "@/agents/grant-watch";
 import { approveTask, rejectTask, teachTask } from "@/services/approval";
 import {
   deployConvoy,
@@ -185,6 +186,19 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
           }],
         });
       }
+      return true;
+    }
+
+    if (method === "GET" && path === "/api/funding/grant-watch") {
+      sendJson(res, 200, {
+        agent: grantWatchAgent,
+      });
+      return true;
+    }
+
+    if (method === "POST" && path === "/api/funding/grant-watch") {
+      const body = await readJson<GrantWatchRunInput>(req);
+      sendJson(res, 200, runGrantWatchCycle(body));
       return true;
     }
 

@@ -33,3 +33,17 @@ export type {
 export * as jwtSecurity from "./specialists/jwt-security.js";
 export * as mediaSecurity from "./specialists/media-security.js";
 export * as vpnSecurity from "./specialists/vpn-security.js";
+
+// Funding Operations
+export * as grantWatch from "./grant-watch.js";
+export {
+  grantWatchAgent,
+  runGrantWatchCycle,
+  scanFundingSources,
+  normalizeOpportunity,
+  scoreFundingFit,
+  detectShortfalls,
+  createGoNoGoMemo,
+  routeToStewardReview,
+  scheduleDeadlineAlerts,
+} from "./grant-watch.js";
