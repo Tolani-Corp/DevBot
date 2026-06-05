@@ -6,6 +6,7 @@ import type {
 } from "./grant-watch.js";
 
 const GRANTS_GOV_SEARCH_URL = "https://api.grants.gov/v1/api/search2";
+const GRANTS_GOV_FETCH_URL = "https://api.grants.gov/v1/api/fetchOpportunity";
 const SAM_GOV_SEARCH_URL = "https://api.sam.gov/opportunities/v2/search";
 
 export type FundingSourceScanMode = "live" | "sample" | "hybrid";
@@ -35,6 +36,43 @@ interface GrantsGovHit {
   oppStatus?: string;
   docType?: string;
   alnist?: string[];
+}
+
+interface GrantsGovDetail {
+  id?: number;
+  opportunityNumber?: string;
+  opportunityTitle?: string;
+  agencyDetails?: { agencyName?: string };
+  synopsis?: {
+    agencyName?: string;
+    synopsisDesc?: string;
+    responseDateDesc?: string;
+    originalDueDateDesc?: string;
+    awardCeiling?: string;
+    awardCeilingFormatted?: string;
+    awardFloor?: string;
+    awardFloorFormatted?: string;
+    costSharing?: boolean;
+    applicantTypes?: Array<{ description?: string }>;
+    fundingInstruments?: Array<{ description?: string }>;
+    fundingActivityCategories?: Array<{ description?: string }>;
+  };
+  forecast?: {
+    agencyCode?: string;
+    forecastDesc?: string;
+    applicantEligibilityDesc?: string;
+    estApplicationResponseDate?: string;
+    estimatedFunding?: string;
+    estimatedFundingFormatted?: string;
+    costSharing?: boolean;
+    applicantTypes?: Array<{ description?: string }>;
+    fundingInstruments?: Array<{ description?: string }>;
+    fundingActivityCategories?: Array<{ description?: string }>;
+    agencyDetails?: { agencyName?: string };
+  };
+  alns?: Array<{ alnNumber?: string; programTitle?: string }>;
+  cfdas?: Array<{ cfdaNumber?: string; programTitle?: string }>;
+  docType?: string;
 }
 
 interface SamGovOpportunity {
@@ -210,35 +248,92 @@ async function scanGrantsGov(keywords: string[], limit: number): Promise<RawFund
       throw new Error(payload.msg ?? `Grants.gov error ${payload.errorcode}`);
     }
 
-    for (const hit of payload.data?.oppHits ?? []) {
-      const id = hit.id === undefined ? undefined : String(hit.id);
-      const title = htmlToText(hit.title ?? hit.number ?? "Untitled Grants.gov opportunity");
-      results.push({
-        name: title,
-        type: "grant",
-        sourceName: hit.agencyName
-          ? `Grants.gov - ${htmlToText(hit.agencyName)}`
-          : hit.agencyCode
-            ? `Grants.gov - ${hit.agencyCode}`
-            : "Grants.gov",
-        sourceUrl: id ? `https://www.grants.gov/search-results-detail/${id}` : "https://www.grants.gov/search-grants",
-        deadline: normalizeDateLabel(hit.closeDate) ?? (hit.oppStatus === "forecasted" ? "Forecasted" : "Unknown"),
-        value: "Unknown",
-        summary: [
-          hit.number ? `Funding opportunity ${hit.number}.` : undefined,
-          hit.oppStatus ? `Status: ${hit.oppStatus}.` : undefined,
-          hit.docType ? `Document type: ${hit.docType}.` : undefined,
-          hit.alnist?.length ? `ALN: ${hit.alnist.join(", ")}.` : undefined,
-          keyword ? `Matched keyword: ${keyword}.` : undefined,
-        ].filter(Boolean).join(" "),
-        eligibility: "Eligibility must be verified in the Grants.gov source package before pursuit.",
-        restrictions: "Federal grant compliance, reporting, and registration requirements may apply.",
-        loeTags: inferLoeTags(title, keyword),
-      });
-    }
+    const mapped = await Promise.all((payload.data?.oppHits ?? []).map((hit) => mapGrantsGovHit(hit, keyword)));
+    results.push(...mapped);
   }
 
   return results;
+}
+
+async function fetchGrantsGovOpportunity(opportunityId: string): Promise<GrantsGovDetail | undefined> {
+  const response = await fetch(GRANTS_GOV_FETCH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ opportunityId: Number(opportunityId) }),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!response.ok) {
+    return undefined;
+  }
+
+  const payload = await response.json() as {
+    errorcode?: number;
+    data?: GrantsGovDetail;
+  };
+  return payload.errorcode === 0 ? payload.data : undefined;
+}
+
+async function mapGrantsGovHit(hit: GrantsGovHit, keyword: string): Promise<RawFundingOpportunity> {
+  const id = hit.id === undefined ? undefined : String(hit.id);
+  const detail = id
+    ? await fetchGrantsGovOpportunity(id).catch(() => undefined)
+    : undefined;
+  const synopsis = detail?.synopsis;
+  const forecast = detail?.forecast;
+  const title = htmlToText(detail?.opportunityTitle ?? hit.title ?? hit.number ?? "Untitled Grants.gov opportunity");
+  const opportunityNumber = detail?.opportunityNumber ?? hit.number;
+  const alnList = detail?.alns?.map((aln) => [aln.alnNumber, aln.programTitle].filter(Boolean).join(" - "))
+    ?? detail?.cfdas?.map((cfda) => [cfda.cfdaNumber, cfda.programTitle].filter(Boolean).join(" - "))
+    ?? hit.alnist;
+  const applicantTypes = (synopsis?.applicantTypes ?? forecast?.applicantTypes)
+    ?.map((item) => item.description)
+    .filter(Boolean);
+  const fundingCategories = (synopsis?.fundingActivityCategories ?? forecast?.fundingActivityCategories)
+    ?.map((item) => item.description)
+    .filter(Boolean);
+  const agencyName = synopsis?.agencyName ?? forecast?.agencyDetails?.agencyName ?? detail?.agencyDetails?.agencyName;
+  const description = synopsis?.synopsisDesc ?? forecast?.forecastDesc;
+
+  return {
+    name: title,
+    type: "grant",
+    sourceName: agencyName
+      ? `Grants.gov - ${htmlToText(agencyName)}`
+      : hit.agencyName
+        ? `Grants.gov - ${htmlToText(hit.agencyName)}`
+        : hit.agencyCode
+          ? `Grants.gov - ${hit.agencyCode}`
+          : "Grants.gov",
+    sourceUrl: id ? `https://www.grants.gov/search-results-detail/${id}` : "https://www.grants.gov/search-grants",
+    deadline: normalizeDateLabel(
+      synopsis?.responseDateDesc
+        ?? synopsis?.originalDueDateDesc
+        ?? forecast?.estApplicationResponseDate
+        ?? hit.closeDate,
+    )
+      ?? (hit.oppStatus === "forecasted" ? "Forecasted" : "Unknown"),
+    value: formatGrantsGovAwardValue(synopsis, forecast),
+    summary: [
+      opportunityNumber ? `Funding opportunity ${opportunityNumber}.` : undefined,
+      hit.oppStatus ? `Status: ${hit.oppStatus}.` : undefined,
+      detail?.docType ?? hit.docType ? `Document type: ${detail?.docType ?? hit.docType}.` : undefined,
+      description ? htmlToText(description).slice(0, 650) : undefined,
+      alnList?.length ? `ALN: ${alnList.join(", ")}.` : undefined,
+      fundingCategories?.length ? `Funding categories: ${fundingCategories.join(", ")}.` : undefined,
+      keyword ? `Matched keyword: ${keyword}.` : undefined,
+    ].filter(Boolean).join(" "),
+    eligibility: applicantTypes?.length
+      ? `Eligible applicant types: ${applicantTypes.join(", ")}.`
+      : forecast?.applicantEligibilityDesc
+        ? htmlToText(forecast.applicantEligibilityDesc).slice(0, 650)
+      : "Eligibility must be verified in the Grants.gov source package before pursuit.",
+    restrictions: [
+      "Federal grant compliance, reporting, and registration requirements may apply.",
+      synopsis?.costSharing || forecast?.costSharing ? "Cost sharing is indicated in the opportunity detail." : undefined,
+    ].filter(Boolean).join(" "),
+    loeTags: inferLoeTags(`${title} ${description ?? ""}`, keyword),
+  };
 }
 
 async function scanSamGov(keywords: string[], apiKey: string, limit: number): Promise<RawFundingOpportunity[]> {
@@ -369,6 +464,31 @@ function normalizeDateLabel(value: string | undefined): string | undefined {
     return htmlToText(trimmed);
   }
   return date.toISOString().slice(0, 10);
+}
+
+function formatGrantsGovAwardValue(
+  synopsis: GrantsGovDetail["synopsis"] | undefined,
+  forecast: GrantsGovDetail["forecast"] | undefined,
+): string {
+  const ceiling = formatAwardAmount(synopsis?.awardCeilingFormatted ?? synopsis?.awardCeiling);
+  const floor = formatAwardAmount(synopsis?.awardFloorFormatted ?? synopsis?.awardFloor);
+  const estimated = formatAwardAmount(forecast?.estimatedFundingFormatted ?? forecast?.estimatedFunding);
+  if (ceiling && floor && ceiling !== floor) return `${floor}-${ceiling}`;
+  if (ceiling) return ceiling;
+  if (floor) return floor;
+  if (estimated) return estimated;
+  return "Unknown";
+}
+
+function formatAwardAmount(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.startsWith("$")) return trimmed;
+  const numeric = Number(trimmed.replace(/,/g, ""));
+  if (Number.isFinite(numeric)) {
+    return `$${numeric.toLocaleString()}`;
+  }
+  return htmlToText(trimmed);
 }
 
 function htmlToText(value: string): string {
