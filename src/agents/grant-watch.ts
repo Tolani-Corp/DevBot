@@ -1,3 +1,5 @@
+import { scanConfiguredFundingSources, type FundingSourceScanReport } from "./grant-watch-sources.js";
+
 export const ROAD_TO_FUNDING_ID = "tolani.foundation.road_to_funding.v1" as const;
 export const GRANT_WATCH_AGENT_ID = "devbot.agent.grant_watch.v1" as const;
 
@@ -124,6 +126,11 @@ export interface GrantWatchRunInput {
   opportunities?: RawFundingOpportunity[];
   profile?: Partial<FundingFitProfile>;
   now?: string | Date;
+  keywords?: string[];
+  maxOpportunities?: number;
+  includeSampleFallback?: boolean;
+  scanRealSources?: boolean;
+  sourceMode?: "live" | "sample" | "hybrid";
 }
 
 export interface GrantWatchRunResult {
@@ -138,6 +145,7 @@ export interface GrantWatchRunResult {
   reviewTasks: StewardReviewTask[];
   alerts: DeadlineAlert[];
   generatedAt: string;
+  sourceScan?: FundingSourceScanReport;
 }
 
 export interface GrantWatchToolDefinition {
@@ -207,29 +215,31 @@ export const grantWatchAgent = {
 
 export const defaultGrantWatchSources: GrantWatchSource[] = [
   {
-    id: "rtf.source.grants_gov",
+    id: "rtf.source.grants_gov.search2",
     name: "Grants.gov",
     type: "public-sector",
-    url: "https://www.grants.gov/search-grants",
+    url: "https://api.grants.gov/v1/api/search2",
     cadence: "daily",
     priority: "high",
-    tags: ["federal", "public-sector", "grant"],
+    tags: ["federal", "public-sector", "grant", "public-api"],
   },
   {
-    id: "rtf.source.foundation_directory",
-    name: "Foundation Directory",
+    id: "rtf.source.sam_gov.opportunities",
+    name: "SAM.gov Contract Opportunities",
+    type: "rfp",
+    url: "https://api.sam.gov/opportunities/v2/search",
+    cadence: "daily",
+    priority: "medium",
+    tags: ["federal", "rfp", "requires-api-key"],
+  },
+  {
+    id: "rtf.source.candid.grants_api",
+    name: "Candid Grants API",
     type: "foundation",
+    url: "https://developer.candid.org/",
     cadence: "weekly",
     priority: "medium",
-    tags: ["foundation", "relationship"],
-  },
-  {
-    id: "rtf.source.local_resilience_calls",
-    name: "Community Resilience Funding Calls",
-    type: "grant",
-    cadence: "weekly",
-    priority: "high",
-    tags: ["climate", "resilience", "community"],
+    tags: ["foundation", "licensed-api", "relationship"],
   },
 ];
 
@@ -297,7 +307,7 @@ const sampleOpportunities: RawFundingOpportunity[] = [
 ];
 
 export function scanFundingSources(input: GrantWatchRunInput = {}): RawFundingOpportunity[] {
-  if (input.opportunities?.length) {
+  if (Array.isArray(input.opportunities)) {
     return input.opportunities;
   }
   return sampleOpportunities;
@@ -613,6 +623,40 @@ export function runGrantWatchCycle(input: GrantWatchRunInput = {}): GrantWatchRu
     reviewTasks,
     alerts,
     generatedAt: now.toISOString(),
+  };
+}
+
+export async function runGrantWatchCycleWithSources(
+  input: GrantWatchRunInput = {},
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<GrantWatchRunResult> {
+  if (input.scanRealSources === false || input.sourceMode === "sample" || Array.isArray(input.opportunities)) {
+    return runGrantWatchCycle(input);
+  }
+
+  const scan = await scanConfiguredFundingSources(input, env);
+  const shouldFallbackToSample =
+    scan.opportunities.length === 0
+    && (input.sourceMode === "hybrid" || input.includeSampleFallback !== false);
+  const warnings = [...scan.report.warnings];
+
+  if (shouldFallbackToSample) {
+    warnings.push("Using sample fallback opportunities because live connectors returned no leads.");
+  }
+
+  const result = runGrantWatchCycle({
+    ...input,
+    sources: scan.sources,
+    opportunities: shouldFallbackToSample ? undefined : scan.opportunities,
+  });
+
+  return {
+    ...result,
+    sourceScan: {
+      ...scan.report,
+      rawOpportunityCount: shouldFallbackToSample ? result.opportunities.length : scan.report.rawOpportunityCount,
+      warnings,
+    },
   };
 }
 

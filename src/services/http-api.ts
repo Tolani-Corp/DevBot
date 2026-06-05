@@ -1,7 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { computeAgentROI } from "@/services/agent-roi";
-import { grantWatchAgent, runGrantWatchCycle, type GrantWatchRunInput } from "@/agents/grant-watch";
+import { grantWatchAgent, runGrantWatchCycleWithSources, type GrantWatchRunInput } from "@/agents/grant-watch";
+import { persistGrantWatchRun } from "@/agents/grant-watch-storage";
 import { approveTask, rejectTask, teachTask } from "@/services/approval";
 import {
   deployConvoy,
@@ -197,8 +198,21 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
     }
 
     if (method === "POST" && path === "/api/funding/grant-watch") {
-      const body = await readJson<GrantWatchRunInput>(req);
-      sendJson(res, 200, runGrantWatchCycle(body));
+      const body = await readJson<GrantWatchRunInput & { persist?: boolean }>(req);
+      const result = await runGrantWatchCycleWithSources({
+        includeSampleFallback: true,
+        ...body,
+      });
+      const persistence = body.persist === false
+        ? {
+            mode: "disabled",
+            runId: "",
+            d1Persisted: false,
+            r2Persisted: false,
+            warnings: ["Persistence skipped by request."],
+          }
+        : await persistGrantWatchRun(result);
+      sendJson(res, 200, { ...result, persistence });
       return true;
     }
 

@@ -39,6 +39,7 @@ export * as grantWatch from "./grant-watch.js";
 export {
   grantWatchAgent,
   runGrantWatchCycle,
+  runGrantWatchCycleWithSources,
   scanFundingSources,
   normalizeOpportunity,
   scoreFundingFit,
@@ -47,3 +48,11 @@ export {
   routeToStewardReview,
   scheduleDeadlineAlerts,
 } from "./grant-watch.js";
+export {
+  scanConfiguredFundingSources,
+  liveGrantWatchSources,
+} from "./grant-watch-sources.js";
+export {
+  persistGrantWatchRun,
+  loadGrantWatchStorageConfig,
+} from "./grant-watch-storage.js";
