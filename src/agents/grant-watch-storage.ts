@@ -14,6 +14,7 @@ interface GrantWatchStorageConfig {
   apiToken?: string;
   d1DatabaseId?: string;
   r2Bucket?: string;
+  r2BucketUrl?: string;
 }
 
 export interface GrantWatchPersistenceResult {
@@ -22,6 +23,7 @@ export interface GrantWatchPersistenceResult {
   d1Persisted: boolean;
   r2Persisted: boolean;
   r2SnapshotKey?: string;
+  r2SnapshotUrl?: string;
   warnings: string[];
 }
 
@@ -63,7 +65,7 @@ export async function persistGrantWatchRun(
       warnings.push(`R2 snapshot skipped: ${errorMessage(error)}`);
     }
   } else {
-    warnings.push("R2 snapshot skipped; configure GRANT_WATCH_R2_BUCKET after enabling R2 on the Cloudflare account.");
+    warnings.push("R2 snapshot skipped; configure GRANT_WATCH_R2_BUCKET or an S3-style CLOUDFLARE_R2_BUCKET_URL after enabling R2 on the Cloudflare account.");
   }
 
   try {
@@ -83,16 +85,19 @@ export async function persistGrantWatchRun(
     d1Persisted,
     r2Persisted,
     r2SnapshotKey: r2Persisted ? r2SnapshotKey : undefined,
+    r2SnapshotUrl: r2Persisted ? buildR2SnapshotUrl(config.r2BucketUrl, r2SnapshotKey) : undefined,
     warnings,
   };
 }
 
 export function loadGrantWatchStorageConfig(env: NodeJS.ProcessEnv = process.env): GrantWatchStorageConfig {
+  const r2BucketUrl = optional(env.CLOUDFLARE_R2_BUCKET_URL);
   return {
     accountId: optional(env.CLOUDFLARE_ACCOUNT_ID),
     apiToken: optional(env.CLOUDFLARE_API_TOKEN),
     d1DatabaseId: optional(env.GRANT_WATCH_D1_DATABASE_ID),
-    r2Bucket: optional(env.GRANT_WATCH_R2_BUCKET),
+    r2Bucket: optional(env.GRANT_WATCH_R2_BUCKET) ?? bucketNameFromR2BucketUrl(r2BucketUrl),
+    r2BucketUrl,
   };
 }
 
@@ -345,6 +350,47 @@ function normalizeStatement(statement: D1Statement): D1Statement {
 function optional(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+function bucketNameFromR2BucketUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+
+  try {
+    const parsed = new URL(value);
+    const pathBucket = parsed.pathname.split("/").filter(Boolean)[0];
+    if (pathBucket) {
+      return decodeURIComponent(pathBucket);
+    }
+
+    const suffix = ".r2.cloudflarestorage.com";
+    const host = parsed.hostname.toLowerCase();
+    if (host.endsWith(suffix)) {
+      const labels = host.slice(0, -suffix.length).split(".").filter(Boolean);
+      if (labels.length >= 2) {
+        return labels[0];
+      }
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function buildR2SnapshotUrl(bucketUrl: string | undefined, key: string | undefined): string | undefined {
+  if (!bucketUrl || !key) return undefined;
+
+  try {
+    const parsed = new URL(bucketUrl);
+    const basePath = parsed.pathname.replace(/\/+$/, "");
+    const encodedKey = key.split("/").map(encodeURIComponent).join("/");
+    parsed.pathname = `${basePath}/${encodedKey}`.replace(/\/{2,}/g, "/");
+    parsed.search = "";
+    parsed.hash = "";
+    return parsed.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 function json(value: unknown): string {
