@@ -56,3 +56,15 @@ export {
   persistGrantWatchRun,
   loadGrantWatchStorageConfig,
 } from "./grant-watch-storage.js";
+
+// Dynamic NATT Roadmap
+export {
+  buildDynamicNATTLearningPlan,
+  loadNATTRoadmapResource,
+  recommendRoadmap,
+  missionTypeSchema,
+  type RoadmapMissionType,
+  type NATTRoadmapResource,
+  type RoadmapRecommendation,
+} from "./natt-dynamic-roadmap.js";
+export * as nattSkillsRoadmap from "./skills/index.js";

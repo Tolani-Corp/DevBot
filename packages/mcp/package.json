@@ -1,0 +1,31 @@
+{
+  "name": "@tolani-bots/natt-ops",
+  "version": "1.0.0",
+  "description": "ROE-gated NATT offensive operations adapters for DevBot and DEBO",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "natt",
+    "security",
+    "pentest",
+    "offensive-ops",
+    "debo"
+  ],
+  "author": "Tolani Corp",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

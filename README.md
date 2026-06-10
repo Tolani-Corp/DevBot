@@ -89,6 +89,29 @@ See [docs/AZURE_INTERNAL_LINKS_AND_LOCAL_OPS.md](./docs/AZURE_INTERNAL_LINKS_AND
 - preserve `human approval on higher-risk changes`
 - use `DEBO` as the upmarket workstation when governance needs outgrow a single teammate surface
 
+## Tolani Ecosystem Web3 Guidance
+
+DevBot agents should use the Tolani DAO NFT program guidance when handling ecosystem credentials, certificates, work orders, deliverables, steward badges, DAO evidence packets, or minting rails.
+
+- Canonical ecosystem issuance should be controlled by `Tolani DAO` through Safe, timelock, or DAO-approved roles.
+- `Tolani Labs` may originate evidence, validation, education workflows, and metadata tooling, but should not be the durable authority for DAO credentials or governance-linked issuance unless DAO-approved.
+- A dynamic pre-mint rail may prepare `draft`, `eligible`, and `approved` records before all production components are settled.
+- On-chain mint execution must stay blocked until issuer/approver roles, metadata storage, evidence storage, duplicate-prevention checks, contract configuration, hashes, and recipient wallet checks pass.
+
+Detailed reference: [docs/web3-knowledge.md](./docs/web3-knowledge.md).
+
+## Tolani Global Hiring Guidance
+
+DevBot agents should use the global hiring operations guidance when handling Tolani workforce planning, recruiting, role requests, onboarding, contractor paths, EOR paths, or hiring council workflows.
+
+- Source-truth ID: `tolani.ecosystem.global_workforce.v1`.
+- Primary source lives in `D:\Projects\tolani-foundation-page\docs\GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md` and `D:\Projects\tolani-foundation-page\client\src\data\workforceOps.ts`.
+- Multi-country employment defaults to EOR unless Legal/EOR review approves another path.
+- Humans must approve classification, compensation, interview outcome, offer, sensitive access, and final hire/no-hire.
+- AI may draft, summarize, compare against approved scorecards, flag missing approvals, and prepare onboarding tasks.
+
+Detailed reference: [docs/global-hiring-ops.md](./docs/global-hiring-ops.md).
+
 ## License
 
 - Commercial use is governed by [LICENSE.md](./LICENSE.md)

@@ -257,6 +257,8 @@ When generating code changes:
 - Smart contract tests use hardhat-network-helpers for time manipulation and impersonation.
 - Gas optimisation: use immutable/constant, pack storage slots, calldata over memory for external arrays.
 - Apply Slither or Aderyn static analysis recommendations for security-sensitive contracts.
+- For Tolani ecosystem NFT, credential, certificate, work-order, deliverable, steward-badge, or evidence-packet work: treat Tolani DAO as the durable authority for canonical issuance and governance/reward-linked contracts; Tolani Labs may originate evidence, education validation, lab workflows, and metadata tooling under DAO policy.
+- Build dynamic mint rails as gated pre-mint systems until production authority is settled. Allow draft, eligible, and approved records; block mint execution until issuer/approver roles, metadata storage, evidence storage, duplicate checks, contract config, hashes, and recipient wallet checks pass.
 Respond ONLY with valid JSON matching the expected schema.`,
     filePatterns: [
       "**/*.sol",
@@ -271,6 +273,7 @@ Respond ONLY with valid JSON matching the expected schema.`,
       "Solidity smart contract development",
       "Hardhat 3 / Foundry project setup",
       "ERC-20 / ERC-721 / ERC-1155 tokens",
+      "Gated NFT credential and pre-mint rail design",
       "Upgradeable proxy patterns (UUPS, Transparent)",
       "DeFi integrations (Uniswap, Chainlink, Aave)",
       "Smart contract security auditing",

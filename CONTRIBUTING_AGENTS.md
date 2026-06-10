@@ -63,3 +63,21 @@ To ensure your new agent appears in the DevTown analytics and visualization:
 ## 5. Test Your Agent
 
 Add a test case in `tests/agents/orchestrator.test.ts` (or create a new test file) to verify that tasks are correctly assigned to your new agent role during plan decomposition.
+
+## Tolani Ecosystem Web3 Agent Guidance
+
+Any agent that handles Tolani ecosystem Web3, NFT, credential, certificate, work-order, deliverable, steward-badge, DAO evidence, or minting tasks must follow the shared policy in `docs/web3-knowledge.md`.
+
+- Tolani DAO is the durable authority for canonical ecosystem issuance, governance-linked credentials, protocol contracts, and reward-linked records.
+- Tolani Labs may originate evidence, education validation, lab workflows, and metadata tooling under DAO policy.
+- Dynamic mint rails are allowed as pre-mint preparation only until production gates are settled.
+- Do not recommend or execute on-chain minting until issuer/approver roles, metadata storage, evidence storage, duplicate checks, contract config, hashes, and recipient wallet checks pass.
+
+## Tolani Global Hiring Agent Guidance
+
+Any agent that handles Tolani hiring, recruiting, onboarding, contractor, EOR, workforce planning, people-ops, or candidate workflow tasks must follow `docs/global-hiring-ops.md`.
+
+- Source-truth ID is `tolani.ecosystem.global_workforce.v1`.
+- Multi-country employment defaults to EOR until Legal/EOR review approves another path.
+- AI may draft, summarize, compare against approved scorecards, flag missing approvals, and prepare onboarding tasks.
+- Humans must approve classification, compensation, interview outcome, offer, sensitive access, and final hire/no-hire.

@@ -53,49 +53,102 @@ This is implemented in `src/agents/orchestrator.ts`:
 - Security-sensitive code changes
 - Refactoring that touches shared interfaces
 
-## File Structure
+## File Structure (Updated with Enhancements)
 ```
 src/
-  agents/           # Multi-agent orchestration system
-    types.ts        # AgentTask, AgentResult, RedevelopmentQueue types
-    orchestrator.ts # Plan decomposition, execution, verification, redevelopment
+  agents/                    # Multi-agent orchestration system
+    types.ts                 # AgentTask, AgentResult, RedevelopmentQueue types
+    orchestrator.ts          # Plan decomposition, execution, verification, redevelopment
+    specialists/             # ⭐ NEW: Specialized domain agents
+      documentation.ts       # Generate OpenAPI, architecture, README, ADR, changelog
+      test-generator.ts      # Unit, integration, E2E tests and factories
+      performance.ts         # Profile, optimize, bundle analysis, caching
+      infrastructure.ts      # IaC generation (Terraform, Bicep, CloudFormation)
+      data.ts                # Data pipelines, ETL, schemas, queries, quality
+      index.ts               # Specialist agents export
   ai/
-    claude.ts       # Core AI functions: analyzeTask, generateCodeChanges, answerQuestion
-    beyond.ts       # Advanced AI: patterns, health, prioritization, tests, infra, docs
-    rag.ts          # RAG engine with OpenAI embeddings
+    claude.ts                # Core AI functions: analyzeTask, generateCodeChanges, answerQuestion
+    beyond.ts                # Advanced AI: patterns, health, prioritization, tests, infra, docs
+    rag.ts                   # RAG engine with OpenAI embeddings
+    patterns/                # ⭐ NEW: Code pattern recognition engine
+      detector.ts            # Detect smells, design patterns, tech debt scoring
+      recommender.ts         # Refactoring recommendations
+    architecture/            # ⭐ NEW: Architecture validation engine
+      validator.ts           # Layer validation, security boundaries, circular deps
+    context-analyzer.ts      # ⭐ NEW: Context-aware code generation
+    conversations/           # ⭐ NEW: Multi-turn conversation engine
+      manager.ts             # Conversation state, consensus building
     chunking/
-      ast-chunker.ts # AST-aware code chunking (regex-based, no external parser)
+      ast-chunker.ts         # AST-aware code chunking (regex-based, no external parser)
   db/
-    schema.ts       # Drizzle schema: tasks, conversations, auditLogs, documents, workspaces
+    schema.ts                # Drizzle schema: tasks, conversations, auditLogs, documents, workspaces
   git/
-    operations.ts   # Safe git ops (execFileSync + sanitization)
+    operations.ts            # Safe git ops (execFileSync + sanitization)
   middleware/
-    sanitizer.ts    # Shell metachar stripping, path traversal prevention
-    validators.ts   # Zod schemas for all user inputs
-    rate-limiter.ts # Redis sliding window rate limiter
+    sanitizer.ts             # Shell metachar stripping, path traversal prevention
+    validators.ts            # Zod schemas for all user inputs
+    rate-limiter.ts          # Redis sliding window rate limiter
   queue/
-    worker.ts       # BullMQ task processor
+    worker.ts                # BullMQ task processor
   services/
-    approval.ts     # Approval workflow with auto-approve heuristics
-    analytics.ts    # Team analytics with SQL aggregations
-    github-actions.ts # CI/CD monitoring, workflow triggering
-    health-scanner.ts # Proactive repo health scanning
-    pr-review.ts    # AI-powered PR reviews with inline comments
-    tier-manager.ts # Enterprise pricing tier management
-    onboarding.ts   # Workspace onboarding flow
+    approval.ts              # Approval workflow with auto-approve heuristics
+    analytics.ts             # Team analytics with SQL aggregations
+    github-actions.ts        # CI/CD monitoring, workflow triggering
+    health-scanner.ts        # Proactive repo health scanning
+    pr-review.ts             # AI-powered PR reviews with inline comments
+    tier-manager.ts          # Enterprise pricing tier management
+    onboarding.ts            # Workspace onboarding flow
   slack/
-    bot.ts          # Slack Bolt app: mentions, messages, commands
-    interactive.ts  # Interactive buttons, modals, select menus
-    messages.ts     # Thread updates, alerts
+    bot.ts                   # Slack Bolt app: mentions, messages, commands
+    interactive.ts           # Interactive buttons, modals, select menus
+    messages.ts              # Thread updates, alerts
+  lib/                       # ⭐ NEW: Utility libraries (planned)
+    logger.ts                # Structured logging
+    metrics.ts               # OpenTelemetry metrics
+    cache.ts                 # Multi-tier caching
+  cli/                       # ⭐ NEW: Developer CLI tools (planned)
+    commands/                # CLI commands
 tests/
-  helpers/          # Mock factories: mock-db, mock-redis, mock-anthropic
-  ai/              # AI function tests
-  git/             # Git operations tests
-  middleware/      # Sanitizer, validator, rate-limiter tests
-  queue/           # Worker tests
-mcp-natt/          # MCP Server: NATT security knowledge
-  src/index.ts     # Tools: validate_roe, identify_hash, scan_for_secrets, etc.
+  helpers/                   # Mock factories: mock-db, mock-redis, mock-anthropic
+  ai/                        # AI function tests
+  agents/specialists/        # ⭐ NEW: Specialist agent tests
+  git/                       # Git operations tests
+  middleware/                # Sanitizer, validator, rate-limiter tests
+  queue/                     # Worker tests
+mcp-natt/                    # MCP Server: NATT security knowledge
+  src/index.ts               # Tools: validate_roe, identify_hash, scan_for_secrets, etc.
 ```
+
+## 2026 Enhancement Roadmap
+
+### Phase 1: Breadth Expansion ✅ (In Progress)
+
+**Phase 1.1: Specialized Agents** ✅ COMPLETED
+- Documentation Agent: OpenAPI specs, architecture diagrams, changelogs, ADRs
+- Test Generation Agent: Unit/integration/E2E tests, factories, mutation analysis
+- Performance Agent: Profiling, bundle analysis, query optimization, caching strategies
+- Infrastructure Agent: IaC generation (Terraform, Bicep, CloudFormation), multi-cloud
+- Data Agent: Data pipelines, ETL, schemas, query optimization, quality checks
+
+**Phase 1.2: Advanced AI Capabilities** ✅ COMPLETED
+- Pattern Detector: Code smells, design patterns, tech debt scoring
+- Architecture Validator: Layer validation, security boundaries, circular dependencies
+- Context Analyzer: Project convention detection, style guide extraction, contextual prompts
+- Conversation Manager: Multi-turn conversations, decision tracking, consensus building
+
+**Phase 1.3-1.5: In Progress**
+- Services expansion (Advanced Analytics, Notification Hub, Workspace Insights)
+- Integration expansion (Linear, Jira, GitLab, Gitea, Datadog, New Relic)
+- Skill modules (Database Migrations, API Contracts, Dependency Security)
+
+### Full Roadmap
+See [ENHANCEMENT_ROADMAP.md](./.claude/ENHANCEMENT_ROADMAP.md) for complete 262-hour roadmap covering:
+- Phase 2: Observability & Monitoring
+- Phase 3: CLI & Developer Tools
+- Phase 4: Enterprise Features
+- Phase 5: Performance Optimization
+- Phase 6: Security Hardening
+- Phase 7: Test Suite Expansion
 
 ## Cloudflare Integration
 - **Token**: Stored in `CLOUDFLARE_API_TOKEN` env var

@@ -147,6 +147,36 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 ```
 
+### Tolani Ecosystem NFT Authority And Mint Rail
+
+Use this guidance when DevBot or DEBO agents work on Tolani Ecosystem DAO NFT, credential, certificate, work order, deliverable, steward badge, or evidence-packet features.
+
+Authority model:
+
+- `Tolani DAO` should control canonical ecosystem issuance, protocol-level contracts, governance-linked NFT contracts, reward-linked credentials, and anything that implies DAO authority.
+- `Tolani Labs` may originate evidence, education validation, lab workflows, metadata tooling, and service operations.
+- A human or service deployer may create a contract, but durable production authority should move to a Safe, timelock, or DAO-approved role structure.
+- Lab-only contracts can remain under Tolani Labs when they do not custody DAO funds, mint DAO credentials, or imply governance authority.
+
+Mint rail rule:
+
+- It is acceptable to build a dynamic pre-mint rail before all roles, storage, and duplicate-prevention components are settled.
+- The rail may create `draft`, `eligible`, and `approved` records.
+- The rail must not broadcast mint transactions, mark a record `minted`, or imply production mint readiness until all hard gates pass.
+
+Hard gates:
+
+- Before `eligible`: active policy and source-of-truth ID.
+- Before `mint_queued`: issuer/approver roles, metadata storage, evidence storage, and duplicate checks.
+- Before `minted`: configured contract, chain, mint function, metadata hash, evidence hash, and recipient wallet when recipient-specific.
+
+Tolani DAO source artifacts:
+
+- `D:\Projects\Tolani Ecosystem DAO\docs\ECOSYSTEM_NFT_PROGRAM.md`
+- `D:\Projects\Tolani Ecosystem DAO\docs\ECOSYSTEM_NFT_METADATA_SCHEMA.md`
+- `D:\Projects\Tolani Ecosystem DAO\frontend\src\lib\nft-policy.ts`
+- `D:\Projects\Tolani Ecosystem DAO\frontend\convex\nftMintRecords.ts`
+
 ---
 
 ## 4. Testing with Hardhat + Viem

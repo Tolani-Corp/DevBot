@@ -117,7 +117,17 @@ export class KnowledgeBase {
   /**
    * Add a new knowledge entry.
    */
-  add(entry: Omit<KnowledgeEntry, "id" | "createdAt" | "updatedAt" | "usageCount" | "validatedCount" | "invalidatedCount">): KnowledgeEntry {
+  add(
+    entry: Omit<
+      KnowledgeEntry,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "usageCount"
+      | "validatedCount"
+      | "invalidatedCount"
+    >,
+  ): KnowledgeEntry {
     const fullEntry: KnowledgeEntry = {
       ...entry,
       id: nanoid(),
@@ -228,12 +238,14 @@ export class KnowledgeBase {
       confidence: "medium",
       applicableRoles: [role],
       tags: [taskType, "success"],
-      examples: [{
-        scenario: description,
-        solution: outcome,
-        outcome: "success",
-        timestamp: new Date(),
-      }],
+      examples: [
+        {
+          scenario: description,
+          solution: outcome,
+          outcome: "success",
+          timestamp: new Date(),
+        },
+      ],
     });
   }
 
@@ -262,12 +274,14 @@ export class KnowledgeBase {
       confidence: "medium",
       applicableRoles: [role],
       tags: [taskType, "error", errorType],
-      examples: [{
-        scenario: context,
-        solution: "Error occurred - needs manual review",
-        outcome: "failure",
-        timestamp: new Date(),
-      }],
+      examples: [
+        {
+          scenario: context,
+          solution: "Error occurred - needs manual review",
+          outcome: "failure",
+          timestamp: new Date(),
+        },
+      ],
     });
   }
 
@@ -275,7 +289,9 @@ export class KnowledgeBase {
    * Export knowledge base as markdown.
    */
   exportAsMarkdown(filter?: KnowledgeQuery): string {
-    const entries = filter ? this.query(filter).map(m => m.entry) : Array.from(this.entries.values());
+    const entries = filter
+      ? this.query(filter).map((m) => m.entry)
+      : Array.from(this.entries.values());
 
     let md = `# DevBot Knowledge Base\n\n`;
     md += `**Generated:** ${new Date().toISOString()}\n`;
@@ -358,7 +374,7 @@ export class KnowledgeBase {
       .slice(0, 5);
 
     const mostValidated = allEntries
-      .filter(e => e.usageCount > 0)
+      .filter((e) => e.usageCount > 0)
       .sort((a, b) => {
         const validationRateA = a.validatedCount / a.usageCount;
         const validationRateB = b.validatedCount / b.usageCount;
@@ -379,15 +395,26 @@ export class KnowledgeBase {
 
   private initializeIndexes(): void {
     const types: KnowledgeEntryType[] = [
-      "error_solution", "best_practice", "anti_pattern", 
-      "codebase_pattern", "optimization", "recommendation",
+      "error_solution",
+      "best_practice",
+      "anti_pattern",
+      "codebase_pattern",
+      "optimization",
+      "recommendation",
     ];
     for (const type of types) {
       this.indexByType.set(type, new Set());
     }
 
     const roles: AgentRole[] = [
-      "frontend", "backend", "security", "devops", "arb-runner", "media", "web3", "general",
+      "frontend",
+      "backend",
+      "security",
+      "devops",
+      "arb-runner",
+      "media",
+      "web3",
+      "general",
     ];
     for (const role of roles) {
       this.indexByRole.set(role, new Set());
@@ -431,7 +458,10 @@ export class KnowledgeBase {
     }
   }
 
-  private calculateRelevance(entry: KnowledgeEntry, query: KnowledgeQuery): number {
+  private calculateRelevance(
+    entry: KnowledgeEntry,
+    query: KnowledgeQuery,
+  ): number {
     let score = 0;
 
     // Base score from confidence
@@ -460,7 +490,10 @@ export class KnowledgeBase {
     if (query.repository) {
       if (entry.context.repository === query.repository) {
         score += 0.15;
-      } else if (entry.context.repository === "*" || !entry.context.repository) {
+      } else if (
+        entry.context.repository === "*" ||
+        !entry.context.repository
+      ) {
         score += 0.05; // generic knowledge is less relevant
       }
     }
@@ -478,7 +511,11 @@ export class KnowledgeBase {
     return Math.min(score, 1.0);
   }
 
-  private explainRelevance(entry: KnowledgeEntry, query: KnowledgeQuery, score: number): string {
+  private explainRelevance(
+    entry: KnowledgeEntry,
+    query: KnowledgeQuery,
+    score: number,
+  ): string {
     const reasons: string[] = [];
 
     if (query.role && entry.applicableRoles.includes(query.role)) {
@@ -490,7 +527,10 @@ export class KnowledgeBase {
     }
 
     if (entry.usageCount > 0) {
-      const validationRate = (entry.validatedCount / entry.usageCount * 100).toFixed(0);
+      const validationRate = (
+        (entry.validatedCount / entry.usageCount) *
+        100
+      ).toFixed(0);
       reasons.push(`${validationRate}% validation rate`);
     }
 
@@ -505,8 +545,10 @@ export class KnowledgeBase {
     if (lower.includes("type") || lower.includes("typescript")) return "type";
     if (lower.includes("syntax")) return "syntax";
     if (lower.includes("timeout")) return "timeout";
-    if (lower.includes("permission") || lower.includes("unauthorized")) return "permission";
-    if (lower.includes("not found") || lower.includes("404")) return "not-found";
+    if (lower.includes("permission") || lower.includes("unauthorized"))
+      return "permission";
+    if (lower.includes("not found") || lower.includes("404"))
+      return "not-found";
     if (lower.includes("network") || lower.includes("fetch")) return "network";
     if (lower.includes("validation")) return "validation";
 
@@ -519,9 +561,12 @@ export class KnowledgeBase {
     md += `**Confidence:** ${entry.confidence}  \n`;
     md += `**Roles:** ${entry.applicableRoles.join(", ")}  \n`;
     md += `**Usage:** ${entry.usageCount} times`;
-    
+
     if (entry.usageCount > 0) {
-      const validationRate = (entry.validatedCount / entry.usageCount * 100).toFixed(0);
+      const validationRate = (
+        (entry.validatedCount / entry.usageCount) *
+        100
+      ).toFixed(0);
       md += ` (${validationRate}% helpful)`;
     }
     md += `\n\n${entry.description}\n\n`;
@@ -539,7 +584,7 @@ export class KnowledgeBase {
   }
 
   private intersect<T>(a: Set<T>, b: Set<T>): Set<T> {
-    return new Set([...a].filter(x => b.has(x)));
+    return new Set([...a].filter((x) => b.has(x)));
   }
 
   private union<T>(a: Set<T>, b: Set<T>): Set<T> {
@@ -551,7 +596,8 @@ export class KnowledgeBase {
     this.add({
       type: "best_practice",
       title: "Always validate user input with Zod",
-      description: "All user inputs must pass through Zod validators to prevent injection attacks and ensure type safety.",
+      description:
+        "All user inputs must pass through Zod validators to prevent injection attacks and ensure type safety.",
       context: {
         filePatterns: ["**/*.ts"],
         taskTypes: ["bug_fix", "feature"],
@@ -565,7 +611,8 @@ export class KnowledgeBase {
     this.add({
       type: "best_practice",
       title: "Use execFileSync with array args for git operations",
-      description: "Never use string interpolation for git commands. Always use execFileSync with array arguments to prevent command injection.",
+      description:
+        "Never use string interpolation for git commands. Always use execFileSync with array arguments to prevent command injection.",
       context: {
         filePatterns: ["**/git/**/*.ts"],
         taskTypes: ["bug_fix", "feature"],
@@ -579,7 +626,8 @@ export class KnowledgeBase {
     this.add({
       type: "anti_pattern",
       title: "Avoid using `any` in TypeScript",
-      description: "Using `any` defeats the purpose of TypeScript's type system and can hide bugs.",
+      description:
+        "Using `any` defeats the purpose of TypeScript's type system and can hide bugs.",
       context: {
         filePatterns: ["**/*.ts"],
       },
@@ -592,7 +640,8 @@ export class KnowledgeBase {
     this.add({
       type: "error_solution",
       title: "Module not found errors",
-      description: "When encountering module resolution errors, check tsconfig.json path aliases and ensure imports match the configured paths.",
+      description:
+        "When encountering module resolution errors, check tsconfig.json path aliases and ensure imports match the configured paths.",
       context: {
         errorPatterns: ["Cannot find module", "Module not found"],
       },
@@ -600,6 +649,283 @@ export class KnowledgeBase {
       applicableRoles: ["frontend", "backend"],
       tags: ["typescript", "build", "modules"],
       examples: [],
+    });
+
+    this.add({
+      type: "best_practice",
+      title: "Tolani ecosystem NFT authority model",
+      description:
+        "For Tolani ecosystem NFTs, Tolani DAO should control canonical ecosystem issuance, protocol-level contracts, governance-linked credentials, and reward-linked credentials. Tolani Labs can originate evidence, education validation, metadata tooling, and lab workflows, but production admin roles should move to a Safe, timelock, or DAO-approved role structure.",
+      context: {
+        repository: "Tolani Ecosystem DAO",
+        filePatterns: [
+          "**/contracts/**/*.sol",
+          "**/frontend/src/lib/nft-policy.ts",
+          "**/frontend/convex/nftMintRecords.ts",
+          "**/docs/ECOSYSTEM_NFT_*.md",
+        ],
+        taskTypes: ["web3", "nft", "credential", "governance", "minting"],
+        successCriteria: [
+          "Deployer is not treated as durable owner",
+          "DAO authority controls canonical issuance",
+          "Tolani Labs authority is limited to lab evidence and service operations unless DAO-approved",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["web3", "backend", "security", "devops", "general"],
+      tags: ["tolani", "dao", "nft", "authority", "roles", "governance"],
+      examples: [
+        {
+          scenario:
+            "Agent is asked whether NFT contracts should be created by Tolani Labs or Tolani DAO.",
+          solution:
+            "Recommend DAO-controlled production authority for canonical ecosystem issuance; Labs may deploy or operate evidence tooling under DAO policy.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "anti_pattern",
+      title: "Do not mint before Tolani NFT hard gates pass",
+      description:
+        "A dynamic pre-mint rail can prepare draft, eligible, and approved NFT records before roles, storage, and duplicate prevention are settled. It must not broadcast mint transactions, mark records minted, or imply production readiness until issuer and approver roles, metadata storage, evidence storage, duplicate checks, contract config, hashes, and recipient wallet checks pass.",
+      context: {
+        repository: "Tolani Ecosystem DAO",
+        filePatterns: [
+          "**/frontend/src/lib/nft-policy.ts",
+          "**/frontend/convex/nftMintRecords.ts",
+          "**/contracts/**/*.sol",
+        ],
+        taskTypes: ["nft", "minting", "credential", "web3"],
+        successCriteria: [
+          "Pre-mint records stop before mint_queued when hard gates are missing",
+          "Actual mint execution requires contract, storage, authority, and duplicate-prevention readiness",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["web3", "backend", "security", "devops", "general"],
+      tags: [
+        "tolani",
+        "nft",
+        "mint-rail",
+        "anti-pattern",
+        "storage",
+        "duplicate-prevention",
+      ],
+      examples: [
+        {
+          scenario:
+            "Agent is asked to create a dynamic mint rail before roles, storage, and duplicate prevention are settled.",
+          solution:
+            "Create a gated pre-mint rail and readiness evaluator; block on-chain minting until every hard gate passes.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "best_practice",
+      title: "Tolani global hiring uses human-in-the-loop workforce governance",
+      description:
+        "Tolani hiring work should follow the global workforce source of truth: tolani.ecosystem.global_workforce.v1. AI may draft role descriptions, scorecards, summaries, and approval packets, but humans must approve classification, compensation, interviews, offers, sensitive access, and final hire/no-hire decisions.",
+      context: {
+        repository: "tolani-foundation-page",
+        filePatterns: [
+          "**/docs/GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md",
+          "**/client/src/data/workforceOps.ts",
+          "**/docs/global-hiring-ops.md",
+        ],
+        taskTypes: [
+          "hiring",
+          "workforce",
+          "people_ops",
+          "recruiting",
+          "onboarding",
+        ],
+        successCriteria: [
+          "Every employment-impacting decision has a named human owner",
+          "AI remains assistive and does not make final hiring decisions",
+          "Role requests use the global workforce source-truth ID",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["general", "backend", "security", "devops"],
+      tags: [
+        "tolani",
+        "hiring",
+        "workforce",
+        "human-in-the-loop",
+        "people-ops",
+      ],
+      examples: [
+        {
+          scenario:
+            "Agent is asked to create a global hiring process for Tolani.",
+          solution:
+            "Use the hiring council model, approval gates, and workforceOps registry as the operating source of truth.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "best_practice",
+      title: "Use EOR-first routing for Tolani multi-country hiring",
+      description:
+        "For Tolani multi-country hiring, default to an employer-of-record path when there is no approved employing entity in the worker's country. Direct employee, contractor, vendor, advisor, steward, or grantee paths require Legal/EOR review before sourcing or offer.",
+      context: {
+        repository: "tolani-foundation-page",
+        filePatterns: [
+          "**/client/src/data/workforceOps.ts",
+          "**/docs/GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md",
+        ],
+        taskTypes: ["hiring", "eor", "global_employment", "workforce"],
+        successCriteria: [
+          "Country path is approved before offer",
+          "EOR is the default for international employment without local entity",
+          "Legal/EOR Advisor is recorded as an approval gate",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["general", "backend", "security", "devops"],
+      tags: ["tolani", "eor", "global-hiring", "employment", "compliance"],
+      examples: [
+        {
+          scenario:
+            "Agent is asked how to hire a Tolani worker in a country without an entity.",
+          solution:
+            "Recommend EOR-first routing and require Legal/EOR approval before offer.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "anti_pattern",
+      title: "Do not bypass Tolani worker classification review",
+      description:
+        "Do not label a worker as contractor, vendor, advisor, steward, or grantee merely to move fast. Contractor and non-employee paths require scoped deliverables, independence, classification review, and periodic review for employee-like control.",
+      context: {
+        repository: "tolani-foundation-page",
+        filePatterns: [
+          "**/client/src/data/workforceOps.ts",
+          "**/docs/GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md",
+        ],
+        taskTypes: ["hiring", "contractor", "classification", "people_ops"],
+        successCriteria: [
+          "Classification gate runs before sourcing or offer",
+          "Contractor path includes statement of work and independence check",
+          "Quarterly review catches contractor drift",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["general", "security", "devops"],
+      tags: [
+        "tolani",
+        "classification",
+        "contractor",
+        "anti-pattern",
+        "people-ops",
+      ],
+      examples: [
+        {
+          scenario: "Agent is asked to onboard a global contractor quickly.",
+          solution:
+            "Block execution until classification facts, statement of work, Legal/EOR approval, and access gates are complete.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "recommendation",
+      title: "Tolani hiring council roster and headcount baseline",
+      description:
+        "Use a 12-month baseline of 24 people across Foundation + Funding Ops, DAO + Web3 Ops, Tolani Labs + Credentials, Product + Engineering, and TCCG + Business Ops. The standing hiring council includes Workforce Lead, Entity Sponsor, Hiring Manager, Recruiter/Sourcer, Legal/EOR Advisor, Finance Reviewer, Security/IT Reviewer, People Ops Coordinator, and DAO/Foundation Approver.",
+      context: {
+        repository: "tolani-foundation-page",
+        filePatterns: [
+          "**/client/src/data/workforceOps.ts",
+          "**/docs/GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md",
+        ],
+        taskTypes: ["hiring", "workforce-planning", "headcount", "operations"],
+        successCriteria: [
+          "Plan stays within 10-30 workforce range unless intentionally revised",
+          "Each role maps to a pod and hiring council approvals",
+          "Sensitive roles require DAO/Foundation approver",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["general", "backend", "devops"],
+      tags: [
+        "tolani",
+        "workforce",
+        "headcount",
+        "hiring-council",
+        "operations",
+      ],
+      examples: [
+        {
+          scenario:
+            "Agent is asked how many people Tolani needs for global hiring operations.",
+          solution:
+            "Use 24-person baseline, 10-30 range, and the nine-role hiring council with 4-5 FTE-equivalent operating load.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    this.add({
+      type: "best_practice",
+      title: "Route FAR-covered Tolani hiring through contract compliance",
+      description:
+        "When a Tolani role supports a covered federal contract, subcontract, RFP, service contract, or contractor personnel assignment, treat it as FAR-covered workforce work. Require Contract Compliance review before sourcing, offer, onboarding, or access. AI must not decide personal-services risk, labor category, wage determination applicability, E-Verify/I-9 obligations, or subcontract clause flowdown.",
+      context: {
+        repository: "tolani-foundation-page",
+        filePatterns: [
+          "**/client/src/data/workforceOps.ts",
+          "**/docs/GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md",
+          "**/docs/global-hiring-ops.md",
+        ],
+        taskTypes: [
+          "hiring",
+          "far",
+          "federal-contracting",
+          "contract-compliance",
+          "workforce",
+        ],
+        successCriteria: [
+          "FAR-covered roles are tagged before sourcing",
+          "Contract Compliance reviewer is required",
+          "Personal-services, labor standards, E-Verify, equal opportunity, access, and flowdown checks are routed to humans",
+        ],
+      },
+      confidence: "high",
+      applicableRoles: ["general", "backend", "security", "devops"],
+      tags: [
+        "tolani",
+        "hiring",
+        "far",
+        "federal-contracting",
+        "contract-compliance",
+      ],
+      examples: [
+        {
+          scenario:
+            "Agent is asked to staff a role for a federal service contract or RFP.",
+          solution:
+            "Tag the role as FAR-covered, require Contract Compliance review, and block sourcing or offer until FAR labor/access/eligibility gates are resolved.",
+          outcome: "success",
+          timestamp: new Date("2026-06-06T00:00:00.000Z"),
+        },
+      ],
     });
   }
 }

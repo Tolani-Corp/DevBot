@@ -191,6 +191,8 @@ import {
   type VpnProviderProfile,
 } from "./vpn-security.js";
 
+import { loadEthicalRoadmap } from "./ethical-roadmap.js";
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1119,6 +1121,74 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       },
     },
     {
+      name: "get_ethical_roadmap",
+      description:
+        "Load the dynamic ethical security roadmap used by NATT and DevBot/DEBO. " +
+        "Returns roadmap phases and optionally the full skills/tools/resources catalog.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          include_details: {
+            type: "boolean",
+            description: "If true, include full roadmap payload (skills, tools, resources)",
+          },
+          path: {
+            type: "string",
+            description: "Optional absolute/relative path override to roadmap JSON file",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_roadmap_stage",
+      description:
+        "Get one roadmap phase bundle including stage skills, related tools, resources, and next phases.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          phase_id: {
+            type: "string",
+            description: "Roadmap phase id (e.g. understand-basics, networking, tools)",
+          },
+          path: {
+            type: "string",
+            description: "Optional absolute/relative path override to roadmap JSON file",
+          },
+        },
+        required: ["phase_id"],
+      },
+    },
+    {
+      name: "recommend_roadmap_path",
+      description:
+        "Recommend next skills, tools, and resources based on mission type and completed skills.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          mission_type: {
+            type: "string",
+            description:
+              "Mission type: web-app, html-analysis, api-recon, network-recon, osint, auth-testing, platform-detection, code-analysis, full-ghost, racing-recon",
+          },
+          completed_skill_ids: {
+            type: "array",
+            items: { type: "string" },
+            description: "List of completed skill ids",
+          },
+          max_skills: {
+            type: "number",
+            description: "Maximum number of next skills to return (default 6)",
+          },
+          path: {
+            type: "string",
+            description: "Optional absolute/relative path override to roadmap JSON file",
+          },
+        },
+        required: [],
+      },
+    },
+    {
       name: "bettorsace_diagnose_issue",
       description:
         "Invoke the BettorsACE platform TypeScript agent to diagnose a platform issue with actionable root causes and next actions.",
@@ -1390,6 +1460,18 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "VPN provider profiles with API integration capabilities",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://ethical-roadmap",
+      name: "Ethical Security Roadmap",
+      description: "Dynamic roadmap phases and progression model for NATT and DevBot/DEBO agents",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://ethical-roadmap-catalog",
+      name: "Ethical Roadmap Skill Catalog",
+      description: "Dynamic skills, tools, and resources catalog derived from roadmap stages",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -1481,6 +1563,33 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       return {
         contents: [{ uri, mimeType: "application/json", text: JSON.stringify(VPN_PROVIDER_PROFILES, null, 2) }],
       };
+    case "natt://ethical-roadmap": {
+      const { roadmap, sourcePath } = await loadEthicalRoadmap();
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify({ sourcePath, roadmap }, null, 2) }],
+      };
+    }
+    case "natt://ethical-roadmap-catalog": {
+      const { roadmap, sourcePath } = await loadEthicalRoadmap();
+      return {
+        contents: [{
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(
+            {
+              sourcePath,
+              title: roadmap.title,
+              updatedAt: roadmap.updatedAt,
+              skills: roadmap.skills,
+              tools: roadmap.tools,
+              resources: roadmap.resources,
+            },
+            null,
+            2,
+          ),
+        }],
+      };
+    }
     default:
       throw new Error(`Unknown resource: ${uri}`);
   }
