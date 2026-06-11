@@ -1,0 +1,83 @@
+﻿{
+    "properties":  {
+                       "displayName":  "Recurring OnDemand Spend (Aggressive)",
+                       "timePeriod":  {
+                                          "startDate":  "2026-06-01",
+                                          "endDate":  "2099-12-31"
+                                      },
+                       "amount":  345,
+                       "notifications":  {
+                                             "Notification_100_Percent":  {
+                                                                              "threshold":  100,
+                                                                              "thresholdType":  "Forecasted",
+                                                                              "contactRoles":  [
+                                                                                                   "Owner"
+                                                                                               ],
+                                                                              "operator":  "GreaterThan",
+                                                                              "contactGroups":  [
+
+                                                                                                ],
+                                                                              "contactEmails":  [
+                                                                                                    "operations@tolanicorp.us"
+                                                                                                ],
+                                                                              "enabled":  true
+                                                                          },
+                                             "Notification_50_Percent":  {
+                                                                             "threshold":  50,
+                                                                             "thresholdType":  "Forecasted",
+                                                                             "contactRoles":  [
+                                                                                                  "Owner"
+                                                                                              ],
+                                                                             "operator":  "GreaterThan",
+                                                                             "contactGroups":  [
+
+                                                                                               ],
+                                                                             "contactEmails":  [
+                                                                                                   "operations@tolanicorp.us"
+                                                                                               ],
+                                                                             "enabled":  true
+                                                                         },
+                                             "Notification_75_Percent":  {
+                                                                             "threshold":  75,
+                                                                             "thresholdType":  "Forecasted",
+                                                                             "contactRoles":  [
+                                                                                                  "Owner"
+                                                                                              ],
+                                                                             "operator":  "GreaterThan",
+                                                                             "contactGroups":  [
+
+                                                                                               ],
+                                                                             "contactEmails":  [
+                                                                                                   "operations@tolanicorp.us"
+                                                                                               ],
+                                                                             "enabled":  true
+                                                                         },
+                                             "Notification_90_Percent":  {
+                                                                             "threshold":  90,
+                                                                             "thresholdType":  "Forecasted",
+                                                                             "contactRoles":  [
+                                                                                                  "Owner"
+                                                                                              ],
+                                                                             "operator":  "GreaterThan",
+                                                                             "contactGroups":  [
+
+                                                                                               ],
+                                                                             "contactEmails":  [
+                                                                                                   "operations@tolanicorp.us"
+                                                                                               ],
+                                                                             "enabled":  true
+                                                                         }
+                                         },
+                       "filters":  {
+                                       "dimensions":  {
+                                                          "operator":  "In",
+                                                          "name":  "ChargeType",
+                                                          "values":  [
+                                                                         "Usage"
+                                                                     ]
+                                                      }
+                                   },
+                       "timeGrain":  "Monthly",
+                       "category":  "Cost"
+                   }
+}
