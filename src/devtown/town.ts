@@ -31,7 +31,7 @@ const DEFAULT_CONFIG: TownConfig = {
   maxPolecats: 10,
   defaultRuntime: {
     provider: "devbot",
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-6",
     enableRag: true,
     enableHealthScan: true,
     enablePrReview: true,

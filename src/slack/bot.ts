@@ -28,7 +28,7 @@ import {
 import { RateLimiter } from "@/middleware/rate-limiter";
 import Redis from "ioredis";
 import { computeAgentROI, formatROIReportBlocks } from "@/services/agent-roi";
-import { checkTaskLimit, incrementTaskUsage } from "@/services/tier-manager";
+import { releaseTaskUsage, reserveTaskUsage } from "@/services/tier-manager";
 import {
   parseMentionCommand,
   formatMentionCommandResponse,
@@ -65,10 +65,13 @@ const rateLimiterRedis = new Redis(process.env.REDIS_URL ?? "redis://localhost:6
 });
 const rateLimiter = new RateLimiter(rateLimiterRedis);
 
+const slackSocketModeEnabled = Boolean(process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN);
+
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   appToken: process.env.SLACK_APP_TOKEN,
-  socketMode: true,
+  socketMode: slackSocketModeEnabled,
+  signatureVerification: slackSocketModeEnabled,
   logLevel: LogLevel.INFO,
 });
 
@@ -77,12 +80,12 @@ registerInteractiveHandlers(app);
 
 const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo";
 
-async function enforceWorkspaceTaskLimit(
+async function reserveWorkspaceTaskUsage(
   workspaceId: string,
   threadTs: string,
   say: (message: { thread_ts: string; text: string }) => Promise<unknown>,
 ): Promise<boolean> {
-  const limit = await checkTaskLimit(workspaceId);
+  const limit = await reserveTaskUsage(workspaceId);
   if (limit.allowed) {
     return true;
   }
@@ -303,10 +306,12 @@ app.event("app_mention", async ({ event, say, client }) => {
     // Extract ClickUp task ID if referenced (CU-xxx, #xxx, or clickup:xxx)
     const clickUpTaskId = extractClickUpId(text);
 
-    if (!(await enforceWorkspaceTaskLimit(workspace.id, event.ts, say))) {
+    if (!(await reserveWorkspaceTaskUsage(workspace.id, event.ts, say))) {
       return;
     }
 
+    let usageReserved = true;
+    try {
     // Create task in database
     const [task] = await db
       .insert(tasks)
@@ -345,7 +350,7 @@ app.event("app_mention", async ({ event, say, client }) => {
       repository,
       clickUpTaskId,
     });
-    await incrementTaskUsage(workspace.id);
+    usageReserved = false;
 
     // Save conversation context
     await db.insert(conversations).values({
@@ -353,6 +358,14 @@ app.event("app_mention", async ({ event, say, client }) => {
       slackChannelId: event.channel,
       context: { repository },
     });
+    } catch (error) {
+      if (usageReserved) {
+        await releaseTaskUsage(workspace.id).catch((releaseError) => {
+          console.error("Failed to release reserved task usage:", releaseError);
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error handling app mention:", error);
     await say({
@@ -519,10 +532,12 @@ app.event("message", async ({ event, say, client }) => {
       return;
     }
 
-    if (!(await enforceWorkspaceTaskLimit(workspace.id, event.thread_ts, say))) {
+    if (!(await reserveWorkspaceTaskUsage(workspace.id, event.thread_ts, say))) {
       return;
     }
 
+    let usageReserved = true;
+    try {
     // Add follow-up task
     const [task] = await db
       .insert(tasks)
@@ -551,7 +566,15 @@ app.event("message", async ({ event, say, client }) => {
       description: cleanText,
       repository: conversation.context?.repository,
     });
-    await incrementTaskUsage(workspace.id);
+    usageReserved = false;
+    } catch (error) {
+      if (usageReserved) {
+        await releaseTaskUsage(workspace.id).catch((releaseError) => {
+          console.error("Failed to release reserved task usage:", releaseError);
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error handling thread message:", error);
   }

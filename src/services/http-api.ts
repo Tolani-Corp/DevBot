@@ -73,13 +73,16 @@ function tokensEqual(left: string, right: string): boolean {
 }
 
 function isAuthorizedApiRequest(req: IncomingMessage): boolean {
-  if (process.env.DEVBOT_ALLOW_UNAUTHENTICATED_API === "true") {
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DEVBOT_ALLOW_UNAUTHENTICATED_API === "true"
+  ) {
     return true;
   }
 
   const expected = process.env.API_AUTH_TOKEN?.trim();
   if (!expected) {
-    return process.env.NODE_ENV !== "production";
+    return false;
   }
 
   const presented = getPresentedApiToken(req)?.trim();

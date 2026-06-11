@@ -21,7 +21,7 @@ import {
   normalizeWorkspaceMemoryPolicy,
   type WorkspaceMemoryPolicy,
 } from "@/services/journey-core";
-import { checkTaskLimit, incrementTaskUsage } from "@/services/tier-manager";
+import { releaseTaskUsage, reserveTaskUsage } from "@/services/tier-manager";
 
 export type JourneyStatus = "active" | "paused" | "completed" | "archived";
 export type JourneyStage =
@@ -1062,7 +1062,7 @@ export async function getTask(taskId: string) {
 
 export async function dispatchTask(description: string, repository?: string) {
   const workspace = await ensureControlPlaneWorkspace();
-  const taskLimit = await checkTaskLimit(workspace.id);
+  const taskLimit = await reserveTaskUsage(workspace.id);
   if (!taskLimit.allowed) {
     const limitText = taskLimit.limit === -1 ? "unlimited" : String(taskLimit.limit);
     throw new Error(
@@ -1070,6 +1070,8 @@ export async function dispatchTask(description: string, repository?: string) {
     );
   }
 
+  let usageReserved = true;
+  try {
   const [task] = await db
     .insert(tasks)
     .values({
@@ -1087,7 +1089,6 @@ export async function dispatchTask(description: string, repository?: string) {
       },
     })
     .returning();
-  await incrementTaskUsage(workspace.id);
 
   const journey = await startJourney({
     workspaceId: workspace.id,
@@ -1106,6 +1107,14 @@ export async function dispatchTask(description: string, repository?: string) {
     repository: task.repository ?? undefined,
     journeyId: journey.id,
   };
+  } catch (error) {
+    if (usageReserved) {
+      await releaseTaskUsage(workspace.id).catch((releaseError) => {
+        console.error("Failed to release reserved task usage:", releaseError);
+      });
+    }
+    throw error;
+  }
 }
 
 export async function deployConvoy(description: string) {

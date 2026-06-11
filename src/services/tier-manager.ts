@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { workspaces } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -53,6 +53,48 @@ export const ANTHROPIC_MODELS = {
     outputPricePerM: 25.00,
     tier: "enterprise" as TierName,
   },
+  "claude-opus-4-7": {
+    label: "Claude Opus 4.7",
+    description: "Previous Opus generation kept for Enterprise compatibility.",
+    inputPricePerM: 5.00,
+    outputPricePerM: 25.00,
+    tier: "enterprise" as TierName,
+  },
+  "claude-opus-4-6": {
+    label: "Claude Opus 4.6",
+    description: "Previous Opus generation kept for Enterprise compatibility.",
+    inputPricePerM: 5.00,
+    outputPricePerM: 25.00,
+    tier: "enterprise" as TierName,
+  },
+  "claude-opus-4-5": {
+    label: "Claude Opus 4.5",
+    description: "Previous Opus generation kept for Enterprise compatibility.",
+    inputPricePerM: 5.00,
+    outputPricePerM: 25.00,
+    tier: "enterprise" as TierName,
+  },
+  "claude-sonnet-4-5": {
+    label: "Claude Sonnet 4.5",
+    description: "Previous Sonnet generation kept for compatibility.",
+    inputPricePerM: 3.00,
+    outputPricePerM: 15.00,
+    tier: "pro" as TierName,
+  },
+  "claude-fable-5": {
+    label: "Claude Fable 5",
+    description: "Frontier model for Enterprise tasks with very large context.",
+    inputPricePerM: 10.00,
+    outputPricePerM: 50.00,
+    tier: "enterprise" as TierName,
+  },
+  "claude-mythos-5": {
+    label: "Claude Mythos 5",
+    description: "Limited-availability frontier model; catalogued but not enabled by default.",
+    inputPricePerM: 10.00,
+    outputPricePerM: 50.00,
+    tier: "enterprise" as TierName,
+  },
 } as const;
 
 export type AnthropicModelId = keyof typeof ANTHROPIC_MODELS;
@@ -60,9 +102,18 @@ export type AnthropicModelId = keyof typeof ANTHROPIC_MODELS;
 /** Models each tier is permitted to use. */
 const TIER_ALLOWED_MODELS: Record<TierName, AnthropicModelId[]> = {
   free:       ["claude-haiku-4-5-20251001"],
-  pro:        ["claude-haiku-4-5-20251001", "claude-sonnet-4-6"],
-  team:       ["claude-haiku-4-5-20251001", "claude-sonnet-4-6"],
-  enterprise: ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-4-8"],
+  pro:        ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-sonnet-4-5"],
+  team:       ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-sonnet-4-5"],
+  enterprise: [
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-4-6",
+    "claude-sonnet-4-5",
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-opus-4-6",
+    "claude-opus-4-5",
+    "claude-fable-5",
+  ],
 };
 
 /** Default model each tier falls back to when none is specified. */
@@ -281,7 +332,14 @@ export async function getModelForWorkspace(
  */
 export async function getAvailableModels(
   workspaceId: string,
-): Promise<Array<{ id: AnthropicModelId; label: string; description: string; inputPricePerM: number; isDefault: boolean }>> {
+): Promise<Array<{
+  id: AnthropicModelId;
+  label: string;
+  description: string;
+  inputPricePerM: number;
+  outputPricePerM: number;
+  isDefault: boolean;
+}>> {
   const tier = await getWorkspaceTier(workspaceId);
   const allowed = TIER_ALLOWED_MODELS[tier];
   const defaultModel = TIER_DEFAULT_MODEL[tier];
@@ -291,6 +349,7 @@ export async function getAvailableModels(
     label: ANTHROPIC_MODELS[id].label,
     description: ANTHROPIC_MODELS[id].description,
     inputPricePerM: ANTHROPIC_MODELS[id].inputPricePerM,
+    outputPricePerM: ANTHROPIC_MODELS[id].outputPricePerM,
     isDefault: id === defaultModel,
   }));
 }
@@ -563,6 +622,74 @@ export async function incrementTaskUsage(workspaceId: string): Promise<void> {
     })
     .where(eq(workspaces.id, workspaceId));
   // Invalidate tier cache so next read reflects updated usage
+  tierCache.delete(workspaceId);
+}
+
+/**
+ * Atomically reserve one monthly task slot before creating or queueing work.
+ * Call `releaseTaskUsage` if the task insert or queue operation fails after
+ * reservation.
+ */
+export async function reserveTaskUsage(workspaceId: string): Promise<TaskLimitResult> {
+  await ensureUsageFresh(workspaceId);
+
+  const tier = await getWorkspaceTier(workspaceId);
+  const limit = TIER_CONFIGS[tier].tasksPerMonth;
+  const [current] = await db
+    .select({ tasksUsedThisMonth: workspaces.tasksUsedThisMonth, usageResetAt: workspaces.usageResetAt })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  const used = current?.tasksUsedThisMonth ?? 0;
+  const resetDate = current?.usageResetAt ?? getNextResetDate();
+
+  if (!current || (limit !== -1 && used >= limit)) {
+    return { allowed: false, used, limit, resetDate };
+  }
+
+  const reservationWhere =
+    limit === -1
+      ? eq(workspaces.id, workspaceId)
+      : and(eq(workspaces.id, workspaceId), sql`${workspaces.tasksUsedThisMonth} < ${limit}`);
+
+  const [updated] = await db
+    .update(workspaces)
+    .set({
+      tasksUsedThisMonth: sql`${workspaces.tasksUsedThisMonth} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(reservationWhere)
+    .returning({
+      tasksUsedThisMonth: workspaces.tasksUsedThisMonth,
+      usageResetAt: workspaces.usageResetAt,
+    });
+
+  tierCache.delete(workspaceId);
+
+  if (!updated) {
+    return checkTaskLimit(workspaceId);
+  }
+
+  return {
+    allowed: true,
+    used: updated.tasksUsedThisMonth,
+    limit,
+    resetDate: updated.usageResetAt ?? resetDate,
+  };
+}
+
+/**
+ * Release a previously reserved monthly task slot after a downstream failure.
+ */
+export async function releaseTaskUsage(workspaceId: string): Promise<void> {
+  await db
+    .update(workspaces)
+    .set({
+      tasksUsedThisMonth: sql`GREATEST(${workspaces.tasksUsedThisMonth} - 1, 0)`,
+      updatedAt: new Date(),
+    })
+    .where(eq(workspaces.id, workspaceId));
   tierCache.delete(workspaceId);
 }
 

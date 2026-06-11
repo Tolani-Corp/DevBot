@@ -7,7 +7,7 @@ import { createServer, type Server } from "http";
 
 import { app } from "./slack/bot";
 import { getStartupSummary, loadRuntimeConfig } from "./config";
-import { startDiscordBot } from "./discord/bot";
+import { startDiscordBot, stopDiscordBot } from "./discord/bot";
 
 let stopCronWorker: (() => Promise<void>) | null = null;
 let webhookServer: Server | null = null;
@@ -17,11 +17,13 @@ async function main(): Promise<void> {
   const runtimeConfig = loadRuntimeConfig();
   const startupSummary = getStartupSummary(runtimeConfig);
   const appPort = runtimeConfig.listenTarget;
+  const listenHost = runtimeConfig.listenHost;
 
   console.log("--------------------------------------------------");
   console.log(`  DevBot Runtime v${startupSummary.version}`);
   console.log("--------------------------------------------------");
   console.log(`  Listen:      ${startupSummary.listenTarget}`);
+  console.log(`  Bind host:   ${startupSummary.listenHost}`);
   console.log(`  WebSocket:   ${startupSummary.ports.websocket}`);
   console.log(`  Discord:     ${startupSummary.runtime.discordEnabled ? "enabled" : "disabled"}`);
   console.log(`  Cron:        ${startupSummary.runtime.cronEnabled ? "enabled" : "disabled"}`);
@@ -119,8 +121,8 @@ async function main(): Promise<void> {
   });
 
   if (typeof appPort === "number") {
-    webhookServer.listen(appPort, "0.0.0.0", () => {
-      console.log(`Webhook and health server listening on port ${appPort}`);
+    webhookServer.listen(appPort, listenHost, () => {
+      console.log(`Webhook and health server listening on ${listenHost}:${appPort}`);
     });
   } else {
     webhookServer.listen(appPort, () => {
@@ -141,6 +143,7 @@ async function gracefulShutdown(signal: string): Promise<void> {
   if (slackStarted) {
     await app.stop();
   }
+  await stopDiscordBot();
   if (stopCronWorker) {
     await stopCronWorker();
   }

@@ -15,6 +15,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3100
+      LISTEN_HOST: 0.0.0.0
       WS_PORT: 8080
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       API_AUTH_TOKEN: ${API_AUTH_TOKEN:?API_AUTH_TOKEN is required}

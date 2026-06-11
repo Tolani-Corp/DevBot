@@ -9,6 +9,7 @@ const concurrencySchema = z.number().int().min(1).max(64);
 
 export interface DevBotRuntimeConfig {
   listenTarget: number | string;
+  listenHost: string;
   wsPort: number;
   redisUrl?: string;
   cronEnabled: boolean;
@@ -23,6 +24,7 @@ export interface DevBotRuntimeConfig {
 export interface DevBotStartupSummary {
   version: string;
   listenTarget: number | string;
+  listenHost: string;
   ports: {
     websocket: number;
   };
@@ -87,6 +89,7 @@ export function loadRuntimeConfig(
   const parsed = z.object({
     wsPort: portSchema,
     redisUrl: z.string().optional(),
+    listenHost: z.string().min(1),
     cronEnabled: z.boolean(),
     discordToken: z.string().optional(),
     mentionTrigger: z.string().min(1),
@@ -97,6 +100,7 @@ export function loadRuntimeConfig(
   }).parse({
     wsPort: parseNumber(env.WS_PORT, 8080),
     redisUrl: optional(env.REDIS_URL),
+    listenHost: optional(env.LISTEN_HOST) ?? "127.0.0.1",
     cronEnabled: optional(env.SKIP_CRON) !== "true",
     discordToken: optional(env.DISCORD_TOKEN),
     mentionTrigger: optional(env.DEVBOT_MENTION_TRIGGER) ?? "@Debo",
@@ -116,6 +120,7 @@ export function getStartupSummary(config: DevBotRuntimeConfig): DevBotStartupSum
   return {
     version: DEVBOT_RUNTIME_VERSION,
     listenTarget: config.listenTarget,
+    listenHost: config.listenHost,
     ports: {
       websocket: config.wsPort,
     },

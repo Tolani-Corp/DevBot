@@ -68,7 +68,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:onboarding": "tsx tests/onboarding.test.ts",
+    "test:onboarding": "vitest run tests/onboarding.test.ts",
     "pentest": "tsx scripts/pentest-demo.ts",
     "test:kali-mcp": "tsx scripts/test-kali-mcp.ts",
     "natt:ops": "tsx .natt/cron/run-offensive-ops.ts",

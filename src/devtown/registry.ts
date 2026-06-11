@@ -53,7 +53,7 @@ export function createDevBotRuntime(overrides?: Partial<RuntimeRegistration>): R
     key: "devbot-default",
     runtime: {
       provider: "devbot",
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       enableRag: true,
       enableHealthScan: true,
       enablePrReview: true,
@@ -83,7 +83,7 @@ export function createClaudeCodeRuntime(overrides?: Partial<RuntimeRegistration>
     key: "claude-code-default",
     runtime: {
       provider: "claude-code",
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
     },
     supportedRoles: ["frontend", "backend", "security", "devops", "general"],
     maxConcurrency: 20,

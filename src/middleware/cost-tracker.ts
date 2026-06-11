@@ -17,7 +17,15 @@ export interface CostReport {
 const PRICING: Record<string, { prompt: number; completion: number }> = {
   "claude-haiku-4-5-20251001": { prompt: 1.0, completion: 5.0 },
   "claude-sonnet-4-6": { prompt: 3.0, completion: 15.0 },
+  "claude-sonnet-4-5": { prompt: 3.0, completion: 15.0 },
   "claude-opus-4-8": { prompt: 5.0, completion: 25.0 },
+  "claude-opus-4-7": { prompt: 5.0, completion: 25.0 },
+  "claude-opus-4-6": { prompt: 5.0, completion: 25.0 },
+  "claude-opus-4-5": { prompt: 5.0, completion: 25.0 },
+  "claude-fable-5": { prompt: 10.0, completion: 50.0 },
+  "claude-mythos-5": { prompt: 10.0, completion: 50.0 },
+  // Previous default used in this codebase.
+  "claude-sonnet-4-20250514": { prompt: 3.0, completion: 15.0 },
   // Legacy aliases kept so historical reports still calculate.
   "claude-3-5-haiku-20241022": { prompt: 0.8, completion: 4.0 },
   "claude-3-5-sonnet-20240620": { prompt: 3.0, completion: 15.0 },

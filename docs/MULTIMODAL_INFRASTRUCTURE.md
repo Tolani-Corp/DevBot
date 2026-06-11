@@ -121,7 +121,7 @@ MULTIMODAL_DOCUMENTS_ENABLED=false
      
      async analyzeScreenshot(image: ImageContext) {
        const response = await this.client.messages.create({
-         model: "claude-3-5-sonnet-20241022",
+          model: "claude-sonnet-4-6",
          max_tokens: 1024,
          messages: [{
            role: "user",
@@ -199,7 +199,7 @@ MULTIMODAL_DOCUMENTS_ENABLED=false
      
      // Use Claude to extract issues and action items
      const analysis = await claudeClient.messages.create({
-       model: "claude-3-5-sonnet-20241022",
+        model: "claude-sonnet-4-6",
        messages: [{
          role: "user",
          content: `Analyze this code review transcript and extract:
@@ -232,7 +232,7 @@ MULTIMODAL_DOCUMENTS_ENABLED=false
        
        // Use Claude to extract structured requirements
        const response = await claudeClient.messages.create({
-         model: "claude-3-5-sonnet-20241022",
+          model: "claude-sonnet-4-6",
          messages: [{
            role: "user",
            content: `Extract requirements from this PDF text:

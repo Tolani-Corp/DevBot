@@ -27,6 +27,8 @@ import { db } from '@/db';
 import { workspaces } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
+let activeDiscordClient: Client | null = null;
+
 type DiscordPendingAction = {
     type: 'onboarding' | 'rename';
     requestedBy: string;
@@ -114,7 +116,12 @@ async function isReplyToBotMessage(message: Message, client: Client): Promise<bo
     }
 }
 
-export function startDiscordBot(token: string) {
+export function startDiscordBot(token: string): Client {
+    if (activeDiscordClient) {
+        console.log('Discord bot already started; reusing active client');
+        return activeDiscordClient;
+    }
+
     console.log('🤖 Starting Discord bot...');
 
     const client = new Client({
@@ -124,6 +131,7 @@ export function startDiscordBot(token: string) {
             GatewayIntentBits.MessageContent,
         ],
     });
+    activeDiscordClient = client;
 
     client.once(Events.ClientReady, (c) => {
         console.log(`✅ Ready! Logged in as ${c.user.tag}`);
@@ -382,5 +390,23 @@ _Scan ID: ${report.scanId}_`;
         }
     });
 
-    client.login(token).catch(err => console.error("Discord login failed:", err));
+    client.login(token).catch(err => {
+        console.error("Discord login failed:", err);
+        if (activeDiscordClient === client) {
+            activeDiscordClient = null;
+        }
+    });
+
+    return client;
+}
+
+export async function stopDiscordBot(): Promise<void> {
+    if (!activeDiscordClient) {
+        return;
+    }
+
+    const client = activeDiscordClient;
+    activeDiscordClient = null;
+    client.removeAllListeners();
+    client.destroy();
 }

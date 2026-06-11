@@ -12,7 +12,7 @@ export function createMockAnthropicResponse(jsonResponse: Record<string, unknown
         text: JSON.stringify(jsonResponse),
       },
     ],
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-6",
     role: "assistant" as const,
     stop_reason: "end_turn" as const,
     usage: { input_tokens: 100, output_tokens: 50 },

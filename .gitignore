@@ -3,6 +3,8 @@ dist/
 .next/
 .env
 .env.local
+.env.*.local
+discord_backup_codes.txt
 *.log
 .DS_Store
 coverage/
