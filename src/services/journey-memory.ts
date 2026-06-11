@@ -21,6 +21,7 @@ import {
   normalizeWorkspaceMemoryPolicy,
   type WorkspaceMemoryPolicy,
 } from "@/services/journey-core";
+import { checkTaskLimit, incrementTaskUsage } from "@/services/tier-manager";
 
 export type JourneyStatus = "active" | "paused" | "completed" | "archived";
 export type JourneyStage =
@@ -1061,6 +1062,14 @@ export async function getTask(taskId: string) {
 
 export async function dispatchTask(description: string, repository?: string) {
   const workspace = await ensureControlPlaneWorkspace();
+  const taskLimit = await checkTaskLimit(workspace.id);
+  if (!taskLimit.allowed) {
+    const limitText = taskLimit.limit === -1 ? "unlimited" : String(taskLimit.limit);
+    throw new Error(
+      `Task limit reached for this workspace (${taskLimit.used}/${limitText}). Resets on ${taskLimit.resetDate.toISOString().slice(0, 10)}.`,
+    );
+  }
+
   const [task] = await db
     .insert(tasks)
     .values({
@@ -1078,6 +1087,7 @@ export async function dispatchTask(description: string, repository?: string) {
       },
     })
     .returning();
+  await incrementTaskUsage(workspace.id);
 
   const journey = await startJourney({
     workspaceId: workspace.id,

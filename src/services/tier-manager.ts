@@ -30,27 +30,27 @@ export type TierFeature =
 /** All available Anthropic models with metadata. */
 export const ANTHROPIC_MODELS = {
   /** Default — fastest, most cost-efficient. Used on Free & Team tiers. */
-  "claude-3-5-haiku-20241022": {
-    label: "Claude 3.5 Haiku",
+  "claude-haiku-4-5-20251001": {
+    label: "Claude Haiku 4.5",
     description: "Fastest & most cost-efficient. Great for routine tasks.",
-    inputPricePerM: 0.80,
-    outputPricePerM: 4.00,
+    inputPricePerM: 1.00,
+    outputPricePerM: 5.00,
     tier: "free" as TierName,
   },
   /** Mid-tier — smarter reasoning for complex tasks. Pro+ only. */
-  "claude-3-5-sonnet-20241022": {
-    label: "Claude 3.5 Sonnet",
+  "claude-sonnet-4-6": {
+    label: "Claude Sonnet 4.6",
     description: "Balanced intelligence and speed. Best for most Pro tasks.",
     inputPricePerM: 3.00,
     outputPricePerM: 15.00,
     tier: "pro" as TierName,
   },
   /** Most capable — reserved for Enterprise. */
-  "claude-opus-4-5": {
-    label: "Claude Opus 4.5",
+  "claude-opus-4-8": {
+    label: "Claude Opus 4.8",
     description: "Most powerful model for the hardest engineering tasks.",
-    inputPricePerM: 15.00,
-    outputPricePerM: 75.00,
+    inputPricePerM: 5.00,
+    outputPricePerM: 25.00,
     tier: "enterprise" as TierName,
   },
 } as const;
@@ -59,18 +59,18 @@ export type AnthropicModelId = keyof typeof ANTHROPIC_MODELS;
 
 /** Models each tier is permitted to use. */
 const TIER_ALLOWED_MODELS: Record<TierName, AnthropicModelId[]> = {
-  free:       ["claude-3-5-haiku-20241022"],
-  pro:        ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
-  team:       ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
-  enterprise: ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022", "claude-opus-4-5"],
+  free:       ["claude-haiku-4-5-20251001"],
+  pro:        ["claude-haiku-4-5-20251001", "claude-sonnet-4-6"],
+  team:       ["claude-haiku-4-5-20251001", "claude-sonnet-4-6"],
+  enterprise: ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-4-8"],
 };
 
 /** Default model each tier falls back to when none is specified. */
 const TIER_DEFAULT_MODEL: Record<TierName, AnthropicModelId> = {
-  free:       "claude-3-5-haiku-20241022",
-  pro:        "claude-3-5-haiku-20241022",
-  team:       "claude-3-5-haiku-20241022",
-  enterprise: "claude-3-5-sonnet-20241022",
+  free:       "claude-haiku-4-5-20251001",
+  pro:        "claude-haiku-4-5-20251001",
+  team:       "claude-haiku-4-5-20251001",
+  enterprise: "claude-sonnet-4-6",
 };
 
 export interface TierLimits {

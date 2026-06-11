@@ -1,18 +1,19 @@
-// Initialize tracing FIRST - before any SDK imports
+// Initialize tracing first, before SDK imports.
 import { initTracing, shutdownTracing } from "./tracing";
 initTracing("devbot-agents");
 
 import "dotenv/config";
-import { app } from "./slack/bot";
 import { createServer, type Server } from "http";
+
+import { app } from "./slack/bot";
 import { getStartupSummary, loadRuntimeConfig } from "./config";
 import { startDiscordBot } from "./discord/bot";
 
-// Cron worker cleanup reference
 let stopCronWorker: (() => Promise<void>) | null = null;
 let webhookServer: Server | null = null;
+let slackStarted = false;
 
-async function main() {
+async function main(): Promise<void> {
   const runtimeConfig = loadRuntimeConfig();
   const startupSummary = getStartupSummary(runtimeConfig);
   const appPort = runtimeConfig.listenTarget;
@@ -29,51 +30,48 @@ async function main() {
   console.log(`  Mention:     ${startupSummary.workspace.mentionTrigger}`);
   console.log("--------------------------------------------------");
 
-  // Start Slack App
-  // Start Slack App
-  /*
-  try {
-    await app.start(port);
-    console.log(`⚡️ FunBot Slack app is running on port ${port}`);
-  } catch (error) {
-    console.warn(`WARNING: Failed to start Slack app (check SLACK_BOT_TOKEN). Continuing with other services...`);
+  if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
+    try {
+      await app.start();
+      slackStarted = true;
+      console.log("Slack Socket Mode integration enabled");
+    } catch (error) {
+      console.warn("WARNING: Failed to start Slack app. Continuing with other services...", error);
+    }
+  } else {
+    console.log("Slack disabled; SLACK_BOT_TOKEN and SLACK_APP_TOKEN are required.");
   }
-  */
 
-  // Start Discord Bot
   if (runtimeConfig.discordToken) {
     startDiscordBot(runtimeConfig.discordToken);
-    console.log(`🤖 FunBot Discord integration enabled`);
+    console.log("Discord integration enabled");
   } else {
-    console.log(`⚠️ DISCORD_TOKEN not found, skipping Discord integration`);
+    console.log("DISCORD_TOKEN not found; skipping Discord integration");
   }
 
-  // Start WebSocket Server
-  const wsPort = runtimeConfig.wsPort;
-  console.log(`📡 Starting WebSocket Server on port ${wsPort}...`);
+  console.log(`Starting WebSocket server on port ${runtimeConfig.wsPort}`);
   try {
-    const { startWebSocketServer } = await import('./websocket');
-    startWebSocketServer(wsPort);
-    console.log(`🚀 DevBot WebSocket streaming enabled`);
+    const { startWebSocketServer } = await import("./websocket");
+    startWebSocketServer(runtimeConfig.wsPort);
+    console.log("WebSocket streaming enabled");
   } catch (error) {
-    console.error(`❌ Failed to start WebSocket Server:`, error);
+    console.error("Failed to start WebSocket server:", error);
   }
 
-  // Start NATT Report Cron Worker
   if (runtimeConfig.cronEnabled) {
     try {
       const { startCronWorker } = await import("./agents/natt-report-cron");
       stopCronWorker = startCronWorker();
-      console.log(`⏰ NATT Report Cron worker started`);
+      console.log("NATT report cron worker started");
     } catch (error) {
-      console.warn(`⚠️ NATT Report Cron worker failed to start (Redis unavailable?):`, error);
+      console.warn("NATT report cron worker failed to start:", error);
     }
   }
 
-  let selfUpdateQueue: Awaited<ReturnType<typeof import("./services/self-updater.js")["createSelfUpdateQueue"]>> | null = null;
+  let selfUpdateQueue: Awaited<
+    ReturnType<typeof import("./services/self-updater.js")["createSelfUpdateQueue"]>
+  > | null = null;
 
-  // ── Autonomous Self-Update Pipeline ───────────────────────────────────────
-  // Starts queue/worker components used by webhook handlers.
   try {
     const {
       createSelfUpdateQueue,
@@ -83,7 +81,7 @@ async function main() {
     selfUpdateQueue = createSelfUpdateQueue();
     startSelfUpdateWorker();
   } catch (error) {
-    console.warn("⚠️ Self-update pipeline failed to start (Redis unavailable?):", error);
+    console.warn("Self-update pipeline failed to start:", error);
   }
 
   webhookServer = createServer(async (req, res) => {
@@ -112,41 +110,49 @@ async function main() {
       } else {
         res.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
       }
-    } catch (err) {
-      console.error("[webhook-server] Unhandled error:", err);
-      if (!res.headersSent) res.writeHead(500).end("Internal server error");
+    } catch (error) {
+      console.error("[webhook-server] Unhandled error:", error);
+      if (!res.headersSent) {
+        res.writeHead(500).end("Internal server error");
+      }
     }
   });
 
   if (typeof appPort === "number") {
     webhookServer.listen(appPort, "0.0.0.0", () => {
-      console.log(`🔗 Webhook + health server listening on port ${appPort}`);
+      console.log(`Webhook and health server listening on port ${appPort}`);
     });
   } else {
     webhookServer.listen(appPort, () => {
-      console.log(`🔗 Webhook + health server listening on ${appPort}`);
+      console.log(`Webhook and health server listening on ${appPort}`);
     });
   }
 
-  console.log(`🤖 Mention trigger: ${startupSummary.workspace.mentionTrigger}`);
-  console.log(`📂 Workspace: ${startupSummary.workspace.root}`);
-  console.log(`🔧 Allowed repos: ${startupSummary.workspace.allowedRepos.join(", ")}`);
+  console.log(`Mention trigger: ${startupSummary.workspace.mentionTrigger}`);
+  console.log(`Workspace: ${startupSummary.workspace.root}`);
+  console.log(`Allowed repos: ${startupSummary.workspace.allowedRepos.join(", ")}`);
 }
 
-// Graceful shutdown
 async function gracefulShutdown(signal: string): Promise<void> {
-  console.log(`\n[${signal}] Shutting down FunBot...`);
-  if (webhookServer) webhookServer.close();
-  if (stopCronWorker) await stopCronWorker();
+  console.log(`\n[${signal}] Shutting down DevBot...`);
+  if (webhookServer) {
+    webhookServer.close();
+  }
+  if (slackStarted) {
+    await app.stop();
+  }
+  if (stopCronWorker) {
+    await stopCronWorker();
+  }
   await shutdownTracing();
   process.exit(0);
 }
 
-process.on("SIGINT",  () => gracefulShutdown("SIGINT"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 main().catch(async (error) => {
-  console.error("Failed to start FunBot:", error);
+  console.error("Failed to start DevBot:", error);
   await shutdownTracing();
   process.exit(1);
 });

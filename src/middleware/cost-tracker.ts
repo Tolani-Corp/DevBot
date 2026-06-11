@@ -15,15 +15,16 @@ export interface CostReport {
 
 // Pricing per 1M tokens (USD)
 const PRICING: Record<string, { prompt: number; completion: number }> = {
-  // Claude 3.5 Sonnet (Current workhorse)
+  "claude-haiku-4-5-20251001": { prompt: 1.0, completion: 5.0 },
+  "claude-sonnet-4-6": { prompt: 3.0, completion: 15.0 },
+  "claude-opus-4-8": { prompt: 5.0, completion: 25.0 },
+  // Legacy aliases kept so historical reports still calculate.
+  "claude-3-5-haiku-20241022": { prompt: 0.8, completion: 4.0 },
   "claude-3-5-sonnet-20240620": { prompt: 3.0, completion: 15.0 },
   "claude-3-5-sonnet-latest": { prompt: 3.0, completion: 15.0 },
-  // Claude 3 Opus
   "claude-3-opus-20240229": { prompt: 15.0, completion: 75.0 },
-  // OpenAI GPT-4o
   "gpt-4o": { prompt: 5.0, completion: 15.0 },
-  // Fallback / Defaults
-  "default": { prompt: 3.0, completion: 15.0 },
+  "default": { prompt: 1.0, completion: 5.0 },
 };
 
 /**

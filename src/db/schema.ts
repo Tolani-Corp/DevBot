@@ -185,6 +185,12 @@ export const workspaces = pgTable("workspaces", {
      * Must be in the tier's allowedModels list — ignored otherwise.
      */
     preferredAnthropicModel?: string;
+    discordPendingAction?: {
+      type: "onboarding" | "rename";
+      requestedBy: string;
+      channelId: string;
+      createdAt: string;
+    };
   }>(),
   
   createdAt: timestamp("created_at").notNull().defaultNow(),

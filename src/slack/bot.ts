@@ -28,6 +28,7 @@ import {
 import { RateLimiter } from "@/middleware/rate-limiter";
 import Redis from "ioredis";
 import { computeAgentROI, formatROIReportBlocks } from "@/services/agent-roi";
+import { checkTaskLimit, incrementTaskUsage } from "@/services/tier-manager";
 import {
   parseMentionCommand,
   formatMentionCommandResponse,
@@ -75,6 +76,24 @@ export const app = new App({
 registerInteractiveHandlers(app);
 
 const DEVBOT_MENTION = process.env.DEVBOT_MENTION_TRIGGER ?? "@Debo";
+
+async function enforceWorkspaceTaskLimit(
+  workspaceId: string,
+  threadTs: string,
+  say: (message: { thread_ts: string; text: string }) => Promise<unknown>,
+): Promise<boolean> {
+  const limit = await checkTaskLimit(workspaceId);
+  if (limit.allowed) {
+    return true;
+  }
+
+  const limitText = limit.limit === -1 ? "unlimited" : String(limit.limit);
+  await say({
+    thread_ts: threadTs,
+    text: `Task limit reached for this workspace (${limit.used}/${limitText}). The limit resets on ${limit.resetDate.toISOString().slice(0, 10)}.`,
+  });
+  return false;
+}
 
 async function respondToFeedbackCommand(options: {
   teamId: string;
@@ -284,6 +303,10 @@ app.event("app_mention", async ({ event, say, client }) => {
     // Extract ClickUp task ID if referenced (CU-xxx, #xxx, or clickup:xxx)
     const clickUpTaskId = extractClickUpId(text);
 
+    if (!(await enforceWorkspaceTaskLimit(workspace.id, event.ts, say))) {
+      return;
+    }
+
     // Create task in database
     const [task] = await db
       .insert(tasks)
@@ -322,6 +345,7 @@ app.event("app_mention", async ({ event, say, client }) => {
       repository,
       clickUpTaskId,
     });
+    await incrementTaskUsage(workspace.id);
 
     // Save conversation context
     await db.insert(conversations).values({
@@ -495,6 +519,10 @@ app.event("message", async ({ event, say, client }) => {
       return;
     }
 
+    if (!(await enforceWorkspaceTaskLimit(workspace.id, event.thread_ts, say))) {
+      return;
+    }
+
     // Add follow-up task
     const [task] = await db
       .insert(tasks)
@@ -523,6 +551,7 @@ app.event("message", async ({ event, say, client }) => {
       description: cleanText,
       repository: conversation.context?.repository,
     });
+    await incrementTaskUsage(workspace.id);
   } catch (error) {
     console.error("Error handling thread message:", error);
   }

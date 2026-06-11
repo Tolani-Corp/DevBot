@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { timingSafeEqual } from "node:crypto";
 
 import { computeAgentROI } from "@/services/agent-roi";
 import { grantWatchAgent, runGrantWatchCycleWithSources, type GrantWatchRunInput } from "@/agents/grant-watch";
@@ -43,12 +44,46 @@ function sendJson(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
+function forbidden(res: ServerResponse, message = "forbidden") {
+  sendJson(res, 403, { error: message });
+}
+
 function notFound(res: ServerResponse) {
   sendJson(res, 404, { error: "not_found" });
 }
 
 function badRequest(res: ServerResponse, message: string) {
   sendJson(res, 400, { error: message });
+}
+
+function getPresentedApiToken(req: IncomingMessage): string | undefined {
+  const auth = req.headers.authorization;
+  if (auth?.startsWith("Bearer ")) {
+    return auth.slice("Bearer ".length).trim();
+  }
+
+  const apiKey = req.headers["x-api-key"];
+  return Array.isArray(apiKey) ? apiKey[0] : apiKey;
+}
+
+function tokensEqual(left: string, right: string): boolean {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function isAuthorizedApiRequest(req: IncomingMessage): boolean {
+  if (process.env.DEVBOT_ALLOW_UNAUTHENTICATED_API === "true") {
+    return true;
+  }
+
+  const expected = process.env.API_AUTH_TOKEN?.trim();
+  if (!expected) {
+    return process.env.NODE_ENV !== "production";
+  }
+
+  const presented = getPresentedApiToken(req)?.trim();
+  return Boolean(presented && tokensEqual(presented, expected));
 }
 
 function approvalModeToApi(mode: "strict" | "balanced" | "auto_low_risk") {
@@ -84,6 +119,11 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
 
   if (!rawPath.startsWith("/api/")) {
     return false;
+  }
+
+  if (!isAuthorizedApiRequest(req)) {
+    forbidden(res, process.env.API_AUTH_TOKEN ? "invalid_api_token" : "api_auth_not_configured");
+    return true;
   }
 
   try {

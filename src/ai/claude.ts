@@ -10,7 +10,7 @@ const _fallbackClient = new Anthropic({
 
 /** Fallback model used when no workspaceId is available (e.g. system tasks). */
 const DEFAULT_MODEL: AnthropicModelId =
-  (process.env.ANTHROPIC_MODEL as AnthropicModelId | undefined) ?? "claude-3-5-haiku-20241022";
+  (process.env.ANTHROPIC_MODEL as AnthropicModelId | undefined) ?? "claude-haiku-4-5-20251001";
 
 /**
  * Resolve the Anthropic client + model for a request.
@@ -139,13 +139,20 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
     { role: "user", content: userPrompt },
   ];
 
-  const { client, model } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
+  const { client, model, isByok } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
   const response = await client.messages.create({
     model,
     max_tokens: 4096,
     system: systemPrompt,
     messages,
   });
+  if (response.usage && context?.userId && !isByok) {
+    costTracker.track(context.userId, context.workspaceId ?? "unknown", {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model,
+    }).catch(console.error);
+  }
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);

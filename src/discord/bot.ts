@@ -23,10 +23,77 @@ import {
     formatFeedbackTicketReceipt,
     formatFeedbackTicketStatus,
 } from '@/services/feedback-loop';
+import { db } from '@/db';
+import { workspaces } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
-// Store pending onboarding and rename states
-const pendingOnboarding = new Set<string>();
-const pendingRename = new Set<string>();
+type DiscordPendingAction = {
+    type: 'onboarding' | 'rename';
+    requestedBy: string;
+    channelId: string;
+    createdAt: string;
+};
+
+async function getDiscordPendingAction(guildId: string): Promise<DiscordPendingAction | undefined> {
+    const workspace = await ensureWorkspace({ platformType: 'discord', guildId });
+    return workspace.settings?.discordPendingAction as DiscordPendingAction | undefined;
+}
+
+async function setDiscordPendingAction(guildId: string, action: DiscordPendingAction): Promise<void> {
+    const workspace = await ensureWorkspace({ platformType: 'discord', guildId });
+    await db
+        .update(workspaces)
+        .set({
+            settings: {
+                ...(workspace.settings ?? {}),
+                discordPendingAction: action,
+            },
+            updatedAt: new Date(),
+        } as any)
+        .where(eq(workspaces.id, workspace.id));
+}
+
+async function clearDiscordPendingAction(guildId: string): Promise<void> {
+    const workspace = await ensureWorkspace({ platformType: 'discord', guildId });
+    const { discordPendingAction: _removed, ...settings } = (workspace.settings ?? {}) as Record<string, unknown>;
+    await db
+        .update(workspaces)
+        .set({ settings, updatedAt: new Date() } as any)
+        .where(eq(workspaces.id, workspace.id));
+}
+
+async function handlePendingDiscordAction(
+    message: Message,
+    guildId: string,
+    pendingAction: DiscordPendingAction,
+): Promise<boolean> {
+    if (pendingAction.requestedBy !== message.author.id || pendingAction.channelId !== message.channelId) {
+        return false;
+    }
+
+    const customName = message.content.replace(/<@\d+>/g, '').trim();
+    if (!customName || customName.length > 50) {
+        await message.reply(
+            pendingAction.type === 'onboarding'
+                ? "Please provide a valid name (1-50 characters) or say 'keep DevBot' to use the default name."
+                : "Please provide a valid name (1-50 characters).",
+        );
+        return true;
+    }
+
+    if (pendingAction.type === 'onboarding') {
+        const finalName = customName.toLowerCase().includes('keep') ? 'DevBot' : customName;
+        await completeOnboarding({ platformType: 'discord', guildId }, finalName);
+        await clearDiscordPendingAction(guildId);
+        await message.reply(getNameConfirmationMessage(finalName));
+        return true;
+    }
+
+    await updateBotName({ platformType: 'discord', guildId }, customName);
+    await clearDiscordPendingAction(guildId);
+    await message.reply(getNameConfirmationMessage(customName));
+    return true;
+}
 
 /**
  * Check if a message is a reply to one of the bot's messages
@@ -70,22 +137,23 @@ export function startDiscordBot(token: string) {
         console.log('🔌 Discord bot disconnected');
     });
 
-    // Login with error handling
-    client.login(token).catch((error) => {
-        console.error('❌ Failed to login to Discord:', error);
-    });
-
     client.on(Events.MessageCreate, async (message) => {
         if (message.author.bot) return;
 
         const guildId = message.guildId;
         if (!guildId) return;
 
+        const pendingAction = await getDiscordPendingAction(guildId);
         const containsAgentAlias = /(^|\s)@(shark|ace|ice|linemd)\b|^\/?(shark|ace|ice|linemd)\/picks\//i.test(message.content.trim());
 
         // Check if the bot is mentioned OR if this is a reply to the bot
         const isReplyToBot = message.reference?.messageId ? await isReplyToBotMessage(message, client) : false;
         const shouldRespond = message.mentions.has(client.user!.id) || containsAgentAlias || isReplyToBot;
+
+        if (pendingAction && (isReplyToBot || !shouldRespond)) {
+            const handled = await handlePendingDiscordAction(message, guildId, pendingAction);
+            if (handled) return;
+        }
 
         if (shouldRespond) {
             try {
@@ -101,7 +169,12 @@ export function startDiscordBot(token: string) {
                         guildId,
                     });
                     
-                    pendingOnboarding.add(guildId);
+                    await setDiscordPendingAction(guildId, {
+                        type: 'onboarding',
+                        requestedBy: message.author.id,
+                        channelId: message.channelId,
+                        createdAt: new Date().toISOString(),
+                    });
                     await message.reply(getOnboardingMessage());
                     return;
                 }
@@ -116,7 +189,12 @@ export function startDiscordBot(token: string) {
 
                 // Check for rename command
                 if (content.toLowerCase().includes('rename bot') || content.toLowerCase().includes('change name')) {
-                    pendingRename.add(guildId);
+                    await setDiscordPendingAction(guildId, {
+                        type: 'rename',
+                        requestedBy: message.author.id,
+                        channelId: message.channelId,
+                        createdAt: new Date().toISOString(),
+                    });
                     await message.reply(`Sure! What would you like to call me instead of **${botName}**? Just reply with your preferred name.`);
                     return;
                 }
@@ -300,49 +378,6 @@ _Scan ID: ${report.scanId}_`;
             } catch (error) {
                 console.error('Error handling message:', error);
                 await message.reply('An error occurred while processing your request.');
-            }
-        } else {
-            // Check if this is a response to onboarding or rename prompt
-            if (pendingOnboarding.has(guildId)) {
-                const customName = message.content.trim();
-                
-                if (customName && customName.length > 0 && customName.length <= 50) {
-                    const finalName = customName.toLowerCase().includes('keep') ? 'DevBot' : customName;
-                    
-                    await completeOnboarding(
-                        {
-                            platformType: 'discord',
-                            guildId,
-                        },
-                        finalName
-                    );
-                    
-                    pendingOnboarding.delete(guildId);
-                    await message.reply(getNameConfirmationMessage(finalName));
-                } else {
-                    await message.reply("Please provide a valid name (1-50 characters) or say 'keep DevBot' to use the default name.");
-                }
-                return;
-            }
-
-            if (pendingRename.has(guildId)) {
-                const customName = message.content.trim();
-                
-                if (customName && customName.length > 0 && customName.length <= 50) {
-                    await updateBotName(
-                        {
-                            platformType: 'discord',
-                            guildId,
-                        },
-                        customName
-                    );
-                    
-                    pendingRename.delete(guildId);
-                    await message.reply(getNameConfirmationMessage(customName));
-                } else {
-                    await message.reply("Please provide a valid name (1-50 characters).");
-                }
-                return;
             }
         }
     });
