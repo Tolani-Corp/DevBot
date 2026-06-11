@@ -209,6 +209,20 @@ DEVBOT_MENTION_TRIGGER=@Debo   # What users type to trigger the bot (display nam
 | `/natt-report` | `/natt-report [--format=pdf\|json\|slack]` | Generate and post a NATT security report |
 | `/natt-cron` | `/natt-cron list\|add\|remove\|pause [config]` | Manage scheduled NATT scan jobs |
 
+### NATT Ethical Roadmap Context
+
+Agents and MCP clients can retrieve the shared ethical hacking roadmap through:
+
+| MCP tool/resource | What it returns |
+|---|---|
+| `get_ethical_roadmap` | Roadmap phases, skill/tool/resource totals, safety policy, and agent context |
+| `get_roadmap_stage` | One phase bundle with skills, tools, resources, manuals, and next phases |
+| `recommend_roadmap_path` | Mission-specific next skills, safe tools, resources, and manuals |
+| `natt://ethical-roadmap` | Full canonical roadmap JSON |
+| `natt://ethical-roadmap-catalog` | Skill, tool, resource, manual, and context catalog |
+
+Human manual: [docs/natt-ethical-hacking-roadmap.md](./docs/natt-ethical-hacking-roadmap.md). All roadmap use remains limited to authorized labs, written ROE, and non-destructive-first workflows.
+
 ---
 
 ## Trigger Patterns

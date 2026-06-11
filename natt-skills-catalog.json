@@ -3,7 +3,7 @@
   "$id": "natt-skills-catalog.json",
   "description": "NATT Ghost Agent — Baseline and Additional Skills Capabilities Catalog",
   "version": "2.0.0",
-  "lastUpdated": "2026-02-24",
+  "lastUpdated": "2026-06-10",
   "source": "DevBot src/agents/natt-skills.ts + natt-skills-cloud.ts + natt-skills-cve.ts + natt-skills-osint.ts + natt-skills-nuclei.ts + natt-skills-llm.ts + natt-skills-mobile.ts + natt-skills-rag.ts + natt.ts + natt-roe.ts + natt-vault.ts + natt-memory.ts + natt-report.ts + natt-report-cron.ts",
 
   "missionTypes": [
@@ -15,8 +15,78 @@
     "auth-testing",
     "platform-detection",
     "code-analysis",
-    "full-ghost"
+    "full-ghost",
+    "racing-recon"
   ],
+
+  "ethicalRoadmap": {
+    "version": "1.1.0",
+    "canonicalResourcePath": ".natt/resources/ethical-hacking-roadmap.json",
+    "description": "Canonical ethical hacking roadmap used by NATT, DevBot/DEBO agents, MCP resources, and operator docs.",
+    "safetyPolicy": [
+      "Operate only in owned labs or on assets with explicit written authorization and defined ROE.",
+      "Prefer passive, non-destructive learning before active testing.",
+      "Practice platforms are limited to their published scopes and challenge environments."
+    ],
+    "phases": [
+      {
+        "id": "understand-basics",
+        "title": "Understand Basics",
+        "instances": ["TCP/IP", "DNS", "HTTP", "HTTPS"],
+        "skillIds": ["tcp-ip-dns", "http-https-basics"]
+      },
+      {
+        "id": "operating-systems",
+        "title": "Operating Systems",
+        "instances": ["Linux", "Windows", "macOS"],
+        "skillIds": ["linux-fundamentals", "windows-fundamentals", "macos-fundamentals"]
+      },
+      {
+        "id": "networking",
+        "title": "Networking",
+        "instances": ["IP", "MAC", "DNS", "DHCP", "ports", "protocols", "OSI model"],
+        "skillIds": ["ip-mac-dhcp", "ports-protocols", "osi-model"]
+      },
+      {
+        "id": "programming",
+        "title": "Programming",
+        "instances": ["Python", "Bash", "JavaScript", "PHP", "SQL"],
+        "skillIds": ["python-scripting", "bash-automation", "web-backend-scripting"]
+      },
+      {
+        "id": "tools",
+        "title": "Tools",
+        "instances": ["Nmap", "Burp Suite", "Metasploit", "John the Ripper", "Wireshark"],
+        "skillIds": ["nmap-basics", "burp-suite-basics", "metasploit-awareness", "john-ripper-basics", "wireshark-analysis"],
+        "toolIds": ["nmap", "burp-suite", "metasploit", "john-the-ripper", "wireshark"]
+      },
+      {
+        "id": "setup-lab",
+        "title": "Set Up Lab",
+        "instances": ["VirtualBox", "VMware", "Kali Linux", "Parrot OS"],
+        "skillIds": ["virtualization-lab-setup", "kali-parrot-lab-setup"]
+      },
+      {
+        "id": "start-practicing",
+        "title": "Start Practicing",
+        "instances": ["TryHackMe", "Hack The Box", "OverTheWire"],
+        "skillIds": ["tryhackme-paths", "hack-the-box-labs", "overthewire-wargames"],
+        "resourceIds": ["tryhackme", "hack-the-box", "overthewire"]
+      }
+    ],
+    "mcpTools": ["get_ethical_roadmap", "get_roadmap_stage", "recommend_roadmap_path"],
+    "mcpResources": ["natt://ethical-roadmap", "natt://ethical-roadmap-catalog"],
+    "manuals": [
+      "docs/natt-ethical-hacking-roadmap.md",
+      "DEVBOT_PENTEST_GUIDE.md",
+      "PENTEST_QUICK_REFERENCE.md",
+      "DEBO_SETUP_GUIDE.md",
+      "DEVBOT_MCP_ARCHITECTURE.md",
+      "src/safety/README.md",
+      "mcp-natt/tactical-dashboard/docs/USER_GUIDE.md",
+      "mcp-natt/tactical-dashboard/docs/TECHNICAL_MANUAL.md"
+    ]
+  },
 
   "ghostModes": {
     "passive": {
@@ -759,13 +829,27 @@
       {
         "name": "get_default_credentials",
         "description": "Look up known default credentials for a given service name"
+      },
+      {
+        "name": "get_ethical_roadmap",
+        "description": "Return the canonical ethical hacking roadmap summary or full skills/tools/resources/manuals catalog"
+      },
+      {
+        "name": "get_roadmap_stage",
+        "description": "Return one roadmap phase bundle with stage skills, tools, resources, manuals, and next phases"
+      },
+      {
+        "name": "recommend_roadmap_path",
+        "description": "Recommend next roadmap skills, tools, resources, and manuals for a mission type"
       }
     ],
     "resources": [
       "natt://roe-templates",
       "natt://password-techniques",
       "natt://auth-bypass",
-      "natt://mission-checklists"
+      "natt://mission-checklists",
+      "natt://ethical-roadmap",
+      "natt://ethical-roadmap-catalog"
     ]
   },
 

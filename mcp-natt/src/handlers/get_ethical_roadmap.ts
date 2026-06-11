@@ -28,7 +28,10 @@ export async function handle(args: any) {
       skills: roadmap.skills.length,
       tools: roadmap.tools.length,
       resources: roadmap.resources.length,
+      manuals: roadmap.manuals.length,
     },
+    safetyPolicy: roadmap.safetyPolicy,
+    agentContext: roadmap.agentContext,
     phases: roadmap.phases
       .slice()
       .sort((left, right) => left.order - right.order)

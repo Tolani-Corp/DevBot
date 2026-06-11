@@ -1,8 +1,14 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Ethical Hacking Roadmap",
   "source": "attachment-analysis",
   "updatedAt": "2026-06-10",
+  "safetyPolicy": [
+    "Operate only in owned labs or on assets with explicit written authorization and defined Rules of Engagement.",
+    "Use passive, non-destructive learning first; escalate only when the lab or engagement explicitly permits it.",
+    "Keep evidence, reports, and credentials sanitized; never store secrets in source control.",
+    "Practice platforms are limited to their published scopes and challenge environments."
+  ],
   "phases": [
     {
       "id": "understand-basics",
@@ -607,5 +613,114 @@
       "difficulty": "beginner",
       "recommendedAfter": ["http-https-basics"]
     }
-  ]
+  ],
+  "manuals": [
+    {
+      "id": "manual-natt-roadmap",
+      "title": "NATT Ethical Hacking Roadmap Manual",
+      "kind": "manual",
+      "summary": "Human-readable manual for the canonical roadmap, MCP resources, agent context, and safe progression model.",
+      "path": "docs/natt-ethical-hacking-roadmap.md",
+      "phaseIds": ["understand-basics", "operating-systems", "networking", "programming", "tools", "setup-lab", "start-practicing"],
+      "skillIds": [],
+      "toolIds": []
+    },
+    {
+      "id": "manual-pentest-guide",
+      "title": "DevBot Pentest Guide",
+      "kind": "guide",
+      "summary": "Operational guide for authorized DevBot and NATT security assessments, scan types, reporting, and guardrails.",
+      "path": "DEVBOT_PENTEST_GUIDE.md",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": ["nmap-basics", "burp-suite-basics", "wireshark-analysis", "kali-parrot-lab-setup"],
+      "toolIds": ["nmap", "burp-suite", "wireshark"]
+    },
+    {
+      "id": "manual-pentest-quick-reference",
+      "title": "Pentest Quick Reference",
+      "kind": "quick-reference",
+      "summary": "Short operator command reference for authorized NATT and DevBot security workflows.",
+      "path": "PENTEST_QUICK_REFERENCE.md",
+      "phaseIds": ["tools", "start-practicing"],
+      "skillIds": ["nmap-basics", "burp-suite-basics"],
+      "toolIds": ["nmap", "burp-suite"]
+    },
+    {
+      "id": "manual-debo-setup",
+      "title": "DEBO Slack and Discord Setup Guide",
+      "kind": "guide",
+      "summary": "Slack, Discord, slash command, trigger, and environment setup for DEBO/DevBot/NATT operators.",
+      "path": "DEBO_SETUP_GUIDE.md",
+      "phaseIds": ["setup-lab"],
+      "skillIds": ["virtualization-lab-setup", "kali-parrot-lab-setup"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-mcp-architecture",
+      "title": "DevBot MCP Architecture",
+      "kind": "architecture",
+      "summary": "Model Context Protocol architecture, tool/resource exposure, and agent integration reference.",
+      "path": "DEVBOT_MCP_ARCHITECTURE.md",
+      "phaseIds": ["understand-basics", "tools", "setup-lab"],
+      "skillIds": ["http-https-basics", "web-backend-scripting"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-safety-readme",
+      "title": "Safety Guardrails",
+      "kind": "safety",
+      "summary": "Repository safety context for bounded, authorized security workflows.",
+      "path": "src/safety/README.md",
+      "phaseIds": ["understand-basics", "tools", "start-practicing"],
+      "skillIds": [],
+      "toolIds": ["nmap", "burp-suite", "metasploit", "john-the-ripper", "wireshark"]
+    },
+    {
+      "id": "manual-skills-catalog",
+      "title": "NATT Skills Catalog",
+      "kind": "catalog",
+      "summary": "Agent-readable capability catalog covering NATT skills, MCP tools, resources, and Slack/Discord commands.",
+      "path": "natt-skills-catalog.json",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": [],
+      "toolIds": ["nmap", "burp-suite", "metasploit", "john-the-ripper", "wireshark"]
+    },
+    {
+      "id": "manual-tactical-dashboard-user-guide",
+      "title": "NATT Tactical Dashboard User Guide",
+      "kind": "guide",
+      "summary": "Operator guide for the self-hosted NATT tactical dashboard and MCP knowledge tools.",
+      "path": "mcp-natt/tactical-dashboard/docs/USER_GUIDE.md",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": ["kali-parrot-lab-setup", "tryhackme-paths", "hack-the-box-labs"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-tactical-dashboard-technical",
+      "title": "NATT Tactical Dashboard Technical Manual",
+      "kind": "manual",
+      "summary": "Technical manual for deployment, maintenance, and MCP-backed operational continuity.",
+      "path": "mcp-natt/tactical-dashboard/docs/TECHNICAL_MANUAL.md",
+      "phaseIds": ["setup-lab"],
+      "skillIds": ["virtualization-lab-setup", "kali-parrot-lab-setup"],
+      "toolIds": []
+    }
+  ],
+  "agentContext": {
+    "canonicalResourcePath": ".natt/resources/ethical-hacking-roadmap.json",
+    "skillCatalogPath": "natt-skills-catalog.json",
+    "agentSkillRuntime": "src/agents/skills/roadmap.ts",
+    "dynamicPlanner": "src/agents/natt-dynamic-roadmap.ts",
+    "mcpModule": "mcp-natt/src/ethical-roadmap.ts",
+    "mcpTools": ["get_ethical_roadmap", "get_roadmap_stage", "recommend_roadmap_path"],
+    "mcpResources": ["natt://ethical-roadmap", "natt://ethical-roadmap-catalog"],
+    "recommendedOperatorFlow": [
+      "Read natt://ethical-roadmap for the full canonical graph.",
+      "Use get_roadmap_stage for stage-specific skills, tools, resources, and manuals.",
+      "Use recommend_roadmap_path before queueing NATT work so training gaps and safe tools are visible.",
+      "Validate ROE before any scan or active test."
+    ],
+    "slackDiscordReady": true,
+    "requiresRoeForActiveTesting": true
+  }
 }

@@ -112,6 +112,18 @@ DevBot agents should use the global hiring operations guidance when handling Tol
 
 Detailed reference: [docs/global-hiring-ops.md](./docs/global-hiring-ops.md).
 
+## NATT Ethical Security Roadmap
+
+NATT's ethical hacking roadmap is available as shared human and agent context.
+
+- Canonical machine-readable source: `.natt/resources/ethical-hacking-roadmap.json`
+- Operator manual: [docs/natt-ethical-hacking-roadmap.md](./docs/natt-ethical-hacking-roadmap.md)
+- Agent skill catalog: `natt-skills-catalog.json`
+- MCP tools: `get_ethical_roadmap`, `get_roadmap_stage`, `recommend_roadmap_path`
+- MCP resources: `natt://ethical-roadmap`, `natt://ethical-roadmap-catalog`
+
+The roadmap covers TCP/IP, DNS, HTTP/HTTPS, Linux/Windows/macOS, networking, Python/Bash/JavaScript/PHP/SQL, Nmap, Burp Suite, Metasploit, John the Ripper, Wireshark, VirtualBox/VMware, Kali/Parrot, TryHackMe, Hack The Box, and OverTheWire. All use is bounded to authorized labs, written ROE, and non-destructive-first workflows.
+
 ## License
 
 - Commercial use is governed by [LICENSE.md](./LICENSE.md)

@@ -69,20 +69,36 @@ const resourceSchema = z.object({
   recommendedAfter: z.array(z.string().min(1)),
 });
 
+const manualSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  kind: z.enum(["manual", "guide", "quick-reference", "architecture", "safety", "catalog"]),
+  summary: z.string().min(1),
+  path: z.string().optional(),
+  url: z.string().url().optional(),
+  phaseIds: z.array(z.string().min(1)),
+  skillIds: z.array(z.string().min(1)),
+  toolIds: z.array(z.string().min(1)),
+});
+
 const roadmapResourceSchema = z.object({
   version: z.string(),
   title: z.string(),
   source: z.string(),
   updatedAt: z.string(),
+  safetyPolicy: z.array(z.string()).default([]),
   phases: z.array(phaseSchema),
   skills: z.array(skillSchema),
   tools: z.array(toolSchema),
   resources: z.array(resourceSchema),
+  manuals: z.array(manualSchema).default([]),
+  agentContext: z.record(z.unknown()).default({}),
 });
 
 export type RoadmapSkill = z.infer<typeof skillSchema>;
 export type RoadmapTool = z.infer<typeof toolSchema>;
 export type RoadmapResource = z.infer<typeof resourceSchema>;
+export type RoadmapManual = z.infer<typeof manualSchema>;
 export type NATTRoadmapResource = z.infer<typeof roadmapResourceSchema>;
 
 export interface RoadmapRecommendation {
@@ -92,6 +108,7 @@ export interface RoadmapRecommendation {
   nextSkills: RoadmapSkill[];
   recommendedTools: RoadmapTool[];
   recommendedResources: RoadmapResource[];
+  recommendedManuals: RoadmapManual[];
   notes: string[];
 }
 
@@ -191,9 +208,19 @@ export function recommendRoadmap(
     .sort((left, right) => toolDifficultyWeight(right.difficulty) - toolDifficultyWeight(left.difficulty))
     .slice(0, maxResources);
 
+  const recommendedToolIds = new Set(recommendedTools.map((tool) => tool.id));
+  const nextPhaseIds = new Set(nextSkills.map((skill) => skill.phaseId));
+  const recommendedManuals = resource.manuals.filter(
+    (manual) =>
+      manual.phaseIds.some((phaseId) => nextPhaseIds.has(phaseId)) ||
+      manual.skillIds.some((skillId) => nextSkillIds.has(skillId)) ||
+      manual.toolIds.some((toolId) => recommendedToolIds.has(toolId)),
+  );
+
   const notes: string[] = [
     "Operate only on systems explicitly authorized in writing and within ROE scope.",
     "Use passive and non-destructive techniques first, then escalate with approval.",
+    ...resource.safetyPolicy.slice(0, 2),
   ];
 
   if (readinessScore < 40) {
@@ -211,6 +238,7 @@ export function recommendRoadmap(
     nextSkills,
     recommendedTools,
     recommendedResources,
+    recommendedManuals,
     notes,
   };
 }

@@ -52,15 +52,30 @@ export interface RoadmapResource {
   recommendedAfter: string[];
 }
 
+export interface RoadmapManual {
+  id: string;
+  title: string;
+  kind: "manual" | "guide" | "quick-reference" | "architecture" | "safety" | "catalog";
+  summary: string;
+  path?: string;
+  url?: string;
+  phaseIds: string[];
+  skillIds: string[];
+  toolIds: string[];
+}
+
 export interface EthicalRoadmap {
   version: string;
   title: string;
   source: string;
   updatedAt: string;
+  safetyPolicy: string[];
   phases: RoadmapPhase[];
   skills: RoadmapSkill[];
   tools: RoadmapTool[];
   resources: RoadmapResource[];
+  manuals: RoadmapManual[];
+  agentContext: Record<string, unknown>;
 }
 
 export interface RoadmapRecommendation {
@@ -78,6 +93,10 @@ const DEFAULT_ROADMAP: EthicalRoadmap = {
   title: "Ethical Hacking Roadmap",
   source: "inline-default",
   updatedAt: "2026-06-10",
+  safetyPolicy: [
+    "Operate only in owned labs or on assets with explicit written authorization and defined ROE.",
+    "Prefer passive, non-destructive learning and validation before any active testing.",
+  ],
   phases: [
     { id: "understand-basics", title: "Understand Basics", order: 1, skills: [] },
     { id: "operating-systems", title: "Operating Systems", order: 2, skills: [] },
@@ -90,6 +109,8 @@ const DEFAULT_ROADMAP: EthicalRoadmap = {
   skills: [],
   tools: [],
   resources: [],
+  manuals: [],
+  agentContext: {},
 };
 
 function asRoadmapMissionType(value: string): RoadmapMissionType | undefined {
@@ -189,15 +210,47 @@ function normalizeRoadmap(raw: unknown): EthicalRoadmap {
         }))
     : [];
 
+  const manuals: RoadmapManual[] = Array.isArray(input.manuals)
+    ? input.manuals
+        .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+        .map((item) => ({
+          id: typeof item.id === "string" ? item.id : "unknown-manual",
+          title: typeof item.title === "string" ? item.title : "Unknown Manual",
+          kind:
+            item.kind === "manual" ||
+            item.kind === "guide" ||
+            item.kind === "quick-reference" ||
+            item.kind === "architecture" ||
+            item.kind === "safety" ||
+            item.kind === "catalog"
+              ? item.kind
+              : "guide",
+          summary: typeof item.summary === "string" ? item.summary : "Roadmap support material.",
+          path: typeof item.path === "string" ? item.path : undefined,
+          url: typeof item.url === "string" ? item.url : undefined,
+          phaseIds: toStringArray(item.phaseIds),
+          skillIds: toStringArray(item.skillIds),
+          toolIds: toStringArray(item.toolIds),
+        }))
+    : [];
+
   return {
     version: typeof input.version === "string" ? input.version : "1.0.0",
     title: typeof input.title === "string" ? input.title : "Ethical Hacking Roadmap",
     source: typeof input.source === "string" ? input.source : "attachment-analysis",
     updatedAt: typeof input.updatedAt === "string" ? input.updatedAt : new Date().toISOString().slice(0, 10),
+    safetyPolicy: toStringArray(input.safetyPolicy).length > 0
+      ? toStringArray(input.safetyPolicy)
+      : DEFAULT_ROADMAP.safetyPolicy,
     phases,
     skills,
     tools,
     resources,
+    manuals,
+    agentContext:
+      input.agentContext && typeof input.agentContext === "object"
+        ? (input.agentContext as Record<string, unknown>)
+        : {},
   };
 }
 
@@ -273,6 +326,7 @@ export function getRoadmapPhaseBundle(
       skills: RoadmapSkill[];
       tools: RoadmapTool[];
       resources: RoadmapResource[];
+      manuals: RoadmapManual[];
       nextPhases: RoadmapPhase[];
     }
   | undefined {
@@ -290,6 +344,14 @@ export function getRoadmapPhaseBundle(
     resource.focusSkillIds.some((skillId) => skillIds.has(skillId)),
   );
 
+  const toolIds = new Set(tools.map((tool) => tool.id));
+  const manuals = roadmap.manuals.filter(
+    (manual) =>
+      manual.phaseIds.includes(phase.id) ||
+      manual.skillIds.some((skillId) => skillIds.has(skillId)) ||
+      manual.toolIds.some((toolId) => toolIds.has(toolId)),
+  );
+
   const nextPhases = roadmap.phases
     .filter((item) => item.order > phase.order)
     .sort((left, right) => left.order - right.order)
@@ -300,6 +362,7 @@ export function getRoadmapPhaseBundle(
     skills,
     tools,
     resources,
+    manuals,
     nextPhases,
   };
 }

@@ -46,6 +46,7 @@ export async function handle(args: any) {
             skills: bundle.skills,
             tools: bundle.tools,
             resources: bundle.resources,
+            manuals: bundle.manuals,
             nextPhases: bundle.nextPhases,
           },
           null,

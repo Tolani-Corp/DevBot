@@ -1463,7 +1463,7 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
     {
       uri: "natt://ethical-roadmap",
       name: "Ethical Security Roadmap",
-      description: "Dynamic roadmap phases and progression model for NATT and DevBot/DEBO agents",
+      description: "Dynamic roadmap phases, safety policy, manuals, and progression model for NATT and DevBot/DEBO agents",
       mimeType: "application/json",
     },
     {
@@ -1583,6 +1583,9 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
               skills: roadmap.skills,
               tools: roadmap.tools,
               resources: roadmap.resources,
+              manuals: roadmap.manuals,
+              safetyPolicy: roadmap.safetyPolicy,
+              agentContext: roadmap.agentContext,
             },
             null,
             2,

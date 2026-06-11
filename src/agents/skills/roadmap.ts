@@ -14,8 +14,10 @@ export type RoadmapStageId =
   | "networking"
   | "programming"
   | "tools"
-  | "set-up-lab"
+  | "setup-lab"
   | "start-practicing";
+
+type RoadmapStageAlias = RoadmapStageId | "set-up-lab";
 
 export type SkillDifficulty = "beginner" | "intermediate" | "advanced";
 
@@ -33,7 +35,7 @@ export interface DynamicSkill {
 export interface DynamicTool {
   id: string;
   name: string;
-  category: "recon" | "web" | "analysis" | "password" | "traffic" | "platform";
+  category: "recon" | "web" | "analysis" | "password" | "traffic" | "platform" | "practice";
   stageId: RoadmapStageId;
   purpose: string;
   safeUsage: string[];
@@ -98,7 +100,7 @@ const STAGES: RoadmapStage[] = [
     prerequisites: ["networking", "programming"],
   },
   {
-    id: "set-up-lab",
+    id: "setup-lab",
     title: "Set Up Lab",
     goals: ["Virtualized isolated environment", "Kali/Parrot operator baseline"],
     prerequisites: ["tools"],
@@ -107,7 +109,7 @@ const STAGES: RoadmapStage[] = [
     id: "start-practicing",
     title: "Start Practicing",
     goals: ["Guided challenge progression", "Evidence-first reporting discipline"],
-    prerequisites: ["set-up-lab"],
+    prerequisites: ["setup-lab"],
   },
 ];
 
@@ -185,7 +187,7 @@ const SKILLS: DynamicSkill[] = [
   {
     id: "skill-lab-orchestration",
     name: "Lab Orchestration",
-    stageId: "set-up-lab",
+    stageId: "setup-lab",
     difficulty: "beginner",
     description: "Set up isolated test ranges and repeatable target scenarios.",
     outcomes: [
@@ -207,7 +209,7 @@ const SKILLS: DynamicSkill[] = [
       "Improved evidence quality",
       "Reusable issue templates and summaries",
     ],
-    relatedTools: ["tool-hack-the-box", "tool-tryhackme"],
+    relatedTools: ["tool-hack-the-box", "tool-tryhackme", "tool-overthewire"],
     resources: ["resource-practice-tracker"],
   },
 ];
@@ -262,7 +264,7 @@ const TOOLS: DynamicTool[] = [
     id: "tool-virtualbox",
     name: "VirtualBox/VMware",
     category: "platform",
-    stageId: "set-up-lab",
+    stageId: "setup-lab",
     purpose: "Isolated virtual lab environment.",
     safeUsage: ["No bridged exposure unless required", "Snapshot before intrusive tests"],
     commandExamples: ["Create host-only network", "Snapshot/rollback workflow"],
@@ -271,7 +273,7 @@ const TOOLS: DynamicTool[] = [
     id: "tool-kali-linux",
     name: "Kali Linux / Parrot OS",
     category: "platform",
-    stageId: "set-up-lab",
+    stageId: "setup-lab",
     purpose: "Security tooling runtime for controlled operations.",
     safeUsage: ["Harden default profile", "Keep tools patched", "Use non-root operator account"],
     commandExamples: ["apt update && apt upgrade", "tooling profile bootstrap"],
@@ -293,6 +295,15 @@ const TOOLS: DynamicTool[] = [
     purpose: "Applied security challenge labs.",
     safeUsage: ["Only challenge targets in platform scope"],
     commandExamples: ["Retired box practice cycle"],
+  },
+  {
+    id: "tool-overthewire",
+    name: "OverTheWire",
+    category: "practice",
+    stageId: "start-practicing",
+    purpose: "Wargame-style Linux, networking, and security fundamentals practice.",
+    safeUsage: ["Use published wargame hosts and rules only", "Track lessons without storing platform passwords"],
+    commandExamples: ["Bandit fundamentals progression"],
   },
 ];
 
@@ -341,7 +352,7 @@ const RESOURCES: DynamicResource[] = [
     id: "resource-lab-setup-guide",
     title: "Lab Setup Guide",
     type: "guide",
-    stageId: "set-up-lab",
+    stageId: "setup-lab",
     summary: "Virtualized lab and snapshot operations baseline.",
     internalPath: "src/agents/skills/roadmap.ts",
   },
@@ -366,22 +377,31 @@ export function createDynamicRoadmapRegistry(now: Date = new Date()): DynamicRoa
   };
 }
 
-export function listStageSkills(stageId: RoadmapStageId): DynamicSkill[] {
-  return SKILLS.filter((skill) => skill.stageId === stageId);
+function normalizeStageId(stageId: RoadmapStageAlias): RoadmapStageId {
+  return stageId === "set-up-lab" ? "setup-lab" : stageId;
 }
 
-export function listStageTools(stageId: RoadmapStageId): DynamicTool[] {
-  return TOOLS.filter((tool) => tool.stageId === stageId);
+export function listStageSkills(stageId: RoadmapStageAlias): DynamicSkill[] {
+  const normalized = normalizeStageId(stageId);
+  return SKILLS.filter((skill) => skill.stageId === normalized);
 }
 
-export function listStageResources(stageId: RoadmapStageId): DynamicResource[] {
-  return RESOURCES.filter((resource) => resource.stageId === stageId);
+export function listStageTools(stageId: RoadmapStageAlias): DynamicTool[] {
+  const normalized = normalizeStageId(stageId);
+  return TOOLS.filter((tool) => tool.stageId === normalized);
 }
 
-export function getNextStages(stageId: RoadmapStageId): RoadmapStage[] {
-  return STAGES.filter((stage) => stage.prerequisites.includes(stageId));
+export function listStageResources(stageId: RoadmapStageAlias): DynamicResource[] {
+  const normalized = normalizeStageId(stageId);
+  return RESOURCES.filter((resource) => resource.stageId === normalized);
 }
 
-export function getRoadmapStage(stageId: RoadmapStageId): RoadmapStage | undefined {
-  return STAGES.find((stage) => stage.id === stageId);
+export function getNextStages(stageId: RoadmapStageAlias): RoadmapStage[] {
+  const normalized = normalizeStageId(stageId);
+  return STAGES.filter((stage) => stage.prerequisites.includes(normalized));
+}
+
+export function getRoadmapStage(stageId: RoadmapStageAlias): RoadmapStage | undefined {
+  const normalized = normalizeStageId(stageId);
+  return STAGES.find((stage) => stage.id === normalized);
 }

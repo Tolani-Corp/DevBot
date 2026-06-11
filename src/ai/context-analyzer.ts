@@ -1,4 +1,4 @@
-import { generateCodeChanges } from "../claude.js";
+import { generateCodeChanges } from "./claude.js";
 import { tracer } from "@/lib/tracing.js";
 import { logger } from "@/lib/logger.js";
 
@@ -96,11 +96,15 @@ export function detectStyleGuide(files: Record<string, string>): StyleGuide {
   const content = Object.values(files).join("\n");
 
   // Detect semicolons
-  const hasSemicolons = content.match(/;\s*\n/).length > content.match(/\s*\n/).length * 0.5;
+  const semicolonMatches = content.match(/;\s*\n/g) ?? [];
+  const lineMatches = content.match(/\s*\n/g) ?? [];
+  const hasSemicolons = semicolonMatches.length > lineMatches.length * 0.5;
 
   // Detect quotes
   let quotes: "single" | "double" | "backtick" = "double";
-  if (content.match(/'[^']*'/g).length > content.match(/"[^"]*"/g).length) {
+  const singleQuoteMatches = content.match(/'[^']*'/g) ?? [];
+  const doubleQuoteMatches = content.match(/"[^"]*"/g) ?? [];
+  if (singleQuoteMatches.length > doubleQuoteMatches.length) {
     quotes = "single";
   }
 
@@ -203,7 +207,7 @@ export async function extractProjectContext(
       {
         area: "Testing",
         rule: "Name tests descriptively with it() blocks",
-        examples: ['it("should return user when id exists", async () => {']);
+        examples: ['it("should return user when id exists", async () => { ... })'],
       },
     ];
 
