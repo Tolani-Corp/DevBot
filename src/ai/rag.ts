@@ -174,3 +174,33 @@ export class RAGEngine {
 }
 
 export const ragEngine = new RAGEngine();
+
+export interface FileAnalysis {
+    fileCount: number;
+    totalBytes: number;
+    averageBytes: number;
+    languages: Record<string, number>;
+}
+
+export async function analyzeFiles(files: string[]): Promise<FileAnalysis> {
+    const languages: Record<string, number> = {};
+    let totalBytes = 0;
+
+    for (const content of files) {
+        totalBytes += content.length;
+        const language =
+            content.includes("import ") || content.includes("export ")
+                ? "typescript"
+                : content.includes("SELECT ") || content.includes("FROM ")
+                    ? "sql"
+                    : "text";
+        languages[language] = (languages[language] ?? 0) + 1;
+    }
+
+    return {
+        fileCount: files.length,
+        totalBytes,
+        averageBytes: files.length === 0 ? 0 : Math.round(totalBytes / files.length),
+        languages,
+    };
+}

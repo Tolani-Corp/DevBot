@@ -97,7 +97,7 @@ export class GuardrailRegistry {
   register(guardrail: SafetyGuardrail): void {
     const configEntry = this.config.guardrails[guardrail.id];
     if (configEntry) {
-      guardrail.enabled = configEntry.enabled;
+      guardrail.enabled = guardrail.enabled && configEntry.enabled;
       guardrail.severity = configEntry.severity;
     }
 

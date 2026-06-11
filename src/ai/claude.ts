@@ -56,7 +56,8 @@ export async function analyzeTask(
   context?: {
     repository?: string;
     previousMessages?: Message[];
-    filesContents: Record<string, string>;
+    fileContents?: Record<string, string>;
+    filesContents?: Record<string, string>;
     userId?: string;
     workspaceId?: string;
     /** Pro/Enterprise only: request a specific Anthropic model. */
@@ -123,9 +124,10 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
     }
   }
 
+  const contextFileContents = context?.filesContents ?? context?.fileContents;
   const userPrompt = `Task description: ${description}${context?.repository ? `\n\nRepository context: ${context.repository}` : ""
-}${ragContext}${context?.filesContents
-      ? `\n\nFile contents:\n${Object.entries(context.filesContents)
+}${ragContext}${contextFileContents
+      ? `\n\nFile contents:\n${Object.entries(contextFileContents)
           .map(([path, content]) => `\n### ${path}\n\`\`\`\n${(content as string).slice(0, 2000)}\n\`\`\``)
         .join("\n")}`
       : ""
@@ -166,9 +168,9 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
 
 export async function generateCodeChanges(
   plan: string,
-  fileContents: Record<string, string>,
+  fileContents: Record<string, string> | { filesContents: Record<string, string> },
   userId: string = "system",
-  workspaceId: string = "system",
+  workspaceId?: string,
   /** Pro/Enterprise only: request a specific Anthropic model. */
   preferredModel?: string
 ): Promise<{
@@ -180,6 +182,7 @@ export async function generateCodeChanges(
   }>;
   commitMessage: string;
   prDescription: string;
+  plan: string;
 }> {
   const systemPrompt = `You are Debo, a governed engineering teammate with expertise in TypeScript, Node.js, React, and systems integration. You generate production-ready code changes.
 
@@ -220,7 +223,10 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
   "prDescription": "## Summary\n<what>\n\n## Changes\n- <file>: <what changed>\n\n## Testing\n<how to verify>"
 }`;
 
-  const userPrompt = `Plan:\n${plan}\n\nFiles:\n${Object.entries(fileContents)
+  const normalizedFileContents =
+    "filesContents" in fileContents ? fileContents.filesContents : fileContents;
+
+  const userPrompt = `Plan:\n${plan}\n\nFiles:\n${Object.entries(normalizedFileContents)
     .map(([path, content]) => `### ${path}\n\`\`\`\n${content}\n\`\`\``)
     .join("\n\n")}`;
 
@@ -234,7 +240,7 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
   if (response.usage && !isByok) {
     // Only track cost against DEBO's account when using the shared platform key.
     // BYOK users pay Anthropic directly — we don't track their spend.
-    costTracker.track(userId, workspaceId, {
+    costTracker.track(userId, workspaceId ?? "system", {
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       model,
@@ -247,7 +253,28 @@ Respond ONLY in valid JSON format (no preamble, no trailing text):
     throw new Error("AI response did not contain valid JSON");
   }
 
-  return JSON.parse(jsonMatch[0]);
+  const parsed = JSON.parse(jsonMatch[0]) as {
+    changes?: Array<{
+      file: string;
+      oldContent: string;
+      newContent: string;
+      explanation: string;
+    }>;
+    commitMessage?: string;
+    prDescription?: string;
+    plan?: string;
+  };
+
+  return {
+    changes: parsed.changes ?? [],
+    commitMessage: parsed.commitMessage ?? "chore: generated changes",
+    prDescription: parsed.prDescription ?? "",
+    plan:
+      parsed.plan ??
+      parsed.prDescription ??
+      parsed.changes?.map((change) => change.newContent).join("\n\n") ??
+      "",
+  };
 }
 
 export async function answerQuestion(

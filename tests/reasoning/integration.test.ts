@@ -3,9 +3,19 @@ import { planDecomposition, executeSubtask, verifyAgentOutput } from "@/agents/o
 import { TraceCapture } from "@/reasoning/trace";
 import type { AgentTask } from "@/agents/types";
 
-vi.mock("@anthropic-ai/sdk");
+const mockCreate = vi.hoisted(() => vi.fn());
+
+vi.mock("@anthropic-ai/sdk", () => ({
+  default: vi.fn().mockImplementation(() => ({
+    messages: { create: mockCreate },
+  })),
+}));
 
 describe("Orchestrator with Reasoning Trace Integration", () => {
+  beforeEach(() => {
+    mockCreate.mockReset();
+  });
+
   describe("planDecomposition with trace", () => {
     it("should capture reasoning steps during planning", async () => {
       const trace = new TraceCapture("parent-task", "orchestrator");
@@ -30,8 +40,7 @@ describe("Orchestrator with Reasoning Trace Integration", () => {
         ],
       };
 
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      vi.mocked(Anthropic.prototype.messages.create).mockResolvedValue(mockResponse as any);
+      mockCreate.mockResolvedValue(mockResponse);
 
       await planDecomposition(
         "Build login form",
@@ -69,8 +78,7 @@ describe("Orchestrator with Reasoning Trace Integration", () => {
         content: [{ type: "text" as const, text: "Invalid response" }],
       };
 
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      vi.mocked(Anthropic.prototype.messages.create).mockResolvedValue(mockResponse as any);
+      mockCreate.mockResolvedValue(mockResponse);
 
       await expect(
         planDecomposition(
@@ -127,8 +135,7 @@ describe("Orchestrator with Reasoning Trace Integration", () => {
         ],
       };
 
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      vi.mocked(Anthropic.prototype.messages.create).mockResolvedValue(mockResponse as any);
+      mockCreate.mockResolvedValue(mockResponse);
 
       await executeSubtask(task, { "src/App.tsx": "const App = () => {}" }, trace);
 
@@ -153,10 +160,7 @@ describe("Orchestrator with Reasoning Trace Integration", () => {
     it("should capture error observations", async () => {
       const trace = new TraceCapture(task.id, task.role);
 
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      vi.mocked(Anthropic.prototype.messages.create).mockRejectedValue(
-        new Error("API error")
-      );
+      mockCreate.mockRejectedValue(new Error("API error"));
 
       await executeSubtask(task, {}, trace);
 
@@ -213,8 +217,7 @@ describe("Orchestrator with Reasoning Trace Integration", () => {
         ],
       };
 
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      vi.mocked(Anthropic.prototype.messages.create).mockResolvedValue(mockResponse as any);
+      mockCreate.mockResolvedValue(mockResponse);
 
       await verifyAgentOutput(task, result, trace);
 

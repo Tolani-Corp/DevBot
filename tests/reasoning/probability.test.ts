@@ -241,9 +241,7 @@ describe("reasoning/probability", () => {
       );
 
       expect(confidence.value).toBeGreaterThan(0.7);
-      expect(confidence.sources).toContain(
-        expect.stringContaining("capability-match"),
-      );
+      expect(confidence.sources.some((source) => source.includes("capability-match"))).toBe(true);
     });
 
     it("increases confidence with file pattern match", () => {

@@ -1,215 +1,211 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+type WorkspaceRow = {
+  id: string;
+  platformType: "slack" | "discord" | "vscode";
+  slackTeamId?: string;
+  discordGuildId?: string;
+  botName: string;
+  botMention?: string;
+  onboardingCompleted: boolean;
+  onboardingCompletedAt?: Date;
+  memoryDisclosureAcceptedAt?: Date;
+  memoryPolicyUpdatedAt?: Date;
+  updatedAt?: Date;
+  settings?: {
+    memoryPolicy?: Record<string, unknown>;
+    consentVersion?: string;
+  };
+};
+
+const workspaceStore = vi.hoisted(() => ({
+  rows: [] as WorkspaceRow[],
+  nextId: 1,
+}));
+
+vi.mock("@/db/schema", () => ({
+  workspaces: {
+    id: "id",
+    slackTeamId: "slackTeamId",
+    discordGuildId: "discordGuildId",
+  },
+}));
+
+vi.mock("drizzle-orm", () => ({
+  eq: (column: string, value: unknown) => ({ column, value }),
+}));
+
+vi.mock("@/db", () => {
+  const matches = (condition: { column: keyof WorkspaceRow; value: unknown }, row: WorkspaceRow) =>
+    row[condition.column] === condition.value;
+
+  return {
+    db: {
+      select: () => {
+        let selected = workspaceStore.rows;
+        const chain = {
+          from: () => chain,
+          where: (condition: { column: keyof WorkspaceRow; value: unknown }) => {
+            selected = workspaceStore.rows.filter((row) => matches(condition, row));
+            return chain;
+          },
+          limit: (count: number) => Promise.resolve(selected.slice(0, count)),
+        };
+        return chain;
+      },
+      insert: () => ({
+        values: (value: Partial<WorkspaceRow>) => {
+          const row: WorkspaceRow = {
+            id: `workspace-${workspaceStore.nextId++}`,
+            platformType: value.platformType ?? "slack",
+            botName: value.botName ?? "DevBot",
+            onboardingCompleted: value.onboardingCompleted ?? false,
+            ...value,
+          };
+          workspaceStore.rows.push(row);
+          return {
+            returning: () => Promise.resolve([row]),
+          };
+        },
+      }),
+      update: () => ({
+        set: (patch: Partial<WorkspaceRow>) => ({
+          where: (condition: { column: keyof WorkspaceRow; value: unknown }) => {
+            for (const row of workspaceStore.rows) {
+              if (matches(condition, row)) {
+                Object.assign(row, patch);
+              }
+            }
+            return Promise.resolve();
+          },
+        }),
+      }),
+      delete: () => ({
+        where: (condition: { column: keyof WorkspaceRow; value: unknown }) => {
+          workspaceStore.rows = workspaceStore.rows.filter((row) => !matches(condition, row));
+          return Promise.resolve();
+        },
+      }),
+    },
+  };
+});
+
+vi.mock("@/services/journey-core", () => ({
+  buildDefaultWorkspaceMemoryPolicy: () => ({
+    mode: "minimal",
+    allowMemoryLearning: false,
+    disclosureVersion: "test-v1",
+  }),
+  normalizeWorkspaceMemoryPolicy: (settings?: { memoryPolicy?: Record<string, unknown> }) =>
+    settings?.memoryPolicy ?? {
+      mode: "minimal",
+      allowMemoryLearning: false,
+      disclosureVersion: "test-v1",
+    },
+  recordJourneySignal: vi.fn().mockResolvedValue(undefined),
+  acknowledgeWorkspaceDisclosure: vi.fn().mockImplementation(
+    async ({ workspaceId }: { workspaceId: string }) => {
+      const workspace = workspaceStore.rows.find((row) => row.id === workspaceId);
+      if (!workspace) {
+        return;
+      }
+
+      const acceptedAt = new Date();
+      workspace.memoryDisclosureAcceptedAt = acceptedAt;
+      workspace.settings = {
+        ...(workspace.settings ?? {}),
+        memoryPolicy: {
+          ...(workspace.settings?.memoryPolicy ?? {}),
+          disclosureAcceptedAt: acceptedAt,
+        },
+      };
+    },
+  ),
+}));
+
 import {
-  needsOnboarding,
-  ensureWorkspace,
   completeOnboarding,
+  ensureWorkspace,
   getBotName,
-  updateBotName,
-  getOnboardingMessage,
-  getNameConfirmationMessage,
   getHelpMessage,
+  getNameConfirmationMessage,
+  getOnboardingMessage,
+  needsOnboarding,
+  updateBotName,
 } from "../src/services/onboarding.js";
-import { db } from "../src/db/index.js";
-import { workspaces } from "../src/db/schema.js";
-import { eq } from "drizzle-orm";
 
-console.log("🧪 DevBot Onboarding Test Suite\n");
+describe("onboarding service", () => {
+  const testSlackTeam = "T123456789TEST";
+  const testDiscordGuild = "987654321TEST";
 
-// Test data
-const testSlackTeam = "T123456789TEST";
-const testDiscordGuild = "987654321TEST";
-
-async function cleanup() {
-  console.log("🧹 Cleaning up test data...");
-  await db.delete(workspaces).where(eq(workspaces.slackTeamId, testSlackTeam));
-  await db.delete(workspaces).where(eq(workspaces.discordGuildId, testDiscordGuild));
-  console.log("✅ Cleanup complete\n");
-}
-
-async function testSlackOnboarding() {
-  console.log("📱 Testing Slack Onboarding...\n");
-
-  // Test 1: Check if onboarding needed for new workspace
-  console.log("Test 1: Check onboarding needed");
-  const needsOnboard = await needsOnboarding({
-    platformType: "slack",
-    teamId: testSlackTeam,
+  beforeEach(() => {
+    workspaceStore.rows = [];
+    workspaceStore.nextId = 1;
+    vi.clearAllMocks();
   });
-  console.log(`  Needs onboarding: ${needsOnboard}`);
-  if (!needsOnboard) throw new Error("Should need onboarding for new workspace");
-  console.log("  ✅ PASS\n");
 
-  // Test 2: Ensure workspace created
-  console.log("Test 2: Create workspace");
-  const workspace = await ensureWorkspace({
-    platformType: "slack",
-    teamId: testSlackTeam,
-  });
-  console.log(`  Workspace ID: ${workspace.id}`);
-  console.log(`  Platform: ${workspace.platformType}`);
-  console.log(`  Default name: ${workspace.botName}`);
-  console.log(`  Onboarding complete: ${workspace.onboardingCompleted}`);
-  console.log(`  Default memory mode: ${workspace.settings?.memoryPolicy?.mode}`);
-  if (workspace.botName !== "DevBot") throw new Error("Default name should be DevBot");
-  if (workspace.onboardingCompleted) throw new Error("Should not be onboarded yet");
-  if (workspace.settings?.memoryPolicy?.mode !== "minimal") throw new Error("Default memory mode should be minimal");
-  if (workspace.settings?.memoryPolicy?.allowMemoryLearning !== false) throw new Error("Passive memory learning should default to off");
-  console.log("  ✅ PASS\n");
+  it("creates and completes Slack onboarding with memory disclosure defaults", async () => {
+    await expect(
+      needsOnboarding({ platformType: "slack", teamId: testSlackTeam }),
+    ).resolves.toBe(true);
 
-  // Test 3: Complete onboarding with custom name
-  console.log("Test 3: Complete onboarding with custom name 'Debo'");
-  await completeOnboarding(
-    {
+    const workspace = await ensureWorkspace({
       platformType: "slack",
       teamId: testSlackTeam,
-    },
-    "Debo"
-  );
-  const updatedWorkspace = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.slackTeamId, testSlackTeam))
-    .limit(1);
-  console.log(`  Bot name: ${updatedWorkspace[0].botName}`);
-  console.log(`  Bot mention: ${updatedWorkspace[0].botMention}`);
-  console.log(`  Onboarding complete: ${updatedWorkspace[0].onboardingCompleted}`);
-  console.log(`  Memory disclosure accepted: ${updatedWorkspace[0].memoryDisclosureAcceptedAt}`);
-  if (updatedWorkspace[0].botName !== "Debo") throw new Error("Name should be Debo");
-  if (!updatedWorkspace[0].onboardingCompleted) throw new Error("Should be onboarded");
-  if (!updatedWorkspace[0].memoryDisclosureAcceptedAt) throw new Error("Disclosure acceptance timestamp should be captured");
-  if (updatedWorkspace[0].settings?.memoryPolicy?.disclosureAcceptedAt == null) {
-    throw new Error("Disclosure acceptance should be mirrored into settings.memoryPolicy");
-  }
-  console.log("  ✅ PASS\n");
+    });
 
-  // Test 4: Check onboarding no longer needed
-  console.log("Test 4: Verify onboarding not needed after completion");
-  const stillNeedsOnboard = await needsOnboarding({
-    platformType: "slack",
-    teamId: testSlackTeam,
+    expect(workspace.botName).toBe("DevBot");
+    expect(workspace.onboardingCompleted).toBe(false);
+    expect(workspace.settings?.memoryPolicy?.mode).toBe("minimal");
+    expect(workspace.settings?.memoryPolicy?.allowMemoryLearning).toBe(false);
+
+    await completeOnboarding(
+      { platformType: "slack", teamId: testSlackTeam },
+      "Debo",
+    );
+
+    const updatedWorkspace = workspaceStore.rows.find((row) => row.slackTeamId === testSlackTeam);
+    expect(updatedWorkspace?.botName).toBe("Debo");
+    expect(updatedWorkspace?.botMention).toBe("@Debo");
+    expect(updatedWorkspace?.onboardingCompleted).toBe(true);
+    expect(updatedWorkspace?.memoryDisclosureAcceptedAt).toBeInstanceOf(Date);
+    expect(updatedWorkspace?.settings?.memoryPolicy?.disclosureAcceptedAt).toBeInstanceOf(Date);
+
+    await expect(
+      needsOnboarding({ platformType: "slack", teamId: testSlackTeam }),
+    ).resolves.toBe(false);
+    await expect(getBotName({ platformType: "slack", teamId: testSlackTeam })).resolves.toBe("Debo");
   });
-  console.log(`  Still needs onboarding: ${stillNeedsOnboard}`);
-  if (stillNeedsOnboard) throw new Error("Should not need onboarding anymore");
-  console.log("  ✅ PASS\n");
 
-  // Test 5: Get bot name
-  console.log("Test 5: Get bot name");
-  const botName = await getBotName({
-    platformType: "slack",
-    teamId: testSlackTeam,
+  it("updates bot name for an onboarded Slack workspace", async () => {
+    await ensureWorkspace({ platformType: "slack", teamId: testSlackTeam });
+    await updateBotName({ platformType: "slack", teamId: testSlackTeam }, "CodeBuddy");
+
+    await expect(getBotName({ platformType: "slack", teamId: testSlackTeam })).resolves.toBe(
+      "CodeBuddy",
+    );
   });
-  console.log(`  Bot name retrieved: ${botName}`);
-  if (botName !== "Debo") throw new Error("Should return Debo");
-  console.log("  ✅ PASS\n");
 
-  // Test 6: Update bot name
-  console.log("Test 6: Update bot name to 'CodeBuddy'");
-  await updateBotName(
-    {
-      platformType: "slack",
-      teamId: testSlackTeam,
-    },
-    "CodeBuddy"
-  );
-  const newName = await getBotName({
-    platformType: "slack",
-    teamId: testSlackTeam,
+  it("handles Discord onboarding while keeping the default name text", async () => {
+    await ensureWorkspace({ platformType: "discord", guildId: testDiscordGuild });
+    await completeOnboarding(
+      { platformType: "discord", guildId: testDiscordGuild },
+      "keep DevBot",
+    );
+
+    const workspace = workspaceStore.rows.find((row) => row.discordGuildId === testDiscordGuild);
+    expect(workspace?.botName).toContain("DevBot");
+    expect(workspace?.onboardingCompleted).toBe(true);
   });
-  console.log(`  New bot name: ${newName}`);
-  if (newName !== "CodeBuddy") throw new Error("Should return CodeBuddy");
-  console.log("  ✅ PASS\n");
 
-  console.log("✅ All Slack tests passed!\n");
-}
+  it("generates onboarding, confirmation, and help messages", () => {
+    expect(getOnboardingMessage()).toContain("DevBot");
+    expect(getOnboardingMessage()).toContain("call me whatever you like");
+    expect(getOnboardingMessage()).toContain("lightweight journey snapshots");
 
-async function testDiscordOnboarding() {
-  console.log("🎮 Testing Discord Onboarding...\n");
+    expect(getNameConfirmationMessage("Debo")).toContain("Debo");
+    expect(getNameConfirmationMessage("Debo")).toContain("Default memory mode is");
 
-  // Test 1: Complete onboarding with "keep DevBot"
-  console.log("Test 1: Onboarding with 'keep DevBot'");
-  await ensureWorkspace({
-    platformType: "discord",
-    guildId: testDiscordGuild,
+    expect(getHelpMessage("CodeWizard")).toContain("CodeWizard");
   });
-  await completeOnboarding(
-    {
-      platformType: "discord",
-      guildId: testDiscordGuild,
-    },
-    "keep DevBot"
-  );
-  const workspace = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.discordGuildId, testDiscordGuild))
-    .limit(1);
-  console.log(`  Bot name: ${workspace[0].botName}`);
-  if (!workspace[0].botName.includes("DevBot")) throw new Error("Should keep DevBot");
-  console.log("  ✅ PASS\n");
-
-  console.log("✅ All Discord tests passed!\n");
-}
-
-async function testMessages() {
-  console.log("💬 Testing Message Generation...\n");
-
-  // Test onboarding message
-  console.log("Test 1: Onboarding message");
-  const onboardMsg = getOnboardingMessage();
-  console.log("  Message preview:");
-  console.log(onboardMsg.substring(0, 100) + "...");
-  if (!onboardMsg.includes("DevBot")) throw new Error("Should mention DevBot");
-  if (!onboardMsg.includes("call me whatever you like")) throw new Error("Should mention customization");
-  if (!onboardMsg.includes("lightweight journey snapshots")) throw new Error("Should disclose default memory behavior");
-  console.log("  ✅ PASS\n");
-
-  // Test confirmation message
-  console.log("Test 2: Name confirmation message");
-  const confirmMsg = getNameConfirmationMessage("Debo");
-  console.log("  Message preview:");
-  console.log(confirmMsg.substring(0, 100) + "...");
-  if (!confirmMsg.includes("Debo")) throw new Error("Should mention custom name");
-  if (!confirmMsg.includes("Default memory mode is")) throw new Error("Should mention default memory mode");
-  console.log("  ✅ PASS\n");
-
-  // Test help message
-  console.log("Test 3: Help message with custom name");
-  const helpMsg = getHelpMessage("CodeWizard");
-  console.log("  Message preview:");
-  console.log(helpMsg.substring(0, 100) + "...");
-  if (!helpMsg.includes("CodeWizard")) throw new Error("Should mention custom name");
-  console.log("  ✅ PASS\n");
-
-  console.log("✅ All message tests passed!\n");
-}
-
-async function runTests() {
-  try {
-    console.log("=" .repeat(60));
-    console.log("DevBot Personalization Feature Test Suite");
-    console.log("=" .repeat(60) + "\n");
-
-    // Cleanup before tests
-    await cleanup();
-
-    // Run test suites
-    await testSlackOnboarding();
-    await testDiscordOnboarding();
-    await testMessages();
-
-    // Cleanup after tests
-    await cleanup();
-
-    console.log("=" .repeat(60));
-    console.log("🎉 ALL TESTS PASSED!");
-    console.log("=" .repeat(60));
-    process.exit(0);
-  } catch (error) {
-    console.error("\n❌ TEST FAILED:");
-    console.error(error);
-    await cleanup();
-    process.exit(1);
-  }
-}
-
-// Run tests
-runTests();
+});

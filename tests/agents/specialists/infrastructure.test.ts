@@ -2,9 +2,31 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { executeInfrastructureTask } from "@/agents/specialists/infrastructure.js";
 import type { AgentTask } from "@/agents/types.js";
 
-vi.mock("@/ai/claude.js");
-vi.mock("@/lib/tracing.js");
-vi.mock("@/lib/logger.js");
+vi.mock("@/ai/claude.js", () => ({
+  generateCodeChanges: async () => ({
+    plan: "Generated infrastructure code",
+    changes: [],
+    commitMessage: "test: generated",
+    prDescription: "Generated test response",
+  }),
+}));
+vi.mock("@/lib/tracing.js", () => ({
+  tracer: {
+    startSpan: () => ({
+      setAttribute: () => undefined,
+      recordException: () => undefined,
+      end: () => undefined,
+    }),
+  },
+}));
+vi.mock("@/lib/logger.js", () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  },
+}));
 
 describe("Infrastructure Agent", () => {
   let mockTask: AgentTask;

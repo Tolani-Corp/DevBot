@@ -171,12 +171,15 @@ export function estimateTaskComplexity(
   let criticalScore = 0;
 
   // Length-based scoring
-  if (descLength < 10) {
+  if (descLength <= 4) {
     trivialScore += 3;
     simpleScore += 1;
-  } else if (descLength < 30) {
+  } else if (descLength < 12) {
     simpleScore += 3;
-    moderateScore += 1;
+    moderateScore += 2;
+  } else if (descLength < 30) {
+    moderateScore += 3;
+    simpleScore += 1;
   } else if (descLength < 80) {
     moderateScore += 3;
     complexScore += 1;
@@ -195,6 +198,7 @@ export function estimateTaskComplexity(
   } else if (fileCount <= 7) {
     complexScore += 2;
   } else {
+    complexScore += 2;
     criticalScore += 3;
   }
 
@@ -205,8 +209,8 @@ export function estimateTaskComplexity(
   const trivialKeywords = ["typo", "comment", "whitespace", "formatting"];
 
   if (securityKeywords.some((kw) => lowerDesc.includes(kw))) {
-    complexScore += 2;
-    criticalScore += 1;
+    complexScore += 6;
+    criticalScore += 3;
   }
 
   if (complexityKeywords.some((kw) => lowerDesc.includes(kw))) {
@@ -233,6 +237,39 @@ export interface AgentCapability {
   filePatterns: string[];
 }
 
+function escapeRegexChar(char: string): string {
+  return /[\\^$+?.()|[\]{}]/.test(char) ? `\\${char}` : char;
+}
+
+function globMatches(pattern: string, filePath: string): boolean {
+  const normalizedPattern = pattern.replace(/\\/g, "/");
+  const normalizedFile = filePath.replace(/\\/g, "/");
+  let regexSource = "";
+
+  for (let i = 0; i < normalizedPattern.length; i++) {
+    const char = normalizedPattern[i];
+
+    if (char === "*") {
+      if (normalizedPattern[i + 1] === "*") {
+        if (normalizedPattern[i + 2] === "/") {
+          regexSource += "(?:.*/)?";
+          i += 2;
+        } else {
+          regexSource += ".*";
+          i += 1;
+        }
+      } else {
+        regexSource += "[^/]*";
+      }
+      continue;
+    }
+
+    regexSource += escapeRegexChar(char);
+  }
+
+  return new RegExp(`^${regexSource}$`).test(normalizedFile);
+}
+
 /**
  * Estimates agent-task match score using Bayesian reasoning.
  * Returns P(success | agent, task).
@@ -241,7 +278,7 @@ export function estimateAgentCapability(
   agent: AgentCapability,
   taskDescription: string,
   filesAffected: string[],
-  priorSuccessRate: number = 0.7, // Default prior
+  priorSuccessRate: number = 0.5, // Default prior
 ): ConfidenceScore {
   const bayesian = new BayesianUpdater();
   let currentProbability = priorSuccessRate;
@@ -249,11 +286,7 @@ export function estimateAgentCapability(
 
   // Evidence 1: File pattern match
   const matchingFiles = filesAffected.filter((file) =>
-    agent.filePatterns.some((pattern) => {
-      // Simple glob matching: **/*.ts -> ends with .ts
-      const regex = pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
-      return new RegExp(regex).test(file);
-    }),
+    agent.filePatterns.some((pattern) => globMatches(pattern, file)),
   );
 
   const fileMatchRatio = filesAffected.length > 0 
@@ -271,9 +304,17 @@ export function estimateAgentCapability(
 
   // Evidence 2: Capability keyword match
   const lowerDesc = taskDescription.toLowerCase();
-  const capabilityMatches = agent.capabilities.filter((cap) =>
-    lowerDesc.includes(cap.toLowerCase()),
-  );
+  const capabilityMatches = agent.capabilities.filter((cap) => {
+    const normalized = cap.toLowerCase();
+    if (lowerDesc.includes(normalized)) {
+      return true;
+    }
+
+    return normalized
+      .split(/[^a-z0-9]+/)
+      .filter((part) => part.length >= 2)
+      .some((part) => lowerDesc.includes(part));
+  });
 
   if (capabilityMatches.length > 0) {
     currentProbability = bayesian.update(

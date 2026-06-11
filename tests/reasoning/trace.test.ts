@@ -198,14 +198,10 @@ describe("mergeTraces", () => {
   it("should merge multiple traces into chronological order", () => {
     const capture1 = new TraceCapture("parent-task", "frontend");
     capture1.thought("Frontend thought 1");
-    setTimeout(() => {
-      capture1.action("Frontend action 1");
-    }, 10);
+    capture1.action("Frontend action 1");
 
     const capture2 = new TraceCapture("parent-task", "backend");
-    setTimeout(() => {
-      capture2.thought("Backend thought 1");
-    }, 5);
+    capture2.thought("Backend thought 1");
     capture2.action("Backend action 1");
 
     const traces = [capture1.getTrace(), capture2.getTrace()];

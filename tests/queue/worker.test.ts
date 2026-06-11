@@ -251,7 +251,8 @@ describe("queue/worker - processTask", () => {
     expect(mockUpdateSlackThread).toHaveBeenCalledWith(
       "C12345",
       "1234567890.123456",
-      expect.stringContaining("committed to branch")
+      expect.stringContaining("committed to branch"),
+      expect.any(Array)
     );
   });
 });

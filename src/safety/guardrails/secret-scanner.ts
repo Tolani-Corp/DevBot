@@ -132,7 +132,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   // Anthropic
   {
     name: "Anthropic API Key",
-    pattern: /sk-ant-api03-[a-zA-Z0-9_-]{95}/gi,
+    pattern: /sk-ant-api03-[a-zA-Z0-9_-]{80,120}/gi,
     severity: "critical",
   },
 

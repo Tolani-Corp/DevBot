@@ -39,12 +39,14 @@ export interface RollbackResult {
  * Run a git command safely using execFileSync with array arguments.
  */
 function git(repoPath: string, args: string[]): string {
-  return execFileSync("git", args, {
+  const output = execFileSync("git", args, {
     cwd: repoPath,
     stdio: "pipe",
     encoding: "utf-8",
     timeout: 30_000,
-  }).trim();
+  });
+
+  return Buffer.isBuffer(output) ? output.toString("utf-8").trim() : String(output).trim();
 }
 
 export class RollbackManager {

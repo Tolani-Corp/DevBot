@@ -2,10 +2,39 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { executeDocumentationTask } from "@/agents/specialists/documentation.js";
 import type { AgentTask, AgentResult } from "@/agents/types.js";
 
-vi.mock("@/ai/claude.js");
-vi.mock("@/ai/rag.js");
-vi.mock("@/lib/tracing.js");
-vi.mock("@/lib/logger.js");
+vi.mock("@/ai/claude.js", () => ({
+  generateCodeChanges: async () => ({
+    plan: "Generated documentation content",
+    changes: [],
+    commitMessage: "test: generated",
+    prDescription: "Generated test response",
+  }),
+}));
+vi.mock("@/ai/rag.js", () => ({
+  analyzeFiles: async () => ({
+    fileCount: 0,
+    totalBytes: 0,
+    averageBytes: 0,
+    languages: {},
+  }),
+}));
+vi.mock("@/lib/tracing.js", () => ({
+  tracer: {
+    startSpan: () => ({
+      setAttribute: () => undefined,
+      recordException: () => undefined,
+      end: () => undefined,
+    }),
+  },
+}));
+vi.mock("@/lib/logger.js", () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  },
+}));
 
 describe("Documentation Agent", () => {
   let mockTask: AgentTask;

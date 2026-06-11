@@ -1,4 +1,4 @@
-import { generateCodeChanges } from "./claude.js";
+import { generateCodeChanges } from "../claude.js";
 import { tracer } from "@/lib/tracing.js";
 import { logger } from "@/lib/logger.js";
 

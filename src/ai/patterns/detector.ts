@@ -1,5 +1,5 @@
-import { generateCodeChanges } from "./claude.js";
-import { analyzeFiles } from "./rag.js";
+import { generateCodeChanges } from "../claude.js";
+import { analyzeFiles } from "../rag.js";
 import { tracer } from "@/lib/tracing.js";
 import { logger } from "@/lib/logger.js";
 import { z } from "zod";

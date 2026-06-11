@@ -8,8 +8,23 @@ import {
 } from "@/ai/conversations/manager.js";
 
 vi.mock("@/ai/claude.js");
-vi.mock("@/lib/tracing.js");
-vi.mock("@/lib/logger.js");
+vi.mock("@/lib/tracing.js", () => ({
+  tracer: {
+    startSpan: () => ({
+      setAttribute: () => undefined,
+      recordException: () => undefined,
+      end: () => undefined,
+    }),
+  },
+}));
+vi.mock("@/lib/logger.js", () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  },
+}));
 
 describe("Conversation Manager", () => {
   let context: any;

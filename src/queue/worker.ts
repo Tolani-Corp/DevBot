@@ -98,6 +98,23 @@ async function logAudit(taskId: string, action: string, details: Record<string, 
   });
 }
 
+async function getTaskRecord(taskId: string): Promise<{
+  slackUserId?: string | null;
+  workspaceId?: string | null;
+} | null> {
+  if (typeof (db as { select?: unknown }).select !== "function") {
+    return null;
+  }
+
+  try {
+    const [taskRecord] = await db.select().from(tasks).where(eq(tasks.id, taskId));
+    return taskRecord ?? null;
+  } catch (error) {
+    console.warn(`[worker] Failed to fetch task record for ${taskId}:`, error);
+    return null;
+  }
+}
+
 async function recordTaskJourney(
   workspaceId: string | null | undefined,
   input: Omit<Parameters<typeof recordJourneySignal>[0], "workspaceId">,
@@ -120,7 +137,7 @@ export async function processTask(job: Job<TaskData>) {
   const { taskId, slackThreadTs, slackChannelId, description, repository, clickUpTaskId } = job.data;
 
   // Fetch task to get userId for cost tracking
-  const [taskRecord] = await db.select().from(tasks).where(eq(tasks.id, taskId));
+  const taskRecord = await getTaskRecord(taskId);
   const userId = taskRecord?.slackUserId ?? "unknown";
   const workspaceId = taskRecord?.workspaceId;
 

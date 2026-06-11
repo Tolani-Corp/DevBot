@@ -2,10 +2,32 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { executeDataTask } from "@/agents/specialists/data.js";
 import type { AgentTask } from "@/agents/types.js";
 
-vi.mock("@/ai/claude.js");
+vi.mock("@/ai/claude.js", () => ({
+  generateCodeChanges: async () => ({
+    plan: "Generated data code",
+    changes: [],
+    commitMessage: "test: generated",
+    prDescription: "Generated test response",
+  }),
+}));
 vi.mock("@/ai/rag.js");
-vi.mock("@/lib/tracing.js");
-vi.mock("@/lib/logger.js");
+vi.mock("@/lib/tracing.js", () => ({
+  tracer: {
+    startSpan: () => ({
+      setAttribute: () => undefined,
+      recordException: () => undefined,
+      end: () => undefined,
+    }),
+  },
+}));
+vi.mock("@/lib/logger.js", () => ({
+  logger: {
+    debug: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+    error: () => undefined,
+  },
+}));
 
 describe("Data Agent", () => {
   let mockTask: AgentTask;
