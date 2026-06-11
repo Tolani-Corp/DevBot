@@ -14,6 +14,11 @@ When Claude makes a mistake and gets corrected, the lesson goes here.
 
 ## Active Patterns
 
+### 2026-06-10 - Operations: Production Hardening Follow-Up
+**Discovery:** The production-readiness pass is complete and the local Node toolchain has been restored with portable Node `v22.22.3` at `C:\Users\terri\.codex\tools\node-v22.22.3-win-x64`; `pnpm@9.15.9` matches the lockfile. Verification passed with `pnpm run check --pretty false`, `pnpm test` (33 files, 410 tests), and `pnpm run build`.
+**Pattern:** Future agent follow-up should start from deployment readiness, not repeat the hardening pass. Validate CI, production secrets, Compose config, and smoke tests against `/health`, authenticated `/api/*`, Slack token gating, and Discord singleton startup/shutdown.
+**Rule:** Before deployment or release-candidate work, confirm Node/pnpm are on PATH, run the three verification commands above, then proceed through the production smoke checklist in `NEXT_STEPS.md`.
+
 ### 2026-02-15 - Workflow: Parallel Build + Redevelopment Queue
 **Discovery:** Building features sequentially and waiting for each build/test pass wastes time. Errors in completed work block forward progress.
 **Pattern:** Launch background subagents to verify completed tasks (type check, test, lint) while the main thread continues building new features. When verification fails, requeue the task with error context appended. Retry up to 3 times before escalating.
