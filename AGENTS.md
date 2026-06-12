@@ -12,6 +12,7 @@ DevBot is the request-to-reviewed-PR execution teammate. DEBO is the broader wor
 - For NATT/security features, require authorization, scope, and rules of engagement. Default to non-destructive, defensive, or lab-only workflows.
 - Keep edits narrowly scoped and avoid broad refactors unless the request explicitly calls for them.
 - Do not vendor `zed-industries/zed` into this repository for performance work. Use Zed through `.zed` configuration and agent/MCP integration unless a separate legal and architecture review approves embedding upstream editor code.
+- Treat tasks prefixed with `High Risk:` and manual-only Zed Skills as operator-controlled workflows. Confirm environment, scope, rollback, and approval before using them.
 
 ## Useful Commands
 

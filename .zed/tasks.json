@@ -118,11 +118,135 @@
     "allow_concurrent_runs": true
   },
   {
+    "label": "High Risk: NATT ops live",
+    "command": "powershell",
+    "args": [
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "scripts/zed/Invoke-GuardedTask.ps1",
+      "-Label",
+      "NATT ops live",
+      "-Risk",
+      "Runs the non-dry NATT offensive-ops workflow. Requires ROE, scope, and operator approval.",
+      "-CommandPath",
+      "npm",
+      "run",
+      "natt:ops"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
     "label": "DevBot: NATT roadmap",
     "command": "npm",
     "args": [
       "run",
       "natt:roadmap"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Security: secret scan workspace",
+    "command": "npm",
+    "args": [
+      "exec",
+      "--",
+      "tsx",
+      "scripts/pentest-demo.ts",
+      ".",
+      "secret-scan"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Security: dependency audit production",
+    "command": "npm",
+    "args": [
+      "audit",
+      "--omit=dev"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Ops: Azure health check",
+    "command": "npm",
+    "args": [
+      "run",
+      "ops:azure:check"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Ops: Azure resource links",
+    "command": "npm",
+    "args": [
+      "run",
+      "ops:azure:links"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Web: run Next.js app",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "web",
+      "run",
+      "dev"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Web: build",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "web",
+      "run",
+      "build"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Web: lint",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "web",
+      "run",
+      "lint"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
@@ -149,6 +273,113 @@
     "allow_concurrent_runs": true
   },
   {
+    "label": "MCP NATT: build",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "mcp-natt",
+      "run",
+      "build"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "HookBot: run service",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "services/hookbot",
+      "run",
+      "dev"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "HookBot: build",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "services/hookbot",
+      "run",
+      "build"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "HookBot: test",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "services/hookbot",
+      "run",
+      "test"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "High Risk: docker compose up --build",
+    "command": "powershell",
+    "args": [
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "scripts/zed/Invoke-GuardedTask.ps1",
+      "-Label",
+      "Docker compose up --build",
+      "-Risk",
+      "Rebuilds and starts local services. May replace running containers and consume ports.",
+      "-CommandPath",
+      "docker",
+      "compose",
+      "up",
+      "--build"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "High Risk: docker compose down",
+    "command": "powershell",
+    "args": [
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "scripts/zed/Invoke-GuardedTask.ps1",
+      "-Label",
+      "Docker compose down",
+      "-Risk",
+      "Stops local composed services. Does not remove volumes.",
+      "-CommandPath",
+      "docker",
+      "compose",
+      "down"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
     "label": "DevBot: database generate migration",
     "command": "npm",
     "args": [
@@ -163,8 +394,18 @@
   },
   {
     "label": "DevBot: database migrate",
-    "command": "npm",
+    "command": "powershell",
     "args": [
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "scripts/zed/Invoke-GuardedTask.ps1",
+      "-Label",
+      "DevBot database migrate",
+      "-Risk",
+      "Applies database migrations to the configured database. Verify target and rollback first.",
+      "-CommandPath",
+      "npm",
       "run",
       "db:migrate"
     ],

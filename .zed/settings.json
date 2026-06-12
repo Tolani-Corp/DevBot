@@ -4,9 +4,35 @@
   "format_on_save": "on",
   "formatter": "prettier",
   "line_ending": "prefer_lf",
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.next",
+    "**/.turbo",
+    "**/.cache",
+    "**/coverage",
+    "**/temp",
+    "**/output",
+    "**/.playwright-mcp",
+    "**/research/extracted",
+    "**/vendor/open-pencil"
+  ],
+  "scan_symlinks": "expanded",
   "remove_trailing_whitespace_on_save": true,
   "ensure_final_newline_on_save": true,
   "autosave": "on_focus_change",
+  "code_lens": "on",
+  "use_smartcase_search": true,
   "tabs": {
     "show_diagnostics": "errors"
   },
@@ -38,6 +64,47 @@
     "docker-compose": true,
     "toml": true,
     "yaml": true
+  },
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsserver": {
+            "maxTsServerMemory": 12288
+          },
+          "implementationsCodeLens": {
+            "enabled": true,
+            "showOnAllClassMethods": true,
+            "showOnInterfaceMethods": true
+          },
+          "referencesCodeLens": {
+            "enabled": true,
+            "showOnAllFunctions": true
+          }
+        },
+        "javascript": {
+          "tsserver": {
+            "maxTsServerMemory": 12288
+          },
+          "implementationsCodeLens": {
+            "enabled": true,
+            "showOnAllClassMethods": true,
+            "showOnInterfaceMethods": true
+          },
+          "referencesCodeLens": {
+            "enabled": true,
+            "showOnAllFunctions": true
+          }
+        }
+      }
+    }
+  },
+  "terminal": {
+    "working_directory": "first_project_directory",
+    "detect_venv": "off",
+    "toolbar": {
+      "breadcrumbs": true
+    }
   },
   "languages": {
     "TypeScript": {
