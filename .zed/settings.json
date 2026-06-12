@@ -1,0 +1,82 @@
+{
+  "load_direnv": "direct",
+  "enable_language_server": true,
+  "format_on_save": "on",
+  "formatter": "prettier",
+  "line_ending": "prefer_lf",
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+  "autosave": "on_focus_change",
+  "tabs": {
+    "show_diagnostics": "errors"
+  },
+  "git_panel": {
+    "starts_open": false,
+    "status_style": "icon",
+    "fallback_branch_name": "main",
+    "collapse_untracked_diff": true
+  },
+  "project_panel": {
+    "auto_fold_dirs": true,
+    "auto_reveal_entries": true
+  },
+  "edit_predictions": {
+    "disabled_globs": [
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.cert",
+      "**/*.crt",
+      "**/.dev.vars",
+      "**/secrets.yml",
+      "**/output/**/*.json"
+    ]
+  },
+  "auto_install_extensions": {
+    "dockerfile": true,
+    "docker-compose": true,
+    "toml": true,
+    "yaml": true
+  },
+  "languages": {
+    "TypeScript": {
+      "format_on_save": "on",
+      "formatter": "prettier",
+      "tab_size": 2,
+      "document_symbols": "on"
+    },
+    "TSX": {
+      "format_on_save": "on",
+      "formatter": "prettier",
+      "tab_size": 2,
+      "document_symbols": "on"
+    },
+    "JavaScript": {
+      "format_on_save": "on",
+      "formatter": "prettier",
+      "tab_size": 2
+    },
+    "JSON": {
+      "tab_size": 2
+    },
+    "Markdown": {
+      "format_on_save": "off",
+      "soft_wrap": "editor_width"
+    }
+  },
+  "context_servers": {
+    "natt-knowledge": {
+      "command": "npm",
+      "args": [
+        "--prefix",
+        "mcp-natt",
+        "run",
+        "dev"
+      ],
+      "env": {
+        "PORT": "3111"
+      }
+    }
+  }
+}

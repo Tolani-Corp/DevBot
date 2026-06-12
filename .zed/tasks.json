@@ -1,0 +1,217 @@
+[
+  {
+    "label": "DevBot: install dependencies",
+    "command": "npm",
+    "args": [
+      "install"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never"
+  },
+  {
+    "label": "DevBot: typecheck",
+    "command": "npm",
+    "args": [
+      "run",
+      "check"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: test",
+    "command": "npm",
+    "args": [
+      "run",
+      "test"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: test current file",
+    "command": "npm",
+    "args": [
+      "exec",
+      "--",
+      "vitest",
+      "run",
+      "$ZED_RELATIVE_FILE"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: build",
+    "command": "npm",
+    "args": [
+      "run",
+      "build"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: format",
+    "command": "npm",
+    "args": [
+      "run",
+      "format"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: run API and webhooks",
+    "command": "npm",
+    "args": [
+      "run",
+      "dev"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: run worker",
+    "command": "npm",
+    "args": [
+      "run",
+      "worker"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: NATT ops dry run",
+    "command": "npm",
+    "args": [
+      "run",
+      "natt:ops:dry"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: NATT roadmap",
+    "command": "npm",
+    "args": [
+      "run",
+      "natt:roadmap"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: start NATT MCP server",
+    "command": "npm",
+    "args": [
+      "--prefix",
+      "mcp-natt",
+      "run",
+      "dev"
+    ],
+    "env": {
+      "PORT": "3111"
+    },
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: database generate migration",
+    "command": "npm",
+    "args": [
+      "run",
+      "db:generate"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "DevBot: database migrate",
+    "command": "npm",
+    "args": [
+      "run",
+      "db:migrate"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Git: show current branch status",
+    "command": "git",
+    "args": [
+      "status",
+      "--short",
+      "--branch"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "on_success"
+  },
+  {
+    "label": "Git: commits since main",
+    "command": "git",
+    "args": [
+      "log",
+      "--oneline",
+      "--decorate",
+      "main..HEAD"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never"
+  },
+  {
+    "label": "Git: files changed since main",
+    "command": "git",
+    "args": [
+      "diff",
+      "--name-status",
+      "main...HEAD"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "none",
+    "reveal": "always",
+    "hide": "never"
+  }
+]
