@@ -132,10 +132,14 @@
     "tsc-alias": "^1.8.10",
     "tsx": "^4.22.4",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.8"
+    "vitest": "^3.2.6"
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "postcss": "^8.5.15"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
