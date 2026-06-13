@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 44" width="168" height="44" role="img" aria-labelledby="title">
+  <title id="title">DEBO</title>
+  <defs>
+    <style>
+      .wordmark {
+        font-family: "IBM Plex Mono", "JetBrains Mono", "Courier New", monospace;
+        font-weight: 700;
+        font-size: 30px;
+        fill: #e6edf3;
+      }
+      .cursor {
+        fill: #00d97e;
+        animation: blink 1.1s step-end infinite;
+      }
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .cursor { animation: none; }
+      }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="167" height="43" rx="8" fill="#0a0e14" stroke="#21262d"/>
+  <text x="16" y="32" class="wordmark">DE</text>
+  <rect x="62" y="10" width="10" height="24" rx="1.5" class="cursor"/>
+  <text x="78" y="32" class="wordmark">BO</text>
+</svg>

@@ -22,13 +22,13 @@ export function DeboLogo({
       aria-label={showText ? "DEBO" : undefined}
     >
       <Image
-        src={showText ? "/assets/debo-logo.svg" : "/assets/favicon.svg"}
-        width={showText ? 245 : 32}
-        height={showText ? 64 : 32}
+        src={showText ? "/assets/debo-logo-compact.svg" : "/assets/favicon.svg"}
+        width={showText ? 168 : 32}
+        height={showText ? 44 : 32}
         alt={alt}
         unoptimized
         className={clsx(
-          showText ? "h-8 w-auto" : "h-8 w-8 rounded-lg",
+          showText ? "h-9 w-auto" : "h-8 w-8 rounded-lg",
           showText ? imageClassName : markClassName,
         )}
       />
