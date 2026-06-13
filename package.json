@@ -1,6 +1,7 @@
 {
   "name": "@tolani/devbot",
   "version": "0.2.0",
+  "packageManager": "pnpm@9.15.9",
   "description": "DevBot - governed engineering teammate for scoped requests, reviewed code changes, and request-to-PR execution",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",

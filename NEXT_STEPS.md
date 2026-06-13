@@ -11,7 +11,7 @@
 - Hardening completed: `/api/*` auth fail-closed, Slack disabled-mode guard, Discord singleton/shutdown, secret placeholder cleanup, `discord_backup_codes.txt` removal, Compose secret requirements, loopback host defaults, Anthropic model/pricing refresh, budget reservation before queue/dispatch.
 
 **Next agent checklist:**
-1. Add or verify CI workflow runs `pnpm run check --pretty false`, `pnpm test`, and `pnpm run build` on push/PR.
+1. Done 2026-06-13: CI now runs `pnpm run check --pretty false`, `pnpm test`, and `pnpm run build` on push/PR. `package.json` pins `pnpm@9.15.9`, and `tests/governance/ci-workflow.test.ts` guards the workflow contract.
 2. Create production secrets outside the repo: `API_AUTH_TOKEN`, `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `ANTHROPIC_API_KEY`, Slack tokens, Discord token, and `ENCRYPTION_SECRET`.
 3. Run `docker compose config` with production env loaded and confirm Redis/Postgres have no public host ports.
 4. Smoke test `/health`, `/api/*` without token, `/api/*` with token, Slack startup with both Slack tokens, and Discord single-login plus graceful shutdown.

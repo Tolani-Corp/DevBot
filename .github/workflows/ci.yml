@@ -20,11 +20,10 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run check
+      - run: pnpm run check --pretty false
       - run: pnpm run commercial:check
       - run: pnpm run governance:evidence
       - run: pnpm run governance:policy
-      - run: pnpm run format --check || true
 
   test:
     runs-on: ubuntu-latest
