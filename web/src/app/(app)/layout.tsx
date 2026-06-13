@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { DeboLogo } from '@/components/DeboLogo'
 import { Sidebar } from '@/components/app/Sidebar'
 
+export const dynamic = 'force-dynamic'
+
 export default function AppLayout({
     children,
 }: {

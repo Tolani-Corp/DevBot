@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import clsx from "clsx";
 import { DeboLogo } from "@/components/DeboLogo";
+import { usePathname } from "next/navigation";
 import {
   HomeIcon,
   CommandLineIcon,
@@ -8,37 +11,41 @@ import {
   Cog6ToothIcon,
   ShieldCheckIcon,
   UserCircleIcon,
+  RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "Overview", href: "/dashboard", icon: HomeIcon, current: true },
+  { name: "Overview", href: "/dashboard", icon: HomeIcon },
   {
     name: "Tasks",
     href: "/dashboard/tasks",
     icon: CommandLineIcon,
-    current: false,
   },
   {
     name: "Agents",
     href: "/dashboard/agents",
     icon: CpuChipIcon,
-    current: false,
   },
   {
     name: "Evidence",
     href: "/dashboard/evidence",
     icon: ShieldCheckIcon,
-    current: false,
+  },
+  {
+    name: "Deployments",
+    href: "/dashboard/deployments",
+    icon: RocketLaunchIcon,
   },
   {
     name: "Settings",
     href: "/dashboard/settings",
     icon: Cog6ToothIcon,
-    current: false,
   },
 ];
 
 export function Sidebar({ className }: { className?: string }) {
+  const pathname = usePathname();
+
   return (
     <div
       className={clsx(
@@ -60,7 +67,7 @@ export function Sidebar({ className }: { className?: string }) {
                   <Link
                     href={item.href}
                     className={clsx(
-                      item.current
+                      pathname === item.href
                         ? "bg-zinc-50 text-cyan-600 dark:bg-zinc-800 dark:text-cyan-400"
                         : "text-zinc-700 hover:text-cyan-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800",
                       "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
