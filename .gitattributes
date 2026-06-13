@@ -13,3 +13,6 @@
 
 # lock files may be updated by OS
 web/.next/** -text
+
+# generated offline vendor bundle
+/vendor/natt-offline/** linguist-generated=true

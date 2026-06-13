@@ -1,0 +1,726 @@
+{
+  "version": "1.1.0",
+  "title": "Ethical Hacking Roadmap",
+  "source": "attachment-analysis",
+  "updatedAt": "2026-06-10",
+  "safetyPolicy": [
+    "Operate only in owned labs or on assets with explicit written authorization and defined Rules of Engagement.",
+    "Use passive, non-destructive learning first; escalate only when the lab or engagement explicitly permits it.",
+    "Keep evidence, reports, and credentials sanitized; never store secrets in source control.",
+    "Practice platforms are limited to their published scopes and challenge environments."
+  ],
+  "phases": [
+    {
+      "id": "understand-basics",
+      "title": "Understand Basics",
+      "order": 1,
+      "skills": ["tcp-ip-dns", "http-https-basics"]
+    },
+    {
+      "id": "operating-systems",
+      "title": "Operating Systems",
+      "order": 2,
+      "skills": ["linux-fundamentals", "windows-fundamentals", "macos-fundamentals"]
+    },
+    {
+      "id": "networking",
+      "title": "Networking",
+      "order": 3,
+      "skills": ["ip-mac-dhcp", "ports-protocols", "osi-model"]
+    },
+    {
+      "id": "programming",
+      "title": "Programming",
+      "order": 4,
+      "skills": ["python-scripting", "bash-automation", "web-backend-scripting"]
+    },
+    {
+      "id": "tools",
+      "title": "Tools",
+      "order": 5,
+      "skills": ["nmap-basics", "burp-suite-basics", "metasploit-awareness", "john-ripper-basics", "wireshark-analysis"]
+    },
+    {
+      "id": "setup-lab",
+      "title": "Set Up Lab",
+      "order": 6,
+      "skills": ["virtualization-lab-setup", "kali-parrot-lab-setup"]
+    },
+    {
+      "id": "start-practicing",
+      "title": "Start Practicing",
+      "order": 7,
+      "skills": ["tryhackme-paths", "hack-the-box-labs", "overthewire-wargames"]
+    }
+  ],
+  "skills": [
+    {
+      "id": "tcp-ip-dns",
+      "title": "TCP/IP and DNS Fundamentals",
+      "phaseId": "understand-basics",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 2,
+        "api-recon": 3,
+        "network-recon": 4,
+        "osint": 3,
+        "auth-testing": 2,
+        "platform-detection": 3,
+        "code-analysis": 1,
+        "full-ghost": 3,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "http-https-basics",
+      "title": "HTTP/HTTPS Request-Response Basics",
+      "phaseId": "understand-basics",
+      "difficulty": "beginner",
+      "estimatedHours": 8,
+      "prerequisites": [],
+      "missionWeights": {
+        "web-app": 4,
+        "html-analysis": 5,
+        "api-recon": 5,
+        "network-recon": 2,
+        "osint": 2,
+        "auth-testing": 4,
+        "platform-detection": 3,
+        "code-analysis": 2,
+        "full-ghost": 4,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "linux-fundamentals",
+      "title": "Linux Fundamentals",
+      "phaseId": "operating-systems",
+      "difficulty": "beginner",
+      "estimatedHours": 14,
+      "prerequisites": [],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 3,
+        "osint": 2,
+        "auth-testing": 3,
+        "platform-detection": 2,
+        "code-analysis": 3,
+        "full-ghost": 3,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "windows-fundamentals",
+      "title": "Windows Fundamentals",
+      "phaseId": "operating-systems",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 1,
+        "network-recon": 2,
+        "osint": 1,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 2,
+        "full-ghost": 2,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "macos-fundamentals",
+      "title": "macOS Fundamentals",
+      "phaseId": "operating-systems",
+      "difficulty": "beginner",
+      "estimatedHours": 8,
+      "prerequisites": [],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 1,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 1,
+        "platform-detection": 1,
+        "code-analysis": 1,
+        "full-ghost": 1,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "ip-mac-dhcp",
+      "title": "IP, MAC, DNS, DHCP Concepts",
+      "phaseId": "networking",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": ["tcp-ip-dns"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 5,
+        "osint": 3,
+        "auth-testing": 2,
+        "platform-detection": 3,
+        "code-analysis": 1,
+        "full-ghost": 4,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "ports-protocols",
+      "title": "Ports and Protocol Mapping",
+      "phaseId": "networking",
+      "difficulty": "beginner",
+      "estimatedHours": 9,
+      "prerequisites": ["tcp-ip-dns"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 1,
+        "api-recon": 3,
+        "network-recon": 5,
+        "osint": 2,
+        "auth-testing": 2,
+        "platform-detection": 4,
+        "code-analysis": 1,
+        "full-ghost": 4,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "osi-model",
+      "title": "OSI Model Practical Understanding",
+      "phaseId": "networking",
+      "difficulty": "beginner",
+      "estimatedHours": 7,
+      "prerequisites": ["tcp-ip-dns"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 4,
+        "osint": 2,
+        "auth-testing": 1,
+        "platform-detection": 2,
+        "code-analysis": 1,
+        "full-ghost": 3,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "python-scripting",
+      "title": "Python for Security Automation",
+      "phaseId": "programming",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": ["linux-fundamentals"],
+      "missionWeights": {
+        "web-app": 3,
+        "html-analysis": 2,
+        "api-recon": 4,
+        "network-recon": 4,
+        "osint": 4,
+        "auth-testing": 3,
+        "platform-detection": 3,
+        "code-analysis": 3,
+        "full-ghost": 5,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "bash-automation",
+      "title": "Bash for Workflow Automation",
+      "phaseId": "programming",
+      "difficulty": "intermediate",
+      "estimatedHours": 12,
+      "prerequisites": ["linux-fundamentals"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 1,
+        "api-recon": 3,
+        "network-recon": 4,
+        "osint": 3,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 2,
+        "full-ghost": 4,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "web-backend-scripting",
+      "title": "JavaScript/PHP/SQL Security Scripting",
+      "phaseId": "programming",
+      "difficulty": "intermediate",
+      "estimatedHours": 22,
+      "prerequisites": ["http-https-basics"],
+      "missionWeights": {
+        "web-app": 5,
+        "html-analysis": 4,
+        "api-recon": 4,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 5,
+        "platform-detection": 3,
+        "code-analysis": 5,
+        "full-ghost": 4,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "nmap-basics",
+      "title": "Nmap Recon and Service Enumeration",
+      "phaseId": "tools",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": ["ports-protocols"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 0,
+        "api-recon": 2,
+        "network-recon": 5,
+        "osint": 2,
+        "auth-testing": 1,
+        "platform-detection": 4,
+        "code-analysis": 0,
+        "full-ghost": 4,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "burp-suite-basics",
+      "title": "Burp Suite Traffic Interception",
+      "phaseId": "tools",
+      "difficulty": "intermediate",
+      "estimatedHours": 14,
+      "prerequisites": ["http-https-basics"],
+      "missionWeights": {
+        "web-app": 5,
+        "html-analysis": 5,
+        "api-recon": 5,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 5,
+        "platform-detection": 2,
+        "code-analysis": 1,
+        "full-ghost": 5,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "metasploit-awareness",
+      "title": "Metasploit Framework Awareness",
+      "phaseId": "tools",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": ["linux-fundamentals", "ports-protocols"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 0,
+        "api-recon": 1,
+        "network-recon": 3,
+        "osint": 1,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 1,
+        "full-ghost": 3,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "john-ripper-basics",
+      "title": "John the Ripper Basics",
+      "phaseId": "tools",
+      "difficulty": "intermediate",
+      "estimatedHours": 8,
+      "prerequisites": ["python-scripting"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 0,
+        "api-recon": 1,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 5,
+        "platform-detection": 1,
+        "code-analysis": 1,
+        "full-ghost": 3,
+        "racing-recon": 1
+      }
+    },
+    {
+      "id": "wireshark-analysis",
+      "title": "Wireshark Packet Analysis",
+      "phaseId": "tools",
+      "difficulty": "intermediate",
+      "estimatedHours": 12,
+      "prerequisites": ["osi-model"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 5,
+        "osint": 1,
+        "auth-testing": 2,
+        "platform-detection": 3,
+        "code-analysis": 0,
+        "full-ghost": 4,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "virtualization-lab-setup",
+      "title": "VirtualBox/VMware Lab Setup",
+      "phaseId": "setup-lab",
+      "difficulty": "beginner",
+      "estimatedHours": 6,
+      "prerequisites": ["linux-fundamentals"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 2,
+        "api-recon": 2,
+        "network-recon": 2,
+        "osint": 2,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 2,
+        "full-ghost": 3,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "kali-parrot-lab-setup",
+      "title": "Kali Linux or Parrot OS Lab Setup",
+      "phaseId": "setup-lab",
+      "difficulty": "beginner",
+      "estimatedHours": 6,
+      "prerequisites": ["virtualization-lab-setup"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 2,
+        "api-recon": 2,
+        "network-recon": 3,
+        "osint": 2,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 2,
+        "full-ghost": 3,
+        "racing-recon": 2
+      }
+    },
+    {
+      "id": "tryhackme-paths",
+      "title": "TryHackMe Guided Paths",
+      "phaseId": "start-practicing",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": ["kali-parrot-lab-setup", "burp-suite-basics"],
+      "missionWeights": {
+        "web-app": 4,
+        "html-analysis": 3,
+        "api-recon": 3,
+        "network-recon": 3,
+        "osint": 3,
+        "auth-testing": 3,
+        "platform-detection": 3,
+        "code-analysis": 3,
+        "full-ghost": 4,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "hack-the-box-labs",
+      "title": "Hack The Box Lab Workflows",
+      "phaseId": "start-practicing",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": ["tryhackme-paths", "nmap-basics"],
+      "missionWeights": {
+        "web-app": 4,
+        "html-analysis": 3,
+        "api-recon": 4,
+        "network-recon": 5,
+        "osint": 3,
+        "auth-testing": 4,
+        "platform-detection": 4,
+        "code-analysis": 3,
+        "full-ghost": 5,
+        "racing-recon": 3
+      }
+    },
+    {
+      "id": "overthewire-wargames",
+      "title": "OverTheWire Wargames",
+      "phaseId": "start-practicing",
+      "difficulty": "intermediate",
+      "estimatedHours": 24,
+      "prerequisites": ["bash-automation"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 3,
+        "osint": 2,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 2,
+        "full-ghost": 3,
+        "racing-recon": 2
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "nmap",
+      "name": "Nmap",
+      "requiresSkillIds": ["ports-protocols", "ip-mac-dhcp"],
+      "missionWeights": {
+        "web-app": 2,
+        "html-analysis": 0,
+        "api-recon": 2,
+        "network-recon": 5,
+        "osint": 2,
+        "auth-testing": 1,
+        "platform-detection": 4,
+        "code-analysis": 0,
+        "full-ghost": 4,
+        "racing-recon": 1
+      },
+      "safeUse": "Only scan assets explicitly in authorized scope and ROE."
+    },
+    {
+      "id": "burp-suite",
+      "name": "Burp Suite",
+      "requiresSkillIds": ["http-https-basics"],
+      "missionWeights": {
+        "web-app": 5,
+        "html-analysis": 5,
+        "api-recon": 5,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 5,
+        "platform-detection": 2,
+        "code-analysis": 1,
+        "full-ghost": 5,
+        "racing-recon": 3
+      },
+      "safeUse": "Use non-destructive test payloads unless explicit written authorization exists."
+    },
+    {
+      "id": "metasploit",
+      "name": "Metasploit",
+      "requiresSkillIds": ["linux-fundamentals", "ports-protocols"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 0,
+        "api-recon": 1,
+        "network-recon": 4,
+        "osint": 1,
+        "auth-testing": 2,
+        "platform-detection": 2,
+        "code-analysis": 1,
+        "full-ghost": 4,
+        "racing-recon": 1
+      },
+      "safeUse": "Restricted to approved lab/engagement contexts and controlled exercises."
+    },
+    {
+      "id": "john-the-ripper",
+      "name": "John the Ripper",
+      "requiresSkillIds": ["python-scripting", "linux-fundamentals"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 0,
+        "api-recon": 1,
+        "network-recon": 1,
+        "osint": 1,
+        "auth-testing": 5,
+        "platform-detection": 1,
+        "code-analysis": 1,
+        "full-ghost": 3,
+        "racing-recon": 1
+      },
+      "safeUse": "Use only for authorized credential auditing and policy strength validation."
+    },
+    {
+      "id": "wireshark",
+      "name": "Wireshark",
+      "requiresSkillIds": ["osi-model", "ip-mac-dhcp"],
+      "missionWeights": {
+        "web-app": 1,
+        "html-analysis": 1,
+        "api-recon": 2,
+        "network-recon": 5,
+        "osint": 1,
+        "auth-testing": 2,
+        "platform-detection": 3,
+        "code-analysis": 0,
+        "full-ghost": 4,
+        "racing-recon": 2
+      },
+      "safeUse": "Capture traffic only in approved networks and with consent."
+    }
+  ],
+  "resources": [
+    {
+      "id": "tryhackme",
+      "name": "TryHackMe",
+      "kind": "practice-lab",
+      "url": "https://tryhackme.com",
+      "focusSkillIds": ["tryhackme-paths", "burp-suite-basics", "nmap-basics"],
+      "difficulty": "beginner",
+      "recommendedAfter": ["kali-parrot-lab-setup"]
+    },
+    {
+      "id": "hack-the-box",
+      "name": "Hack The Box",
+      "kind": "practice-lab",
+      "url": "https://www.hackthebox.com",
+      "focusSkillIds": ["hack-the-box-labs", "nmap-basics", "wireshark-analysis"],
+      "difficulty": "advanced",
+      "recommendedAfter": ["tryhackme-paths"]
+    },
+    {
+      "id": "overthewire",
+      "name": "OverTheWire",
+      "kind": "wargame",
+      "url": "https://overthewire.org/wargames/",
+      "focusSkillIds": ["overthewire-wargames", "bash-automation", "linux-fundamentals"],
+      "difficulty": "intermediate",
+      "recommendedAfter": ["bash-automation"]
+    },
+    {
+      "id": "portswigger-academy",
+      "name": "PortSwigger Web Security Academy",
+      "kind": "course",
+      "url": "https://portswigger.net/web-security",
+      "focusSkillIds": ["burp-suite-basics", "http-https-basics", "web-backend-scripting"],
+      "difficulty": "intermediate",
+      "recommendedAfter": ["http-https-basics"]
+    },
+    {
+      "id": "owasp-top-10",
+      "name": "OWASP Top 10",
+      "kind": "reference",
+      "url": "https://owasp.org/www-project-top-ten/",
+      "focusSkillIds": ["web-backend-scripting", "burp-suite-basics", "http-https-basics"],
+      "difficulty": "beginner",
+      "recommendedAfter": ["http-https-basics"]
+    }
+  ],
+  "manuals": [
+    {
+      "id": "manual-natt-roadmap",
+      "title": "NATT Ethical Hacking Roadmap Manual",
+      "kind": "manual",
+      "summary": "Human-readable manual for the canonical roadmap, MCP resources, agent context, and safe progression model.",
+      "path": "docs/natt-ethical-hacking-roadmap.md",
+      "phaseIds": ["understand-basics", "operating-systems", "networking", "programming", "tools", "setup-lab", "start-practicing"],
+      "skillIds": [],
+      "toolIds": []
+    },
+    {
+      "id": "manual-pentest-guide",
+      "title": "DevBot Pentest Guide",
+      "kind": "guide",
+      "summary": "Operational guide for authorized DevBot and NATT security assessments, scan types, reporting, and guardrails.",
+      "path": "DEVBOT_PENTEST_GUIDE.md",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": ["nmap-basics", "burp-suite-basics", "wireshark-analysis", "kali-parrot-lab-setup"],
+      "toolIds": ["nmap", "burp-suite", "wireshark"]
+    },
+    {
+      "id": "manual-pentest-quick-reference",
+      "title": "Pentest Quick Reference",
+      "kind": "quick-reference",
+      "summary": "Short operator command reference for authorized NATT and DevBot security workflows.",
+      "path": "PENTEST_QUICK_REFERENCE.md",
+      "phaseIds": ["tools", "start-practicing"],
+      "skillIds": ["nmap-basics", "burp-suite-basics"],
+      "toolIds": ["nmap", "burp-suite"]
+    },
+    {
+      "id": "manual-debo-setup",
+      "title": "DEBO Slack and Discord Setup Guide",
+      "kind": "guide",
+      "summary": "Slack, Discord, slash command, trigger, and environment setup for DEBO/DevBot/NATT operators.",
+      "path": "DEBO_SETUP_GUIDE.md",
+      "phaseIds": ["setup-lab"],
+      "skillIds": ["virtualization-lab-setup", "kali-parrot-lab-setup"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-mcp-architecture",
+      "title": "DevBot MCP Architecture",
+      "kind": "architecture",
+      "summary": "Model Context Protocol architecture, tool/resource exposure, and agent integration reference.",
+      "path": "DEVBOT_MCP_ARCHITECTURE.md",
+      "phaseIds": ["understand-basics", "tools", "setup-lab"],
+      "skillIds": ["http-https-basics", "web-backend-scripting"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-safety-readme",
+      "title": "Safety Guardrails",
+      "kind": "safety",
+      "summary": "Repository safety context for bounded, authorized security workflows.",
+      "path": "src/safety/README.md",
+      "phaseIds": ["understand-basics", "tools", "start-practicing"],
+      "skillIds": [],
+      "toolIds": ["nmap", "burp-suite", "metasploit", "john-the-ripper", "wireshark"]
+    },
+    {
+      "id": "manual-skills-catalog",
+      "title": "NATT Skills Catalog",
+      "kind": "catalog",
+      "summary": "Agent-readable capability catalog covering NATT skills, MCP tools, resources, and Slack/Discord commands.",
+      "path": "natt-skills-catalog.json",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": [],
+      "toolIds": ["nmap", "burp-suite", "metasploit", "john-the-ripper", "wireshark"]
+    },
+    {
+      "id": "manual-tactical-dashboard-user-guide",
+      "title": "NATT Tactical Dashboard User Guide",
+      "kind": "guide",
+      "summary": "Operator guide for the self-hosted NATT tactical dashboard and MCP knowledge tools.",
+      "path": "mcp-natt/tactical-dashboard/docs/USER_GUIDE.md",
+      "phaseIds": ["tools", "setup-lab", "start-practicing"],
+      "skillIds": ["kali-parrot-lab-setup", "tryhackme-paths", "hack-the-box-labs"],
+      "toolIds": []
+    },
+    {
+      "id": "manual-tactical-dashboard-technical",
+      "title": "NATT Tactical Dashboard Technical Manual",
+      "kind": "manual",
+      "summary": "Technical manual for deployment, maintenance, and MCP-backed operational continuity.",
+      "path": "mcp-natt/tactical-dashboard/docs/TECHNICAL_MANUAL.md",
+      "phaseIds": ["setup-lab"],
+      "skillIds": ["virtualization-lab-setup", "kali-parrot-lab-setup"],
+      "toolIds": []
+    }
+  ],
+  "agentContext": {
+    "canonicalResourcePath": ".natt/resources/ethical-hacking-roadmap.json",
+    "skillCatalogPath": "natt-skills-catalog.json",
+    "agentSkillRuntime": "src/agents/skills/roadmap.ts",
+    "dynamicPlanner": "src/agents/natt-dynamic-roadmap.ts",
+    "mcpModule": "mcp-natt/src/ethical-roadmap.ts",
+    "mcpTools": ["get_ethical_roadmap", "get_roadmap_stage", "recommend_roadmap_path"],
+    "mcpResources": ["natt://ethical-roadmap", "natt://ethical-roadmap-catalog"],
+    "recommendedOperatorFlow": [
+      "Read natt://ethical-roadmap for the full canonical graph.",
+      "Use get_roadmap_stage for stage-specific skills, tools, resources, and manuals.",
+      "Use recommend_roadmap_path before queueing NATT work so training gaps and safe tools are visible.",
+      "Validate ROE before any scan or active test."
+    ],
+    "slackDiscordReady": true,
+    "requiresRoeForActiveTesting": true
+  }
+}

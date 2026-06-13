@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "natt-pi5-runtime.json",
+  "description": "NATT Ghost Agent runtime configuration for Raspberry Pi 5 (BCM2712 arm64)",
+  "platform": "raspberry-pi-5",
+  "arch": "aarch64",
+  "lastUpdated": "2026-02-22",
+
+  "playwright": {
+    "notes": "Pi OS Bookworm ships Chromium 130+ with arm64 binary via apt. Do NOT use Playwright's browser download — it doesn't have arm64 Chromium.",
+    "executablePath": "/usr/bin/chromium-browser",
+    "env": {
+      "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1",
+      "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH": "/usr/bin/chromium-browser"
+    },
+    "launchArgs": [
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--disable-setuid-sandbox",
+      "--single-process",
+      "--no-zygote"
+    ],
+    "alternateChromiumPaths": [
+      "/usr/bin/chromium",
+      "/usr/bin/chromium-browser",
+      "/snap/bin/chromium"
+    ]
+  },
+
+  "ghostModes": {
+    "passive": {
+      "maxConcurrentRequests": 1,
+      "requestDelayMs": { "min": 800, "max": 2400 },
+      "notes": "Single-core scheduling on Pi — don't overload Cortex-A76 with burst fetches"
+    },
+    "stealth": {
+      "maxConcurrentRequests": 2,
+      "requestDelayMs": { "min": 400, "max": 1200 },
+      "notes": "Two cores free for other DevBot tasks during stealth ops"
+    },
+    "active": {
+      "maxConcurrentRequests": 3,
+      "requestDelayMs": { "min": 100, "max": 400 },
+      "notes": "Max 3 parallel — leave 1 core for OS + Redis. authorizationProof required."
+    }
+  },
+
+  "vault": {
+    "basePath": "/mnt/nvme/natt/vault",
+    "fallbackPath": "/opt/devbot/.natt/vault",
+    "notes": "NVMe path preferred — all mission archives stored here. Fallback to in-app dir on SD card only deployments.",
+    "maxVaultSizeMB": 10240,
+    "compressionEnabled": true,
+    "compressionAlgorithm": "gzip"
+  },
+
+  "cron": {
+    "configPath": "/mnt/nvme/natt/cron/schedules.json",
+    "fallbackPath": "/opt/devbot/.natt/cron/schedules.json",
+    "rtcNote": "Pi 5 has an onboard RTC. Enable with dtparam=rtc=on in /boot/firmware/config.txt and insert CR2032. Cron scheduling is accurate even after power loss.",
+    "bullMQQueue": "natt-report-cron",
+    "timezoneSource": "system (Pi OS timezone — set via raspi-config or timedatectl)"
+  },
+
+  "pptxReport": {
+    "tempOutputDir": "/mnt/nvme/natt/tmp-reports",
+    "notes": "Generate PPTX to NVMe, then stream buffer to Slack. Do NOT write to SD card /tmp for large reports.",
+    "maxReportSizeMB": 25,
+    "cleanupAfterDeliveryMs": 300000
+  },
+
+  "secrets": {
+    "notes": "On Pi 5 bare metal, store secrets in /opt/devbot/.env with 600 permissions. For Docker, mount .env as Docker secret or use env_file.",
+    "envFilePermissions": "0600",
+    "envFileOwner": "devbot:devbot",
+    "sensitiveKeys": [
+      "ANTHROPIC_API_KEY",
+      "SLACK_BOT_TOKEN",
+      "SLACK_SIGNING_SECRET",
+      "DISCORD_TOKEN",
+      "GITHUB_TOKEN",
+      "OPENAI_API_KEY",
+      "DATABASE_URL",
+      "REDIS_URL"
+    ]
+  },
+
+  "resourceLimits": {
+    "notes": "Limits for NATT services on 16GB Pi. Adjust based on actual workload.",
+    "nattGhostAgent": {
+      "maxHeapMB": 512,
+      "nodeOptions": "--max-old-space-size=512"
+    },
+    "reportGenerator": {
+      "maxHeapMB": 256,
+      "notes": "pptxgenjs is memory-efficient. 256MB is sufficient for 10-slide reports with 50 missions."
+    },
+    "cronWorker": {
+      "maxHeapMB": 1024,
+      "notes": "Higher limit because cron worker may spawn report generation inline."
+    }
+  },
+
+  "nativeModuleCompat": {
+    "notes": "All DevBot dependencies with native code and their Pi 5 / arm64 status",
+    "modules": [
+      { "name": "ioredis", "type": "pure-js", "arm64": "✓" },
+      { "name": "pptxgenjs", "type": "pure-js", "arm64": "✓" },
+      { "name": "bullmq", "type": "pure-js", "arm64": "✓" },
+      { "name": "drizzle-orm", "type": "pure-js", "arm64": "✓" },
+      { "name": "postgres (postgres.js)", "type": "pure-js", "arm64": "✓" },
+      { "name": "zod", "type": "pure-js", "arm64": "✓" },
+      { "name": "@anthropic-ai/sdk", "type": "pure-js", "arm64": "✓" },
+      { "name": "openai", "type": "pure-js", "arm64": "✓" },
+      { "name": "nanoid", "type": "pure-js", "arm64": "✓" },
+      { "name": "playwright", "type": "native-chromium", "arm64": "✓ — use system chromium (/usr/bin/chromium-browser), set PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1" },
+      { "name": "discord.js (bufferutil)", "type": "optional-native", "arm64": "✓ — needs build-essential + python3 for compilation" },
+      { "name": "discord.js (utf-8-validate)", "type": "optional-native", "arm64": "✓ — same" },
+      { "name": "ws (bufferutil)", "type": "optional-native", "arm64": "✓ — same" },
+      { "name": "@opentelemetry addon", "type": "optional-native", "arm64": "✓ — compile from source" }
+    ]
+  },
+
+  "gpio": {
+    "description": "Optional NATT status GPIO/hardware integrations on Pi 5",
+    "statusLED": {
+      "enabled": false,
+      "pin": 18,
+      "protocol": "PWM (NeoPixel via rpi-ws281x-native)",
+      "modes": {
+        "passive": "Blue (hue 240)",
+        "stealth": "Amber (hue 40)",
+        "active": "Red (hue 0)",
+        "idle": "Off"
+      }
+    },
+    "einkDisplay": {
+      "enabled": false,
+      "protocol": "SPI0",
+      "purpose": "Show active mission count + ghost mode without monitor"
+    }
+  },
+
+  "thermalMonitoring": {
+    "description": "Pi 5 throttles at 80°C. NATT active missions are CPU-intensive.",
+    "readTempCommand": "cat /sys/class/thermal/thermal_zone0/temp",
+    "unit": "millidegrees Celsius (divide by 1000 for °C)",
+    "throttleThresholdMC": 80000,
+    "recommendedMaxMC": 75000,
+    "action": "If sustained temp > 75°C during active NATT mission, reduce maxConcurrentRequests to 1"
+  }
+}

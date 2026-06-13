@@ -1,0 +1,335 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { ragEngine } from "./rag";
+import { costTracker } from "@/services/cost-service";
+import { getModelForWorkspace, getAnthropicClientForWorkspace, type AnthropicModelId } from "@/services/tier-manager";
+
+// Shared fallback client — used when no workspaceId is provided (system tasks).
+const _fallbackClient = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
+
+/** Fallback model used when no workspaceId is available (e.g. system tasks). */
+const DEFAULT_MODEL: AnthropicModelId =
+  (process.env.ANTHROPIC_MODEL as AnthropicModelId | undefined) ?? "claude-haiku-4-5-20251001";
+
+/**
+ * Resolve the Anthropic client + model for a request.
+ *
+ * - If workspaceId is provided: enforces tier-based model access and uses
+ *   the workspace's BYOK key (Enterprise) or the shared platform key.
+ * - If no workspaceId: uses the fallback shared client and DEFAULT_MODEL.
+ */
+async function resolveClientAndModel(
+  workspaceId?: string,
+  preferredModel?: string,
+): Promise<{ client: Anthropic; model: AnthropicModelId; isByok: boolean }> {
+  if (!workspaceId) {
+    return {
+      client: _fallbackClient,
+      model: (preferredModel as AnthropicModelId | undefined) ?? DEFAULT_MODEL,
+      isByok: false,
+    };
+  }
+
+  const [{ client, isByok }, { model, allowed, tier }] = await Promise.all([
+    getAnthropicClientForWorkspace(workspaceId),
+    getModelForWorkspace(workspaceId, preferredModel),
+  ]);
+
+  if (preferredModel && !allowed) {
+    console.warn(
+      `[claude] Model "${preferredModel}" not allowed on tier "${tier}". ` +
+      `Falling back to "${model}". Upgrade to Pro or Enterprise for model selection.`
+    );
+  }
+
+  return { client, model, isByok };
+}
+
+export type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export async function analyzeTask(
+  description: string,
+  context?: {
+    repository?: string;
+    previousMessages?: Message[];
+    fileContents?: Record<string, string>;
+    filesContents?: Record<string, string>;
+    userId?: string;
+    workspaceId?: string;
+    /** Pro/Enterprise only: request a specific Anthropic model. */
+    preferredModel?: string;
+  }
+): Promise<{
+  taskType: "bug_fix" | "feature" | "question" | "review" | "refactor";
+  repository?: string;
+  filesNeeded?: string[];
+  plan: string;
+  requiresCodeChange: boolean;
+}> {
+  const systemPrompt = `You are Debo, a governed engineering teammate with deep expertise in TypeScript, Node.js, React, distributed systems, and platform integration work.
+Your primary directive: COMPLETE EVERY TASK FULLY. Never stop mid-way. Never leave partial plans. Never say "I'll do this later."
+
+WEB3 / BLOCKCHAIN COMPETENCIES:
+- Hardhat 3 (compile, test, deploy, verify via @nomicfoundation/hardhat-toolbox-viem or hardhat-toolbox-mocha-ethers)
+- Solidity ≥0.8 (ERC-20/721/1155, access control, upgradeable proxies, CEI reentrancy pattern)
+- viem, ethers.js v6, web3.js v4 — read/write contracts, parse events, sign txs
+- Wagmi hooks (React), RainbowKit, ConnectKit for wallet UI
+- Foundry: forge test/build/script, anvil local node, cast queries
+- OpenZeppelin contracts (Ownable, AccessControl, ReentrancyGuard, Pausable, ERC20/721/1155, UUPS upgrades)
+- DeFi: Uniswap V3 swaps, Chainlink price feeds, flash loans, AMM math
+- Security: reentrancy, tx.origin auth, front-running, oracle manipulation, signature replay, storage collision
+- Hardhat Ignition deployment modules; ignition/ folder pattern
+- Static analysis: Slither, Mythril, Aderyn
+- Networks: Mainnet, Sepolia, Polygon, Arbitrum, Optimism, Base, BSC (chainIds + RPC patterns)
+
+Analyze the user's request and determine:
+1. Task type: bug_fix | feature | question | review | refactor
+2. Repository (from context or explicit mention)
+3. Exact files to examine or modify — be precise, list real paths
+4. A numbered step-by-step plan where every step is actionable and has a clear completion criterion
+5. Whether code changes are required
+
+PLANNING RULES:
+- Every step in "plan" must be a concrete action (not vague like "investigate the issue").
+- Include all sub-steps — a plan with 3 broad steps is worse than one with 8 specific steps.
+- If the task has multiple parts (fix + test + PR), list ALL of them.
+- Never list a step you cannot complete — only promise what you will deliver.
+
+Available repositories: ${process.env.ALLOWED_REPOS ?? "*"}
+
+Respond ONLY in valid JSON format (no preamble, no trailing text):
+{
+  "taskType": "bug_fix" | "feature" | "question" | "review" | "refactor",
+  "repository": "repo-name or null",
+  "filesNeeded": ["src/exact/path/to/file.ts"],
+  "plan": "## Plan\n1. <action> → <done criteria>\n2. <action> → <done criteria>\n...",
+  "requiresCodeChange": true | false
+}`;
+
+  let ragContext = "";
+  if (context?.repository) {
+    try {
+      const results = await ragEngine.search(description, context.repository);
+      if (results.length > 0) {
+        ragContext = `\n\nExisting code context (from RAG):\n${results
+          .map((r) => `File: ${r.filePath}\n\`\`\`\n${r.content}\n\`\`\``)
+          .join("\n\n")}`;
+      }
+    } catch (e) {
+      console.warn("RAG search failed", e);
+    }
+  }
+
+  const contextFileContents = context?.filesContents ?? context?.fileContents;
+  const userPrompt = `Task description: ${description}${context?.repository ? `\n\nRepository context: ${context.repository}` : ""
+}${ragContext}${contextFileContents
+      ? `\n\nFile contents:\n${Object.entries(contextFileContents)
+          .map(([path, content]) => `\n### ${path}\n\`\`\`\n${(content as string).slice(0, 2000)}\n\`\`\``)
+        .join("\n")}`
+      : ""
+    }`;
+
+  const messages: Anthropic.MessageParam[] = [
+    ...(context?.previousMessages?.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    })) ?? []),
+    { role: "user", content: userPrompt },
+  ];
+
+  const { client, model, isByok } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
+  const response = await client.messages.create({
+    model,
+    max_tokens: 4096,
+    system: systemPrompt,
+    messages,
+  });
+  if (response.usage && context?.userId && !isByok) {
+    costTracker.track(context.userId, context.workspaceId ?? "unknown", {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model,
+    }).catch(console.error);
+  }
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("AI response did not contain valid JSON");
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+export async function generateCodeChanges(
+  plan: string,
+  fileContents: Record<string, string> | { filesContents: Record<string, string> },
+  userId: string = "system",
+  workspaceId?: string,
+  /** Pro/Enterprise only: request a specific Anthropic model. */
+  preferredModel?: string
+): Promise<{
+  changes: Array<{
+    file: string;
+    oldContent: string;
+    newContent: string;
+    explanation: string;
+  }>;
+  commitMessage: string;
+  prDescription: string;
+  plan: string;
+}> {
+  const systemPrompt = `You are Debo, a governed engineering teammate with expertise in TypeScript, Node.js, React, and systems integration. You generate production-ready code changes.
+
+WEB3 RULES (when generating Solidity / contract code):
+- Always use Solidity ≥0.8 (no SafeMath needed for overflow protection)
+- Use CEI pattern (Checks-Effects-Interactions) to prevent reentrancy
+- Import from @openzeppelin/contracts, not custom implementations
+- Use viem or ethers.js v6 (not v5) for off-chain scripts
+- Hardhat 3 config: use hardhat-toolbox-viem or hardhat-toolbox-mocha-ethers bundles
+- NEVER hardcode private keys — use process.env.PRIVATE_KEY pattern
+- Deployment scripts go in scripts/ (ethers.js) or ignition/modules/ (Ignition)
+
+COMPLETION MANDATE:
+- Implement EVERY step from the plan — do not skip any item.
+- Every change must be 100% complete and compilable. No partial implementations.
+- NEVER use placeholder comments like "// existing code...", "// ... rest of file", "// TODO: implement", or "...".
+- Include all necessary imports in every file you modify.
+- If a plan has N steps, your changes array must cover all N steps.
+
+CODE QUALITY RULES:
+- TypeScript strict mode: no implicit 'any', proper return types, exact generics.
+- Security: never commit secrets, validate all user input, use execFileSync with array args (never string interpolation for shell commands).
+- Preserve existing code style (indentation, naming, ESM imports).
+- Use conventional commits format for commitMessage: "feat:", "fix:", "refactor:", "test:", "chore:".
+- Add JSDoc comments for exported functions.
+
+Respond ONLY in valid JSON format (no preamble, no trailing text):
+{
+  "changes": [
+    {
+      "file": "src/exact/path/to/file.ts",
+      "oldContent": "exact verbatim content to replace (must match file exactly)",
+      "newContent": "complete replacement content (never truncated)",
+      "explanation": "concise reason: what changed and why"
+    }
+  ],
+  "commitMessage": "<type>(<scope>): <short description>",
+  "prDescription": "## Summary\n<what>\n\n## Changes\n- <file>: <what changed>\n\n## Testing\n<how to verify>"
+}`;
+
+  const normalizedFileContents =
+    "filesContents" in fileContents ? fileContents.filesContents : fileContents;
+
+  const userPrompt = `Plan:\n${plan}\n\nFiles:\n${Object.entries(normalizedFileContents)
+    .map(([path, content]) => `### ${path}\n\`\`\`\n${content}\n\`\`\``)
+    .join("\n\n")}`;
+
+  const { client, model, isByok } = await resolveClientAndModel(workspaceId, preferredModel);
+  const response = await client.messages.create({
+    model,
+    max_tokens: 8192,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }],
+  });
+  if (response.usage && !isByok) {
+    // Only track cost against DEBO's account when using the shared platform key.
+    // BYOK users pay Anthropic directly — we don't track their spend.
+    costTracker.track(userId, workspaceId ?? "system", {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model,
+    }).catch(console.error);
+  }
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    throw new Error("AI response did not contain valid JSON");
+  }
+
+  const parsed = JSON.parse(jsonMatch[0]) as {
+    changes?: Array<{
+      file: string;
+      oldContent: string;
+      newContent: string;
+      explanation: string;
+    }>;
+    commitMessage?: string;
+    prDescription?: string;
+    plan?: string;
+  };
+
+  return {
+    changes: parsed.changes ?? [],
+    commitMessage: parsed.commitMessage ?? "chore: generated changes",
+    prDescription: parsed.prDescription ?? "",
+    plan:
+      parsed.plan ??
+      parsed.prDescription ??
+      parsed.changes?.map((change) => change.newContent).join("\n\n") ??
+      "",
+  };
+}
+
+export async function answerQuestion(
+  question: string,
+  context?: {
+    repository?: string;
+    fileContents?: Record<string, string>;
+    previousMessages?: Message[];
+    userId?: string;
+    workspaceId?: string;
+    /** Pro/Enterprise only: request a specific Anthropic model. */
+    preferredModel?: string;
+  }
+): Promise<string> {
+  const systemPrompt = `You are Debo, an expert AI software engineer assistant with deep knowledge of TypeScript, Node.js, React, distributed systems, security, and Web3/blockchain development (Solidity, Hardhat 3, Foundry, viem, ethers.js, OpenZeppelin, DeFi protocols, ERC standards).
+
+ANSWER RULES:
+- Provide COMPLETE answers. Never say "you can explore further" or leave instructions half-finished.
+- If explaining a multi-step process, include every step with working code examples.
+- Never truncate a code block — if a function is relevant, show the full function.
+- When suggesting a fix, show the exact before/after diff or full replacement.
+- Use markdown: headings, fenced code blocks with language tags, bullet lists.
+- If the question implies a security concern, call it out explicitly.
+- Prefer concrete, actionable answers over abstract explanations.`;
+
+  const userPrompt = `Question: ${question}${context?.fileContents
+      ? `\n\nRelevant files:\n${Object.entries(context.fileContents)
+        .map(([path, content]) => `### ${path}\n\`\`\`\n${content.slice(0, 1500)}\n\`\`\``)
+        .join("\n")}`
+      : ""
+    }`;
+
+  const messages: Anthropic.MessageParam[] = [
+    ...(context?.previousMessages?.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    })) ?? []),
+    { role: "user", content: userPrompt },
+  ];
+
+  const { client, model, isByok } = await resolveClientAndModel(context?.workspaceId, context?.preferredModel);
+  const response = await client.messages.create({
+    model,
+    max_tokens: 4096,
+    system: systemPrompt,
+    messages,
+  });
+
+  if (response.usage && context?.userId && !isByok) {
+    costTracker.track(context.userId, context.workspaceId ?? "unknown", {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      model,
+    }).catch(console.error);
+  }
+
+  return response.content[0].type === "text" ? response.content[0].text : "";
+}

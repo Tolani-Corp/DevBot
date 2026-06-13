@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "profiles": [
+    {
+      "id": "authorized-surface-recon",
+      "enabled": false,
+      "operation": "natt",
+      "target": "https://example.com",
+      "targetType": "url",
+      "missionType": "full-ghost",
+      "ghostMode": "passive",
+      "operator": "debo-operator",
+      "roe": {
+        "engagementIdEnv": "NATT_ENGAGEMENT_ID",
+        "passphraseEnv": "NATT_MISSION_PASSPHRASE",
+        "authorizationProofEnv": "NATT_AUTH_PROOF"
+      },
+      "options": {
+        "autoVault": true,
+        "cveCheck": true
+      }
+    },
+    {
+      "id": "authorized-web-hardening-scan",
+      "enabled": false,
+      "operation": "pentest",
+      "target": "https://example.com",
+      "scanType": "web-security",
+      "options": {
+        "host": "example.com",
+        "portRange": "80,443,8080"
+      }
+    }
+  ]
+}

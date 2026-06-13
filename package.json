@@ -74,6 +74,8 @@
     "natt:ops": "tsx .natt/cron/run-offensive-ops.ts",
     "natt:ops:dry": "tsx .natt/cron/run-offensive-ops.ts --dry-run",
     "natt:roadmap": "tsx scripts/natt-roadmap.ts",
+    "natt:offline:vendor": "node scripts/natt-offline-vendor.mjs build",
+    "natt:offline:check": "node scripts/natt-offline-vendor.mjs check",
     "show-reasoning": "tsx scripts/show-reasoning.ts",
     "test:discord-webhook": "tsx scripts/test-discord-webhook.ts",
     "ops:azure:links": "node scripts/azure-resource-links.mjs list",
@@ -82,6 +84,9 @@
     "ops:azure:open": "node scripts/azure-resource-links.mjs open",
     "ops:azure:check": "node scripts/azure-resource-links.mjs check",
     "ops:azure:policy": "node scripts/azure-resource-links.mjs policy",
+    "governance:demo": "node scripts/devbot-governance.mjs demo",
+    "governance:check": "node scripts/devbot-governance.mjs check",
+    "governance:adr": "node scripts/devbot-governance.mjs adr",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate"
   },

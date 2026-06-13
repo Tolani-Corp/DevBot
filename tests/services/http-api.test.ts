@@ -1,4 +1,8 @@
-import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
+import type {
+  IncomingHttpHeaders,
+  IncomingMessage,
+  ServerResponse,
+} from "node:http";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { handleApiRequest } from "@/services/http-api";
@@ -17,7 +21,10 @@ function createRequest(input: {
   } as IncomingMessage;
 }
 
-function createResponse(): ServerResponse & { body: string; statusCode: number } {
+function createResponse(): ServerResponse & {
+  body: string;
+  statusCode: number;
+} {
   return {
     body: "",
     statusCode: 0,
@@ -57,16 +64,26 @@ describe("http-api auth", () => {
     const missingTokenResponse = createResponse();
     const invalidTokenResponse = createResponse();
 
-    await handleApiRequest(createRequest({ url: "/api/tasks" }), missingTokenResponse);
     await handleApiRequest(
-      createRequest({ url: "/api/tasks", headers: { authorization: "Bearer wrong-token" } }),
+      createRequest({ url: "/api/tasks" }),
+      missingTokenResponse,
+    );
+    await handleApiRequest(
+      createRequest({
+        url: "/api/tasks",
+        headers: { authorization: "Bearer wrong-token" },
+      }),
       invalidTokenResponse,
     );
 
     expect(missingTokenResponse.statusCode).toBe(403);
-    expect(JSON.parse(missingTokenResponse.body)).toEqual({ error: "invalid_api_token" });
+    expect(JSON.parse(missingTokenResponse.body)).toEqual({
+      error: "invalid_api_token",
+    });
     expect(invalidTokenResponse.statusCode).toBe(403);
-    expect(JSON.parse(invalidTokenResponse.body)).toEqual({ error: "invalid_api_token" });
+    expect(JSON.parse(invalidTokenResponse.body)).toEqual({
+      error: "invalid_api_token",
+    });
   });
 
   it("accepts bearer and x-api-key credentials", async () => {
@@ -75,11 +92,17 @@ describe("http-api auth", () => {
     const apiKeyResponse = createResponse();
 
     await handleApiRequest(
-      createRequest({ url: "/api/unknown", headers: { authorization: "Bearer expected-token" } }),
+      createRequest({
+        url: "/api/unknown",
+        headers: { authorization: "Bearer expected-token" },
+      }),
       bearerResponse,
     );
     await handleApiRequest(
-      createRequest({ url: "/api/unknown", headers: { "x-api-key": "expected-token" } }),
+      createRequest({
+        url: "/api/unknown",
+        headers: { "x-api-key": "expected-token" },
+      }),
       apiKeyResponse,
     );
 
@@ -94,10 +117,38 @@ describe("http-api auth", () => {
 
     process.env.NODE_ENV = "production";
     const productionResponse = createResponse();
-    await handleApiRequest(createRequest({ url: "/api/unknown" }), productionResponse);
+    await handleApiRequest(
+      createRequest({ url: "/api/unknown" }),
+      productionResponse,
+    );
 
     expect(devResponse.statusCode).toBe(404);
     expect(productionResponse.statusCode).toBe(403);
-    expect(JSON.parse(productionResponse.body)).toEqual({ error: "api_auth_not_configured" });
+    expect(JSON.parse(productionResponse.body)).toEqual({
+      error: "api_auth_not_configured",
+    });
+  });
+
+  it("returns governance proof overview for authorized operators", async () => {
+    process.env.API_AUTH_TOKEN = "expected-token";
+    const res = createResponse();
+
+    await handleApiRequest(
+      createRequest({
+        url: "/api/governance/proof",
+        headers: { authorization: "Bearer expected-token" },
+      }),
+      res,
+    );
+
+    const body = JSON.parse(res.body);
+    expect(res.statusCode).toBe(200);
+    expect(body.proofStatus).toBe("scaffolded");
+    expect(body.demoPath.validate).toBe("npm run governance:check");
+    expect(body.stages.map((stage: { key: string }) => stage.key)).toEqual([
+      "architects",
+      "deploys",
+      "evolves",
+    ]);
   });
 });

@@ -1,0 +1,20 @@
+[Unit]
+Description=NATT Tactical Dashboard
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/natt/tactical-dashboard
+ExecStart=/usr/bin/node /home/pi/natt/tactical-dashboard/server.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=natt-tactical
+Environment=PORT=7474
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

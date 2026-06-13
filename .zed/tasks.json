@@ -1,10 +1,28 @@
 [
   {
+    "label": "Governance: generate demo evidence",
+    "command": "npm",
+    "args": ["run", "governance:demo"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Governance: validate evidence",
+    "command": "npm",
+    "args": ["run", "governance:check"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
     "label": "DevBot: install dependencies",
     "command": "npm",
-    "args": [
-      "install"
-    ],
+    "args": ["install"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -13,10 +31,7 @@
   {
     "label": "DevBot: typecheck",
     "command": "npm",
-    "args": [
-      "run",
-      "check"
-    ],
+    "args": ["run", "check"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -26,10 +41,7 @@
   {
     "label": "DevBot: test",
     "command": "npm",
-    "args": [
-      "run",
-      "test"
-    ],
+    "args": ["run", "test"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -39,13 +51,7 @@
   {
     "label": "DevBot: test current file",
     "command": "npm",
-    "args": [
-      "exec",
-      "--",
-      "vitest",
-      "run",
-      "$ZED_RELATIVE_FILE"
-    ],
+    "args": ["exec", "--", "vitest", "run", "$ZED_RELATIVE_FILE"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -55,10 +61,7 @@
   {
     "label": "DevBot: build",
     "command": "npm",
-    "args": [
-      "run",
-      "build"
-    ],
+    "args": ["run", "build"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -68,10 +71,7 @@
   {
     "label": "DevBot: format",
     "command": "npm",
-    "args": [
-      "run",
-      "format"
-    ],
+    "args": ["run", "format"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -81,10 +81,7 @@
   {
     "label": "DevBot: run API and webhooks",
     "command": "npm",
-    "args": [
-      "run",
-      "dev"
-    ],
+    "args": ["run", "dev"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -94,10 +91,7 @@
   {
     "label": "DevBot: run worker",
     "command": "npm",
-    "args": [
-      "run",
-      "worker"
-    ],
+    "args": ["run", "worker"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -107,10 +101,7 @@
   {
     "label": "DevBot: NATT ops dry run",
     "command": "npm",
-    "args": [
-      "run",
-      "natt:ops:dry"
-    ],
+    "args": ["run", "natt:ops:dry"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -143,14 +134,31 @@
   {
     "label": "DevBot: NATT roadmap",
     "command": "npm",
-    "args": [
-      "run",
-      "natt:roadmap"
-    ],
+    "args": ["run", "natt:roadmap"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
     "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "NATT: build offline vendor bundle",
+    "command": "npm",
+    "args": ["run", "natt:offline:vendor"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "NATT: check offline vendor bundle",
+    "command": "npm",
+    "args": ["run", "natt:offline:check"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
     "allow_concurrent_runs": true
   },
   {
@@ -173,10 +181,7 @@
   {
     "label": "Security: dependency audit production",
     "command": "npm",
-    "args": [
-      "audit",
-      "--omit=dev"
-    ],
+    "args": ["audit", "--omit=dev"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -186,10 +191,7 @@
   {
     "label": "Ops: Azure health check",
     "command": "npm",
-    "args": [
-      "run",
-      "ops:azure:check"
-    ],
+    "args": ["run", "ops:azure:check"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -199,10 +201,7 @@
   {
     "label": "Ops: Azure resource links",
     "command": "npm",
-    "args": [
-      "run",
-      "ops:azure:links"
-    ],
+    "args": ["run", "ops:azure:links"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -212,12 +211,7 @@
   {
     "label": "Web: run Next.js app",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "web",
-      "run",
-      "dev"
-    ],
+    "args": ["--prefix", "web", "run", "dev"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -227,12 +221,7 @@
   {
     "label": "Web: build",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "web",
-      "run",
-      "build"
-    ],
+    "args": ["--prefix", "web", "run", "build"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -242,12 +231,7 @@
   {
     "label": "Web: lint",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "web",
-      "run",
-      "lint"
-    ],
+    "args": ["--prefix", "web", "run", "lint"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -257,12 +241,7 @@
   {
     "label": "DevBot: start NATT MCP server",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "mcp-natt",
-      "run",
-      "dev"
-    ],
+    "args": ["--prefix", "mcp-natt", "run", "dev"],
     "env": {
       "PORT": "3111"
     },
@@ -275,12 +254,7 @@
   {
     "label": "MCP NATT: build",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "mcp-natt",
-      "run",
-      "build"
-    ],
+    "args": ["--prefix", "mcp-natt", "run", "build"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -290,12 +264,7 @@
   {
     "label": "HookBot: run service",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "services/hookbot",
-      "run",
-      "dev"
-    ],
+    "args": ["--prefix", "services/hookbot", "run", "dev"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -305,12 +274,7 @@
   {
     "label": "HookBot: build",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "services/hookbot",
-      "run",
-      "build"
-    ],
+    "args": ["--prefix", "services/hookbot", "run", "build"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -320,12 +284,7 @@
   {
     "label": "HookBot: test",
     "command": "npm",
-    "args": [
-      "--prefix",
-      "services/hookbot",
-      "run",
-      "test"
-    ],
+    "args": ["--prefix", "services/hookbot", "run", "test"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -382,10 +341,7 @@
   {
     "label": "DevBot: database generate migration",
     "command": "npm",
-    "args": [
-      "run",
-      "db:generate"
-    ],
+    "args": ["run", "db:generate"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",
@@ -418,11 +374,7 @@
   {
     "label": "Git: show current branch status",
     "command": "git",
-    "args": [
-      "status",
-      "--short",
-      "--branch"
-    ],
+    "args": ["status", "--short", "--branch"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -431,12 +383,7 @@
   {
     "label": "Git: commits since main",
     "command": "git",
-    "args": [
-      "log",
-      "--oneline",
-      "--decorate",
-      "main..HEAD"
-    ],
+    "args": ["log", "--oneline", "--decorate", "main..HEAD"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",
@@ -445,11 +392,7 @@
   {
     "label": "Git: files changed since main",
     "command": "git",
-    "args": [
-      "diff",
-      "--name-status",
-      "main...HEAD"
-    ],
+    "args": ["diff", "--name-status", "main...HEAD"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "none",
     "reveal": "always",

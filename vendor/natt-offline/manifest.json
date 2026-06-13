@@ -1,0 +1,1082 @@
+{
+  "schemaVersion": "devbot.natt-offline-vendor.v1",
+  "generatedAt": "2026-06-13T00:57:58.431Z",
+  "sourceRepository": "DevBot",
+  "policy": {
+    "use": "Authorized, written-ROE security work and offline labs only.",
+    "excludes": [
+      "secrets",
+      "runtime logs",
+      "mission memory",
+      "node_modules",
+      "dist/build outputs",
+      "generated caches"
+    ],
+    "liveOpsDefault": "dry-run"
+  },
+  "localIncludes": [
+    {
+      "path": ".natt/resources/ethical-hacking-roadmap.json",
+      "copied": true
+    },
+    {
+      "path": ".natt/ops/offensive-profiles.json",
+      "copied": true
+    },
+    {
+      "path": ".natt/cron/run-offensive-ops.ts",
+      "copied": true
+    },
+    {
+      "path": "natt-skills-catalog.json",
+      "copied": true
+    },
+    {
+      "path": "docs/natt-ethical-hacking-roadmap.md",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/package.json",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/package-lock.json",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tsconfig.json",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/src",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/package.json",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/package-lock.json",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/server.js",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/setup.js",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/Dockerfile",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/install-pi.sh",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/natt-tactical.service",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/docs",
+      "copied": true
+    },
+    {
+      "path": "mcp-natt/tactical-dashboard/public",
+      "copied": true
+    },
+    {
+      "path": "packages/mcp/src/offensive-ops",
+      "copied": true
+    },
+    {
+      "path": "pi5/natt-pi5-runtime.json",
+      "copied": true
+    },
+    {
+      "path": "pi5/devbot-natt-cron.service",
+      "copied": true
+    },
+    {
+      "path": "scripts/natt-roadmap.ts",
+      "copied": true
+    },
+    {
+      "path": "scripts/pentest-demo.ts",
+      "copied": true
+    },
+    {
+      "path": "scripts/test-kali-mcp.ts",
+      "copied": true
+    },
+    {
+      "path": "scripts/scaffold-natt-repos.ts",
+      "copied": true
+    },
+    {
+      "path": "src/ai/bettorsace-agent.ts",
+      "copied": true
+    },
+    {
+      "path": "src/ai/beyond.ts",
+      "copied": true
+    },
+    {
+      "path": "src/ai/claude.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-memory.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-report.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-report-cron.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-roe.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-cloud.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-cve.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-llm.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-mobile.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-nuclei.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-osint.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-racing.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-skills-rag.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-vault.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/natt-dynamic-roadmap.ts",
+      "copied": true
+    },
+    {
+      "path": "src/agents/skills",
+      "copied": true
+    },
+    {
+      "path": "src/agents/specialists",
+      "copied": true
+    },
+    {
+      "path": "src/agents/unchained",
+      "copied": true
+    },
+    {
+      "path": "src/ai/prompts/index.ts",
+      "copied": true
+    },
+    {
+      "path": "src/discord/bot.ts",
+      "copied": true
+    },
+    {
+      "path": "src/middleware/validators.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/agent-roi.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/health-scanner.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/http-api.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/journey-memory.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/pentest.ts",
+      "copied": true
+    },
+    {
+      "path": "src/services/pentest-runner.ts",
+      "copied": true
+    },
+    {
+      "path": "src/slack/bot.ts",
+      "copied": true
+    },
+    {
+      "path": "src/safety",
+      "copied": true
+    },
+    {
+      "path": "tests/mcp-natt",
+      "copied": true
+    },
+    {
+      "path": "tests/services/pentest.test.ts",
+      "copied": true
+    },
+    {
+      "path": "tests/safety",
+      "copied": true
+    }
+  ],
+  "files": [
+    {
+      "path": "source/.natt/resources/ethical-hacking-roadmap.json",
+      "bytes": 22554,
+      "sha256": "26ded8b4d5ecc3b343282f913052c7165e1759c041f68442530b06ac530790c8"
+    },
+    {
+      "path": "source/.natt/ops/offensive-profiles.json",
+      "bytes": 883,
+      "sha256": "90411ba2e77e58e04c28bf7a3ecfaa74669eb0f6ed4993059b7abbe134428798"
+    },
+    {
+      "path": "source/.natt/cron/run-offensive-ops.ts",
+      "bytes": 13555,
+      "sha256": "3902907012cf91b5c9f7a6ab08844852481ef5c7dafd815b315ede23830d3017"
+    },
+    {
+      "path": "source/natt-skills-catalog.json",
+      "bytes": 39984,
+      "sha256": "1e926af9869a90e9701f72d955d4c4f1c0fc7ad12c6ccde2593f93ae6e2068c8"
+    },
+    {
+      "path": "source/docs/natt-ethical-hacking-roadmap.md",
+      "bytes": 3412,
+      "sha256": "bcfc1e62c1379a23c8c0a0decc7e83d8e473690942166774a8c0807bb8128814"
+    },
+    {
+      "path": "source/mcp-natt/package.json",
+      "bytes": 607,
+      "sha256": "ae90fb0ae237c83db36f5b3a0419ea38a5762847283286b1f0d7c7bbf3bb93cd"
+    },
+    {
+      "path": "source/mcp-natt/package-lock.json",
+      "bytes": 63236,
+      "sha256": "d08c745cc49809ee0130be157b076a222b9ada05e5fe82c1c1660bab7d2b5975"
+    },
+    {
+      "path": "source/mcp-natt/tsconfig.json",
+      "bytes": 389,
+      "sha256": "65137f9c79b2436a600c5e24af9a7d614a87ff04c318294df04285a313157d66"
+    },
+    {
+      "path": "source/mcp-natt/src/formatters.ts",
+      "bytes": 21989,
+      "sha256": "9cdb186db1bbceec0da376187a1d6f409af43d6da459d49843eb2426bf242d7d"
+    },
+    {
+      "path": "source/mcp-natt/src/index.ts",
+      "bytes": 66790,
+      "sha256": "6945a4dbe5b156dd2679113297799f049971628a81238819cb8884dccf772eca"
+    },
+    {
+      "path": "source/mcp-natt/src/jwt-security.ts",
+      "bytes": 74380,
+      "sha256": "6307aeaf4326845c0ee5a27092239ac03df0730dd4c8f8bb000ae80af006b956"
+    },
+    {
+      "path": "source/mcp-natt/src/knowledge.ts",
+      "bytes": 24694,
+      "sha256": "4a57aef5c9bf67936f28fc95a2cfe4f3ff287f243ee32c85b61b064ba5732199"
+    },
+    {
+      "path": "source/mcp-natt/src/media-security.ts",
+      "bytes": 48793,
+      "sha256": "907e9e6f57285f2ee2c521941b581ab2212f422b2a7e224c9ba2724d54b4dc00"
+    },
+    {
+      "path": "source/mcp-natt/src/password-generator.ts",
+      "bytes": 8232,
+      "sha256": "5330845d1eda0c6a290d94d16b5286f8bd5ca616660f769399b526f18323a2aa"
+    },
+    {
+      "path": "source/mcp-natt/src/portswigger.ts",
+      "bytes": 76916,
+      "sha256": "45dfa26ff0c8de95d5e1add07ed21841db60e44277ca55f7188053bba8325769"
+    },
+    {
+      "path": "source/mcp-natt/src/ux-response.ts",
+      "bytes": 5532,
+      "sha256": "4cd63d4d7e43be07c417e52bf8b7f4df71f5e6b644f4ad5137a4852c55c5aeff"
+    },
+    {
+      "path": "source/mcp-natt/src/vpn-security.ts",
+      "bytes": 81058,
+      "sha256": "3051db80aef74f7834adf1bd02244309119826480894cd67438daba40f8df83d"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/analyze_ip_reputation.ts",
+      "bytes": 4559,
+      "sha256": "acdc10edd94876fbc6bb74d2db5bd4fdfa7650fe5e452c11ee450bdfc845823a"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/analyze_jwt_config.ts",
+      "bytes": 4591,
+      "sha256": "e1a71de9499f31ea35a7aa7de067642b1bdc92c1160b95637eae4404d270c6e9"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/analyze_vpn_config.ts",
+      "bytes": 4439,
+      "sha256": "a9f4dc404d0a283c2e9b75ec4261408537c7b50c539164d2800490fd2d814169"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/bettorsace_create_blueprint.ts",
+      "bytes": 1832,
+      "sha256": "07cc093539619dbd281fc8cf129f4868bd71c9683322ad50c0ddd59c234724d4"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/bettorsace_diagnose_issue.ts",
+      "bytes": 2193,
+      "sha256": "250feb2fdbe0b250cc446626636b601a5e5cb262b2bd7f046d1df635a0a59158"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/bettorsace_generate_strategy.ts",
+      "bytes": 1776,
+      "sha256": "38cbd61558c95bc95bcd61c54b898efe474f62defd4adf46e4c235fb3632ec6f"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/build_operational_config.ts",
+      "bytes": 4260,
+      "sha256": "b015e851699254a6fa07cac1a5dc27d88490bb70be547828c587c5983fe3e3ec"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/decode_jwt.ts",
+      "bytes": 4533,
+      "sha256": "86ea35cc4b56dd94deda1fabc8a9bf1e7387cdab6662260556c4591929ef69d9"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/generate_password.ts",
+      "bytes": 4868,
+      "sha256": "faca60d2b3aed87e9ef0066dc8d68225bcf5a09b3867a14b68ac898d6282d7b6"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_algorithm_weights.ts",
+      "bytes": 321,
+      "sha256": "69b598498eda4afb5e493c44a3b0a8e8a7b3c6e3d7fad2ca14bd23335d235fd9"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_auth_bypass_techniques.ts",
+      "bytes": 3923,
+      "sha256": "b66e0d4943a2e072c3fdc9b31e2ba5bc50724913ddfcf4d2783c6a26a3fb6580"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_bug_bounty_guidance.ts",
+      "bytes": 4050,
+      "sha256": "4c0dbf8ca135768805ee168541f3a28184acf635e2a4cd5f125b40e865dc2d0b"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_compliance_mapping.ts",
+      "bytes": 4558,
+      "sha256": "d45bf20941894408793ff680fa6108e96ced1a8e6f7adcaf458e5b1c5bc3e5b2"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_content_integrity.ts",
+      "bytes": 4077,
+      "sha256": "5b95cd0749d964078e38b05a09099890c76cf18bf84c646de6338d20c812ed67"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_dast_profile.ts",
+      "bytes": 4905,
+      "sha256": "bcd4593d56a7dafeef90bfbfc8cd94b7871e681de1abf22a11dd518c11b54117"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_default_credentials.ts",
+      "bytes": 3782,
+      "sha256": "d041907db05be8109c679af8197ca9a46cd9fd9b61b40e51d33deb62d7dda26c"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_defense_playbook.ts",
+      "bytes": 4368,
+      "sha256": "ee69e353b22bf21c740d806c5398c884022855d3114cda10c0c9c64ab7dee8ce"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_devsecops_guidance.ts",
+      "bytes": 4062,
+      "sha256": "cb21f61a3db14301fb6c8f0234bf47c6a71ddff69830c95e44dd934d3b8114a4"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_jwt_attack.ts",
+      "bytes": 4595,
+      "sha256": "21139ce51b2265f8fecd31e9bc7797831d3059132b618c130e49feff1d2652a0"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_jwt_defense.ts",
+      "bytes": 4437,
+      "sha256": "81379ebcddcebb471a02ace215bb2310afad63410830ecaf53f307de3cfe092a"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_jwt_library_vulns.ts",
+      "bytes": 3935,
+      "sha256": "fa8adbfe101f500cc3357994e118917ed9724c1d2ae4677aad8483e685957b0c"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_mission_guidance.ts",
+      "bytes": 4036,
+      "sha256": "646d2bd8e86275ccb7cf4b0c842e314dae8b86aedfd0b9f557fe37d24155f6bf"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_password_attacks.ts",
+      "bytes": 3968,
+      "sha256": "cdc7f07304a040c63af4418fed79eae81e58038498ec1c00160adb15d6eab39c"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_pentest_methodology.ts",
+      "bytes": 3971,
+      "sha256": "5e14701c10dace7cdb6f34305c0523483e7a9c5413d8aff8b576d39c64cc4cd5"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_platform_defense.ts",
+      "bytes": 4525,
+      "sha256": "3ec44b042cf1b42fd7f36b4e47a36390ff716e94fd2c968e07800ece6fa5948e"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_reverse_engineering_guidance.ts",
+      "bytes": 4128,
+      "sha256": "ae8e3136f7aef887fda8b19aa43190e0a7d9d95b458aa65432fbf06df5988b94"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_roe_template.ts",
+      "bytes": 3393,
+      "sha256": "b5dd022589ac148b3c7491cca3490198a88f7aee29db7c905caeb46669ee9e08"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_scraper_pattern.ts",
+      "bytes": 4355,
+      "sha256": "26aa8cbc41c4e2ed61a7b9705a96e65115c89326a1bec1c2ed277823c3726bc9"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_secret_patterns.ts",
+      "bytes": 3866,
+      "sha256": "113e9d7b94034622342be7ccd200486ee7cc0781083ecde46205d81a81add6c0"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_top_passwords.ts",
+      "bytes": 698,
+      "sha256": "877bd36a396655c39e28ee08cd7affaae7be87a8d445619d52cd747c94e2e238"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_vpn_defense.ts",
+      "bytes": 4445,
+      "sha256": "dca65434940b58d2fdc40ee12223f5c446f09867953c0b6b562c1e4164bc12eb"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_vpn_leak.ts",
+      "bytes": 4572,
+      "sha256": "96fb2803a6bd7b8e353ccbaca99bc735996be11d09c3b475bcf20e2ff07620a3"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_vpn_protocol.ts",
+      "bytes": 4310,
+      "sha256": "ca4d6945826d73b094616ee1d9a42f8c0d3f3db63e2f332446ce4837f6a3ac16"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_vpn_provider.ts",
+      "bytes": 4587,
+      "sha256": "16d31c41ef4e64e43e9b22bda142bc89e2ca425024f07eabe6c26b74def46c77"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_vulnerability_info.ts",
+      "bytes": 5491,
+      "sha256": "464593eb0f161c0ac3fbe85674b7362361a6b1d610f023824415c5bfe7aed7fe"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/identify_hash.ts",
+      "bytes": 3569,
+      "sha256": "0223f70f738b4b759367441a5a7af5ba5b3fdeded547ad48a1b9e4465342aefc"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/run_e2e_simulation.ts",
+      "bytes": 619,
+      "sha256": "87385d4788990ea48e2ed381c026ba4f09a79ae3b2ddcac466b40d8210187485"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/scan_for_secrets.ts",
+      "bytes": 3605,
+      "sha256": "40ce0d23c8cd0707fedcf2169377e7e2f29aa6c9508a174a25006117684bf3cd"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/store_generated_password.ts",
+      "bytes": 1121,
+      "sha256": "45ec94c4890026bda42fc2fee07c6dd05358f666aa7664902522f1f717835b06"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/submit_aar.ts",
+      "bytes": 506,
+      "sha256": "7562aa62ed85cd6873381f890c87e67b972a836013f2f6fa28c43c0555571012"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/validate_roe_checklist.ts",
+      "bytes": 5311,
+      "sha256": "8ff1db603ec3472392decbe71c4dfad029ef64542b6a6623502d66a13e4a42e1"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_ethical_roadmap.ts",
+      "bytes": 1467,
+      "sha256": "3e66f96def7093cb0766643040a9dab6a2bd044b9c9a02a0cc3beac3201407b2"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/get_roadmap_stage.ts",
+      "bytes": 1584,
+      "sha256": "8c45626cc066a3652ec5e0425f02d2bc3697383172af2093a5ed3dde3b43caa6"
+    },
+    {
+      "path": "source/mcp-natt/src/handlers/recommend_roadmap_path.ts",
+      "bytes": 1658,
+      "sha256": "5d3b40c4f31d6b8cc609d0dd99fece10fc39789218448e06702f4360e3da5cf5"
+    },
+    {
+      "path": "source/mcp-natt/src/memory/aar.ts",
+      "bytes": 1465,
+      "sha256": "f18ff923608256965ccf9c5271fa3d741362ecd4ca00d617be6b75f121ac5182"
+    },
+    {
+      "path": "source/mcp-natt/src/memory/password-vault.ts",
+      "bytes": 2807,
+      "sha256": "514222d5c5c7369b0614e981a698c4069867113a0605605760027c72c3221527"
+    },
+    {
+      "path": "source/mcp-natt/src/testing/e2e-engine.ts",
+      "bytes": 1582,
+      "sha256": "c92f6a6063b489f7a758f3c8a5c79232916308d94874d413829c31f79ed6391c"
+    },
+    {
+      "path": "source/mcp-natt/src/testing/e2e-schemas.ts",
+      "bytes": 805,
+      "sha256": "c04fa182f7dab1ba66db9226db4f36411a541eea298c66e8f13faa19200b0c2b"
+    },
+    {
+      "path": "source/mcp-natt/src/ethical-roadmap.ts",
+      "bytes": 15619,
+      "sha256": "acce19bccca2e932a71e4ee927f6ff1821bf7eee415ff27cf83227aaa26f76da"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/package.json",
+      "bytes": 770,
+      "sha256": "e7df9a1490ef064c1f2791b048f9b3df05f79e72c0b88a9230d6aaeab2a5a650"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/package-lock.json",
+      "bytes": 31124,
+      "sha256": "c8225b667404697deef1698f65715fafcc963d9f67edb4caafe33b776d3093cf"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/server.js",
+      "bytes": 6901,
+      "sha256": "b53c7861fbbb4c3c1ef9485b4541c4ffb71b7b024358b00738d1f7415b3626b8"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/setup.js",
+      "bytes": 1901,
+      "sha256": "97855db9c00885635ad369afe91af50c181303f78c32853351a1db30ecac21b7"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/Dockerfile",
+      "bytes": 529,
+      "sha256": "6bf05994a83906647714a9b3e9580ae42941469ffe121b7f6a26e9e52ece5171"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/install-pi.sh",
+      "bytes": 2650,
+      "sha256": "efa82093c3a9b8c6d02224f30b223d4c080c9baab702bdaf5f7ac5db164052fb"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/natt-tactical.service",
+      "bytes": 453,
+      "sha256": "bbc992b162a1ed47b3b660851b62ca3c4e31cc041ccbd29d6c80fd34e8deebcd"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/BUSINESS_REQUIREMENTS.md",
+      "bytes": 22009,
+      "sha256": "8619ef0356cd9371e3ec46f63f93921cfc967646da4955fa10ef56809df0532d"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/MAINTENANCE_CHECKLIST.md",
+      "bytes": 20733,
+      "sha256": "b1d581457b410ac6aedc80aed52dcd40ad0e85d5a3c1f9b23efbc64e9b6ef595"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/FAQ.md",
+      "bytes": 13974,
+      "sha256": "e854fb194f888cb0d492655d7bce80d984a1831e8a7716272f1a6b3ab07d2a16"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/QUICK_START.md",
+      "bytes": 2861,
+      "sha256": "999f9e1547c7233cceaecdeb3d6fd7109053d799cdf9dbb679d43a3fc4a9fbe3"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/SPECIFICATION_ANNEX.md",
+      "bytes": 21907,
+      "sha256": "35b7ebb0c36ec7681cd4c593a03cef196ba89683250d14e562e7838b924c38b2"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/TECHNICAL_MANUAL.md",
+      "bytes": 37865,
+      "sha256": "d4c9a49303134ed5fce2e9d7b81cb82d9983189ebd7d0cdec149d6390af904a3"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/docs/USER_GUIDE.md",
+      "bytes": 32046,
+      "sha256": "dbb20f8fd060d595a7904e693d5f597413b0e23e11039af5de66ffa3efdba859"
+    },
+    {
+      "path": "source/mcp-natt/tactical-dashboard/public/index.html",
+      "bytes": 41772,
+      "sha256": "38f4b12a12beb9381d55d097dbeb0a681e967d17558a81425c9cb5ad3fe2be05"
+    },
+    {
+      "path": "source/packages/mcp/src/offensive-ops/types.ts",
+      "bytes": 2547,
+      "sha256": "b62165edbe5b82c1f1f202dc387e1073d3b6d3a2bfd3d75e8e3ed65f45f506ea"
+    },
+    {
+      "path": "source/packages/mcp/src/offensive-ops/profile-loader.ts",
+      "bytes": 1091,
+      "sha256": "aed8d59cc6f7f7bf56b564cdc79f5203527ebde8577a7b9ff4086312f5ca40f5"
+    },
+    {
+      "path": "source/packages/mcp/src/offensive-ops/executor.ts",
+      "bytes": 1662,
+      "sha256": "0b4238cc315c72ed547f16090ff2c540037542b6d1483083c2ee7e190120f8ec"
+    },
+    {
+      "path": "source/packages/mcp/src/offensive-ops/devbot-adapter.ts",
+      "bytes": 2324,
+      "sha256": "eb39503f649977f8809cab2b547f9323bdce6c2b5c515f407d6b1806d9f19d61"
+    },
+    {
+      "path": "source/pi5/natt-pi5-runtime.json",
+      "bytes": 6009,
+      "sha256": "54ff0965b5e1c8c4fd575b005829c1dd68616d0979648bedc53fdeacef00dbc2"
+    },
+    {
+      "path": "source/pi5/devbot-natt-cron.service",
+      "bytes": 937,
+      "sha256": "4b464eb5dddc66e42c43e0698f6e5e7f017f3c222f346d407043d5b7846f9743"
+    },
+    {
+      "path": "source/scripts/natt-roadmap.ts",
+      "bytes": 1284,
+      "sha256": "6787b654f8817683d30b1d4c5a4b9723ec0bbd064e438093e3b18ab9bacf4a7e"
+    },
+    {
+      "path": "source/scripts/pentest-demo.ts",
+      "bytes": 5878,
+      "sha256": "912037cfae4f35e4c9bf4d26288bd5c451174dd0c7f2e66f02485c7c71661a81"
+    },
+    {
+      "path": "source/scripts/test-kali-mcp.ts",
+      "bytes": 4671,
+      "sha256": "3288bdbfe3c163bcd83c13205c4f98add3d0a59b292873ee5b0596db77b06350"
+    },
+    {
+      "path": "source/scripts/scaffold-natt-repos.ts",
+      "bytes": 17038,
+      "sha256": "517b9d50327c105098dd285b9bfc1e021cd22f186457897342742b47c04c26f9"
+    },
+    {
+      "path": "source/src/ai/bettorsace-agent.ts",
+      "bytes": 3655,
+      "sha256": "c2f70387ea776d20ac66f15e77df0994e68ac7e18de3890c642e2ac00173e81b"
+    },
+    {
+      "path": "source/src/ai/beyond.ts",
+      "bytes": 22179,
+      "sha256": "778d8a9a867f9ab8d26d300fed5880e0ec03027a028a8b40d29bef8d8e6a89e9"
+    },
+    {
+      "path": "source/src/ai/claude.ts",
+      "bytes": 13588,
+      "sha256": "f67f8984b50046f64cd56271c1fec448411aca8a76939fc70e350a9f77592566"
+    },
+    {
+      "path": "source/src/ai/prompts/index.ts",
+      "bytes": 42629,
+      "sha256": "76da04231187c095817826e55ace97a9df4c765047534debcd2eb3b52f8530ac"
+    },
+    {
+      "path": "source/src/agents/natt.ts",
+      "bytes": 72292,
+      "sha256": "4c07760b0d3e908b32641e3b2e62730e4334bf54b44e038f8020d25428d987cb"
+    },
+    {
+      "path": "source/src/agents/natt-memory.ts",
+      "bytes": 14699,
+      "sha256": "8d814be72c64533175c52df40814440bb66c5cb094b7b660eec612c58fad6b81"
+    },
+    {
+      "path": "source/src/agents/natt-report.ts",
+      "bytes": 35958,
+      "sha256": "fbf329893b2a8ad30b47a1511cd8d63514bd3ecb5d1481f5e91ff478bbd3ca9e"
+    },
+    {
+      "path": "source/src/agents/natt-report-cron.ts",
+      "bytes": 30725,
+      "sha256": "ee3efeffd2d7f5e0bb3d195e634b9215dddfcc50afd8334deeb1e91c1809bdb9"
+    },
+    {
+      "path": "source/src/agents/natt-roe.ts",
+      "bytes": 39927,
+      "sha256": "e72326c3bf46461b2c65fa7bcdb936b55cda134c34d3f9e4de4b1fc5e1ec76b5"
+    },
+    {
+      "path": "source/src/agents/natt-skills.ts",
+      "bytes": 50427,
+      "sha256": "5aff155da8083aeb9706faa157cb4cdd6c420884db232faee60c2cbcf36d53d3"
+    },
+    {
+      "path": "source/src/agents/natt-skills-cloud.ts",
+      "bytes": 14403,
+      "sha256": "6184c7c5e6272754ef32e00c9e6b4b42344483c44e4a2fa5718d5ce1b2076935"
+    },
+    {
+      "path": "source/src/agents/natt-skills-cve.ts",
+      "bytes": 11325,
+      "sha256": "c7f8d14ecc5cd854728972186124439d3025b4358abfbdcaf06410dbdf5b521d"
+    },
+    {
+      "path": "source/src/agents/natt-skills-llm.ts",
+      "bytes": 12425,
+      "sha256": "4050b69f78306f869d62f4058113b6b7b6aa899aa82c2c0e235034fc244ac964"
+    },
+    {
+      "path": "source/src/agents/natt-skills-mobile.ts",
+      "bytes": 13597,
+      "sha256": "54edd8f323d585046849b3bfeff0b784a99039dc99b4315cee373a89ca7d43ee"
+    },
+    {
+      "path": "source/src/agents/natt-skills-nuclei.ts",
+      "bytes": 8860,
+      "sha256": "1893e2fcb5f16aa9bf23ebe322dfe2e0aaacedb38af854d4e16c5e60a00a2492"
+    },
+    {
+      "path": "source/src/agents/natt-skills-osint.ts",
+      "bytes": 11424,
+      "sha256": "df1cc9b0802a716a38c4887f95a935b12128062d6a8cae39a7ce4ee719fb18fd"
+    },
+    {
+      "path": "source/src/agents/natt-skills-racing.ts",
+      "bytes": 20525,
+      "sha256": "f93b36dd718ccdb20853ad9144a71767677f74b64b0bb5683a8e88fad17d6b3c"
+    },
+    {
+      "path": "source/src/agents/natt-skills-rag.ts",
+      "bytes": 8963,
+      "sha256": "4851c4c9f80252f4a0dd2e5d8b30ee738a7480ea97ac0e675d3d4c025437fdb6"
+    },
+    {
+      "path": "source/src/agents/natt-vault.ts",
+      "bytes": 28650,
+      "sha256": "f85fc7256a3ab0e22f732810183fc4e02b155c1692eed3a91c2f7561dce56852"
+    },
+    {
+      "path": "source/src/agents/natt-dynamic-roadmap.ts",
+      "bytes": 8571,
+      "sha256": "f80fca255e1b1d6b8eca2580f2f0a5116226c527278c3f2e1ab499b7d3c03f91"
+    },
+    {
+      "path": "source/src/agents/skills/roadmap.ts",
+      "bytes": 13580,
+      "sha256": "c45d2d71b2074a48ba92648c991b9378bb20984f0852ab74b279b4e0ca43d197"
+    },
+    {
+      "path": "source/src/agents/skills/roadmap-runtime.ts",
+      "bytes": 2177,
+      "sha256": "da4c1a3102e5a60f77d35d62cf84b81295164e744fb34cf8db0df1d0f708434c"
+    },
+    {
+      "path": "source/src/agents/skills/index.ts",
+      "bytes": 70,
+      "sha256": "41b98cc2e1e0f89c2851991f83f84be426d84c6d66061b6c1bd1d8deae8545f0"
+    },
+    {
+      "path": "source/src/agents/specialists/jr.ts",
+      "bytes": 2610,
+      "sha256": "39c46ebd79d2ff0130cd365e672e9e1e0e288425a7d1db554217e1093920914f"
+    },
+    {
+      "path": "source/src/agents/specialists/jwt-security.ts",
+      "bytes": 74380,
+      "sha256": "6307aeaf4326845c0ee5a27092239ac03df0730dd4c8f8bb000ae80af006b956"
+    },
+    {
+      "path": "source/src/agents/specialists/media-security.ts",
+      "bytes": 48793,
+      "sha256": "907e9e6f57285f2ee2c521941b581ab2212f422b2a7e224c9ba2724d54b4dc00"
+    },
+    {
+      "path": "source/src/agents/specialists/media.ts",
+      "bytes": 6214,
+      "sha256": "1c4ca3bc186dc5d58f498ccc799063514aae5509301ee63630595edc8f062a05"
+    },
+    {
+      "path": "source/src/agents/specialists/vpn-security.ts",
+      "bytes": 81058,
+      "sha256": "3051db80aef74f7834adf1bd02244309119826480894cd67438daba40f8df83d"
+    },
+    {
+      "path": "source/src/agents/specialists/documentation.ts",
+      "bytes": 8407,
+      "sha256": "5fec2a01fe649235445b8eb79ec306f153a486c6d5cc306d6060d8716822e789"
+    },
+    {
+      "path": "source/src/agents/specialists/test-generator.ts",
+      "bytes": 7678,
+      "sha256": "e7195b7c81bef4a6fdb366dbc1805758254457e69b4b4f39e382470512596b4e"
+    },
+    {
+      "path": "source/src/agents/specialists/performance.ts",
+      "bytes": 10783,
+      "sha256": "8c514f628609b252bc58e6b15de45d250a2dbc61919e19957718f1c81d3e812b"
+    },
+    {
+      "path": "source/src/agents/specialists/infrastructure.ts",
+      "bytes": 7389,
+      "sha256": "0422e3ec977d9aae0dfa018899fadbc98d3855117c69a87fa16d02eae72fd84a"
+    },
+    {
+      "path": "source/src/agents/specialists/data.ts",
+      "bytes": 10301,
+      "sha256": "0d6ad52a9b0b1c7dee01c08db422fde4c6e61c0c78bd3c76618cdcc164228c2c"
+    },
+    {
+      "path": "source/src/agents/specialists/index.ts",
+      "bytes": 1275,
+      "sha256": "3b30cfe6f94e5c8b8188f769455a3e1e07cfd488228c564aee7eaa4ebaea7cc4"
+    },
+    {
+      "path": "source/src/agents/unchained/allowlist.ts",
+      "bytes": 7424,
+      "sha256": "93f9b32b49b0d09dca7d54ba40208ca88d7943180d812f99e1d3d0f007933592"
+    },
+    {
+      "path": "source/src/agents/unchained/audit.ts",
+      "bytes": 3190,
+      "sha256": "c1510de138ce612e3b14e39146f06db1944eaccd8dd64dbec21c6d30467a4901"
+    },
+    {
+      "path": "source/src/agents/unchained/capabilities.ts",
+      "bytes": 8951,
+      "sha256": "19edf946eefa167b6079f186a73ed06c5ac2d2902ee6b728a8b45d992790fc48"
+    },
+    {
+      "path": "source/src/agents/unchained/engine.ts",
+      "bytes": 7003,
+      "sha256": "027e1a72e26e51d4d940f54acfbf493787a409dbe0c72318cab482fc735bdc06"
+    },
+    {
+      "path": "source/src/agents/unchained/index.ts",
+      "bytes": 267,
+      "sha256": "9c403b4249b91da75a6193c316c5b0dfba1ac8a95d4a95c5034862bb6c9e9b91"
+    },
+    {
+      "path": "source/src/agents/unchained/roe.ts",
+      "bytes": 6361,
+      "sha256": "024d4a0c81e5e852bdc1918395523e87a697f609e5fae9aa977768be5e6a2b5f"
+    },
+    {
+      "path": "source/src/agents/unchained/session.ts",
+      "bytes": 5943,
+      "sha256": "af79a32a063b77afc9255a0a2e32ba7cd3b9404099e53abde64342ad630933a4"
+    },
+    {
+      "path": "source/src/agents/unchained/types.ts",
+      "bytes": 6774,
+      "sha256": "10bcd49535d21693161e48d285d415acb6a6fe05de3fdaeb4ec943a056b6f3db"
+    },
+    {
+      "path": "source/src/discord/bot.ts",
+      "bytes": 16542,
+      "sha256": "29872284c08582eb96573316c0a731dab3805b1d95532431e6736f63a41525c1"
+    },
+    {
+      "path": "source/src/middleware/validators.ts",
+      "bytes": 5504,
+      "sha256": "7ff6097e8a94f0d92d5a8563be8704f558f881ee30547745ca244fa0f4a077f3"
+    },
+    {
+      "path": "source/src/services/agent-roi.ts",
+      "bytes": 16456,
+      "sha256": "897abc2f3a94aae5662d44f858aff9c8beeaae767f234bebe4f21a1b636d262d"
+    },
+    {
+      "path": "source/src/services/health-scanner.ts",
+      "bytes": 27664,
+      "sha256": "0934b011ff0a2c6221befd6a5763bb0b046896cca3a5650c7e958ee5f6cc5a4b"
+    },
+    {
+      "path": "source/src/services/http-api.ts",
+      "bytes": 23266,
+      "sha256": "ee4444bda4a4a2dcdee4b7bee4f25617d26ac4d426b0379ba1a0149f67f8dbd8"
+    },
+    {
+      "path": "source/src/services/journey-memory.ts",
+      "bytes": 36455,
+      "sha256": "7e762496f20ef73bf7b982e3034340a1e5eef11ea2aa4a2228b09da46cf3809a"
+    },
+    {
+      "path": "source/src/services/pentest.ts",
+      "bytes": 26060,
+      "sha256": "28b55ace30b7dc3f33e3dc9c49096c502fb2fdb3a72351ffe1e566960b1921f1"
+    },
+    {
+      "path": "source/src/services/pentest-runner.ts",
+      "bytes": 21369,
+      "sha256": "b2f584d2d39a4e332845a759945fe65eeb276fd8c4cd7916eb75da27fd8818dc"
+    },
+    {
+      "path": "source/src/slack/bot.ts",
+      "bytes": 56856,
+      "sha256": "27bc05b8ef22a051f0b485b3fa2d2726f8fda238a81e6cb82fba41105d6a34ae"
+    },
+    {
+      "path": "source/src/safety/guardrails.ts",
+      "bytes": 8208,
+      "sha256": "d5e80c566ddfcb291a2832540244e8dfc8ad0ff8476d0bb63d87cb3300e936a4"
+    },
+    {
+      "path": "source/src/safety/index.ts",
+      "bytes": 1143,
+      "sha256": "a5248b9e9b6d836d50b3995bd1f6944d8e6a1a201f5b32e07df4ad5057eac6d8"
+    },
+    {
+      "path": "source/src/safety/README.md",
+      "bytes": 12591,
+      "sha256": "579250a1d32909f06ef2ac91161cf3379418d3e3ed18e5939e8defbb82f7e1e8"
+    },
+    {
+      "path": "source/src/safety/rollback.ts",
+      "bytes": 9616,
+      "sha256": "04f7346e254b5d3b53c883b5621582d93668c819e22df80e94edbae1cb70cf53"
+    },
+    {
+      "path": "source/src/safety/sandbox.ts",
+      "bytes": 8707,
+      "sha256": "77c5f7fb132fce25fd871be788c50d56d3aa60fe58a07f845d2ee59c700fa336"
+    },
+    {
+      "path": "source/src/safety/guardrails/breaking-changes.ts",
+      "bytes": 8651,
+      "sha256": "667b1e70ddffd0833efd599de48f938d47d4317eae30331ba7c3267f0f67c667"
+    },
+    {
+      "path": "source/src/safety/guardrails/code-review.ts",
+      "bytes": 5309,
+      "sha256": "bea141cbc4aa5e2851eb3299834e9419083cd53d2d5e1144ded0e091bb292b1f"
+    },
+    {
+      "path": "source/src/safety/guardrails/compliance.ts",
+      "bytes": 10531,
+      "sha256": "6882462943396dfa60eee59206cea731d336677cdac9725c86c90506563f924e"
+    },
+    {
+      "path": "source/src/safety/guardrails/dependency-audit.ts",
+      "bytes": 7243,
+      "sha256": "beb89e3e12f69f30de724ff438e9b55c34535033f455f903323758634fa76709"
+    },
+    {
+      "path": "source/src/safety/guardrails/performance.ts",
+      "bytes": 8273,
+      "sha256": "e53dc994b1d247441eb0812980591768a3b07f1f11a4877ff95f942ae546ae31"
+    },
+    {
+      "path": "source/src/safety/guardrails/secret-scanner.ts",
+      "bytes": 7169,
+      "sha256": "849bac0accf2b5fdfa3ed5709dc7ca56e4d3565ab86b352cc946394620253304"
+    },
+    {
+      "path": "source/tests/mcp-natt/ux-response.test.ts",
+      "bytes": 3214,
+      "sha256": "d7e5368be27af5a137575d5c2b8b99217c3b69ff0cd2d1a077931a58b019e7cd"
+    },
+    {
+      "path": "source/tests/services/pentest.test.ts",
+      "bytes": 19931,
+      "sha256": "ecb6d0068fc8d011b405f93a58569482c148bb2fcd0456392db195131983da0b"
+    },
+    {
+      "path": "source/tests/safety/guardrails.test.ts",
+      "bytes": 6344,
+      "sha256": "6f59d813a25e03f03206769b65300bc95e0195f8165a193d05a4a3343e1f9002"
+    },
+    {
+      "path": "source/tests/safety/rollback.test.ts",
+      "bytes": 10365,
+      "sha256": "77cf1f12f90dcba4fcdb12993a8cda8c207ab526d9a5fb8308aefc1eb40be940"
+    },
+    {
+      "path": "source/tests/safety/secret-scanner.test.ts",
+      "bytes": 6212,
+      "sha256": "09a5373193aeb642920ab2c5e9153ac721fbc0c8d98988b3464764071f66def4"
+    }
+  ],
+  "recommendedExternalMirrors": [
+    {
+      "name": "vendorpull",
+      "role": "Pinned git repository vendoring for non-package-manager dependencies.",
+      "decision": "Evaluate only; license metadata needs review before embedding."
+    },
+    {
+      "name": "WSL 2",
+      "role": "Offline-capable Linux runtime layer for Windows operators.",
+      "decision": "Recommended for Windows NATT labs and POSIX-only vendoring tools."
+    },
+    {
+      "name": "pnpm/npm cache",
+      "role": "Prime JavaScript dependencies for offline builds.",
+      "decision": "Use lockfiles and local cache exports; do not commit node_modules."
+    },
+    {
+      "name": "Docker save/load",
+      "role": "Move pinned container images into disconnected environments.",
+      "decision": "Store checksums and SBOMs beside image archives."
+    },
+    {
+      "name": "apt/offline package mirrors",
+      "role": "Mirror Linux packages for WSL/Kali/Debian-based lab distros.",
+      "decision": "Keep outside this repo unless small metadata manifests are needed."
+    }
+  ]
+}

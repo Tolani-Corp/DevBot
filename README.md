@@ -23,6 +23,23 @@ DevBot should be positioned as a teammate for engineering teams, not as a vague 
 - keeps approval, memory, and trust state visible
 - creates a commercial handoff into `DEBO` when the buyer needs broader workstation and governance controls
 
+## Autonomy Proof Path
+
+DevBot's autonomy claim is evidence-gated:
+
+- `Architects systems` through enhancement records, ADRs, design review packets, and human approval checkpoints.
+- `Deploys systems` through a replayable request -> code -> tests -> PR -> deploy path with provenance.
+- `Evolves systems` through evals, CI evidence, rollback proof, release governance, and post-release reflection.
+
+Generate the local proof manifest:
+
+```bash
+npm run governance:demo
+npm run governance:check
+```
+
+Reference materials live in [docs/autonomous-delivery/README.md](./docs/autonomous-delivery/README.md).
+
 ## Product Relationship
 
 - `DevBot` = execution teammate and commercial wedge
@@ -123,6 +140,15 @@ NATT's ethical hacking roadmap is available as shared human and agent context.
 - MCP resources: `natt://ethical-roadmap`, `natt://ethical-roadmap-catalog`
 
 The roadmap covers TCP/IP, DNS, HTTP/HTTPS, Linux/Windows/macOS, networking, Python/Bash/JavaScript/PHP/SQL, Nmap, Burp Suite, Metasploit, John the Ripper, Wireshark, VirtualBox/VMware, Kali/Parrot, TryHackMe, Hack The Box, and OverTheWire. All use is bounded to authorized labs, written ROE, and non-destructive-first workflows.
+
+Offline NATT vendoring:
+
+```bash
+npm run natt:offline:vendor
+npm run natt:offline:check
+```
+
+See [docs/natt-offline-vendoring.md](./docs/natt-offline-vendoring.md) for WSL, vendorpull, package-cache, and offline mirror guidance.
 
 ## License
 

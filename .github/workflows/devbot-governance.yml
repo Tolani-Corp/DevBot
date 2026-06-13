@@ -1,0 +1,38 @@
+name: DevBot Governance Evidence
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - run: pnpm run governance:demo
+      - run: pnpm run governance:check
+
+      - name: Upload governance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: devbot-governance-evidence
+          path: .devbot/evidence/demo-delivery-evidence.json
+          if-no-files-found: error
+          retention-days: 14
