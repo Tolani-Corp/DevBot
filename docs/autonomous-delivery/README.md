@@ -37,13 +37,13 @@ Required evidence:
 Generate an evidence manifest:
 
 ```bash
-npm run governance:evidence
+pnpm run governance:evidence
 ```
 
 Validate it:
 
 ```bash
-npm run governance:check
+pnpm run governance:check
 ```
 
 The generated file lives at `.devbot/evidence/demo-delivery-evidence.json` and is intentionally safe: it records the proof shape without deploying anything.

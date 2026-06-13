@@ -8,6 +8,7 @@ DevBot is the request-to-reviewed-PR execution teammate. DEBO is the broader wor
 
 - Prefer the existing TypeScript, npm/pnpm, Vitest, Drizzle, MCP, Slack, Discord, and worker patterns already in this repository.
 - Keep memory, approval, security, and operator visibility conservative by default.
+- Apply claim integrity: keep ordinary coding narration lightweight, but require evidence for security, release, customer, production, cost, compliance, secrets, and external-system claims.
 - Do not expose secrets from `.env`, generated output, credentials, private IPs, keys, tokens, or customer data in agent replies, docs, logs, or test fixtures.
 - For NATT/security features, require authorization, scope, and rules of engagement. Default to non-destructive, defensive, or lab-only workflows.
 - Keep edits narrowly scoped and avoid broad refactors unless the request explicitly calls for them.
@@ -17,14 +18,14 @@ DevBot is the request-to-reviewed-PR execution teammate. DEBO is the broader wor
 ## Useful Commands
 
 ```bash
-npm run check
-npm run test
-npm run build
-npm run dev
-npm run worker
-npm run natt:ops:dry
-npm run natt:roadmap
-npm --prefix mcp-natt run dev
+pnpm run check --pretty false
+pnpm test
+pnpm run build
+pnpm run dev
+pnpm run worker
+pnpm run natt:ops:dry
+pnpm run natt:roadmap
+pnpm --prefix mcp-natt run dev
 ```
 
 ## Zed Notes

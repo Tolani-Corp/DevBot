@@ -18,13 +18,13 @@ It is not a reason to bulk-import exploit repositories. Third-party security too
 Generate the local NATT bundle:
 
 ```bash
-npm run natt:offline:vendor
+pnpm run natt:offline:vendor
 ```
 
 Validate the hashes:
 
 ```bash
-npm run natt:offline:check
+pnpm run natt:offline:check
 ```
 
 The generated bundle lives in `vendor/natt-offline/` and includes:
@@ -41,8 +41,8 @@ The bundle excludes secrets, mission memory, logs, `node_modules`, build outputs
 Full offline implementations use a separate manifest and policy gate:
 
 ```bash
-npm run natt:mirror:sbom
-npm run natt:mirror:check
+pnpm run natt:mirror:sbom
+pnpm run natt:mirror:check
 ```
 
 Mirror metadata lives in:

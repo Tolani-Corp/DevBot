@@ -1,6 +1,6 @@
 {
   "schemaVersion": "devbot.delivery-evidence.v1",
-  "generatedAt": "2026-06-13T02:21:53.421Z",
+  "generatedAt": "2026-06-13T20:14:56.502Z",
   "request": {
     "id": "demo-request-offline-natt-vendor-bundle",
     "source": "local-demo",
@@ -24,11 +24,11 @@
     "evidenceHashes": [
       {
         "path": "docs/autonomous-delivery/README.md",
-        "sha256": "ca02ab6139a4804ca1f606037f9d9c50e4661474ccbbda48b95550d8e84f5e03"
+        "sha256": "68b93d3e172a4fe9a4a509cf7ae3e25469c0afc98a32f1262e75325ac92c1dc2"
       },
       {
         "path": "docs/enhancements/0001-offline-natt-vendor-bundle.md",
-        "sha256": "328b2e1ae4a476e5ab58da375cf8073b8b834b6e9d9a99fe2aab39e3424e0694"
+        "sha256": "0a70931c8cca7015275b062fd083f69451b8b5739a89e8241dc5bdfbbbe2c89f"
       },
       {
         "path": "docs/adr/0001-offline-natt-vendor-bundle.md",
@@ -36,7 +36,7 @@
       },
       {
         "path": "docs/design-reviews/0001-offline-natt-vendor-bundle.md",
-        "sha256": "7a409094559c47833fe1b8b84e2eb3db4c5c8a9be074fd91a1c3baf88a2aec8c"
+        "sha256": "ee5d872e2eb64516012a93c2f87b20067a81a0dd6036f0b21aa2e646799f3c03"
       },
       {
         "path": "docs/evals/README.md",
@@ -44,7 +44,7 @@
       },
       {
         "path": "docs/natt-offline-vendoring.md",
-        "sha256": "5b3ba50a1734383a0a103fa3b2952adf92df16e1e1ba9f89a733bfb7aa21fdbd"
+        "sha256": "6441534e90c70e1b058540b3cb03e5b0168f233d747bc2213cdb44e4b344dfd0"
       },
       {
         "path": "docs/offline-mirrors/ROE_POLICY.md",
@@ -77,9 +77,9 @@
       "docs/offline-mirrors/external-mirrors.json"
     ],
     "testCommands": [
-      "npm run check",
-      "npm test",
-      "npm run governance:check"
+      "pnpm run check --pretty false",
+      "pnpm test",
+      "pnpm run governance:check"
     ],
     "pullRequest": {
       "required": true,
@@ -115,6 +115,25 @@
       ]
     }
   },
+  "claimIntegrity": {
+    "policy": "docs/claim-integrity-policy.md",
+    "defaultPosture": "Lightweight for ordinary coding narration; strict for high-risk claims.",
+    "strictDomains": [
+      "security",
+      "release",
+      "customer",
+      "production",
+      "cost",
+      "compliance",
+      "secrets"
+    ],
+    "requirements": [
+      "Label observed facts, inferences, assumptions, and unverified claims.",
+      "Back high-risk claims with command output, file references, CI artifacts, approvals, or external source citations.",
+      "Do not assert live production, customer, secret, vulnerability, deployment, or compliance state without direct evidence.",
+      "State unknown or not verified when evidence is missing."
+    ]
+  },
   "offlineMirrors": {
     "policy": "docs/offline-mirrors/ROE_POLICY.md",
     "manifest": "docs/offline-mirrors/external-mirrors.json",
@@ -126,7 +145,7 @@
     "predicateType": "https://tolani.dev/devbot/delivery-evidence/v1",
     "subject": {
       "name": "@tolani/devbot",
-      "digest": "a4b8958321d99d88f21cd642dc131ef0af84ec63e5afcfdea147599003409efc"
+      "digest": "17d546bf63f8045c2049436f944b55e1bcfca6fa9cf4e3da627686ffbfb5f9ef"
     },
     "builder": {
       "id": "devbot-governance-demo"

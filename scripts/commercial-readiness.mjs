@@ -13,6 +13,7 @@ const scannedRoots = [
   "scripts/natt-offline-vendor.mjs",
   "docs/autonomous-delivery",
   "docs/evals",
+  "docs/claim-integrity-policy.md",
   "docs/release-governance.md",
   "docs/natt-offline-vendoring.md",
   "docs/enhancements",

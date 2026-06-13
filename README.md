@@ -30,16 +30,18 @@ DevBot's autonomy claim is evidence-gated:
 - `Architects systems` through enhancement records, ADRs, design review packets, and human approval checkpoints.
 - `Deploys systems` through a replayable request -> code -> tests -> PR -> deploy path with provenance.
 - `Evolves systems` through evals, CI evidence, rollback proof, release governance, and post-release reflection.
+- `States system truth` through claim integrity: high-risk security, release, customer, production, compliance, cost, and external-system claims must be backed by evidence or labeled as unverified.
 
 Generate the local proof manifest:
 
 ```bash
-npm run governance:evidence
-npm run governance:check
-npm run commercial:check
+pnpm run governance:evidence
+pnpm run governance:check
+pnpm run commercial:check
 ```
 
 Reference materials live in [docs/autonomous-delivery/README.md](./docs/autonomous-delivery/README.md).
+Claim integrity rules live in [docs/claim-integrity-policy.md](./docs/claim-integrity-policy.md).
 
 ## Product Relationship
 
@@ -145,10 +147,10 @@ The roadmap covers TCP/IP, DNS, HTTP/HTTPS, Linux/Windows/macOS, networking, Pyt
 Offline NATT vendoring:
 
 ```bash
-npm run natt:offline:vendor
-npm run natt:offline:check
-npm run natt:mirror:sbom
-npm run natt:mirror:check
+pnpm run natt:offline:vendor
+pnpm run natt:offline:check
+pnpm run natt:mirror:sbom
+pnpm run natt:mirror:check
 ```
 
 See [docs/natt-offline-vendoring.md](./docs/natt-offline-vendoring.md) for WSL, vendorpull, package-cache, and offline mirror guidance.

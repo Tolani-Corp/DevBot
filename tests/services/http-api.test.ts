@@ -144,11 +144,12 @@ describe("http-api auth", () => {
     const body = JSON.parse(res.body);
     expect(res.statusCode).toBe(200);
     expect(body.proofStatus).toBe("scaffolded");
-    expect(body.demoPath.validate).toBe("npm run governance:check");
+    expect(body.demoPath.validate).toBe("pnpm run governance:check");
     expect(body.stages.map((stage: { key: string }) => stage.key)).toEqual([
       "architects",
       "deploys",
       "evolves",
+      "states",
     ]);
   });
 });

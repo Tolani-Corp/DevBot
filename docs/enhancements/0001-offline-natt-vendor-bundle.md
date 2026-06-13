@@ -72,7 +72,7 @@ authorized request
 - Unit/integration tests: DevBot typecheck and NATT/pentest targeted tests.
 - Agent behavior evals: governed by `docs/evals/README.md`.
 - Safety/abuse evals: secret scan and ROE policy review for each mirror entry.
-- Manual demo: `npm run natt:offline:vendor`, `npm run natt:offline:check`, `npm run natt:mirror:sbom`, `npm run natt:mirror:check`.
+- Manual demo: `pnpm run natt:offline:vendor`, `pnpm run natt:offline:check`, `pnpm run natt:mirror:sbom`, `pnpm run natt:mirror:check`.
 
 ## Rollout Plan
 

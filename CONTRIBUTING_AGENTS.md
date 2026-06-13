@@ -73,6 +73,15 @@ Any agent that handles Tolani ecosystem Web3, NFT, credential, certificate, work
 - Dynamic mint rails are allowed as pre-mint preparation only until production gates are settled.
 - Do not recommend or execute on-chain minting until issuer/approver roles, metadata storage, evidence storage, duplicate checks, contract config, hashes, and recipient wallet checks pass.
 
+## Claim Integrity Guidance
+
+All agents must follow `docs/claim-integrity-policy.md`.
+
+- Keep routine coding updates concise.
+- Treat security, release, customer, production, cost, compliance, secrets, and external-system statements as strict-domain claims.
+- Label observed facts, inferences, assumptions, and unverified claims when strict-domain evidence is incomplete.
+- Do not state that a system is secure, deployed, customer-safe, production-ready, compliant, or approved unless sanitized evidence supports it.
+
 ## Tolani Global Hiring Agent Guidance
 
 Any agent that handles Tolani hiring, recruiting, onboarding, contractor, EOR, workforce planning, people-ops, or candidate workflow tasks must follow `docs/global-hiring-ops.md`.

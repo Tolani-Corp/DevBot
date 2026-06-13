@@ -19,10 +19,10 @@ Related ADRs: `docs/adr/0001-offline-natt-vendor-bundle.md`
   - Primary risk is accidental inclusion of secrets, mission logs, target data, or unapproved third-party offensive code.
   - Mitigation is explicit excludes, manifest checks, license-review status, checksums, and ROE-required entries.
 - Test/eval plan:
-  - `npm run natt:offline:vendor`
-  - `npm run natt:offline:check`
-  - `npm run natt:mirror:sbom`
-  - `npm run natt:mirror:check`
+  - `pnpm run natt:offline:vendor`
+  - `pnpm run natt:offline:check`
+  - `pnpm run natt:mirror:sbom`
+  - `pnpm run natt:mirror:check`
   - DevBot typecheck and targeted NATT/pentest tests.
 - Deployment plan:
   - Local pilot first.

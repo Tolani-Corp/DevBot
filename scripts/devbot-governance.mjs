@@ -19,6 +19,7 @@ const realEvidenceFiles = {
   designReview: "docs/design-reviews/0001-offline-natt-vendor-bundle.md",
   mirrorPolicy: "docs/offline-mirrors/ROE_POLICY.md",
   mirrorManifest: "docs/offline-mirrors/external-mirrors.json",
+  claimPolicy: "docs/claim-integrity-policy.md",
 };
 
 function sha256(value) {
@@ -81,7 +82,11 @@ function createDemoEvidence() {
         "request -> plan -> code -> tests -> pull_request -> deploy",
       ),
       changedFiles: docs,
-      testCommands: ["npm run check", "npm test", "npm run governance:check"],
+      testCommands: [
+        "pnpm run check --pretty false",
+        "pnpm test",
+        "pnpm run governance:check",
+      ],
       pullRequest: {
         required: true,
         url: null,
@@ -111,6 +116,26 @@ function createDemoEvidence() {
         required: true,
         stores: ["journey memory", "approval history", "eval fixtures"],
       },
+    },
+    claimIntegrity: {
+      policy: realEvidenceFiles.claimPolicy,
+      defaultPosture:
+        "Lightweight for ordinary coding narration; strict for high-risk claims.",
+      strictDomains: [
+        "security",
+        "release",
+        "customer",
+        "production",
+        "cost",
+        "compliance",
+        "secrets",
+      ],
+      requirements: [
+        "Label observed facts, inferences, assumptions, and unverified claims.",
+        "Back high-risk claims with command output, file references, CI artifacts, approvals, or external source citations.",
+        "Do not assert live production, customer, secret, vulnerability, deployment, or compliance state without direct evidence.",
+        "State unknown or not verified when evidence is missing.",
+      ],
     },
     offlineMirrors: {
       policy: realEvidenceFiles.mirrorPolicy,
@@ -233,6 +258,47 @@ function checkEvidence(path = defaultEvidencePath) {
   );
 
   assert(
+    Boolean(evidence.claimIntegrity?.policy),
+    "claimIntegrity.policy is required",
+    failures,
+  );
+  assert(
+    evidence.claimIntegrity?.defaultPosture ===
+      "Lightweight for ordinary coding narration; strict for high-risk claims.",
+    "claimIntegrity.defaultPosture must preserve the strict/lightweight boundary",
+    failures,
+  );
+
+  const strictDomains = evidence.claimIntegrity?.strictDomains ?? [];
+  for (const domain of ["security", "release", "customer", "production"]) {
+    assert(
+      strictDomains.includes(domain),
+      `claimIntegrity.strictDomains must include ${domain}`,
+      failures,
+    );
+  }
+
+  const claimRequirements = evidence.claimIntegrity?.requirements ?? [];
+  assert(
+    claimRequirements.some((requirement) =>
+      /observed facts, inferences, assumptions, and unverified claims/i.test(
+        requirement,
+      ),
+    ),
+    "claimIntegrity.requirements must require fact/inference/assumption labels",
+    failures,
+  );
+  assert(
+    claimRequirements.some((requirement) =>
+      /direct evidence|command output|file references|CI artifacts/i.test(
+        requirement,
+      ),
+    ),
+    "claimIntegrity.requirements must require evidence for high-risk claims",
+    failures,
+  );
+
+  assert(
     Boolean(evidence.provenance?.predicateType),
     "provenance.predicateType is required",
     failures,
@@ -290,6 +356,7 @@ function nextAdrPath(title) {
 function createAdr(title) {
   const adrPath = nextAdrPath(title);
   const number = basename(adrPath).slice(0, 4);
+  const slug = basename(adrPath).slice(5, -3);
   const today = new Date().toISOString().slice(0, 10);
   const content = `# ADR ${number}: ${title}
 

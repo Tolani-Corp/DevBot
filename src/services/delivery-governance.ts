@@ -1,5 +1,5 @@
 export interface GovernanceProofStage {
-  key: "architects" | "deploys" | "evolves";
+  key: "architects" | "deploys" | "evolves" | "states";
   promise: string;
   currentEvidence: string[];
   requiredNextProof: string[];
@@ -25,7 +25,7 @@ export interface GovernanceProofOverview {
 export function getGovernanceProofOverview(): GovernanceProofOverview {
   return {
     productPosition:
-      "DevBot is a governed engineering teammate. The autonomy promise is proven through replayable architecture, delivery, and evolution evidence.",
+      "DevBot is a governed engineering teammate. The autonomy promise is proven through replayable architecture, delivery, evolution, and claim-integrity evidence.",
     proofStatus: "scaffolded",
     stages: [
       {
@@ -87,10 +87,30 @@ export function getGovernanceProofOverview(): GovernanceProofOverview {
           "Release captain",
         ],
       },
+      {
+        key: "states",
+        promise:
+          "States high-risk system truth only when evidence supports the claim.",
+        currentEvidence: [
+          "docs/claim-integrity-policy.md",
+          "scripts/devbot-governance.mjs",
+          ".devbot/evidence/demo-delivery-evidence.json",
+        ],
+        requiredNextProof: [
+          "Attach strict-domain claim evidence to release notes.",
+          "Label unverified production, security, customer, and cost claims.",
+          "Keep evidence sanitized before it enters agent replies or fixtures.",
+        ],
+        humanApprovalCheckpoints: [
+          "Security owner",
+          "Release owner",
+          "Customer-data owner",
+        ],
+      },
     ],
     demoPath: {
-      generate: "npm run governance:evidence",
-      validate: "npm run governance:check",
+      generate: "pnpm run governance:evidence",
+      validate: "pnpm run governance:check",
       evidenceFile: ".devbot/evidence/demo-delivery-evidence.json",
     },
     recommendedIntegrations: [
