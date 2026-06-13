@@ -54,3 +54,30 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
 }
+
+@keyframes debo-cursor-blink {
+  0%,
+  46% {
+    opacity: 1;
+  }
+  47%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.debo-terminal-cursor {
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 1px;
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.72);
+  animation: debo-cursor-blink 1s steps(1, end) infinite;
+  vertical-align: -0.12em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .debo-terminal-cursor {
+    animation: none;
+  }
+}

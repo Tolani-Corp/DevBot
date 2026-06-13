@@ -29,7 +29,7 @@ const styles: Record<string, React.CSSProperties> = {
         color: '#22d3ee', // Cyan-400
         fontSize: '20px',
         fontWeight: 700,
-        letterSpacing: '-0.5px',
+        letterSpacing: '0',
         textDecoration: 'none',
     },
     content: {
@@ -101,8 +101,8 @@ interface NotificationProps {
 export const NotificationEmail = ({
     type = 'Pull Request',
     title = 'Refactor Authentication Module',
-    description = 'DevBot has completed the requested refactor. A new pull request #42 is ready for your review. All tests passed (12/12).',
-    actionUrl = 'https://devbot.tolani.io/dashboard',
+    description = 'DEBO has completed the requested refactor through its DevBot execution lane. A new pull request #42 is ready for your review. All tests passed (12/12).',
+    actionUrl = 'https://debo.ai/dashboard',
     actionText = 'Review Pull Request',
 }: NotificationProps) => {
     return (
@@ -113,7 +113,7 @@ export const NotificationEmail = ({
                         <div style={styles.container}>
                             {/* Header */}
                             <div style={styles.header}>
-                                <span style={styles.logo}>DevBot OS</span>
+                                <span style={styles.logo}>DEBO</span>
                             </div>
 
                             {/* Content */}
@@ -125,11 +125,11 @@ export const NotificationEmail = ({
                                 {/* Simulated Code/Status Block */}
                                 <div style={styles.codeBlock}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <span style={{ color: '#4ade80' }}>✔ Build Success</span>
+                                        <span style={{ color: '#4ade80' }}>OK Build Success</span>
                                         <span style={{ color: '#71717a' }}>2m 14s</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: '#4ade80' }}>✔ Tests Passed</span>
+                                        <span style={{ color: '#4ade80' }}>OK Tests Passed</span>
                                         <span style={{ color: '#71717a' }}>12/12</span>
                                     </div>
                                 </div>
@@ -140,10 +140,10 @@ export const NotificationEmail = ({
                             {/* Footer */}
                             <div style={styles.footer}>
                                 <p style={{ margin: 0 }}>
-                                    Sent by DevBot • <a href="#" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Notification Settings</a>
+                                    Sent by DEBO - <a href="#" style={{ color: '#a1a1aa', textDecoration: 'underline' }}>Notification Settings</a>
                                 </p>
                                 <p style={{ margin: '8px 0 0' }}>
-                                    © 2026 Tolani Labs. All rights reserved.
+                                    (c) 2026 Tolani Corp. All rights reserved.
                                 </p>
                             </div>
                         </div>

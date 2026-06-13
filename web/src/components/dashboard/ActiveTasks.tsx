@@ -1,6 +1,14 @@
 import type { LogMessage } from "@/hooks/useDevBotStream";
+import { useEffect, useState } from "react";
 
 const ActiveTasks = ({ logs }: { logs: LogMessage[] }) => {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const completedIds = new Set(
     logs
       .filter((log) => log.type === "task:completed")
@@ -14,7 +22,7 @@ const ActiveTasks = ({ logs }: { logs: LogMessage[] }) => {
     .slice(0, 5);
 
   const formatAge = (timestamp: string) => {
-    const elapsed = Date.now() - new Date(timestamp).getTime();
+    const elapsed = now - new Date(timestamp).getTime();
     if (!Number.isFinite(elapsed) || elapsed < 60000) return "under 1m";
     return `${Math.floor(elapsed / 60000)}m`;
   };

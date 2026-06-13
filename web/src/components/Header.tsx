@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { DeboLogo } from './DeboLogo'
 import { useTheme } from './ThemeProvider'
-import { SunIcon, MoonIcon, Bars3Icon, XMarkIcon, CommandLineIcon } from '@heroicons/react/24/outline'
+import { SunIcon, MoonIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -17,14 +18,11 @@ export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-page)]/80 backdrop-blur-xl">
+        <header className="sticky top-0 z-50 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-page)] backdrop-blur-xl">
             <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
                 <div className="flex lg:flex-1">
-                    <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-emerald-400 flex items-center justify-center text-slate-950">
-                            <CommandLineIcon className="h-5 w-5" />
-                        </div>
-                        <span className="font-bold text-[var(--text-primary)]">DevBot</span>
+                    <Link href="/" className="-m-1.5 p-1.5">
+                        <DeboLogo />
                     </Link>
                 </div>
 
@@ -50,7 +48,7 @@ export function Header() {
                         href="/dashboard"
                         className="hidden lg:block rounded-md bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
-                        Launch Pilot
+                        Open Console
                     </Link>
 
                     <button
@@ -67,8 +65,8 @@ export function Header() {
             {mobileMenuOpen && (
                 <div className="lg:hidden fixed inset-0 z-50 bg-[var(--bg-page)] p-6">
                     <div className="flex items-center justify-between mb-8">
-                        <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-2">
-                            <span className="font-bold text-[var(--text-primary)]">DevBot</span>
+                        <Link href="/" className="-m-1.5 p-1.5">
+                            <DeboLogo />
                         </Link>
                         <button
                             type="button"

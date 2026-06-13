@@ -22,7 +22,7 @@ const StreamLog = ({ logs }: { logs: LogMessage[] }) => {
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2 font-mono text-xs scrollbar-thin scrollbar-thumb-slate-700 font-terminal">
         {logs.length === 0 && (
-          <div className="text-slate-600 italic text-center py-10">Waiting for DevBot activity...</div>
+          <div className="text-slate-600 italic text-center py-10">Waiting for DevBot stream activity...</div>
         )}
         {logs.map((log, i) => (
           <div key={i} className="flex gap-2 animate-in fade-in slide-in-from-bottom-1 duration-200">

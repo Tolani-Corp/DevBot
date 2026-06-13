@@ -56,7 +56,7 @@ export const useDevBotStream = (url: string = "ws://localhost:8080") => {
         setStatus("connected");
         addLog({
           type: "connected",
-          message: "Connected to DevBot stream",
+          message: "Connected to DevBot execution stream",
           timestamp: new Date().toISOString(),
         });
       };

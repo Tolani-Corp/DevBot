@@ -4,6 +4,17 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme = 'dark' | 'light' | 'system'
 
+function isTheme(value: string | null): value is Theme {
+    return value === 'dark' || value === 'light' || value === 'system'
+}
+
+function getInitialTheme(): Theme {
+    if (typeof window === 'undefined') return 'system'
+
+    const savedTheme = localStorage.getItem('theme')
+    return isTheme(savedTheme) ? savedTheme : 'system'
+}
+
 const ThemeContext = createContext<{
     theme: Theme
     setTheme: (theme: Theme) => void
@@ -13,12 +24,7 @@ const ThemeContext = createContext<{
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('system')
-
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as Theme
-        if (savedTheme) setTheme(savedTheme)
-    }, [])
+    const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
     useEffect(() => {
         const root = window.document.documentElement

@@ -6,11 +6,11 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div data-theme="dark" className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)]">
       <Header />
       <main className="flex-1">{children}</main>
       <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] py-12 text-center text-sm text-[var(--text-secondary)]">
-        &copy; 2026 DevBot by Tolani Labs. Governed engineering workstation.
+        &copy; 2026 DEBO by Tolani Corp. Governed engineering workstation.
       </footer>
     </div>
   );

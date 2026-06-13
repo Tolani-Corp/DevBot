@@ -1,5 +1,6 @@
 import Link from "next/link";
 import clsx from "clsx";
+import { DeboLogo } from "@/components/DeboLogo";
 import {
   HomeIcon,
   CommandLineIcon,
@@ -46,11 +47,8 @@ export function Sidebar({ className }: { className?: string }) {
       )}
     >
       <div className="flex h-16 shrink-0 items-center">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <div className="h-8 w-8 rounded-lg bg-cyan-500 flex items-center justify-center text-white">
-            DB
-          </div>
-          <span className="text-zinc-950 dark:text-white">DevBot</span>
+        <Link href="/" className="font-bold text-xl">
+          <DeboLogo />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col">
@@ -89,12 +87,12 @@ export function Sidebar({ className }: { className?: string }) {
             </Link>
             <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
               <a
-                href="https://tolanilabs.io"
+                href="https://tolani.dev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] text-zinc-500 hover:text-cyan-500 transition-colors italic flex items-center gap-1"
               >
-                Built by <span className="font-bold">Tolani Labs</span>
+                DEBO by <span className="font-bold">Tolani Corp</span>
               </a>
             </div>
           </li>

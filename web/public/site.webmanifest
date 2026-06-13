@@ -1,0 +1,33 @@
+{
+  "name": "DEBO | AI Dashboard And Workstation",
+  "short_name": "DEBO",
+  "description": "DEBO is the AI dashboard and workstation for guided journeys, approvals, trust posture, learner progress, operator review, and the reviewed DEBO Unchained lane.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#35ff7a",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/assets/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
