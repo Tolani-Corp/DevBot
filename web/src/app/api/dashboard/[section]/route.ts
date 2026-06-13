@@ -11,6 +11,7 @@ const sections = new Set<keyof DashboardData>([
   "agents",
   "deployments",
   "evidence",
+  "learning",
   "settings",
   "profile",
 ]);

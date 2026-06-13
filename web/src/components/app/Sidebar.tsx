@@ -12,6 +12,7 @@ import {
   ShieldCheckIcon,
   UserCircleIcon,
   RocketLaunchIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
@@ -25,6 +26,11 @@ const navigation = [
     name: "Agents",
     href: "/dashboard/agents",
     icon: CpuChipIcon,
+  },
+  {
+    name: "Learning",
+    href: "/dashboard/learning",
+    icon: AcademicCapIcon,
   },
   {
     name: "Evidence",

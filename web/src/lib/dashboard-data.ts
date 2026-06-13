@@ -115,6 +115,30 @@ export type DashboardEvidence = {
   digest?: string;
 };
 
+export type StudentLearningData = {
+  learner: {
+    name: string;
+    cohort: string;
+    journey: string;
+    progress: number;
+  };
+  terminal: Array<{
+    prompt: string;
+    output: string;
+    tone: "success" | "info" | "warning";
+  }>;
+  checkpoints: Array<{
+    label: string;
+    status: "complete" | "active" | "review";
+    detail: string;
+  }>;
+  review: {
+    owner: string;
+    nextAction: string;
+    guardrail: string;
+  };
+};
+
 export type DashboardData = {
   generatedAt: string;
   overview: {
@@ -130,6 +154,7 @@ export type DashboardData = {
   agents: DashboardAgent[];
   deployments: DashboardDeployment[];
   evidence: DashboardEvidence[];
+  learning: StudentLearningData;
   settings: {
     approvalMode: string;
     claimIntegrity: string;
@@ -387,6 +412,69 @@ export async function getDashboardData(): Promise<DashboardData> {
       },
     ],
     evidence: evidenceItems,
+    learning: {
+      learner: {
+        name: "Student Operator",
+        cohort: "Tolani Labs guided AI cohort",
+        journey: "Research-to-reviewed-build sprint",
+        progress: 68,
+      },
+      terminal: [
+        {
+          prompt: "debo journey start --student",
+          output:
+            "Loaded guided path: research question -> scoped plan -> evidence-backed build.",
+          tone: "success",
+        },
+        {
+          prompt: "debo memory inspect --sources",
+          output:
+            "3 learner notes, 2 rubric items, and 1 operator review are attached.",
+          tone: "info",
+        },
+        {
+          prompt: "debo review request --checkpoint build",
+          output:
+            "Human review required before escalation into implementation lane.",
+          tone: "warning",
+        },
+        {
+          prompt: "debo next",
+          output:
+            "Draft the smallest build step and cite the evidence used for each claim.",
+          tone: "success",
+        },
+      ],
+      checkpoints: [
+        {
+          label: "Intake",
+          status: "complete",
+          detail: "Goal, learner context, and rubric captured.",
+        },
+        {
+          label: "Research",
+          status: "complete",
+          detail: "Sources attached to the journey memory.",
+        },
+        {
+          label: "Build Plan",
+          status: "active",
+          detail: "Student is converting research into a scoped implementation.",
+        },
+        {
+          label: "Operator Review",
+          status: "review",
+          detail: "Reviewer checks evidence quality before escalation.",
+        },
+      ],
+      review: {
+        owner: "Tolani Labs mentor",
+        nextAction:
+          "Confirm the student can explain the evidence trail before DevBot opens an execution lane.",
+        guardrail:
+          "Student learning mode keeps teach loops visible and blocks unsupported claims.",
+      },
+    },
     settings: {
       approvalMode: "strict for high-risk, lightweight for ordinary coding",
       claimIntegrity:
