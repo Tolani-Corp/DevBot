@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
@@ -27,4 +27,24 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - run: echo "Deploy to ${{ github.event.inputs.environment }} - configure deployment target here"
+      - run: pnpm run governance:evidence
+      - run: pnpm run governance:policy
+      - run: |
+          mkdir -p .devbot/deployments
+          cat > ".devbot/deployments/${{ github.run_id }}.json" <<'JSON'
+          {
+            "schemaVersion": "devbot.deployment-intent.v1",
+            "environment": "${{ github.event.inputs.environment }}",
+            "runId": "${{ github.run_id }}",
+            "sha": "${{ github.sha }}",
+            "ref": "${{ github.ref }}",
+            "governanceEvidence": ".devbot/evidence/demo-delivery-evidence.json",
+            "status": "ready-for-target-adapter"
+          }
+          JSON
+      - name: Upload deployment intent
+        uses: actions/upload-artifact@v4
+        with:
+          name: devbot-deployment-intent
+          path: .devbot/deployments/${{ github.run_id }}.json
+          if-no-files-found: error

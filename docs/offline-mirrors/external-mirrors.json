@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "devbot.offline-mirrors.v1",
+  "policy": "docs/offline-mirrors/ROE_POLICY.md",
+  "artifactRoot": "vendor/natt-external-mirrors/artifacts",
+  "sbomPath": "vendor/natt-external-mirrors/sbom.json",
+  "checksumsPath": "vendor/natt-external-mirrors/checksums.sha256",
+  "mirrors": [
+    {
+      "id": "wsl-debian-baseline",
+      "name": "WSL Debian baseline",
+      "type": "wsl-distro",
+      "source": "https://learn.microsoft.com/en-us/windows/wsl/",
+      "version": "operator-selected",
+      "license": "Microsoft Store/Linux distribution terms",
+      "licenseReview": {
+        "status": "review-required",
+        "reviewer": "",
+        "notes": "Record distribution and package licenses before export or redistribution."
+      },
+      "roeRequired": true,
+      "artifactPath": "",
+      "sha256": "",
+      "notes": "Use as an isolated Linux runtime layer for offline labs. Do not commit distro exports."
+    },
+    {
+      "id": "vendorpull-evaluation",
+      "name": "sourcemeta/vendorpull evaluation",
+      "type": "git-tool",
+      "source": "https://github.com/sourcemeta/vendorpull",
+      "version": "pin-before-use",
+      "license": "review-required",
+      "licenseReview": {
+        "status": "review-required",
+        "reviewer": "",
+        "notes": "Public metadata must be reconciled before embedding or distributing."
+      },
+      "roeRequired": false,
+      "artifactPath": "",
+      "sha256": "",
+      "notes": "Useful for pinned git-source vendoring after license review."
+    },
+    {
+      "id": "owasp-zap-container",
+      "name": "OWASP ZAP container archive",
+      "type": "docker-image",
+      "source": "https://www.zaproxy.org/",
+      "version": "pin-before-use",
+      "license": "Apache-2.0 expected; verify before mirroring",
+      "licenseReview": {
+        "status": "review-required",
+        "reviewer": "",
+        "notes": "Mirror only approved image digest and store docker save archive outside git."
+      },
+      "roeRequired": true,
+      "artifactPath": "",
+      "sha256": "",
+      "notes": "Use for authorized DAST in offline lab environments."
+    },
+    {
+      "id": "nuclei-templates",
+      "name": "Nuclei templates mirror",
+      "type": "git-repository",
+      "source": "https://github.com/projectdiscovery/nuclei-templates",
+      "version": "pin-before-use",
+      "license": "review-required",
+      "licenseReview": {
+        "status": "review-required",
+        "reviewer": "",
+        "notes": "Review template license and operational safety before mirroring."
+      },
+      "roeRequired": true,
+      "artifactPath": "",
+      "sha256": "",
+      "notes": "Templates can expand offensive capability; require scope and severity review."
+    }
+  ]
+}

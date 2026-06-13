@@ -13,7 +13,7 @@ It helps teams move from a scoped request to a reviewed code change without losi
 - approval posture
 - operator visibility
 
-DevBot should be positioned as a teammate for engineering teams, not as a vague autonomous replacement for the team.
+DevBot is positioned as a teammate for engineering teams: it keeps scope, reviewer intent, approvals, and delivery evidence visible while humans retain control over high-risk decisions.
 
 ## What It Does
 
@@ -34,8 +34,9 @@ DevBot's autonomy claim is evidence-gated:
 Generate the local proof manifest:
 
 ```bash
-npm run governance:demo
+npm run governance:evidence
 npm run governance:check
+npm run commercial:check
 ```
 
 Reference materials live in [docs/autonomous-delivery/README.md](./docs/autonomous-delivery/README.md).
@@ -108,10 +109,10 @@ See [docs/AZURE_INTERNAL_LINKS_AND_LOCAL_OPS.md](./docs/AZURE_INTERNAL_LINKS_AND
 
 ## Tolani Ecosystem Web3 Guidance
 
-DevBot agents should use the Tolani DAO NFT program guidance when handling ecosystem credentials, certificates, work orders, deliverables, steward badges, DAO evidence packets, or minting rails.
+DevBot agents use the Tolani DAO NFT program guidance when handling ecosystem credentials, certificates, work orders, deliverables, steward badges, DAO evidence packets, or minting rails.
 
-- Canonical ecosystem issuance should be controlled by `Tolani DAO` through Safe, timelock, or DAO-approved roles.
-- `Tolani Labs` may originate evidence, validation, education workflows, and metadata tooling, but should not be the durable authority for DAO credentials or governance-linked issuance unless DAO-approved.
+- Canonical ecosystem issuance is controlled by `Tolani DAO` through Safe, timelock, or DAO-approved roles.
+- `Tolani Labs` may originate evidence, validation, education workflows, and metadata tooling, but is not the durable authority for DAO credentials or governance-linked issuance unless DAO-approved.
 - A dynamic pre-mint rail may prepare `draft`, `eligible`, and `approved` records before all production components are settled.
 - On-chain mint execution must stay blocked until issuer/approver roles, metadata storage, evidence storage, duplicate-prevention checks, contract configuration, hashes, and recipient wallet checks pass.
 
@@ -119,7 +120,7 @@ Detailed reference: [docs/web3-knowledge.md](./docs/web3-knowledge.md).
 
 ## Tolani Global Hiring Guidance
 
-DevBot agents should use the global hiring operations guidance when handling Tolani workforce planning, recruiting, role requests, onboarding, contractor paths, EOR paths, or hiring council workflows.
+DevBot agents use the global hiring operations guidance when handling Tolani workforce planning, recruiting, role requests, onboarding, contractor paths, EOR paths, or hiring council workflows.
 
 - Source-truth ID: `tolani.ecosystem.global_workforce.v1`.
 - Primary source lives in `D:\Projects\tolani-foundation-page\docs\GLOBAL_HIRING_OPERATIONS_PLAYBOOK.md` and `D:\Projects\tolani-foundation-page\client\src\data\workforceOps.ts`.
@@ -146,6 +147,8 @@ Offline NATT vendoring:
 ```bash
 npm run natt:offline:vendor
 npm run natt:offline:check
+npm run natt:mirror:sbom
+npm run natt:mirror:check
 ```
 
 See [docs/natt-offline-vendoring.md](./docs/natt-offline-vendoring.md) for WSL, vendorpull, package-cache, and offline mirror guidance.

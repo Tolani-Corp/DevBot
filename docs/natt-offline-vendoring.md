@@ -36,6 +36,27 @@ The generated bundle lives in `vendor/natt-offline/` and includes:
 
 The bundle excludes secrets, mission memory, logs, `node_modules`, build outputs, and caches.
 
+## External Mirror Step
+
+Full offline implementations use a separate manifest and policy gate:
+
+```bash
+npm run natt:mirror:sbom
+npm run natt:mirror:check
+```
+
+Mirror metadata lives in:
+
+- `docs/offline-mirrors/external-mirrors.json`
+- `docs/offline-mirrors/ROE_POLICY.md`
+
+Generated review artifacts live in:
+
+- `vendor/natt-external-mirrors/sbom.json`
+- `vendor/natt-external-mirrors/checksums.sha256`
+
+Do not add a third-party artifact path until the entry has a pinned version, license-review status, ROE requirement, and SHA-256 checksum.
+
 ## Tooling Assessment
 
 ### vendorpull

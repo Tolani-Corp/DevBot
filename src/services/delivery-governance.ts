@@ -89,7 +89,7 @@ export function getGovernanceProofOverview(): GovernanceProofOverview {
       },
     ],
     demoPath: {
-      generate: "npm run governance:demo",
+      generate: "npm run governance:evidence",
       validate: "npm run governance:check",
       evidenceFile: ".devbot/evidence/demo-delivery-evidence.json",
     },

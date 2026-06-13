@@ -1,6 +1,6 @@
 # Release Governance
 
-DevBot releases should prove three things before deployment:
+DevBot releases prove three things before deployment:
 
 1. Architecture changes have an enhancement record, ADR, design review, and human approval.
 2. Delivery has a replayable path from request to tests, PR, deploy workflow, and provenance.
@@ -10,8 +10,12 @@ DevBot releases should prove three things before deployment:
 
 - `npm run check`
 - `npm test`
-- `npm run governance:demo`
+- `npm run governance:evidence`
 - `npm run governance:check`
+- `npm run governance:policy`
+- `npm run commercial:check`
+- `npm run natt:offline:check`
+- `npm run natt:mirror:check`
 - PR review from a human owner for architecture, security, or deployment risk.
 - Release notes that name rollback procedure and evidence location.
 

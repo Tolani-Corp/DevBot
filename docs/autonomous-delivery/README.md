@@ -34,10 +34,10 @@ Required evidence:
 
 ## Local Demo
 
-Generate a demo manifest:
+Generate an evidence manifest:
 
 ```bash
-npm run governance:demo
+npm run governance:evidence
 ```
 
 Validate it:

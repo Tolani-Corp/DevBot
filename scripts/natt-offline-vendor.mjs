@@ -241,6 +241,12 @@ function buildManifest(copyResults) {
           "Keep outside this repo unless small metadata manifests are needed.",
       },
     ],
+    externalMirrorPolicy: {
+      manifest: "docs/offline-mirrors/external-mirrors.json",
+      roePolicy: "docs/offline-mirrors/ROE_POLICY.md",
+      checkCommand: "npm run natt:mirror:check",
+      sbomCommand: "npm run natt:mirror:sbom",
+    },
   };
 }
 

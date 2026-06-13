@@ -20,6 +20,16 @@
     "allow_concurrent_runs": true
   },
   {
+    "label": "Commercial: readiness check",
+    "command": "npm",
+    "args": ["run", "commercial:check"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "on_success",
+    "allow_concurrent_runs": true
+  },
+  {
     "label": "DevBot: install dependencies",
     "command": "npm",
     "args": ["install"],
@@ -155,6 +165,26 @@
     "label": "NATT: check offline vendor bundle",
     "command": "npm",
     "args": ["run", "natt:offline:check"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "NATT: generate external mirror SBOM",
+    "command": "npm",
+    "args": ["run", "natt:mirror:sbom"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always",
+    "hide": "never",
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "NATT: check external mirrors",
+    "command": "npm",
+    "args": ["run", "natt:mirror:check"],
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always",

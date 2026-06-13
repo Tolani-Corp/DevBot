@@ -1,0 +1,164 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:devbot-natt-offline-1781317082029",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-06-13T02:18:02.029Z",
+    "component": {
+      "type": "application",
+      "name": "DevBot NATT external offline mirrors",
+      "version": "devbot.offline-mirrors.v1"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "wsl-debian-baseline",
+      "type": "wsl-distro",
+      "name": "WSL Debian baseline",
+      "version": "operator-selected",
+      "licenses": [
+        {
+          "license": {
+            "name": "Microsoft Store/Linux distribution terms"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://learn.microsoft.com/en-us/windows/wsl/"
+        }
+      ],
+      "properties": [
+        {
+          "name": "devbot:roeRequired",
+          "value": "true"
+        },
+        {
+          "name": "devbot:licenseReviewStatus",
+          "value": "review-required"
+        },
+        {
+          "name": "devbot:artifactPath",
+          "value": ""
+        },
+        {
+          "name": "devbot:sha256",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "bom-ref": "vendorpull-evaluation",
+      "type": "git-tool",
+      "name": "sourcemeta/vendorpull evaluation",
+      "version": "pin-before-use",
+      "licenses": [
+        {
+          "license": {
+            "name": "review-required"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://github.com/sourcemeta/vendorpull"
+        }
+      ],
+      "properties": [
+        {
+          "name": "devbot:roeRequired",
+          "value": "false"
+        },
+        {
+          "name": "devbot:licenseReviewStatus",
+          "value": "review-required"
+        },
+        {
+          "name": "devbot:artifactPath",
+          "value": ""
+        },
+        {
+          "name": "devbot:sha256",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "bom-ref": "owasp-zap-container",
+      "type": "docker-image",
+      "name": "OWASP ZAP container archive",
+      "version": "pin-before-use",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 expected; verify before mirroring"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://www.zaproxy.org/"
+        }
+      ],
+      "properties": [
+        {
+          "name": "devbot:roeRequired",
+          "value": "true"
+        },
+        {
+          "name": "devbot:licenseReviewStatus",
+          "value": "review-required"
+        },
+        {
+          "name": "devbot:artifactPath",
+          "value": ""
+        },
+        {
+          "name": "devbot:sha256",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "bom-ref": "nuclei-templates",
+      "type": "git-repository",
+      "name": "Nuclei templates mirror",
+      "version": "pin-before-use",
+      "licenses": [
+        {
+          "license": {
+            "name": "review-required"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://github.com/projectdiscovery/nuclei-templates"
+        }
+      ],
+      "properties": [
+        {
+          "name": "devbot:roeRequired",
+          "value": "true"
+        },
+        {
+          "name": "devbot:licenseReviewStatus",
+          "value": "review-required"
+        },
+        {
+          "name": "devbot:artifactPath",
+          "value": ""
+        },
+        {
+          "name": "devbot:sha256",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

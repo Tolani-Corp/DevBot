@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export type StreamTaskData = {
   id?: string;
@@ -8,56 +8,92 @@ export type StreamTaskData = {
 };
 
 export type LogMessage = {
-  type: 'log' | 'task:started' | 'task:completed' | 'connected';
+  type: "log" | "task:started" | "task:completed" | "connected";
   data?: StreamTaskData;
   message?: string;
   timestamp: string;
 };
 
-export const useDevBotStream = (url: string = 'ws://localhost:8080') => {
+function normalizeLog(raw: Partial<LogMessage>): LogMessage {
+  const allowedTypes = new Set([
+    "log",
+    "task:started",
+    "task:completed",
+    "connected",
+  ]);
+
+  return {
+    type: allowedTypes.has(String(raw.type))
+      ? (raw.type as LogMessage["type"])
+      : "log",
+    data: raw.data,
+    message: raw.message,
+    timestamp: raw.timestamp ?? new Date().toISOString(),
+  };
+}
+
+export const useDevBotStream = (url: string = "ws://localhost:8080") => {
   const [logs, setLogs] = useState<LogMessage[]>([]);
-  const [status, setStatus] = useState<'connected' | 'disconnected' | 'connecting'>('disconnected');
+  const [status, setStatus] = useState<
+    "connected" | "disconnected" | "connecting"
+  >("disconnected");
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (status === 'connected') return;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let closedByEffect = false;
 
-    setStatus('connecting');
-    ws.current = new WebSocket(url);
-
-    ws.current.onopen = () => {
-      setStatus('connected');
-      addLog({ type: 'connected', message: 'Connected to DevBot Stream', timestamp: new Date().toISOString() });
+    const addLog = (log: LogMessage) => {
+      setLogs((prev) => [log, ...prev].slice(0, 100));
     };
 
-    ws.current.onmessage = (event) => {
-      try {
-        const raw = JSON.parse(event.data) as Partial<LogMessage>;
+    const connect = () => {
+      setStatus("connecting");
+      const socket = new WebSocket(url);
+      ws.current = socket;
+
+      socket.onopen = () => {
+        setStatus("connected");
         addLog({
-          type: raw.type ?? 'log',
-          data: raw.data,
-          message: raw.message,
+          type: "connected",
+          message: "Connected to DevBot stream",
           timestamp: new Date().toISOString(),
         });
-      } catch (e) {
-        console.error('Failed to parse WS message', e);
-      }
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const raw = JSON.parse(event.data) as Partial<LogMessage>;
+          addLog(normalizeLog(raw));
+        } catch (error) {
+          console.error("Failed to parse WS message", error);
+        }
+      };
+
+      socket.onclose = () => {
+        if (closedByEffect) return;
+        setStatus("disconnected");
+        addLog({
+          type: "log",
+          message: "Stream disconnected. Reconnecting...",
+          timestamp: new Date().toISOString(),
+        });
+        retryTimer = setTimeout(connect, 3000);
+      };
+
+      socket.onerror = () => {
+        socket.close();
+      };
     };
 
-    ws.current.onclose = () => {
-      setStatus('disconnected');
-      addLog({ type: 'log', message: 'Stream disconnected. Reconnecting...', timestamp: new Date().toISOString() });
-      setTimeout(() => setStatus('disconnected'), 3000); // Trigger re-render to retry
-    };
+    connect();
 
     return () => {
+      closedByEffect = true;
+      if (retryTimer) clearTimeout(retryTimer);
       ws.current?.close();
     };
-  }, [url, status]); // Simple reconnection logic
-
-  const addLog = (log: LogMessage) => {
-    setLogs((prev) => [log, ...prev].slice(0, 100)); // Keep last 100 logs
-  };
+  }, [url]);
 
   return { logs, status };
 };

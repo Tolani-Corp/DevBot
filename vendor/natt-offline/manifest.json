@@ -1,6 +1,6 @@
 {
   "schemaVersion": "devbot.natt-offline-vendor.v1",
-  "generatedAt": "2026-06-13T00:57:58.431Z",
+  "generatedAt": "2026-06-13T02:18:05.278Z",
   "sourceRepository": "DevBot",
   "policy": {
     "use": "Authorized, written-ROE security work and offline labs only.",
@@ -1078,5 +1078,11 @@
       "role": "Mirror Linux packages for WSL/Kali/Debian-based lab distros.",
       "decision": "Keep outside this repo unless small metadata manifests are needed."
     }
-  ]
+  ],
+  "externalMirrorPolicy": {
+    "manifest": "docs/offline-mirrors/external-mirrors.json",
+    "roePolicy": "docs/offline-mirrors/ROE_POLICY.md",
+    "checkCommand": "npm run natt:mirror:check",
+    "sbomCommand": "npm run natt:mirror:sbom"
+  }
 }

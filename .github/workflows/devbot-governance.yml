@@ -26,13 +26,30 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
-      - run: pnpm run governance:demo
+      - run: pnpm run commercial:check
+      - run: pnpm run governance:evidence
       - run: pnpm run governance:check
+      - run: pnpm run governance:policy
+      - run: pnpm run natt:offline:vendor
+      - run: pnpm run natt:offline:check
+      - run: pnpm run natt:mirror:sbom
+      - run: pnpm run natt:mirror:check
 
       - name: Upload governance evidence
         uses: actions/upload-artifact@v4
         with:
           name: devbot-governance-evidence
           path: .devbot/evidence/demo-delivery-evidence.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload offline mirror evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: devbot-offline-mirror-evidence
+          path: |
+            vendor/natt-offline/manifest.json
+            vendor/natt-external-mirrors/sbom.json
+            vendor/natt-external-mirrors/checksums.sha256
           if-no-files-found: error
           retention-days: 14

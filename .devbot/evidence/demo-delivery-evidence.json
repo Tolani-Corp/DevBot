@@ -1,20 +1,20 @@
 {
   "schemaVersion": "devbot.delivery-evidence.v1",
-  "generatedAt": "2026-06-13T00:24:57.463Z",
+  "generatedAt": "2026-06-13T02:21:53.421Z",
   "request": {
-    "id": "demo-request-architect-deploy-evolve",
+    "id": "demo-request-offline-natt-vendor-bundle",
     "source": "local-demo",
-    "summary": "Demonstrate request -> architecture evidence -> code/test proof -> PR/deploy provenance -> evolution governance.",
+    "summary": "Demonstrate request -> architecture evidence -> ADR/design review -> offline NATT bundle -> mirror policy -> tests -> provenance.",
     "operator": "local-operator"
   },
   "architecture": {
-    "enhancementId": "enhancement-template",
+    "enhancementId": "0001-offline-natt-vendor-bundle",
     "adrIds": [
-      "0000-template"
+      "0001-offline-natt-vendor-bundle"
     ],
     "designReview": {
-      "status": "required",
-      "packet": "docs/design-reviews/TEMPLATE.md"
+      "status": "approved-for-pilot",
+      "packet": "docs/design-reviews/0001-offline-natt-vendor-bundle.md"
     },
     "humanApprovals": [
       "architecture-owner",
@@ -24,23 +24,35 @@
     "evidenceHashes": [
       {
         "path": "docs/autonomous-delivery/README.md",
-        "sha256": "9c9a93484b8f64c45f15940d2adace81be61672ae6245aec85066b8701cec7f7"
+        "sha256": "ca02ab6139a4804ca1f606037f9d9c50e4661474ccbbda48b95550d8e84f5e03"
       },
       {
-        "path": "docs/enhancements/TEMPLATE.md",
-        "sha256": "b4e73aef8755869c2ec37d4f123fba3c2fd7418a5487dfdec1dda0be674aa7f6"
+        "path": "docs/enhancements/0001-offline-natt-vendor-bundle.md",
+        "sha256": "328b2e1ae4a476e5ab58da375cf8073b8b834b6e9d9a99fe2aab39e3424e0694"
       },
       {
-        "path": "docs/adr/0000-template.md",
-        "sha256": "d5660b7286b712e510db56be9244a75c0be3115b762d292cec6aeb6b7d5566bb"
+        "path": "docs/adr/0001-offline-natt-vendor-bundle.md",
+        "sha256": "397808bbd9d4efd1b958d601efa4b573b812ec7321cb506bc2802bb3a7c41be5"
       },
       {
-        "path": "docs/design-reviews/TEMPLATE.md",
-        "sha256": "b6bcfe2e9eeab0f5ae55330e8fc8e9c2c7caa71db8c475bed8fc1952ef16c2e0"
+        "path": "docs/design-reviews/0001-offline-natt-vendor-bundle.md",
+        "sha256": "7a409094559c47833fe1b8b84e2eb3db4c5c8a9be074fd91a1c3baf88a2aec8c"
       },
       {
         "path": "docs/evals/README.md",
         "sha256": "050f2e903627f5397dea3d5f6934629bdc797f78e05f52d2a886b57dfb000258"
+      },
+      {
+        "path": "docs/natt-offline-vendoring.md",
+        "sha256": "5b3ba50a1734383a0a103fa3b2952adf92df16e1e1ba9f89a733bfb7aa21fdbd"
+      },
+      {
+        "path": "docs/offline-mirrors/ROE_POLICY.md",
+        "sha256": "4d585913ce16bece9ada02bcc7c501413b4306d6ede055d2b83d6c97b11cf32f"
+      },
+      {
+        "path": "docs/offline-mirrors/external-mirrors.json",
+        "sha256": "f88110be566b20b71a6095882411f20a7301888aae64b940bdf6c0dc30ae167d"
       }
     ]
   },
@@ -56,10 +68,13 @@
     "planHash": "1abbd12674da8299f044bd478fdc163ae238ca15fbcf1181da7fa8f05ddd2ab7",
     "changedFiles": [
       "docs/autonomous-delivery/README.md",
-      "docs/enhancements/TEMPLATE.md",
-      "docs/adr/0000-template.md",
-      "docs/design-reviews/TEMPLATE.md",
-      "docs/evals/README.md"
+      "docs/enhancements/0001-offline-natt-vendor-bundle.md",
+      "docs/adr/0001-offline-natt-vendor-bundle.md",
+      "docs/design-reviews/0001-offline-natt-vendor-bundle.md",
+      "docs/evals/README.md",
+      "docs/natt-offline-vendoring.md",
+      "docs/offline-mirrors/ROE_POLICY.md",
+      "docs/offline-mirrors/external-mirrors.json"
     ],
     "testCommands": [
       "npm run check",
@@ -88,7 +103,7 @@
     ],
     "releaseGovernance": "docs/release-governance.md",
     "rollback": {
-      "plan": "Rollback from the previous known-good artifact or dist backup.",
+      "plan": "Remove failing mirror entries/artifacts, regenerate manifests, and keep live profiles disabled until review clears.",
       "proofRequired": true
     },
     "postReleaseReflection": {
@@ -100,11 +115,18 @@
       ]
     }
   },
+  "offlineMirrors": {
+    "policy": "docs/offline-mirrors/ROE_POLICY.md",
+    "manifest": "docs/offline-mirrors/external-mirrors.json",
+    "sbom": "vendor/natt-external-mirrors/sbom.json",
+    "checksums": "vendor/natt-external-mirrors/checksums.sha256",
+    "localBundle": "vendor/natt-offline/manifest.json"
+  },
   "provenance": {
     "predicateType": "https://tolani.dev/devbot/delivery-evidence/v1",
     "subject": {
-      "name": "@tolani/debo",
-      "digest": "f24f827f25ce3499b165c95b3693f8afd89d4ddca0f33466c686c2db4ee8dd45"
+      "name": "@tolani/devbot",
+      "digest": "a4b8958321d99d88f21cd642dc131ef0af84ec63e5afcfdea147599003409efc"
     },
     "builder": {
       "id": "devbot-governance-demo"

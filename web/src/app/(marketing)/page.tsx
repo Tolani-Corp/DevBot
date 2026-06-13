@@ -135,7 +135,14 @@ export default function Home() {
     return entries.map((message, index) => ({
       id: `${mode.id}-${index}`,
       message,
-      tone: index === 0 ? "emerald" : index === 1 ? "cyan" : index === 2 ? "amber" : "slate",
+      tone:
+        index === 0
+          ? "emerald"
+          : index === 1
+            ? "cyan"
+            : index === 2
+              ? "amber"
+              : "slate",
     }));
   }, [mode, pilotRequested, tick]);
 
@@ -150,7 +157,7 @@ export default function Home() {
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-emerald-300">
-              Governed engineering workstation demo
+              Governed engineering workstation
             </div>
 
             <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-[-0.05em] text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
@@ -158,8 +165,10 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)] sm:text-xl">
-              This proof-of-concept surface shows the operator loop: intake, patch, review, and teach.
-              It reads like a governed workstation, not a generic chatbot landing page.
+              This surface shows the operator loop DevBot is built around:
+              intake, patch, review, and teach. It keeps delivery evidence,
+              reviewer posture, and approval state visible from the first
+              request.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -202,10 +211,19 @@ export default function Home() {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {operationalSignals.map((signal) => (
-                <div key={signal.label} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                  <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">{signal.label}</p>
-                  <p className="mt-2 text-xl font-semibold text-[var(--text-primary)]">{signal.value}</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{signal.detail}</p>
+                <div
+                  key={signal.label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur"
+                >
+                  <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">
+                    {signal.label}
+                  </p>
+                  <p className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
+                    {signal.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                    {signal.detail}
+                  </p>
                 </div>
               ))}
             </div>
@@ -216,8 +234,12 @@ export default function Home() {
             <div className="rounded-[2rem] border border-white/10 bg-[rgba(7,12,24,0.92)] p-5 shadow-2xl shadow-emerald-950/20">
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Workspace snapshot</p>
-                  <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">tenant: engineering-pilot</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">
+                    Workspace snapshot
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                    tenant: engineering-pilot
+                  </p>
                 </div>
                 <div className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                   {mode.status}
@@ -226,19 +248,29 @@ export default function Home() {
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-amber-300">Selected mode</p>
-                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{mode.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{mode.body}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-amber-300">
+                    Selected mode
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
+                    {mode.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                    {mode.body}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Readiness</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">
+                    Readiness
+                  </p>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300 transition-all duration-500"
                       style={{ width: `${readiness}%` }}
                     />
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{readiness}% pilot ready</p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
+                    {readiness}% pilot ready
+                  </p>
                 </div>
               </div>
 
@@ -255,9 +287,15 @@ export default function Home() {
                         : "border-white/10 bg-white/5 hover:border-cyan-300/30 hover:bg-white/10"
                     }`}
                   >
-                    <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">{item.label}</p>
-                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{item.status}</p>
-                    <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{item.checkpoint}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
+                      {item.status}
+                    </p>
+                    <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
+                      {item.checkpoint}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -280,7 +318,9 @@ export default function Home() {
                       <FireIcon className="h-4 w-4 text-emerald-300" />
                       Live event
                     </div>
-                    <p className="mt-2 text-[var(--text-primary)]">{entry.message}</p>
+                    <p className="mt-2 text-[var(--text-primary)]">
+                      {entry.message}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -292,7 +332,8 @@ export default function Home() {
                     Change Envelope
                   </div>
                   <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                    Scope stays small until review evidence, memory provenance, and policy checks all line up.
+                    Scope stays small until review evidence, memory provenance,
+                    and policy checks all line up.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -302,7 +343,7 @@ export default function Home() {
                   </div>
                   <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                     {pilotRequested
-                      ? "The request is staged. Use the console to continue the demo."
+                      ? "The request is staged. Use the console to continue the pilot review."
                       : "Click request pilot to stage the workspace handoff signal."}
                   </p>
                 </div>
@@ -316,14 +357,18 @@ export default function Home() {
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-amber-300">Pilot motion</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-amber-300">
+                Pilot motion
+              </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl">
-                Sell the operating lane first, then widen the account when trust is earned.
+                Sell the operating lane first, then widen the account when trust
+                is earned.
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-7 text-[var(--text-secondary)]">
-              This demo frames DevBot as a governed workstation: deliberate controls, visible approvals,
-              and a clean expansion path into broader DEBO command.
+              DevBot is packaged as a governed workstation: deliberate controls,
+              visible approvals, and a clean expansion path into broader DEBO
+              command.
             </p>
           </div>
 
@@ -331,12 +376,19 @@ export default function Home() {
             {pilotPlan.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-2xl border border-white/10 bg-[#0a1424] p-5">
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-white/10 bg-[#0a1424] p-5"
+                >
                   <div className="inline-flex rounded-2xl border border-white/10 bg-white/5 p-3">
                     <Icon className="h-6 w-6 text-emerald-300" />
                   </div>
-                  <h3 className="mt-5 text-xl font-semibold text-[var(--text-primary)]">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{item.body}</p>
+                  <h3 className="mt-5 text-xl font-semibold text-[var(--text-primary)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+                    {item.body}
+                  </p>
                 </div>
               );
             })}

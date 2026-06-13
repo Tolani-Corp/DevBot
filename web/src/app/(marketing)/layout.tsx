@@ -1,19 +1,17 @@
-import { Header } from '@/components/Header'
+import { Header } from "@/components/Header";
 
 export default function MarketingLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
-                {children}
-            </main>
-            <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] py-12 text-center text-sm text-[var(--text-secondary)]">
-                &copy; 2026 DevBot by Tolani Labs. Governed engineering workstation demo.
-            </footer>
-        </div>
-    )
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">{children}</main>
+      <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] py-12 text-center text-sm text-[var(--text-secondary)]">
+        &copy; 2026 DevBot by Tolani Labs. Governed engineering workstation.
+      </footer>
+    </div>
+  );
 }
