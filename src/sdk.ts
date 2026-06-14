@@ -15,6 +15,9 @@ export * from "./agents/index.js";
 // Re-export AI module
 export * from "./ai/index.js";
 
+// Re-export reasoning primitives
+export * from "./reasoning/index.js";
+
 // Version
 export const VERSION = "0.1.0";
 

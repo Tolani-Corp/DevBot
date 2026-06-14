@@ -80,6 +80,7 @@
     "natt:mirror:check": "node scripts/natt-offline-mirror.mjs check",
     "natt:mirror:sbom": "node scripts/natt-offline-mirror.mjs sbom",
     "show-reasoning": "tsx scripts/show-reasoning.ts",
+    "demo:ccot": "tsx scripts/demo-ccot.ts",
     "test:discord-webhook": "tsx scripts/test-discord-webhook.ts",
     "ops:azure:links": "node scripts/azure-resource-links.mjs list",
     "ops:azure:social:slack": "node scripts/azure-resource-links.mjs slack",
