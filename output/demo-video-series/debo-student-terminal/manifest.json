@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-06-14T15:46:23.062Z",
+  "source": "docs/demo-video-series/debo-student-terminal/video-agent-context.json",
+  "packets": [
+    {
+      "episodeId": "01-first-run",
+      "title": "First Run: From Blank Terminal to Learning Plan",
+      "json": "output/demo-video-series/debo-student-terminal/01-first-run.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/01-first-run.editor-packet.md"
+    },
+    {
+      "episodeId": "02-tests-first",
+      "title": "Tests First: Learn by Watching the Guardrails",
+      "json": "output/demo-video-series/debo-student-terminal/02-tests-first.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/02-tests-first.editor-packet.md"
+    },
+    {
+      "episodeId": "03-debug-loop",
+      "title": "Debug Loop: Fix a Failing Student API",
+      "json": "output/demo-video-series/debo-student-terminal/03-debug-loop.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/03-debug-loop.editor-packet.md"
+    },
+    {
+      "episodeId": "04-reviewed-pr",
+      "title": "Reviewed PR: From Change to Evidence Packet",
+      "json": "output/demo-video-series/debo-student-terminal/04-reviewed-pr.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/04-reviewed-pr.editor-packet.md"
+    },
+    {
+      "episodeId": "05-mentor-mode",
+      "title": "Mentor Mode: Explain the Code Without Hand-Waving",
+      "json": "output/demo-video-series/debo-student-terminal/05-mentor-mode.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/05-mentor-mode.editor-packet.md"
+    },
+    {
+      "episodeId": "06-safe-security-lab",
+      "title": "Safe Security Lab: Learn Defense With Written Scope",
+      "json": "output/demo-video-series/debo-student-terminal/06-safe-security-lab.video-agent.json",
+      "markdown": "output/demo-video-series/debo-student-terminal/06-safe-security-lab.editor-packet.md"
+    }
+  ]
+}

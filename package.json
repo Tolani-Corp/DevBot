@@ -93,6 +93,7 @@
     "governance:policy": "node scripts/devbot-governance.mjs policy",
     "governance:adr": "node scripts/devbot-governance.mjs adr",
     "commercial:check": "node scripts/commercial-readiness.mjs",
+    "demo:student-terminal:packets": "node docs/demo-video-series/debo-student-terminal/scripts/build-video-agent-packets.mjs",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate"
   },

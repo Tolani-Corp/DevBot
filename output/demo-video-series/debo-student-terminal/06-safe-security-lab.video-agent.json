@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "06-safe-security-lab",
+    "title": "Safe Security Lab: Learn Defense With Written Scope",
+    "runtimeSeconds": 120,
+    "hook": "Security learning starts with authorization and non-destructive checks.",
+    "cta": "Never run security workflows without scope."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 06: Safe Security Lab\n\nRuntime target: 120 seconds\n\n## Hook\n\nOpen with a blocked security command until scope is provided.\n\nVoiceover:\n\"Security learning starts before the scan. It starts with permission and scope.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:14 | Scope file passed to NATT lesson | \"DEBO requires written scope for security workflows.\" | Authorized lab only |\n| 0:14-0:36 | Scope checklist appears | \"The target is local, the mode is non-destructive, and public internet testing is out of scope.\" | Non-destructive |\n| 0:36-0:58 | Defensive checks run | \"The baseline checks are defensive: dependencies, secrets, headers, and auth configuration.\" | Defensive baseline |\n| 0:58-1:20 | Findings appear | \"The output is practical and bounded. No secrets found, one dependency finding, and a missing header.\" | Bounded findings |\n| 1:20-1:45 | Safe fixes recommended | \"DEBO recommends fixes that improve the lab app without crossing scope.\" | Safe recommendations |\n| 1:45-2:00 | Final cursor and safety text | \"Students learn security discipline as part of the workflow.\" | Scope first, always |\n\n## Video Agent Prompt\n\nRender `snapshots/06-safe-security-lab.terminal.md`. Use amber for scope gates and green only after scope passes. Include onscreen disclaimer: \"Authorized local lab only. Non-destructive checks.\" Do not show exploit commands, credential capture, or real targets.\n\n## Editor Notes\n\n- This is a trust-building episode.\n- Keep the scope checklist onscreen long enough to read.\n- End with a clear safety posture, not a dramatic hack visual.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 06: Safe Security Lab\n\n```terminal\nstudent@debo:~/security-lab$ debo natt lesson --target local-demo-api --scope roe/student-lab.yml\nSCOPE CHECK\n- Target: local-demo-api\n- Authorization: present\n- Environment: local lab\n- Mode: non-destructive\n- Out of scope: public internet, credentials, persistence, exploitation\n\nstudent@debo:~/security-lab$ debo natt run --profile defensive-baseline\nNATT defensive baseline started\n\nCHECKS\n- dependency audit\n- secret pattern scan\n- security headers review\n- auth route configuration review\n\nRESULT\nNo secrets found in tracked files.\nDependency audit has 1 moderate finding.\nSecurity headers missing content-security-policy.\n\nDEBO teaching note:\nSecurity learning begins with scope. We are checking our own lab app and producing defensive fixes.\n\nstudent@debo:~/security-lab$ debo natt recommend-fixes --safe\nRecommended safe changes:\n1. Add baseline content security policy\n2. Pin vulnerable demo dependency\n3. Add regression test for security headers\n\nstudent@debo:~/security-lab$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}

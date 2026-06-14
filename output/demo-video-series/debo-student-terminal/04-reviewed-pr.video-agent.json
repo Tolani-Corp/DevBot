@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "04-reviewed-pr",
+    "title": "Reviewed PR: From Change to Evidence Packet",
+    "runtimeSeconds": 120,
+    "hook": "DEBO shows students what professional review discipline looks like.",
+    "cta": "Use this as your PR checklist."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 04: Reviewed PR\n\nRuntime target: 120 seconds\n\n## Hook\n\nStart with a terminal request, then show the same request becoming a reviewable PR packet.\n\nVoiceover:\n\"Professional engineering is not just changing files. It is proving what changed, how it was checked, and who reviews it.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:12 | Student asks for progress cards | \"DEBO normalizes the task before it edits.\" | Request normalized |\n| 0:12-0:32 | Lane, risk, review required | \"Even a low-risk student UI change keeps review explicit.\" | Review required |\n| 0:32-0:55 | Plan appears | \"The plan connects UI work, demo data, tests, and evidence.\" | Plan before edits |\n| 0:55-1:15 | Changed files list | \"The student sees exactly which files moved.\" | Operator visibility |\n| 1:15-1:40 | Verification commands pass | \"Checks are part of the story, not an afterthought.\" | Check and test |\n| 1:40-2:00 | Evidence packet and draft PR | \"The outcome is ready for human review. DEBO does not pretend review already happened.\" | Human review required |\n\n## Video Agent Prompt\n\nRender `snapshots/04-reviewed-pr.terminal.md` with a side panel showing the evidence packet files. Use amber for review-required states. Do not say or imply the change is deployed.\n\n## Editor Notes\n\n- Onscreen disclaimer near the PR scene: \"Demo workspace. Human review required.\"\n- Keep changed file names readable.\n- End on `Release: not deployed`.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 04: Reviewed PR\n\n```terminal\nstudent@debo:~/learning-dashboard$ debo task \"add progress cards to the learning dashboard\"\nREQUEST NORMALIZED\nLane: student-ui\nRisk: low\nReview: required\nRelease claim: blocked until human approval\n\nPLAN\n1. Inspect existing dashboard components\n2. Add progress card component\n3. Seed synthetic learning data\n4. Run typecheck and tests\n5. Create evidence packet for review\n\nstudent@debo:~/learning-dashboard$ debo execute --reviewed-pr\nEDIT\n- web/src/components/ProgressCards.tsx\n- web/src/lib/demo-learning-data.ts\n- tests/progress-cards.test.ts\n\nVERIFY\nnpm run check\nStatus: pass\n\nnpm test -- --run tests/progress-cards.test.ts\nStatus: pass\n\nEVIDENCE PACKET\n- request-summary.md\n- changed-files.txt\n- verification-log.txt\n- review-notes.md\n\nPR DRAFT\nTitle: Add student progress cards to learning dashboard\nStatus: ready for human review\nRelease: not deployed\n\nstudent@debo:~/learning-dashboard$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}

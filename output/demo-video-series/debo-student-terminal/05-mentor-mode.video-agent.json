@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "05-mentor-mode",
+    "title": "Mentor Mode: Explain the Code Without Hand-Waving",
+    "runtimeSeconds": 90,
+    "hook": "The terminal becomes a personal tutor for code comprehension.",
+    "cta": "Ask DEBO to explain before you edit."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 05: Mentor Mode\n\nRuntime target: 90 seconds\n\n## Hook\n\nShow the student asking DEBO to explain before editing.\n\nVoiceover:\n\"Sometimes the fastest way to ship is to slow down for one minute and understand the code.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:10 | `debo mentor` command | \"Mentor Mode starts with explanation, not modification.\" | Explain before edit |\n| 0:10-0:28 | Code map appears | \"DEBO maps the file into human-sized pieces.\" | Code map |\n| 0:28-0:48 | Validation explanation | \"The lesson is about API boundaries: reject bad input early and clearly.\" | API boundary |\n| 0:48-1:10 | Quiz interaction | \"Then it checks understanding with a small question.\" | Active recall |\n| 1:10-1:30 | Suggested next test | \"The student gets a next step they can act on.\" | Next learning step |\n\n## Video Agent Prompt\n\nRender `snapshots/05-mentor-mode.terminal.md`. Use a calm teaching pace, with slight pauses before student answers. Keep the terminal foreground readable and uncluttered.\n\n## Editor Notes\n\n- This episode should feel more like a tutorial than a sales demo.\n- Add a lower-third: \"Explain. Quiz. Apply.\"\n- End with the prompt and blinking green cursor.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 05: Mentor Mode\n\n```terminal\nstudent@debo:~/campus-labs$ debo mentor src/routes/notes.ts --level beginner\nMENTOR MODE\nGoal: explain before editing\n\nCode map:\n- validateNoteInput checks required fields\n- notesRouter.get returns notes\n- notesRouter.post creates a note after validation\n\nImportant idea:\nValidation protects the API boundary. It stops incomplete data before it reaches application logic.\n\nstudent@debo:~/campus-labs$ debo quiz last-explanation\nQuestion 1:\nWhy validate request body data before creating a note?\n\nStudent answer:\nto make sure the data is complete before saving it\n\nDEBO:\nCorrect. Strong APIs reject bad input early and return clear errors.\n\nQuestion 2:\nWhat test should we add next?\n\nSuggested answer:\nA test for title length or empty body.\n\nstudent@debo:~/campus-labs$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}

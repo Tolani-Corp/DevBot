@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "01-first-run",
+    "title": "First Run: From Blank Terminal to Learning Plan",
+    "runtimeSeconds": 90,
+    "hook": "A student opens DEBO and turns a vague goal into a guided learning path.",
+    "cta": "Subscribe for the next terminal workflow."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 01: First Run\n\nRuntime target: 90 seconds\n\n## Hook\n\nShow a blank terminal. A green cursor blinks after the prompt.\n\nVoiceover:\n\"Most students do not need more mystery in the terminal. They need a guided path from a goal to the next safe step.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:06 | DEBO logo types into terminal, cursor blinks after O | \"This is DEBO Student Terminal.\" | DEBO by Tolani Labs |\n| 0:06-0:18 | Student runs `debo start --mode student` | \"It opens in a learning profile, where explanations and review gates are on by default.\" | Student learning mode |\n| 0:18-0:35 | Student asks vague API question | \"The student can start with ordinary language, not perfect requirements.\" | Goal first |\n| 0:35-0:58 | UNDERSTAND and PLAN sections reveal | \"DEBO turns the goal into a scoped lesson: inspect, test, implement, explain.\" | Request to plan |\n| 0:58-1:15 | DEBO suggests notes API | \"The important move is small scope. One endpoint, one learning objective, one reviewable change.\" | Small scope wins |\n| 1:15-1:30 | Cursor returns, ready for next command | \"The terminal is no longer a wall. It is a guided workshop.\" | Subscribe for workflow 2 |\n\n## Video Agent Prompt\n\nCreate a dark terminal scene with a crisp green blinking cursor. Animate the DEBO logo as text typed into the header. Use the transcript from `snapshots/01-first-run.terminal.md`. Keep pacing calm and readable. Do not add real repo names or credentials.\n\n## Editor Notes\n\n- Highlight `UNDERSTAND` and `PLAN` with subtle cyan bars.\n- Use a soft zoom when DEBO suggests the `notes API`.\n- End on the blinking green cursor.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 01: First Run\n\n```terminal\nstudent@debo:~/campus-labs$ debo start --mode student --repo campus-labs\nDEBO Workstation online\nProfile: student-learning\nPolicy: explain steps, require review before release claims\nWorkspace: campus-labs\n\nstudent@debo:~/campus-labs$ debo ask \"I want to build a small API but I do not know where to start\"\nUNDERSTAND\n- Goal: build a small API\n- Learner level: beginner\n- Risk: low\n- Missing context: language, route, data model\n\nPLAN\n1. Inspect project shape\n2. Pick one endpoint\n3. Add tests first\n4. Implement smallest working route\n5. Explain what changed\n\nDEBO suggestion:\nStart with a notes API:\nGET /api/notes returns sample notes\nPOST /api/notes validates title and body\n\nstudent@debo:~/campus-labs$ debo accept-plan --episode first-run\nPlan accepted for demo workspace.\nNext command: debo run lesson-api-basics\n\nstudent@debo:~/campus-labs$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}

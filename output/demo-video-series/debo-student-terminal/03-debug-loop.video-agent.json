@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "03-debug-loop",
+    "title": "Debug Loop: Fix a Failing Student API",
+    "runtimeSeconds": 120,
+    "hook": "A failing endpoint becomes a readable debugging lesson.",
+    "cta": "Save this for your next bug hunt."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 03: Debug Loop\n\nRuntime target: 120 seconds\n\n## Hook\n\nShow a student staring at a 500 error. Cut immediately to DEBO narrowing the cause.\n\nVoiceover:\n\"Debugging gets easier when the terminal teaches the shape of the problem.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:12 | Failing `profile-api` test | \"The endpoint returns 500. That tells us where the symptom is, not the cause.\" | Symptom, not cause |\n| 0:12-0:30 | `debo debug` command | \"DEBO starts by reproducing the failure and naming the likely surface area.\" | Reproduce first |\n| 0:30-0:52 | TRACE list appears | \"The debug loop is simple: reproduce, read, compare, patch, verify.\" | Five-step loop |\n| 0:52-1:12 | Finding highlights `displayName` vs `name` | \"Here the bug is a contract mismatch. The handler expects one field, the fixture provides another.\" | Contract mismatch |\n| 1:12-1:35 | Patch prepared and tests rerun | \"The fix is narrow, and the focused test confirms it.\" | Narrow fix |\n| 1:35-2:00 | DEBO explanation at beginner level | \"The student leaves with a method, not just a patched file.\" | Learn the method |\n\n## Video Agent Prompt\n\nUse the transcript from `snapshots/03-debug-loop.terminal.md`. Animate the mismatch as two highlighted code tokens: `displayName` and `name`. Keep the tone practical and calm.\n\n## Editor Notes\n\n- The main takeaway is the repeatable debug loop.\n- Do not show unrelated files.\n- End with \"method, not magic\" as optional lower-third text.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 03: Debug Loop\n\n```terminal\nstudent@debo:~/student-api$ npm test\nFAIL tests/profile-api.test.ts\nExpected status 200\nReceived status 500\n\nstudent@debo:~/student-api$ debo debug \"profile endpoint returns 500\"\nUNDERSTAND\n- Symptom: GET /api/profile returns 500\n- Likely area: request handler or profile fixture\n- Safety: local test environment only\n\nTRACE\n1. Reproduce failing test\n2. Read handler and schema\n3. Compare expected response shape\n4. Patch smallest defect\n5. Rerun focused test\n\nFINDING\nsrc/routes/profile.ts reads user.displayName\ntests fixture provides user.name\n\nDEBO teaching note:\nThe bug is not in the HTTP layer. It is a contract mismatch between test data and handler code.\n\nstudent@debo:~/student-api$ debo patch --lesson \"contract mismatch\"\nPatch prepared:\n- src/routes/profile.ts\n- tests/profile-api.test.ts\n\nstudent@debo:~/student-api$ npm test -- --run tests/profile-api.test.ts\nPASS tests/profile-api.test.ts\n4 tests passed\n\nstudent@debo:~/student-api$ debo explain last-change --level beginner\nYou fixed a mismatch between what the route expected and what the test supplied.\nGood debugging starts by reproducing the failure, then narrowing the surface area.\n\nstudent@debo:~/student-api$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}

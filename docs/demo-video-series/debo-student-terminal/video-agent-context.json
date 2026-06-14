@@ -1,0 +1,136 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series",
+    "episodeCount": 6,
+    "defaultRuntimeSeconds": 90,
+    "status": "production-ready demo source"
+  },
+  "visualSystem": {
+    "canvas": {
+      "aspectRatio": "16:9",
+      "resolution": "3840x2160 preferred, 1920x1080 acceptable",
+      "safeMarginsPercent": 8
+    },
+    "palette": {
+      "background": "#020617",
+      "panel": "#0f172a",
+      "terminal": "#030712",
+      "text": "#e5e7eb",
+      "muted": "#94a3b8",
+      "cursorGreen": "#00ff66",
+      "success": "#22c55e",
+      "info": "#38bdf8",
+      "review": "#f59e0b",
+      "danger": "#ef4444"
+    },
+    "terminal": {
+      "font": "JetBrains Mono, Cascadia Code, or SF Mono",
+      "cursor": "blinking green block",
+      "cursorHex": "#00ff66",
+      "prompt": "student@debo",
+      "typingSpeed": "22 to 38 characters per second",
+      "lineReveal": "natural typing for commands, quick fade for logs"
+    },
+    "logoAnimation": {
+      "description": "DEBO wordmark boots as a terminal prompt, then the green cursor blinks after the O.",
+      "frames": [
+        "black screen with tiny green cursor",
+        "type D, E, B, O",
+        "cursor blinks twice after DEBO",
+        "wordmark shrinks into workstation header"
+      ]
+    }
+  },
+  "voiceover": {
+    "style": "calm, confident, teacher-like, practical",
+    "pace": "145 words per minute",
+    "pronunciation": {
+      "DEBO": "dee-bo",
+      "DevBot": "dev-bot",
+      "NATT": "nat"
+    },
+    "claimPolicy": {
+      "ordinaryNarration": "Lightweight claims are allowed for visible demo actions.",
+      "strictClaims": [
+        "security",
+        "release",
+        "customer",
+        "production",
+        "compliance",
+        "financial ROI"
+      ],
+      "requiredQualifiers": [
+        "demo environment",
+        "example workflow",
+        "human review required",
+        "authorized lab only"
+      ]
+    }
+  },
+  "safety": {
+    "dataPolicy": "synthetic data only",
+    "secretsPolicy": "never show secrets, keys, tokens, customer names, private IPs, or real credentials",
+    "securityPolicy": "security scenes must be defensive, scoped, authorized, and non-destructive",
+    "studentPolicy": "position DEBO as a learning coach and governed teammate, not a replacement for instructors or human judgment"
+  },
+  "episodes": [
+    {
+      "id": "01-first-run",
+      "title": "First Run: From Blank Terminal to Learning Plan",
+      "runtimeSeconds": 90,
+      "snapshot": "snapshots/01-first-run.terminal.md",
+      "script": "episodes/01-first-run.md",
+      "hook": "A student opens DEBO and turns a vague goal into a guided learning path.",
+      "cta": "Subscribe for the next terminal workflow."
+    },
+    {
+      "id": "02-tests-first",
+      "title": "Tests First: Learn by Watching the Guardrails",
+      "runtimeSeconds": 90,
+      "snapshot": "snapshots/02-tests-first.terminal.md",
+      "script": "episodes/02-tests-first.md",
+      "hook": "DEBO teaches why tests come before code changes.",
+      "cta": "Try the workflow with a small practice repo."
+    },
+    {
+      "id": "03-debug-loop",
+      "title": "Debug Loop: Fix a Failing Student API",
+      "runtimeSeconds": 120,
+      "snapshot": "snapshots/03-debug-loop.terminal.md",
+      "script": "episodes/03-debug-loop.md",
+      "hook": "A failing endpoint becomes a readable debugging lesson.",
+      "cta": "Save this for your next bug hunt."
+    },
+    {
+      "id": "04-reviewed-pr",
+      "title": "Reviewed PR: From Change to Evidence Packet",
+      "runtimeSeconds": 120,
+      "snapshot": "snapshots/04-reviewed-pr.terminal.md",
+      "script": "episodes/04-reviewed-pr.md",
+      "hook": "DEBO shows students what professional review discipline looks like.",
+      "cta": "Use this as your PR checklist."
+    },
+    {
+      "id": "05-mentor-mode",
+      "title": "Mentor Mode: Explain the Code Without Hand-Waving",
+      "runtimeSeconds": 90,
+      "snapshot": "snapshots/05-mentor-mode.terminal.md",
+      "script": "episodes/05-mentor-mode.md",
+      "hook": "The terminal becomes a personal tutor for code comprehension.",
+      "cta": "Ask DEBO to explain before you edit."
+    },
+    {
+      "id": "06-safe-security-lab",
+      "title": "Safe Security Lab: Learn Defense With Written Scope",
+      "runtimeSeconds": 120,
+      "snapshot": "snapshots/06-safe-security-lab.terminal.md",
+      "script": "episodes/06-safe-security-lab.md",
+      "hook": "Security learning starts with authorization and non-destructive checks.",
+      "cta": "Never run security workflows without scope."
+    }
+  ]
+}

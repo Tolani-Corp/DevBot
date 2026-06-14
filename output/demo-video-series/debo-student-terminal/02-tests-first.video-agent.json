@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": "debo-student-terminal",
+    "title": "DEBO Student Terminal",
+    "tagline": "Learn by shipping through governed AI workflows.",
+    "brand": "DEBO by Tolani Labs",
+    "format": "YouTube demo series"
+  },
+  "episode": {
+    "id": "02-tests-first",
+    "title": "Tests First: Learn by Watching the Guardrails",
+    "runtimeSeconds": 90,
+    "hook": "DEBO teaches why tests come before code changes.",
+    "cta": "Try the workflow with a small practice repo."
+  },
+  "productionContext": {},
+  "source": {
+    "scriptMarkdown": "# Episode 02: Tests First\n\nRuntime target: 90 seconds\n\n## Hook\n\nOpen on a failing test in red, then pause before the fix.\n\nVoiceover:\n\"A failing test is not a setback. In a good learning workflow, it is the map.\"\n\n## Shot List\n\n| Time | Visual | Voiceover | Onscreen Note |\n|---|---|---|---|\n| 0:00-0:08 | Terminal shows `--tests-first` | \"DEBO can teach students to describe behavior before changing code.\" | Tests first |\n| 0:08-0:24 | Test file appears in a side panel | \"The test names are plain English: return notes, reject bad input, create valid data.\" | Behavior before implementation |\n| 0:24-0:38 | `FAIL` result appears | \"Red is expected. The API does not exist yet.\" | Expected failure |\n| 0:38-0:58 | DEBO explains the failure | \"Instead of hiding the failure, DEBO explains why it is useful.\" | Failure as signal |\n| 0:58-1:15 | Implementation logs and changed files | \"Then it makes the smallest clear change needed to satisfy the tests.\" | Smallest clear change |\n| 1:15-1:30 | `PASS` result and green cursor | \"The lesson lands because the student saw the guardrail first.\" | Green with understanding |\n\n## Video Agent Prompt\n\nRender the terminal transcript from `snapshots/02-tests-first.terminal.md`. Show test failure in muted red, then the passing result in green. Avoid claiming production readiness. The scene is a local demo learning repo.\n\n## Editor Notes\n\n- Add a split view for `tests/notes-api.test.ts`.\n- Use a subtle sound cue when tests switch from fail to pass.\n- Keep the green cursor visible after the final prompt.\n",
+    "terminalSnapshotMarkdown": "# Snapshot 02: Tests First\n\n```terminal\nstudent@debo:~/campus-labs$ debo run lesson-api-basics --tests-first\nDEBO lesson: API basics\nMode: tests first\n\nCHECK\n- package.json found\n- test runner found: vitest\n- source folder found: src\n\nWRITE TEST\ntests/notes-api.test.ts\n- returns an empty notes list\n- rejects missing title\n- creates a valid note\n\nstudent@debo:~/campus-labs$ npm test -- --run tests/notes-api.test.ts\nFAIL tests/notes-api.test.ts\n3 tests failed\n\nDEBO explains:\nThis is expected. The tests describe the behavior before the API exists.\nYour job is to make the red test turn green with the smallest clear change.\n\nstudent@debo:~/campus-labs$ debo implement --target notes-api --explain\nChanged:\n- src/routes/notes.ts\n- src/server.ts\n\nstudent@debo:~/campus-labs$ npm test -- --run tests/notes-api.test.ts\nPASS tests/notes-api.test.ts\n3 tests passed\n\nstudent@debo:~/campus-labs$ _\n```\n"
+  },
+  "buildInstructions": [
+    "Render a dark DEBO terminal with a bright green blinking cursor.",
+    "Use synthetic data exactly as provided in the terminal snapshot.",
+    "Keep commands readable for a YouTube viewer on mobile.",
+    "Do not add secrets, real customer names, private IP addresses, or live targets.",
+    "Keep high-risk/security/release claims qualified and human-review aware."
+  ]
+}
