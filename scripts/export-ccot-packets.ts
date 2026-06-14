@@ -8,10 +8,21 @@ import {
   createPrHandoffCCOTPacket,
   createReleaseReadinessCCOTPacket,
   createSecurityReviewCCOTPacket,
+  type CCOTPacket,
+  type CCOTSurfaceModel,
 } from "../src/reasoning/index.js";
 
-const outputDir = path.resolve("output", "ccot");
-const outputPath = path.join(outputDir, "demo-packets.json");
+function argValue(name: string): string | undefined {
+  const prefix = `${name}=`;
+  const inline = process.argv.find((arg) => arg.startsWith(prefix));
+  if (inline) return inline.slice(prefix.length);
+  const index = process.argv.indexOf(name);
+  return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
+const outputDir = path.resolve(argValue("--out-dir") ?? path.join("output", "ccot"));
+const jsonPath = path.join(outputDir, "demo-packets.json");
+const markdownPath = path.join(outputDir, "demo-packets.md");
 
 const runtimePackets = [
   createReleaseReadinessCCOTPacket({
@@ -89,6 +100,34 @@ const payload = {
   })),
 };
 
+function formatPacketIndex(items: Array<CCOTPacket & { surface: CCOTSurfaceModel }>): string {
+  const lines: string[] = [];
+  lines.push("# CCOT Demo Packet Index");
+  lines.push("");
+  lines.push(`Generated: ${payload.generatedAt}`);
+  lines.push(`Audiences: ${payload.audiences.join(", ")}`);
+  lines.push("");
+  for (const packet of items) {
+    lines.push(`## ${packet.title}`);
+    lines.push("");
+    lines.push(`- id: ${packet.id}`);
+    lines.push(`- kind: ${packet.kind}`);
+    lines.push(`- domain: ${packet.analysis.domain}`);
+    lines.push(`- policy: ${packet.analysis.policyMode}`);
+    lines.push(`- risk: ${packet.analysis.riskLevel}`);
+    lines.push(`- confidence: ${(packet.analysis.confidence * 100).toFixed(0)}%`);
+    lines.push(`- timeline items: ${packet.surface.timeline.length}`);
+    lines.push(`- evidence chips: ${packet.surface.evidenceChips.length}`);
+    lines.push(`- actions: ${packet.analysis.actions.map((action) => `${action.type}:${action.label}`).join("; ")}`);
+    lines.push("");
+    lines.push(packet.analysis.summary);
+    lines.push("");
+  }
+  return `${lines.join("\n").trim()}\n`;
+}
+
 await mkdir(outputDir, { recursive: true });
-await writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-console.log(`Wrote ${packets.length} CCOT packets to ${outputPath}`);
+await writeFile(jsonPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+await writeFile(markdownPath, formatPacketIndex(payload.packets), "utf8");
+console.log(`Wrote ${packets.length} CCOT packets to ${jsonPath}`);
+console.log(`Wrote CCOT packet index to ${markdownPath}`);
