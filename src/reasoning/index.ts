@@ -1,5 +1,6 @@
 export * from "./ccot.js";
 export * from "./ccot-demo-flows.js";
+export * from "./ccot-runtime.js";
 export {
   BayesianUpdater,
   ProbabilityDistribution,

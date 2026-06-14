@@ -5,6 +5,10 @@ import {
   createBettorsAceAARCCOTPacket,
   createBettorsAceWarroomCCOTPacket,
   createCCOTDemoPackets,
+  createCustomerClaimCCOTPacket,
+  createPrHandoffCCOTPacket,
+  createReleaseReadinessCCOTPacket,
+  createSecurityReviewCCOTPacket,
   createStudentLearningCCOTPacket,
   formatCCOTMarkdown,
   resolveCCOTPolicyMode,
@@ -288,5 +292,67 @@ describe("reasoning/ccot", () => {
       ]),
     );
     expect(packets.every((packet) => packet.analysis.actions.length > 0)).toBe(true);
+  });
+
+  it("creates strict runtime packets for release, security, and customer reviews", () => {
+    const evidence = [
+      {
+        id: "runtime-check",
+        source: "runtime check",
+        summary: "Verification evidence exists.",
+        reliability: 0.86,
+      },
+    ];
+    const release = createReleaseReadinessCCOTPacket({
+      subject: "Release packet",
+      baselineLabel: "candidate",
+      currentLabel: "review",
+      checksPassed: ["tests passed"],
+      evidence,
+    });
+    const security = createSecurityReviewCCOTPacket({
+      subject: "Security packet",
+      baselineLabel: "before",
+      currentLabel: "after",
+      mitigations: ["secret output blocked"],
+      residualRisks: ["human review required"],
+      evidence,
+    });
+    const customer = createCustomerClaimCCOTPacket({
+      subject: "Customer packet",
+      baselineLabel: "draft",
+      currentLabel: "qualified",
+      previousClaim: "best available",
+      revisedClaim: "available after listed checks",
+      evidence,
+    });
+
+    expect([release, security, customer].map((packet) => packet.analysis.policyMode)).toEqual([
+      "strict",
+      "strict",
+      "strict",
+    ]);
+    expect(security.analysis.actions.some((action) => action.type === "escalate")).toBe(true);
+  });
+
+  it("creates lightweight PR handoff packets for demo summaries", () => {
+    const packet = createPrHandoffCCOTPacket({
+      subject: "PR handoff",
+      baselineLabel: "before",
+      currentLabel: "after",
+      implementedChanges: ["demo packet export added"],
+      unchangedGuardrails: ["human review remains"],
+      evidence: [
+        {
+          id: "diff",
+          source: "git diff",
+          summary: "Runtime helper was added.",
+          reliability: 0.82,
+        },
+      ],
+    });
+
+    expect(packet.analysis.policyMode).toBe("lightweight");
+    expect(packet.analysis.actions.some((action) => action.type === "change")).toBe(true);
   });
 });

@@ -1,0 +1,2847 @@
+{
+  "generatedAt": "2026-06-14T20:19:26.387Z",
+  "audiences": [
+    "youtube-video-agents",
+    "dashboard-seed-data",
+    "figma-design-handoff",
+    "docs"
+  ],
+  "packets": [
+    {
+      "id": "demo-tolani-student-terminal",
+      "kind": "student_learning",
+      "title": "Tolani Labs student terminal workflow",
+      "input": {
+        "subject": "Tolani Labs student terminal workflow",
+        "baselineLabel": "first terminal lab",
+        "currentLabel": "review-ready terminal lab",
+        "decisionContext": "Prepare mentor feedback and the next practice task.",
+        "evidence": [
+          {
+            "id": "lesson-log",
+            "source": "DEBO terminal lesson log",
+            "timestamp": "2026-06-14",
+            "summary": "Student moved from vague prompts to scoped terminal steps with checkpoint language.",
+            "reliability": 0.9
+          },
+          {
+            "id": "work-product",
+            "source": "student repository diff",
+            "timestamp": "2026-06-14",
+            "summary": "Student added a focused component and verified it with a local preview.",
+            "reliability": 0.86
+          }
+        ],
+        "events": [
+          {
+            "id": "checkpoint-habit",
+            "label": "Checkpoint habit introduced",
+            "timestamp": "2026-06-14",
+            "description": "The student began pausing for evidence before asking for the next step.",
+            "significance": 0.82,
+            "evidenceIds": [
+              "lesson-log"
+            ]
+          }
+        ],
+        "observations": [
+          {
+            "id": "terminal-scoping",
+            "label": "Terminal scoping",
+            "category": "learning",
+            "before": "Commands were copied without naming intent.",
+            "after": "Commands are tied to a goal, expected output, and recovery path.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.86,
+            "evidenceIds": [
+              "lesson-log"
+            ],
+            "implication": "Next lab should practice reading failures before rerunning commands."
+          },
+          {
+            "id": "student-curiosity",
+            "label": "Student curiosity",
+            "category": "learning",
+            "before": "Asked why after seeing output.",
+            "after": "Still asks why after seeing output.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.74,
+            "evidenceIds": [
+              "work-product"
+            ]
+          }
+        ],
+        "domain": "student_learning"
+      },
+      "analysis": {
+        "subject": "Tolani Labs student terminal workflow",
+        "domain": "student_learning",
+        "baselineLabel": "first terminal lab",
+        "currentLabel": "review-ready terminal lab",
+        "changes": [
+          {
+            "id": "terminal-scoping",
+            "label": "Terminal scoping",
+            "category": "learning",
+            "before": "Commands were copied without naming intent.",
+            "after": "Commands are tied to a goal, expected output, and recovery path.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.86,
+            "evidenceIds": [
+              "lesson-log"
+            ],
+            "implication": "Next lab should practice reading failures before rerunning commands.",
+            "evidence": [
+              {
+                "id": "lesson-log",
+                "source": "DEBO terminal lesson log",
+                "timestamp": "2026-06-14",
+                "summary": "Student moved from vague prompts to scoped terminal steps with checkpoint language.",
+                "reliability": 0.9
+              }
+            ],
+            "evidenceReliability": 0.9,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "student-curiosity",
+            "label": "Student curiosity",
+            "category": "learning",
+            "before": "Asked why after seeing output.",
+            "after": "Still asks why after seeing output.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.74,
+            "evidenceIds": [
+              "work-product"
+            ],
+            "evidence": [
+              {
+                "id": "work-product",
+                "source": "student repository diff",
+                "timestamp": "2026-06-14",
+                "summary": "Student added a focused component and verified it with a local preview.",
+                "reliability": 0.86
+              }
+            ],
+            "evidenceReliability": 0.86,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [
+          {
+            "id": "checkpoint-habit",
+            "label": "Checkpoint habit introduced",
+            "timestamp": "2026-06-14",
+            "description": "The student began pausing for evidence before asking for the next step.",
+            "significance": 0.82,
+            "evidenceIds": [
+              "lesson-log"
+            ],
+            "evidence": [
+              {
+                "id": "lesson-log",
+                "source": "DEBO terminal lesson log",
+                "timestamp": "2026-06-14",
+                "summary": "Student moved from vague prompts to scoped terminal steps with checkpoint language.",
+                "reliability": 0.9
+              }
+            ],
+            "evidenceReliability": 0.9
+          }
+        ],
+        "evidenceGaps": [],
+        "confidence": 0.958,
+        "riskLevel": "low",
+        "policyMode": "lightweight",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Return a learner-facing explanation and a next practice step.",
+          "Do not score student progress without evidence from work products or assessments."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Prepare mentor feedback and the next practice task.",
+          "Convert the analysis into one explanation, one misconception check, and one next exercise."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "low",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "student-curiosity"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "low",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "terminal-scoping"
+            ],
+            "requiresHumanReview": false
+          }
+        ],
+        "summary": "Tolani Labs student terminal workflow from first terminal lab to review-ready terminal lab: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "first terminal lab",
+            "timestamp": "first terminal lab",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "checkpoint-habit",
+            "label": "Checkpoint habit introduced",
+            "timestamp": "2026-06-14",
+            "description": "The student began pausing for evidence before asking for the next step.",
+            "kind": "turning_point"
+          },
+          {
+            "id": "current",
+            "label": "review-ready terminal lab",
+            "timestamp": "review-ready terminal lab",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "terminal-scoping",
+              "label": "Terminal scoping",
+              "category": "learning",
+              "before": "Commands were copied without naming intent.",
+              "after": "Commands are tied to a goal, expected output, and recovery path.",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.86,
+              "evidenceIds": [
+                "lesson-log"
+              ],
+              "implication": "Next lab should practice reading failures before rerunning commands.",
+              "evidence": [
+                {
+                  "id": "lesson-log",
+                  "source": "DEBO terminal lesson log",
+                  "timestamp": "2026-06-14",
+                  "summary": "Student moved from vague prompts to scoped terminal steps with checkpoint language.",
+                  "reliability": 0.9
+                }
+              ],
+              "evidenceReliability": 0.9,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "student-curiosity",
+              "label": "Student curiosity",
+              "category": "learning",
+              "before": "Asked why after seeing output.",
+              "after": "Still asks why after seeing output.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.74,
+              "evidenceIds": [
+                "work-product"
+              ],
+              "evidence": [
+                {
+                  "id": "work-product",
+                  "source": "student repository diff",
+                  "timestamp": "2026-06-14",
+                  "summary": "Student added a focused component and verified it with a local preview.",
+                  "reliability": 0.86
+                }
+              ],
+              "evidenceReliability": 0.86,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "lesson-log",
+            "source": "DEBO terminal lesson log",
+            "timestamp": "2026-06-14",
+            "reliability": 0.9,
+            "summary": "Student moved from vague prompts to scoped terminal steps with checkpoint language."
+          },
+          {
+            "id": "work-product",
+            "source": "student repository diff",
+            "timestamp": "2026-06-14",
+            "reliability": 0.86,
+            "summary": "Student added a focused component and verified it with a local preview."
+          }
+        ],
+        "prompts": [
+          "What changed since the baseline?",
+          "What stayed stable and should be reused?",
+          "What evidence supports the next practice step?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "low",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "student-curiosity"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "low",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "terminal-scoping"
+            ],
+            "requiresHumanReview": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "demo-debo-release-readiness",
+      "kind": "devbot_review",
+      "title": "DEBO release readiness review",
+      "input": {
+        "subject": "DEBO release readiness review",
+        "domain": "release",
+        "baselineLabel": "candidate build",
+        "currentLabel": "release gate",
+        "policyMode": "strict",
+        "decisionContext": "Decide whether release claims are supported by checks and evidence.",
+        "evidence": [
+          {
+            "id": "test-run",
+            "source": "local verification run",
+            "timestamp": "2026-06-14",
+            "summary": "Targeted tests passed for the changed reasoning module.",
+            "reliability": 0.9
+          },
+          {
+            "id": "build-run",
+            "source": "typecheck/build output",
+            "timestamp": "2026-06-14",
+            "summary": "Typecheck and package export checks completed before release narration.",
+            "reliability": 0.88
+          }
+        ],
+        "observations": [
+          {
+            "id": "claim-discipline",
+            "label": "Release claim discipline",
+            "category": "release",
+            "before": "Claims were drafted before verification was complete.",
+            "after": "Claims are tied to test/build evidence before release wording.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.88,
+            "evidenceIds": [
+              "test-run",
+              "build-run"
+            ]
+          },
+          {
+            "id": "human-review",
+            "label": "Human review",
+            "category": "governance",
+            "before": "Human review required for production claims.",
+            "after": "Human review still required for production claims.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.86,
+            "evidenceIds": [
+              "build-run"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "DEBO release readiness review",
+        "domain": "release",
+        "baselineLabel": "candidate build",
+        "currentLabel": "release gate",
+        "changes": [
+          {
+            "id": "claim-discipline",
+            "label": "Release claim discipline",
+            "category": "release",
+            "before": "Claims were drafted before verification was complete.",
+            "after": "Claims are tied to test/build evidence before release wording.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.88,
+            "evidenceIds": [
+              "test-run",
+              "build-run"
+            ],
+            "evidence": [
+              {
+                "id": "test-run",
+                "source": "local verification run",
+                "timestamp": "2026-06-14",
+                "summary": "Targeted tests passed for the changed reasoning module.",
+                "reliability": 0.9
+              },
+              {
+                "id": "build-run",
+                "source": "typecheck/build output",
+                "timestamp": "2026-06-14",
+                "summary": "Typecheck and package export checks completed before release narration.",
+                "reliability": 0.88
+              }
+            ],
+            "evidenceReliability": 0.89,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "human-review",
+            "label": "Human review",
+            "category": "governance",
+            "before": "Human review required for production claims.",
+            "after": "Human review still required for production claims.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.86,
+            "evidenceIds": [
+              "build-run"
+            ],
+            "evidence": [
+              {
+                "id": "build-run",
+                "source": "typecheck/build output",
+                "timestamp": "2026-06-14",
+                "summary": "Typecheck and package export checks completed before release narration.",
+                "reliability": 0.88
+              }
+            ],
+            "evidenceReliability": 0.88,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.96,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Require strict evidence for security, release, customer, or production claims.",
+          "Escalate to human review when evidence is incomplete or impact is high."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Decide whether release claims are supported by checks and evidence."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "human-review"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "claim-discipline"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "DEBO release readiness review from candidate build to release gate: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "candidate build",
+            "timestamp": "candidate build",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "release gate",
+            "timestamp": "release gate",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "claim-discipline",
+              "label": "Release claim discipline",
+              "category": "release",
+              "before": "Claims were drafted before verification was complete.",
+              "after": "Claims are tied to test/build evidence before release wording.",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.88,
+              "evidenceIds": [
+                "test-run",
+                "build-run"
+              ],
+              "evidence": [
+                {
+                  "id": "test-run",
+                  "source": "local verification run",
+                  "timestamp": "2026-06-14",
+                  "summary": "Targeted tests passed for the changed reasoning module.",
+                  "reliability": 0.9
+                },
+                {
+                  "id": "build-run",
+                  "source": "typecheck/build output",
+                  "timestamp": "2026-06-14",
+                  "summary": "Typecheck and package export checks completed before release narration.",
+                  "reliability": 0.88
+                }
+              ],
+              "evidenceReliability": 0.89,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "human-review",
+              "label": "Human review",
+              "category": "governance",
+              "before": "Human review required for production claims.",
+              "after": "Human review still required for production claims.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.86,
+              "evidenceIds": [
+                "build-run"
+              ],
+              "evidence": [
+                {
+                  "id": "build-run",
+                  "source": "typecheck/build output",
+                  "timestamp": "2026-06-14",
+                  "summary": "Typecheck and package export checks completed before release narration.",
+                  "reliability": 0.88
+                }
+              ],
+              "evidenceReliability": 0.88,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "test-run",
+            "source": "local verification run",
+            "timestamp": "2026-06-14",
+            "reliability": 0.9,
+            "summary": "Targeted tests passed for the changed reasoning module."
+          },
+          {
+            "id": "build-run",
+            "source": "typecheck/build output",
+            "timestamp": "2026-06-14",
+            "reliability": 0.88,
+            "summary": "Typecheck and package export checks completed before release narration."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "human-review"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "claim-discipline"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "demo-bettorsace-aar-model-adjustment",
+      "kind": "bettorsace_aar",
+      "title": "BettorsACE AAR-to-model adjustment",
+      "input": {
+        "subject": "BettorsACE AAR-to-model adjustment",
+        "domain": "bettorsace_warroom",
+        "policyMode": "strict",
+        "baselineLabel": "pre-AAR racing model",
+        "currentLabel": "post-AAR guarded model",
+        "decisionContext": "Convert AAR lessons into guarded model and War Room posture updates without picks or stake advice.",
+        "evidence": [
+          {
+            "id": "aar",
+            "source": "Santa Anita 2026-05-15 AAR",
+            "timestamp": "2026-05-16",
+            "summary": "After-action review converted into CCOT observations.",
+            "reliability": 0.82
+          }
+        ],
+        "observations": [
+          {
+            "id": "model-behavior",
+            "label": "Model behavior",
+            "category": "model",
+            "before": "Position/pace top pick was allowed to act like a single-key win signal.",
+            "after": "Position/pace top pick is treated as contender-core evidence unless independent win-key support exists.",
+            "status": "changed",
+            "direction": "mixed",
+            "significance": 0.82,
+            "evidenceIds": [
+              "aar"
+            ]
+          },
+          {
+            "id": "stable-strengths",
+            "label": "Stable strengths",
+            "category": "aar_continuity",
+            "before": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+            "after": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.78,
+            "evidenceIds": [
+              "aar"
+            ]
+          },
+          {
+            "id": "recurring-failures",
+            "label": "Recurring failures",
+            "category": "aar_failure",
+            "before": "Known failure modes required review.",
+            "after": "Straight exotics and position-only win keys remained brittle on chaotic turf and fade-risk races.",
+            "status": "changed",
+            "direction": "regressed",
+            "significance": 0.88,
+            "evidenceIds": [
+              "aar"
+            ]
+          },
+          {
+            "id": "changed-context",
+            "label": "Changed context",
+            "category": "risk_signal",
+            "before": "Prior context applied.",
+            "after": "Late-surface chaos and front-speed fade risk now require explicit review flags.",
+            "status": "changed",
+            "direction": "mixed",
+            "significance": 0.72,
+            "evidenceIds": [
+              "aar"
+            ]
+          },
+          {
+            "id": "action-taken",
+            "label": "Action taken",
+            "category": "governance",
+            "before": "No post-AAR adjustment recorded.",
+            "after": "Guard straight exotics, preserve board confidence, and send fragile lanes through historical-intelligence gates.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.8,
+            "evidenceIds": [
+              "aar"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "BettorsACE AAR-to-model adjustment",
+        "domain": "bettorsace_warroom",
+        "baselineLabel": "pre-AAR racing model",
+        "currentLabel": "post-AAR guarded model",
+        "changes": [
+          {
+            "id": "recurring-failures",
+            "label": "Recurring failures",
+            "category": "aar_failure",
+            "before": "Known failure modes required review.",
+            "after": "Straight exotics and position-only win keys remained brittle on chaotic turf and fade-risk races.",
+            "status": "changed",
+            "direction": "regressed",
+            "significance": 0.88,
+            "evidenceIds": [
+              "aar"
+            ],
+            "evidence": [
+              {
+                "id": "aar",
+                "source": "Santa Anita 2026-05-15 AAR",
+                "timestamp": "2026-05-16",
+                "summary": "After-action review converted into CCOT observations.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          },
+          {
+            "id": "model-behavior",
+            "label": "Model behavior",
+            "category": "model",
+            "before": "Position/pace top pick was allowed to act like a single-key win signal.",
+            "after": "Position/pace top pick is treated as contender-core evidence unless independent win-key support exists.",
+            "status": "changed",
+            "direction": "mixed",
+            "significance": 0.82,
+            "evidenceIds": [
+              "aar"
+            ],
+            "evidence": [
+              {
+                "id": "aar",
+                "source": "Santa Anita 2026-05-15 AAR",
+                "timestamp": "2026-05-16",
+                "summary": "After-action review converted into CCOT observations.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          },
+          {
+            "id": "action-taken",
+            "label": "Action taken",
+            "category": "governance",
+            "before": "No post-AAR adjustment recorded.",
+            "after": "Guard straight exotics, preserve board confidence, and send fragile lanes through historical-intelligence gates.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.8,
+            "evidenceIds": [
+              "aar"
+            ],
+            "evidence": [
+              {
+                "id": "aar",
+                "source": "Santa Anita 2026-05-15 AAR",
+                "timestamp": "2026-05-16",
+                "summary": "After-action review converted into CCOT observations.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          },
+          {
+            "id": "changed-context",
+            "label": "Changed context",
+            "category": "risk_signal",
+            "before": "Prior context applied.",
+            "after": "Late-surface chaos and front-speed fade risk now require explicit review flags.",
+            "status": "changed",
+            "direction": "mixed",
+            "significance": 0.72,
+            "evidenceIds": [
+              "aar"
+            ],
+            "evidence": [
+              {
+                "id": "aar",
+                "source": "Santa Anita 2026-05-15 AAR",
+                "timestamp": "2026-05-16",
+                "summary": "After-action review converted into CCOT observations.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "stable-strengths",
+            "label": "Stable strengths",
+            "category": "aar_continuity",
+            "before": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+            "after": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.78,
+            "evidenceIds": [
+              "aar"
+            ],
+            "evidence": [
+              {
+                "id": "aar",
+                "source": "Santa Anita 2026-05-15 AAR",
+                "timestamp": "2026-05-16",
+                "summary": "After-action review converted into CCOT observations.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.817,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Do not present CCOT as betting advice or a guaranteed prediction.",
+          "Flag line movement, model drift, and bankroll exposure as risk signals, not certainties.",
+          "Include responsible-gaming posture and avoid chase-language."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 4 high-significance changes.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Convert AAR lessons into guarded model and War Room posture updates without picks or stake advice.",
+          "Use the analysis for risk review and postures only; avoid certainty, guarantees, or chase decisions."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "stable-strengths"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "4 high-significance changes may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "recurring-failures",
+              "model-behavior",
+              "action-taken",
+              "changed-context"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "BettorsACE AAR-to-model adjustment from pre-AAR racing model to post-AAR guarded model: 4 changes, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "pre-AAR racing model",
+            "timestamp": "pre-AAR racing model",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "post-AAR guarded model",
+            "timestamp": "post-AAR guarded model",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "recurring-failures",
+              "label": "Recurring failures",
+              "category": "aar_failure",
+              "before": "Known failure modes required review.",
+              "after": "Straight exotics and position-only win keys remained brittle on chaotic turf and fade-risk races.",
+              "status": "changed",
+              "direction": "regressed",
+              "significance": 0.88,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            },
+            {
+              "id": "model-behavior",
+              "label": "Model behavior",
+              "category": "model",
+              "before": "Position/pace top pick was allowed to act like a single-key win signal.",
+              "after": "Position/pace top pick is treated as contender-core evidence unless independent win-key support exists.",
+              "status": "changed",
+              "direction": "mixed",
+              "significance": 0.82,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            },
+            {
+              "id": "action-taken",
+              "label": "Action taken",
+              "category": "governance",
+              "before": "No post-AAR adjustment recorded.",
+              "after": "Guard straight exotics, preserve board confidence, and send fragile lanes through historical-intelligence gates.",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.8,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            },
+            {
+              "id": "changed-context",
+              "label": "Changed context",
+              "category": "risk_signal",
+              "before": "Prior context applied.",
+              "after": "Late-surface chaos and front-speed fade risk now require explicit review flags.",
+              "status": "changed",
+              "direction": "mixed",
+              "significance": 0.72,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "stable-strengths",
+              "label": "Stable strengths",
+              "category": "aar_continuity",
+              "before": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+              "after": "Top-three and top-four contender coverage remained useful as lower-variance context.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.78,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "aar",
+            "source": "Santa Anita 2026-05-15 AAR",
+            "timestamp": "2026-05-16",
+            "reliability": 0.82,
+            "summary": "After-action review converted into CCOT observations."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "warroomDriftPanel": {
+          "modelAssumptions": [
+            {
+              "id": "model-behavior",
+              "label": "Model behavior",
+              "category": "model",
+              "before": "Position/pace top pick was allowed to act like a single-key win signal.",
+              "after": "Position/pace top pick is treated as contender-core evidence unless independent win-key support exists.",
+              "status": "changed",
+              "direction": "mixed",
+              "significance": 0.82,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            },
+            {
+              "id": "changed-context",
+              "label": "Changed context",
+              "category": "risk_signal",
+              "before": "Prior context applied.",
+              "after": "Late-surface chaos and front-speed fade risk now require explicit review flags.",
+              "status": "changed",
+              "direction": "mixed",
+              "significance": 0.72,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "aarDeltas": [
+            {
+              "id": "recurring-failures",
+              "label": "Recurring failures",
+              "category": "aar_failure",
+              "before": "Known failure modes required review.",
+              "after": "Straight exotics and position-only win keys remained brittle on chaotic turf and fade-risk races.",
+              "status": "changed",
+              "direction": "regressed",
+              "significance": 0.88,
+              "evidenceIds": [
+                "aar"
+              ],
+              "evidence": [
+                {
+                  "id": "aar",
+                  "source": "Santa Anita 2026-05-15 AAR",
+                  "timestamp": "2026-05-16",
+                  "summary": "After-action review converted into CCOT observations.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "staleContextFlags": [],
+          "safetyFlags": [
+            "Do not present CCOT as betting advice or a guaranteed prediction.",
+            "Include responsible-gaming posture and avoid chase-language."
+          ]
+        },
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "stable-strengths"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "4 high-significance changes may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "recurring-failures",
+              "model-behavior",
+              "action-taken",
+              "changed-context"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "demo-bettorsace-warroom-drift",
+      "kind": "bettorsace_warroom",
+      "title": "BettorsACE War Room assumption drift",
+      "input": {
+        "subject": "BettorsACE War Room assumption drift",
+        "baselineLabel": "morning board",
+        "currentLabel": "pre-event board",
+        "decisionContext": "Review assumption drift without generating picks, odds forecasts, or stake advice.",
+        "evidence": [
+          {
+            "id": "market-log",
+            "source": "internal market movement log",
+            "timestamp": "2026-06-14",
+            "summary": "Afternoon movement exceeded the internal review threshold.",
+            "reliability": 0.82
+          }
+        ],
+        "observations": [
+          {
+            "id": "assumption-drift",
+            "label": "Assumption drift",
+            "category": "assumption",
+            "before": "Morning assumptions were aligned with stable context.",
+            "after": "Pre-event movement requires stale-context review.",
+            "status": "changed",
+            "direction": "increased",
+            "significance": 0.8,
+            "evidenceIds": [
+              "market-log"
+            ]
+          },
+          {
+            "id": "no-stake-policy",
+            "label": "No stake guidance",
+            "category": "guardrail",
+            "before": "War Room avoids stake sizing.",
+            "after": "War Room still avoids stake sizing.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.94,
+            "evidenceIds": [
+              "market-log"
+            ]
+          }
+        ],
+        "domain": "bettorsace_warroom",
+        "policyMode": "strict"
+      },
+      "analysis": {
+        "subject": "BettorsACE War Room assumption drift",
+        "domain": "bettorsace_warroom",
+        "baselineLabel": "morning board",
+        "currentLabel": "pre-event board",
+        "changes": [
+          {
+            "id": "assumption-drift",
+            "label": "Assumption drift",
+            "category": "assumption",
+            "before": "Morning assumptions were aligned with stable context.",
+            "after": "Pre-event movement requires stale-context review.",
+            "status": "changed",
+            "direction": "increased",
+            "significance": 0.8,
+            "evidenceIds": [
+              "market-log"
+            ],
+            "evidence": [
+              {
+                "id": "market-log",
+                "source": "internal market movement log",
+                "timestamp": "2026-06-14",
+                "summary": "Afternoon movement exceeded the internal review threshold.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "no-stake-policy",
+            "label": "No stake guidance",
+            "category": "guardrail",
+            "before": "War Room avoids stake sizing.",
+            "after": "War Room still avoids stake sizing.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.94,
+            "evidenceIds": [
+              "market-log"
+            ],
+            "evidence": [
+              {
+                "id": "market-log",
+                "source": "internal market movement log",
+                "timestamp": "2026-06-14",
+                "summary": "Afternoon movement exceeded the internal review threshold.",
+                "reliability": 0.82
+              }
+            ],
+            "evidenceReliability": 0.82,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.862,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Do not present CCOT as betting advice or a guaranteed prediction.",
+          "Flag line movement, model drift, and bankroll exposure as risk signals, not certainties.",
+          "Include responsible-gaming posture and avoid chase-language."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Review assumption drift without generating picks, odds forecasts, or stake advice.",
+          "Use the analysis for risk review and postures only; avoid certainty, guarantees, or chase decisions."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "no-stake-policy"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "assumption-drift"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "BettorsACE War Room assumption drift from morning board to pre-event board: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "morning board",
+            "timestamp": "morning board",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "pre-event board",
+            "timestamp": "pre-event board",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "assumption-drift",
+              "label": "Assumption drift",
+              "category": "assumption",
+              "before": "Morning assumptions were aligned with stable context.",
+              "after": "Pre-event movement requires stale-context review.",
+              "status": "changed",
+              "direction": "increased",
+              "significance": 0.8,
+              "evidenceIds": [
+                "market-log"
+              ],
+              "evidence": [
+                {
+                  "id": "market-log",
+                  "source": "internal market movement log",
+                  "timestamp": "2026-06-14",
+                  "summary": "Afternoon movement exceeded the internal review threshold.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "no-stake-policy",
+              "label": "No stake guidance",
+              "category": "guardrail",
+              "before": "War Room avoids stake sizing.",
+              "after": "War Room still avoids stake sizing.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.94,
+              "evidenceIds": [
+                "market-log"
+              ],
+              "evidence": [
+                {
+                  "id": "market-log",
+                  "source": "internal market movement log",
+                  "timestamp": "2026-06-14",
+                  "summary": "Afternoon movement exceeded the internal review threshold.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "market-log",
+            "source": "internal market movement log",
+            "timestamp": "2026-06-14",
+            "reliability": 0.82,
+            "summary": "Afternoon movement exceeded the internal review threshold."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "warroomDriftPanel": {
+          "modelAssumptions": [
+            {
+              "id": "assumption-drift",
+              "label": "Assumption drift",
+              "category": "assumption",
+              "before": "Morning assumptions were aligned with stable context.",
+              "after": "Pre-event movement requires stale-context review.",
+              "status": "changed",
+              "direction": "increased",
+              "significance": 0.8,
+              "evidenceIds": [
+                "market-log"
+              ],
+              "evidence": [
+                {
+                  "id": "market-log",
+                  "source": "internal market movement log",
+                  "timestamp": "2026-06-14",
+                  "summary": "Afternoon movement exceeded the internal review threshold.",
+                  "reliability": 0.82
+                }
+              ],
+              "evidenceReliability": 0.82,
+              "evidenceGap": false
+            }
+          ],
+          "aarDeltas": [],
+          "staleContextFlags": [],
+          "safetyFlags": [
+            "Do not present CCOT as betting advice or a guaranteed prediction.",
+            "Include responsible-gaming posture and avoid chase-language."
+          ]
+        },
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "no-stake-policy"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "assumption-drift"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "demo-devbot-stale-claim-scanner",
+      "kind": "devbot_review",
+      "title": "DevBot stale-claim scanner",
+      "input": {
+        "subject": "DevBot stale-claim scanner",
+        "domain": "customer",
+        "baselineLabel": "draft customer note",
+        "currentLabel": "evidence-reviewed customer note",
+        "policyMode": "strict",
+        "decisionContext": "Remove or qualify stale claims before customer-facing copy is approved.",
+        "evidence": [
+          {
+            "id": "scanner-output",
+            "source": "claims scanner",
+            "timestamp": "2026-06-14",
+            "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp.",
+            "reliability": 0.84
+          }
+        ],
+        "observations": [
+          {
+            "id": "latest-claim",
+            "label": "Latest claim",
+            "category": "customer_claim",
+            "before": "Copy asserted latest capability without timestamped evidence.",
+            "after": "Copy now requires timestamped evidence or a qualified statement.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "scanner-output"
+            ]
+          },
+          {
+            "id": "customer-tone",
+            "label": "Customer tone",
+            "category": "customer_claim",
+            "before": "Copy stayed concise and customer-safe.",
+            "after": "Copy remains concise and customer-safe.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.72,
+            "evidenceIds": [
+              "scanner-output"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "DevBot stale-claim scanner",
+        "domain": "customer",
+        "baselineLabel": "draft customer note",
+        "currentLabel": "evidence-reviewed customer note",
+        "changes": [
+          {
+            "id": "latest-claim",
+            "label": "Latest claim",
+            "category": "customer_claim",
+            "before": "Copy asserted latest capability without timestamped evidence.",
+            "after": "Copy now requires timestamped evidence or a qualified statement.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "scanner-output"
+            ],
+            "evidence": [
+              {
+                "id": "scanner-output",
+                "source": "claims scanner",
+                "timestamp": "2026-06-14",
+                "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp.",
+                "reliability": 0.84
+              }
+            ],
+            "evidenceReliability": 0.84,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "customer-tone",
+            "label": "Customer tone",
+            "category": "customer_claim",
+            "before": "Copy stayed concise and customer-safe.",
+            "after": "Copy remains concise and customer-safe.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.72,
+            "evidenceIds": [
+              "scanner-output"
+            ],
+            "evidence": [
+              {
+                "id": "scanner-output",
+                "source": "claims scanner",
+                "timestamp": "2026-06-14",
+                "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp.",
+                "reliability": 0.84
+              }
+            ],
+            "evidenceReliability": 0.84,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.869,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Require strict evidence for security, release, customer, or production claims.",
+          "Escalate to human review when evidence is incomplete or impact is high."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Remove or qualify stale claims before customer-facing copy is approved."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "customer-tone"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "latest-claim"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "DevBot stale-claim scanner from draft customer note to evidence-reviewed customer note: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "draft customer note",
+            "timestamp": "draft customer note",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "evidence-reviewed customer note",
+            "timestamp": "evidence-reviewed customer note",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "latest-claim",
+              "label": "Latest claim",
+              "category": "customer_claim",
+              "before": "Copy asserted latest capability without timestamped evidence.",
+              "after": "Copy now requires timestamped evidence or a qualified statement.",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.9,
+              "evidenceIds": [
+                "scanner-output"
+              ],
+              "evidence": [
+                {
+                  "id": "scanner-output",
+                  "source": "claims scanner",
+                  "timestamp": "2026-06-14",
+                  "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp.",
+                  "reliability": 0.84
+                }
+              ],
+              "evidenceReliability": 0.84,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "customer-tone",
+              "label": "Customer tone",
+              "category": "customer_claim",
+              "before": "Copy stayed concise and customer-safe.",
+              "after": "Copy remains concise and customer-safe.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.72,
+              "evidenceIds": [
+                "scanner-output"
+              ],
+              "evidence": [
+                {
+                  "id": "scanner-output",
+                  "source": "claims scanner",
+                  "timestamp": "2026-06-14",
+                  "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp.",
+                  "reliability": 0.84
+                }
+              ],
+              "evidenceReliability": 0.84,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "scanner-output",
+            "source": "claims scanner",
+            "timestamp": "2026-06-14",
+            "reliability": 0.84,
+            "summary": "Scanner flagged an unsupported latest/best claim and missing timestamp."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "customer-tone"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "latest-claim"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "devbot_review-1781468366386",
+      "kind": "devbot_review",
+      "title": "Runtime release readiness packet",
+      "input": {
+        "subject": "Runtime release readiness packet",
+        "domain": "release",
+        "policyMode": "strict",
+        "baselineLabel": "candidate branch",
+        "currentLabel": "release review",
+        "decisionContext": "Decide whether release wording is supported by completed checks.",
+        "evidence": [
+          {
+            "id": "release-verification",
+            "source": "local CI-equivalent run",
+            "timestamp": "2026-06-14",
+            "summary": "Targeted tests, typecheck, and build completed before release narration.",
+            "reliability": 0.9
+          }
+        ],
+        "observations": [
+          {
+            "id": "release-checks",
+            "label": "Release checks",
+            "category": "release",
+            "before": "Release claims were not yet tied to completed checks.",
+            "after": "targeted tests passed; typecheck passed; build passed",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.88,
+            "evidenceIds": [
+              "release-verification"
+            ]
+          },
+          {
+            "id": "release-gaps",
+            "label": "Release gaps",
+            "category": "release",
+            "before": "Open checks required review before release.",
+            "after": "No missing release checks were declared.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.68,
+            "evidenceIds": [
+              "release-verification"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "Runtime release readiness packet",
+        "domain": "release",
+        "baselineLabel": "candidate branch",
+        "currentLabel": "release review",
+        "changes": [
+          {
+            "id": "release-checks",
+            "label": "Release checks",
+            "category": "release",
+            "before": "Release claims were not yet tied to completed checks.",
+            "after": "targeted tests passed; typecheck passed; build passed",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.88,
+            "evidenceIds": [
+              "release-verification"
+            ],
+            "evidence": [
+              {
+                "id": "release-verification",
+                "source": "local CI-equivalent run",
+                "timestamp": "2026-06-14",
+                "summary": "Targeted tests, typecheck, and build completed before release narration.",
+                "reliability": 0.9
+              }
+            ],
+            "evidenceReliability": 0.9,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "release-gaps",
+            "label": "Release gaps",
+            "category": "release",
+            "before": "Open checks required review before release.",
+            "after": "No missing release checks were declared.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.68,
+            "evidenceIds": [
+              "release-verification"
+            ],
+            "evidence": [
+              {
+                "id": "release-verification",
+                "source": "local CI-equivalent run",
+                "timestamp": "2026-06-14",
+                "summary": "Targeted tests, typecheck, and build completed before release narration.",
+                "reliability": 0.9
+              }
+            ],
+            "evidenceReliability": 0.9,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.89,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Require strict evidence for security, release, customer, or production claims.",
+          "Escalate to human review when evidence is incomplete or impact is high."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Decision context: Decide whether release wording is supported by completed checks."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "release-checks"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "Runtime release readiness packet from candidate branch to release review: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "candidate branch",
+            "timestamp": "candidate branch",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "release review",
+            "timestamp": "release review",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "release-checks",
+              "label": "Release checks",
+              "category": "release",
+              "before": "Release claims were not yet tied to completed checks.",
+              "after": "targeted tests passed; typecheck passed; build passed",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.88,
+              "evidenceIds": [
+                "release-verification"
+              ],
+              "evidence": [
+                {
+                  "id": "release-verification",
+                  "source": "local CI-equivalent run",
+                  "timestamp": "2026-06-14",
+                  "summary": "Targeted tests, typecheck, and build completed before release narration.",
+                  "reliability": 0.9
+                }
+              ],
+              "evidenceReliability": 0.9,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "release-gaps",
+              "label": "Release gaps",
+              "category": "release",
+              "before": "Open checks required review before release.",
+              "after": "No missing release checks were declared.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.68,
+              "evidenceIds": [
+                "release-verification"
+              ],
+              "evidence": [
+                {
+                  "id": "release-verification",
+                  "source": "local CI-equivalent run",
+                  "timestamp": "2026-06-14",
+                  "summary": "Targeted tests, typecheck, and build completed before release narration.",
+                  "reliability": 0.9
+                }
+              ],
+              "evidenceReliability": 0.9,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "release-verification",
+            "source": "local CI-equivalent run",
+            "timestamp": "2026-06-14",
+            "reliability": 0.9,
+            "summary": "Targeted tests, typecheck, and build completed before release narration."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "release-checks"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "devbot_review-1781468366386",
+      "kind": "devbot_review",
+      "title": "Runtime security review packet",
+      "input": {
+        "subject": "Runtime security review packet",
+        "domain": "security",
+        "policyMode": "strict",
+        "baselineLabel": "pre-review implementation",
+        "currentLabel": "security review",
+        "decisionContext": "Escalate incomplete or high-impact security claims.",
+        "evidence": [
+          {
+            "id": "security-review",
+            "source": "security review checklist",
+            "timestamp": "2026-06-14",
+            "summary": "Review confirmed conservative handling and human approval requirement.",
+            "reliability": 0.86
+          }
+        ],
+        "observations": [
+          {
+            "id": "security-mitigations",
+            "label": "Security mitigations",
+            "category": "security",
+            "before": "Risk controls required review.",
+            "after": "no secrets emitted; strict evidence required for high-impact claims",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "security-review"
+            ]
+          },
+          {
+            "id": "residual-risk",
+            "label": "Residual risk",
+            "category": "security",
+            "before": "Residual risk must be explicit before approval.",
+            "after": "human approval required before production deployment",
+            "status": "uncertain",
+            "direction": "unknown",
+            "significance": 0.86,
+            "evidenceIds": []
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "Runtime security review packet",
+        "domain": "security",
+        "baselineLabel": "pre-review implementation",
+        "currentLabel": "security review",
+        "changes": [
+          {
+            "id": "security-mitigations",
+            "label": "Security mitigations",
+            "category": "security",
+            "before": "Risk controls required review.",
+            "after": "no secrets emitted; strict evidence required for high-impact claims",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "security-review"
+            ],
+            "evidence": [
+              {
+                "id": "security-review",
+                "source": "security review checklist",
+                "timestamp": "2026-06-14",
+                "summary": "Review confirmed conservative handling and human approval requirement.",
+                "reliability": 0.86
+              }
+            ],
+            "evidenceReliability": 0.86,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [],
+        "uncertain": [
+          {
+            "id": "residual-risk",
+            "label": "Residual risk",
+            "category": "security",
+            "before": "Residual risk must be explicit before approval.",
+            "after": "human approval required before production deployment",
+            "status": "uncertain",
+            "direction": "unknown",
+            "significance": 0.86,
+            "evidenceIds": [],
+            "evidence": [],
+            "evidenceReliability": 0,
+            "evidenceGap": true
+          }
+        ],
+        "turningPoints": [],
+        "evidenceGaps": [
+          "Residual risk: no linked evidence"
+        ],
+        "confidence": 0.626,
+        "riskLevel": "high",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Require strict evidence for security, release, customer, or production claims.",
+          "Escalate to human review when evidence is incomplete or impact is high."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Decision context: Escalate incomplete or high-impact security claims."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "high",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "security-mitigations"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "high",
+            "label": "Review evidence gaps",
+            "reason": "1 evidence gap must be resolved before stronger claims.",
+            "targetObservationIds": [
+              "residual-risk"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-escalate-escalate-strict-domain-risk",
+            "type": "escalate",
+            "priority": "high",
+            "label": "Escalate strict-domain risk",
+            "reason": "security is in strict mode with high risk; human approval is required before release, customer, security, or War Room claims.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "Runtime security review packet from pre-review implementation to security review: 1 change, 0 continuities, and 1 uncertain observation identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "pre-review implementation",
+            "timestamp": "pre-review implementation",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "security review",
+            "timestamp": "security review",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "security-mitigations",
+              "label": "Security mitigations",
+              "category": "security",
+              "before": "Risk controls required review.",
+              "after": "no secrets emitted; strict evidence required for high-impact claims",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.9,
+              "evidenceIds": [
+                "security-review"
+              ],
+              "evidence": [
+                {
+                  "id": "security-review",
+                  "source": "security review checklist",
+                  "timestamp": "2026-06-14",
+                  "summary": "Review confirmed conservative handling and human approval requirement.",
+                  "reliability": 0.86
+                }
+              ],
+              "evidenceReliability": 0.86,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [],
+          "uncertain": [
+            {
+              "id": "residual-risk",
+              "label": "Residual risk",
+              "category": "security",
+              "before": "Residual risk must be explicit before approval.",
+              "after": "human approval required before production deployment",
+              "status": "uncertain",
+              "direction": "unknown",
+              "significance": 0.86,
+              "evidenceIds": [],
+              "evidence": [],
+              "evidenceReliability": 0,
+              "evidenceGap": true
+            }
+          ]
+        },
+        "evidenceChips": [
+          {
+            "id": "security-review",
+            "source": "security review checklist",
+            "timestamp": "2026-06-14",
+            "reliability": 0.86,
+            "summary": "Review confirmed conservative handling and human approval requirement."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "high",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "security-mitigations"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "high",
+            "label": "Review evidence gaps",
+            "reason": "1 evidence gap must be resolved before stronger claims.",
+            "targetObservationIds": [
+              "residual-risk"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-escalate-escalate-strict-domain-risk",
+            "type": "escalate",
+            "priority": "high",
+            "label": "Escalate strict-domain risk",
+            "reason": "security is in strict mode with high risk; human approval is required before release, customer, security, or War Room claims.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "devbot_review-1781468366387",
+      "kind": "devbot_review",
+      "title": "Runtime customer claim packet",
+      "input": {
+        "subject": "Runtime customer claim packet",
+        "domain": "customer",
+        "policyMode": "strict",
+        "baselineLabel": "draft customer copy",
+        "currentLabel": "qualified customer copy",
+        "decisionContext": "Qualify customer-facing claims unless timestamped evidence supports them.",
+        "evidence": [
+          {
+            "id": "claim-scan",
+            "source": "claim scanner",
+            "timestamp": "2026-06-14",
+            "summary": "Scanner required timestamped evidence for latest or production-ready claims.",
+            "reliability": 0.84
+          }
+        ],
+        "observations": [
+          {
+            "id": "customer-claim",
+            "label": "Customer claim",
+            "category": "customer_claim",
+            "before": "Feature is latest and production-ready.",
+            "after": "Feature is available in this build after the listed verification checks.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "claim-scan"
+            ]
+          },
+          {
+            "id": "customer-tone",
+            "label": "Customer tone",
+            "category": "customer_claim",
+            "before": "Copy should remain concise, accurate, and non-exaggerated.",
+            "after": "Copy remains concise, accurate, and non-exaggerated.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.72,
+            "evidenceIds": [
+              "claim-scan"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "Runtime customer claim packet",
+        "domain": "customer",
+        "baselineLabel": "draft customer copy",
+        "currentLabel": "qualified customer copy",
+        "changes": [
+          {
+            "id": "customer-claim",
+            "label": "Customer claim",
+            "category": "customer_claim",
+            "before": "Feature is latest and production-ready.",
+            "after": "Feature is available in this build after the listed verification checks.",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.9,
+            "evidenceIds": [
+              "claim-scan"
+            ],
+            "evidence": [
+              {
+                "id": "claim-scan",
+                "source": "claim scanner",
+                "timestamp": "2026-06-14",
+                "summary": "Scanner required timestamped evidence for latest or production-ready claims.",
+                "reliability": 0.84
+              }
+            ],
+            "evidenceReliability": 0.84,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "customer-tone",
+            "label": "Customer tone",
+            "category": "customer_claim",
+            "before": "Copy should remain concise, accurate, and non-exaggerated.",
+            "after": "Copy remains concise, accurate, and non-exaggerated.",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.72,
+            "evidenceIds": [
+              "claim-scan"
+            ],
+            "evidence": [
+              {
+                "id": "claim-scan",
+                "source": "claim scanner",
+                "timestamp": "2026-06-14",
+                "summary": "Scanner required timestamped evidence for latest or production-ready claims.",
+                "reliability": 0.84
+              }
+            ],
+            "evidenceReliability": 0.84,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.869,
+        "riskLevel": "medium",
+        "policyMode": "strict",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability.",
+          "Require strict evidence for security, release, customer, or production claims.",
+          "Escalate to human review when evidence is incomplete or impact is high."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Qualify customer-facing claims unless timestamped evidence supports them."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "customer-tone"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "customer-claim"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ],
+        "summary": "Runtime customer claim packet from draft customer copy to qualified customer copy: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "draft customer copy",
+            "timestamp": "draft customer copy",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "qualified customer copy",
+            "timestamp": "qualified customer copy",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "customer-claim",
+              "label": "Customer claim",
+              "category": "customer_claim",
+              "before": "Feature is latest and production-ready.",
+              "after": "Feature is available in this build after the listed verification checks.",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.9,
+              "evidenceIds": [
+                "claim-scan"
+              ],
+              "evidence": [
+                {
+                  "id": "claim-scan",
+                  "source": "claim scanner",
+                  "timestamp": "2026-06-14",
+                  "summary": "Scanner required timestamped evidence for latest or production-ready claims.",
+                  "reliability": 0.84
+                }
+              ],
+              "evidenceReliability": 0.84,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "customer-tone",
+              "label": "Customer tone",
+              "category": "customer_claim",
+              "before": "Copy should remain concise, accurate, and non-exaggerated.",
+              "after": "Copy remains concise, accurate, and non-exaggerated.",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.72,
+              "evidenceIds": [
+                "claim-scan"
+              ],
+              "evidence": [
+                {
+                  "id": "claim-scan",
+                  "source": "claim scanner",
+                  "timestamp": "2026-06-14",
+                  "summary": "Scanner required timestamped evidence for latest or production-ready claims.",
+                  "reliability": 0.84
+                }
+              ],
+              "evidenceReliability": 0.84,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "claim-scan",
+            "source": "claim scanner",
+            "timestamp": "2026-06-14",
+            "reliability": 0.84,
+            "summary": "Scanner required timestamped evidence for latest or production-ready claims."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "medium",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "customer-tone"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "medium",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "customer-claim"
+            ],
+            "requiresHumanReview": true
+          },
+          {
+            "id": "ccot-action-review-review-evidence-gaps",
+            "type": "review",
+            "priority": "medium",
+            "label": "Review evidence gaps",
+            "reason": "Uncertain observations or elevated risk require review.",
+            "targetObservationIds": [],
+            "requiresHumanReview": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "devbot_review-1781468366387",
+      "kind": "devbot_review",
+      "title": "Runtime PR/demo handoff packet",
+      "input": {
+        "subject": "Runtime PR/demo handoff packet",
+        "domain": "engineering",
+        "policyMode": "lightweight",
+        "baselineLabel": "before implementation",
+        "currentLabel": "demo handoff",
+        "decisionContext": "Summarize what changed, what stayed stable, and what reviewers should inspect.",
+        "evidence": [
+          {
+            "id": "handoff-diff",
+            "source": "local git diff",
+            "timestamp": "2026-06-14",
+            "summary": "Changed files show CCOT runtime and export additions.",
+            "reliability": 0.8
+          }
+        ],
+        "observations": [
+          {
+            "id": "implemented-changes",
+            "label": "Implemented changes",
+            "category": "handoff",
+            "before": "Requested work was not implemented.",
+            "after": "CCOT packet builders added; snapshot export generated; UI surface model available",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.82,
+            "evidenceIds": [
+              "handoff-diff"
+            ]
+          },
+          {
+            "id": "unchanged-guardrails",
+            "label": "Unchanged guardrails",
+            "category": "governance",
+            "before": "high-risk claims require evidence; review remains human-approved",
+            "after": "high-risk claims require evidence; review remains human-approved",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.74,
+            "evidenceIds": [
+              "handoff-diff"
+            ]
+          }
+        ]
+      },
+      "analysis": {
+        "subject": "Runtime PR/demo handoff packet",
+        "domain": "engineering",
+        "baselineLabel": "before implementation",
+        "currentLabel": "demo handoff",
+        "changes": [
+          {
+            "id": "implemented-changes",
+            "label": "Implemented changes",
+            "category": "handoff",
+            "before": "Requested work was not implemented.",
+            "after": "CCOT packet builders added; snapshot export generated; UI surface model available",
+            "status": "changed",
+            "direction": "introduced",
+            "significance": 0.82,
+            "evidenceIds": [
+              "handoff-diff"
+            ],
+            "evidence": [
+              {
+                "id": "handoff-diff",
+                "source": "local git diff",
+                "timestamp": "2026-06-14",
+                "summary": "Changed files show CCOT runtime and export additions.",
+                "reliability": 0.8
+              }
+            ],
+            "evidenceReliability": 0.8,
+            "evidenceGap": false
+          }
+        ],
+        "continuities": [
+          {
+            "id": "unchanged-guardrails",
+            "label": "Unchanged guardrails",
+            "category": "governance",
+            "before": "high-risk claims require evidence; review remains human-approved",
+            "after": "high-risk claims require evidence; review remains human-approved",
+            "status": "continued",
+            "direction": "stabilized",
+            "significance": 0.74,
+            "evidenceIds": [
+              "handoff-diff"
+            ],
+            "evidence": [
+              {
+                "id": "handoff-diff",
+                "source": "local git diff",
+                "timestamp": "2026-06-14",
+                "summary": "Changed files show CCOT runtime and export additions.",
+                "reliability": 0.8
+              }
+            ],
+            "evidenceReliability": 0.8,
+            "evidenceGap": false
+          }
+        ],
+        "uncertain": [],
+        "turningPoints": [],
+        "evidenceGaps": [],
+        "confidence": 0.855,
+        "riskLevel": "low",
+        "policyMode": "lightweight",
+        "guardrails": [
+          "Separate observed evidence from interpretation.",
+          "Identify both continuity and change before drawing conclusions.",
+          "Name uncertainty when evidence is missing, stale, or low reliability."
+        ],
+        "decisionImplications": [
+          "Prioritize review of 1 high-significance change.",
+          "Treat 1 high-significance continuity as stable context, not new evidence.",
+          "Decision context: Summarize what changed, what stayed stable, and what reviewers should inspect."
+        ],
+        "actions": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "low",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "unchanged-guardrails"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "low",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "implemented-changes"
+            ],
+            "requiresHumanReview": false
+          }
+        ],
+        "summary": "Runtime PR/demo handoff packet from before implementation to demo handoff: 1 change, 1 continuity, and 0 uncertain observations identified."
+      },
+      "surface": {
+        "timeline": [
+          {
+            "id": "baseline",
+            "label": "before implementation",
+            "timestamp": "before implementation",
+            "description": "Baseline state for continuity and change comparison.",
+            "kind": "baseline"
+          },
+          {
+            "id": "current",
+            "label": "demo handoff",
+            "timestamp": "demo handoff",
+            "description": "Current state after observed changes and continuities.",
+            "kind": "current"
+          }
+        ],
+        "changeContinuity": {
+          "changes": [
+            {
+              "id": "implemented-changes",
+              "label": "Implemented changes",
+              "category": "handoff",
+              "before": "Requested work was not implemented.",
+              "after": "CCOT packet builders added; snapshot export generated; UI surface model available",
+              "status": "changed",
+              "direction": "introduced",
+              "significance": 0.82,
+              "evidenceIds": [
+                "handoff-diff"
+              ],
+              "evidence": [
+                {
+                  "id": "handoff-diff",
+                  "source": "local git diff",
+                  "timestamp": "2026-06-14",
+                  "summary": "Changed files show CCOT runtime and export additions.",
+                  "reliability": 0.8
+                }
+              ],
+              "evidenceReliability": 0.8,
+              "evidenceGap": false
+            }
+          ],
+          "continuities": [
+            {
+              "id": "unchanged-guardrails",
+              "label": "Unchanged guardrails",
+              "category": "governance",
+              "before": "high-risk claims require evidence; review remains human-approved",
+              "after": "high-risk claims require evidence; review remains human-approved",
+              "status": "continued",
+              "direction": "stabilized",
+              "significance": 0.74,
+              "evidenceIds": [
+                "handoff-diff"
+              ],
+              "evidence": [
+                {
+                  "id": "handoff-diff",
+                  "source": "local git diff",
+                  "timestamp": "2026-06-14",
+                  "summary": "Changed files show CCOT runtime and export additions.",
+                  "reliability": 0.8
+                }
+              ],
+              "evidenceReliability": 0.8,
+              "evidenceGap": false
+            }
+          ],
+          "uncertain": []
+        },
+        "evidenceChips": [
+          {
+            "id": "handoff-diff",
+            "source": "local git diff",
+            "timestamp": "2026-06-14",
+            "reliability": 0.8,
+            "summary": "Changed files show CCOT runtime and export additions."
+          }
+        ],
+        "prompts": [
+          "What changed since the prior review?",
+          "What stayed stable and should not be overfit?",
+          "What evidence is missing before stronger claims?"
+        ],
+        "actionQueue": [
+          {
+            "id": "ccot-action-continue-keep-stable-behavior",
+            "type": "continue",
+            "priority": "low",
+            "label": "Keep stable behavior",
+            "reason": "1 high-significance continuity signal remain stable.",
+            "targetObservationIds": [
+              "unchanged-guardrails"
+            ],
+            "requiresHumanReview": false
+          },
+          {
+            "id": "ccot-action-change-review-material-changes",
+            "type": "change",
+            "priority": "low",
+            "label": "Review material changes",
+            "reason": "1 high-significance change may require workflow, model, prompt, or UI updates.",
+            "targetObservationIds": [
+              "implemented-changes"
+            ],
+            "requiresHumanReview": false
+          }
+        ]
+      }
+    }
+  ]
+}
