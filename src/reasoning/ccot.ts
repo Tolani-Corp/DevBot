@@ -19,6 +19,19 @@ export type CCOTChangeDirection =
   | "mixed"
   | "unknown";
 
+export type CCOTPolicyMode = "lightweight" | "strict";
+
+export type CCOTActionType = "continue" | "change" | "review" | "pause" | "escalate";
+
+export type CCOTActionPriority = "low" | "medium" | "high";
+
+export type CCOTPacketKind =
+  | "student_learning"
+  | "devbot_review"
+  | "bettorsace_warroom"
+  | "bettorsace_aar"
+  | "demo";
+
 export interface CCOTEvidence {
   id: string;
   source: string;
@@ -53,12 +66,23 @@ export interface CCOTEvent {
 export interface CCOTInput {
   subject: string;
   domain?: CCOTDomain;
+  policyMode?: CCOTPolicyMode;
   baselineLabel: string;
   currentLabel: string;
   observations: CCOTObservation[];
   evidence?: CCOTEvidence[];
   events?: CCOTEvent[];
   decisionContext?: string;
+}
+
+export interface CCOTAction {
+  id: string;
+  type: CCOTActionType;
+  priority: CCOTActionPriority;
+  label: string;
+  reason: string;
+  targetObservationIds: string[];
+  requiresHumanReview: boolean;
 }
 
 export interface CCOTFinding extends CCOTObservation {
@@ -84,9 +108,53 @@ export interface CCOTAnalysis {
   evidenceGaps: string[];
   confidence: number;
   riskLevel: "low" | "medium" | "high";
+  policyMode: CCOTPolicyMode;
   guardrails: string[];
   decisionImplications: string[];
+  actions: CCOTAction[];
   summary: string;
+}
+
+export interface CCOTPacket {
+  id: string;
+  kind: CCOTPacketKind;
+  title: string;
+  input: CCOTInput;
+  analysis: CCOTAnalysis;
+}
+
+export interface CCOTTimelineItem {
+  id: string;
+  label: string;
+  timestamp: string;
+  description: string;
+  kind: "baseline" | "turning_point" | "current";
+}
+
+export interface CCOTEvidenceChip {
+  id: string;
+  source: string;
+  timestamp?: string;
+  reliability: number;
+  summary: string;
+}
+
+export interface CCOTSurfaceModel {
+  timeline: CCOTTimelineItem[];
+  changeContinuity: {
+    changes: CCOTFinding[];
+    continuities: CCOTFinding[];
+    uncertain: CCOTFinding[];
+  };
+  evidenceChips: CCOTEvidenceChip[];
+  prompts: string[];
+  warroomDriftPanel?: {
+    modelAssumptions: CCOTFinding[];
+    aarDeltas: CCOTFinding[];
+    staleContextFlags: string[];
+    safetyFlags: string[];
+  };
+  actionQueue: CCOTAction[];
 }
 
 const DEFAULT_RELIABILITY = 0.7;
@@ -171,6 +239,11 @@ function domainGuardrails(domain: CCOTDomain): string[] {
   return common;
 }
 
+export function resolveCCOTPolicyMode(domain: CCOTDomain, requested?: CCOTPolicyMode): CCOTPolicyMode {
+  if (requested) return requested;
+  return ["bettorsace_warroom", "security", "release", "customer"].includes(domain) ? "strict" : "lightweight";
+}
+
 function decisionImplications(input: CCOTInput, changes: CCOTFinding[], continuities: CCOTFinding[]): string[] {
   const implications: string[] = [];
   const highChanges = changes.filter((change) => clamp01(change.significance, 0.5) >= 0.7);
@@ -226,6 +299,122 @@ function riskLevel(domain: CCOTDomain, confidence: number, evidenceGaps: string[
   return "low";
 }
 
+function actionPriority(type: CCOTActionType, risk: "low" | "medium" | "high"): CCOTActionPriority {
+  if (type === "escalate" || type === "pause" || risk === "high") return "high";
+  if (type === "review" || risk === "medium") return "medium";
+  return "low";
+}
+
+function makeAction(params: {
+  type: CCOTActionType;
+  risk: "low" | "medium" | "high";
+  label: string;
+  reason: string;
+  targetObservationIds?: string[];
+  requiresHumanReview?: boolean;
+}): CCOTAction {
+  return {
+    id: `ccot-action-${params.type}-${params.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    type: params.type,
+    priority: actionPriority(params.type, params.risk),
+    label: params.label,
+    reason: params.reason,
+    targetObservationIds: params.targetObservationIds ?? [],
+    requiresHumanReview: params.requiresHumanReview ?? ["review", "pause", "escalate"].includes(params.type),
+  };
+}
+
+function buildActions(params: {
+  domain: CCOTDomain;
+  policyMode: CCOTPolicyMode;
+  changes: CCOTFinding[];
+  continuities: CCOTFinding[];
+  uncertain: CCOTFinding[];
+  evidenceGaps: string[];
+  confidence: number;
+  risk: "low" | "medium" | "high";
+}): CCOTAction[] {
+  const actions: CCOTAction[] = [];
+  const highChanges = params.changes.filter((change) => clamp01(change.significance, 0.5) >= 0.7);
+  const highContinuities = params.continuities.filter((continuity) => clamp01(continuity.significance, 0.5) >= 0.7);
+
+  if (highContinuities.length > 0) {
+    actions.push(
+      makeAction({
+        type: "continue",
+        risk: params.risk,
+        label: "Keep stable behavior",
+        reason: `${highContinuities.length} high-significance continuity signal${highContinuities.length === 1 ? "" : "s"} remain stable.`,
+        targetObservationIds: highContinuities.map((item) => item.id),
+        requiresHumanReview: false,
+      }),
+    );
+  }
+
+  if (highChanges.length > 0) {
+    actions.push(
+      makeAction({
+        type: "change",
+        risk: params.risk,
+        label: "Review material changes",
+        reason: `${highChanges.length} high-significance change${highChanges.length === 1 ? "" : "s"} may require workflow, model, prompt, or UI updates.`,
+        targetObservationIds: highChanges.map((item) => item.id),
+        requiresHumanReview: params.policyMode === "strict",
+      }),
+    );
+  }
+
+  if (params.uncertain.length > 0 || params.evidenceGaps.length > 0 || params.risk !== "low") {
+    actions.push(
+      makeAction({
+        type: "review",
+        risk: params.risk,
+        label: "Review evidence gaps",
+        reason: params.evidenceGaps.length > 0
+          ? `${params.evidenceGaps.length} evidence gap${params.evidenceGaps.length === 1 ? "" : "s"} must be resolved before stronger claims.`
+          : "Uncertain observations or elevated risk require review.",
+        targetObservationIds: params.uncertain.map((item) => item.id),
+      }),
+    );
+  }
+
+  if (params.policyMode === "strict" && params.confidence < 0.45) {
+    actions.push(
+      makeAction({
+        type: "pause",
+        risk: params.risk,
+        label: "Pause automation",
+        reason: "Strict policy mode with low confidence requires stronger evidence before automation continues.",
+      }),
+    );
+  }
+
+  if (params.policyMode === "strict" && params.risk === "high") {
+    actions.push(
+      makeAction({
+        type: "escalate",
+        risk: params.risk,
+        label: "Escalate strict-domain risk",
+        reason: `${params.domain} is in strict mode with high risk; human approval is required before release, customer, security, or War Room claims.`,
+      }),
+    );
+  }
+
+  if (actions.length === 0) {
+    actions.push(
+      makeAction({
+        type: "continue",
+        risk: params.risk,
+        label: "Continue monitored workflow",
+        reason: "No material change requires action beyond normal monitoring.",
+        requiresHumanReview: false,
+      }),
+    );
+  }
+
+  return actions;
+}
+
 export function analyzeCCOT(input: CCOTInput): CCOTAnalysis {
   if (!input.subject.trim()) throw new Error("CCOT subject is required.");
   if (!input.baselineLabel.trim()) throw new Error("CCOT baselineLabel is required.");
@@ -233,6 +422,7 @@ export function analyzeCCOT(input: CCOTInput): CCOTAnalysis {
   if (input.observations.length === 0) throw new Error("CCOT requires at least one observation.");
 
   const domain = input.domain ?? "general";
+  const policyMode = resolveCCOTPolicyMode(domain, input.policyMode);
   const evidenceById = new Map((input.evidence ?? []).map((item) => [item.id, item]));
   const findings = input.observations.map((observation) => toFinding(observation, evidenceById));
   const changes = sortBySignificance(findings.filter((finding) => finding.status === "changed"));
@@ -252,6 +442,17 @@ export function analyzeCCOT(input: CCOTInput): CCOTAnalysis {
         : `${finding.label}: low evidence reliability (${finding.evidenceReliability.toFixed(2)})`,
     );
   const confidence = calculateConfidence(findings, evidenceById.size);
+  const risk = riskLevel(domain, confidence, evidenceGaps);
+  const actions = buildActions({
+    domain,
+    policyMode,
+    changes,
+    continuities,
+    uncertain,
+    evidenceGaps,
+    confidence,
+    risk,
+  });
 
   return {
     subject: input.subject,
@@ -264,11 +465,219 @@ export function analyzeCCOT(input: CCOTInput): CCOTAnalysis {
     turningPoints,
     evidenceGaps,
     confidence,
-    riskLevel: riskLevel(domain, confidence, evidenceGaps),
+    riskLevel: risk,
+    policyMode,
     guardrails: domainGuardrails(domain),
     decisionImplications: decisionImplications(input, changes, continuities),
+    actions,
     summary: summarize(input, changes, continuities, uncertain),
   };
+}
+
+export function buildCCOTSurfaceModel(analysis: CCOTAnalysis): CCOTSurfaceModel {
+  const evidence = new Map<string, CCOTEvidence>();
+  for (const finding of [...analysis.changes, ...analysis.continuities, ...analysis.uncertain]) {
+    for (const item of finding.evidence) evidence.set(item.id, item);
+  }
+  for (const point of analysis.turningPoints) {
+    for (const item of point.evidence) evidence.set(item.id, item);
+  }
+
+  const timeline: CCOTTimelineItem[] = [
+    {
+      id: "baseline",
+      label: analysis.baselineLabel,
+      timestamp: analysis.baselineLabel,
+      description: "Baseline state for continuity and change comparison.",
+      kind: "baseline",
+    },
+    ...analysis.turningPoints.map((point) => ({
+      id: point.id,
+      label: point.label,
+      timestamp: point.timestamp,
+      description: point.description,
+      kind: "turning_point" as const,
+    })),
+    {
+      id: "current",
+      label: analysis.currentLabel,
+      timestamp: analysis.currentLabel,
+      description: "Current state after observed changes and continuities.",
+      kind: "current",
+    },
+  ];
+
+  const prompts = analysis.domain === "student_learning"
+    ? [
+        "What changed since the baseline?",
+        "What stayed stable and should be reused?",
+        "What evidence supports the next practice step?",
+      ]
+    : [
+        "What changed since the prior review?",
+        "What stayed stable and should not be overfit?",
+        "What evidence is missing before stronger claims?",
+      ];
+
+  const warroomDriftPanel = analysis.domain === "bettorsace_warroom"
+    ? {
+        modelAssumptions: [...analysis.changes, ...analysis.uncertain].filter((finding) =>
+          ["model", "assumption", "market_signal", "risk_signal"].includes(finding.category),
+        ),
+        aarDeltas: analysis.changes.filter((finding) => finding.category.includes("aar")),
+        staleContextFlags: analysis.evidenceGaps,
+        safetyFlags: analysis.guardrails.filter((guardrail) =>
+          guardrail.toLowerCase().includes("betting") ||
+          guardrail.toLowerCase().includes("responsible") ||
+          guardrail.toLowerCase().includes("chase"),
+        ),
+      }
+    : undefined;
+
+  return {
+    timeline,
+    changeContinuity: {
+      changes: analysis.changes,
+      continuities: analysis.continuities,
+      uncertain: analysis.uncertain,
+    },
+    evidenceChips: [...evidence.values()].map((item) => ({
+      id: item.id,
+      source: item.source,
+      timestamp: item.timestamp,
+      reliability: clamp01(item.reliability, DEFAULT_RELIABILITY),
+      summary: item.summary,
+    })),
+    prompts,
+    warroomDriftPanel,
+    actionQueue: analysis.actions,
+  };
+}
+
+export function createCCOTPacket(kind: CCOTPacketKind, title: string, input: CCOTInput, id = `${kind}-${Date.now()}`): CCOTPacket {
+  return {
+    id,
+    kind,
+    title,
+    input,
+    analysis: analyzeCCOT(input),
+  };
+}
+
+export function createStudentLearningCCOTPacket(input: Omit<CCOTInput, "domain">, id?: string): CCOTPacket {
+  return createCCOTPacket("student_learning", input.subject, { ...input, domain: "student_learning" }, id);
+}
+
+export function createDevBotReviewCCOTPacket(
+  input: Omit<CCOTInput, "domain"> & { domain?: Extract<CCOTDomain, "engineering" | "security" | "release" | "customer"> },
+  id?: string,
+): CCOTPacket {
+  return createCCOTPacket("devbot_review", input.subject, { ...input, domain: input.domain ?? "engineering" }, id);
+}
+
+export function createBettorsAceWarroomCCOTPacket(input: Omit<CCOTInput, "domain" | "policyMode">, id?: string): CCOTPacket {
+  return createCCOTPacket(
+    "bettorsace_warroom",
+    input.subject,
+    { ...input, domain: "bettorsace_warroom", policyMode: "strict" },
+    id,
+  );
+}
+
+export function createBettorsAceAARCCOTPacket(params: {
+  subject: string;
+  baselineLabel: string;
+  currentLabel: string;
+  aarSource: string;
+  aarTimestamp?: string;
+  previousModelBehavior: string;
+  currentModelBehavior: string;
+  stableStrengths: string;
+  recurringFailures: string;
+  changedContext: string;
+  actionTaken: string;
+  id?: string;
+}): CCOTPacket {
+  const evidence: CCOTEvidence[] = [
+    {
+      id: "aar",
+      source: params.aarSource,
+      timestamp: params.aarTimestamp,
+      summary: "After-action review converted into CCOT observations.",
+      reliability: 0.82,
+    },
+  ];
+  return createCCOTPacket(
+    "bettorsace_aar",
+    params.subject,
+    {
+      subject: params.subject,
+      domain: "bettorsace_warroom",
+      policyMode: "strict",
+      baselineLabel: params.baselineLabel,
+      currentLabel: params.currentLabel,
+      decisionContext: "Convert AAR lessons into guarded model and War Room posture updates without picks or stake advice.",
+      evidence,
+      observations: [
+        {
+          id: "model-behavior",
+          label: "Model behavior",
+          category: "model",
+          before: params.previousModelBehavior,
+          after: params.currentModelBehavior,
+          status: "changed",
+          direction: "mixed",
+          significance: 0.82,
+          evidenceIds: ["aar"],
+        },
+        {
+          id: "stable-strengths",
+          label: "Stable strengths",
+          category: "aar_continuity",
+          before: params.stableStrengths,
+          after: params.stableStrengths,
+          status: "continued",
+          direction: "stabilized",
+          significance: 0.78,
+          evidenceIds: ["aar"],
+        },
+        {
+          id: "recurring-failures",
+          label: "Recurring failures",
+          category: "aar_failure",
+          before: "Known failure modes required review.",
+          after: params.recurringFailures,
+          status: "changed",
+          direction: "regressed",
+          significance: 0.88,
+          evidenceIds: ["aar"],
+        },
+        {
+          id: "changed-context",
+          label: "Changed context",
+          category: "risk_signal",
+          before: "Prior context applied.",
+          after: params.changedContext,
+          status: "changed",
+          direction: "mixed",
+          significance: 0.72,
+          evidenceIds: ["aar"],
+        },
+        {
+          id: "action-taken",
+          label: "Action taken",
+          category: "governance",
+          before: "No post-AAR adjustment recorded.",
+          after: params.actionTaken,
+          status: "changed",
+          direction: "introduced",
+          significance: 0.8,
+          evidenceIds: ["aar"],
+        },
+      ],
+    },
+    params.id,
+  );
 }
 
 export function formatCCOTMarkdown(analysis: CCOTAnalysis): string {
@@ -279,6 +688,7 @@ export function formatCCOTMarkdown(analysis: CCOTAnalysis): string {
   lines.push(`Domain: ${analysis.domain}`);
   lines.push(`Confidence: ${(analysis.confidence * 100).toFixed(0)}%`);
   lines.push(`Risk: ${analysis.riskLevel}`);
+  lines.push(`Policy: ${analysis.policyMode}`);
   lines.push("");
   lines.push(`## Summary`);
   lines.push("");
@@ -316,6 +726,12 @@ export function formatCCOTMarkdown(analysis: CCOTAnalysis): string {
   lines.push("");
   for (const implication of analysis.decisionImplications) {
     lines.push(`- ${implication}`);
+  }
+  lines.push("");
+  lines.push(`## Action Queue`);
+  lines.push("");
+  for (const action of analysis.actions) {
+    lines.push(`- [${action.priority}] ${action.type}: ${action.label} - ${action.reason}`);
   }
   lines.push("");
   lines.push(`## Guardrails`);

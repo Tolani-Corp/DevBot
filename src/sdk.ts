@@ -4,16 +4,10 @@
 // https://github.com/Tolani-Corp/DevBot
 //
 // Usage:
-//   import { orchestrateWithRedevelopment, buildPrompt } from '@tolani/debo';
-//   import { jwtSecurity, vpnSecurity } from '@tolani/debo/agents';
-//   import { RAGEngine, detectTraits } from '@tolani/debo/ai';
+//   import { analyzeCCOT, createCCOTDemoPackets } from '@tolani/devbot';
+//   import { orchestrateWithRedevelopment } from '@tolani/devbot/agents';
+//   import { RAGEngine, detectTraits } from '@tolani/devbot/ai';
 // ──────────────────────────────────────────────────────────────
-
-// Re-export agents module
-export * from "./agents/index.js";
-
-// Re-export AI module
-export * from "./ai/index.js";
 
 // Re-export reasoning primitives
 export * from "./reasoning/index.js";

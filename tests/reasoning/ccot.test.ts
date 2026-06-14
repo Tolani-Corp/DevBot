@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { analyzeCCOT, formatCCOTMarkdown } from "@/reasoning/ccot";
+import {
+  analyzeCCOT,
+  buildCCOTSurfaceModel,
+  createBettorsAceAARCCOTPacket,
+  createBettorsAceWarroomCCOTPacket,
+  createCCOTDemoPackets,
+  createStudentLearningCCOTPacket,
+  formatCCOTMarkdown,
+  resolveCCOTPolicyMode,
+} from "@/reasoning";
 
 describe("reasoning/ccot", () => {
   it("separates changes, continuities, turning points, and evidence for student learning", () => {
@@ -66,6 +75,8 @@ describe("reasoning/ccot", () => {
     expect(analysis.turningPoints[0].label).toBe("Tests-first workflow adopted");
     expect(analysis.evidenceGaps).toHaveLength(0);
     expect(analysis.confidence).toBeGreaterThan(0.7);
+    expect(analysis.policyMode).toBe("lightweight");
+    expect(analysis.actions.some((action) => action.type === "change")).toBe(true);
     expect(analysis.guardrails).toContain("Return a learner-facing explanation and a next practice step.");
     expect(analysis.decisionImplications.join(" ")).toContain("misconception check");
   });
@@ -112,10 +123,12 @@ describe("reasoning/ccot", () => {
     });
 
     expect(analysis.domain).toBe("bettorsace_warroom");
+    expect(analysis.policyMode).toBe("strict");
     expect(analysis.riskLevel).toBe("high");
     expect(analysis.evidenceGaps).toContain("Bankroll policy: no linked evidence");
     expect(analysis.guardrails.join(" ")).toContain("Do not present CCOT as betting advice");
     expect(analysis.decisionImplications.join(" ")).toContain("avoid certainty");
+    expect(analysis.actions.some((action) => action.type === "escalate")).toBe(true);
   });
 
   it("formats an auditable markdown report", () => {
@@ -148,6 +161,7 @@ describe("reasoning/ccot", () => {
     const markdown = formatCCOTMarkdown(analysis);
     expect(markdown).toContain("# CCOT Analysis: Release readiness");
     expect(markdown).toContain("## Changes");
+    expect(markdown).toContain("## Action Queue");
     expect(markdown).toContain("## Guardrails");
     expect(markdown).toContain("Require strict evidence");
   });
@@ -161,5 +175,118 @@ describe("reasoning/ccot", () => {
         observations: [],
       }),
     ).toThrow("CCOT requires at least one observation.");
+  });
+
+  it("resolves strict policy mode for high-risk domains", () => {
+    expect(resolveCCOTPolicyMode("release")).toBe("strict");
+    expect(resolveCCOTPolicyMode("security")).toBe("strict");
+    expect(resolveCCOTPolicyMode("customer")).toBe("strict");
+    expect(resolveCCOTPolicyMode("bettorsace_warroom")).toBe("strict");
+    expect(resolveCCOTPolicyMode("engineering")).toBe("lightweight");
+  });
+
+  it("creates reusable student packet and UI surface model", () => {
+    const packet = createStudentLearningCCOTPacket(
+      {
+        subject: "Student CSS workflow",
+        baselineLabel: "before layout review",
+        currentLabel: "after layout review",
+        evidence: [
+          {
+            id: "preview",
+            source: "local preview",
+            summary: "Student validated the layout in a browser preview.",
+            reliability: 0.86,
+          },
+        ],
+        observations: [
+          {
+            id: "preview-habit",
+            label: "Preview habit",
+            category: "learning",
+            before: "did not check responsive state",
+            after: "checks responsive state before handoff",
+            status: "changed",
+            significance: 0.84,
+            evidenceIds: ["preview"],
+          },
+        ],
+      },
+      "student-css-workflow",
+    );
+    const surface = buildCCOTSurfaceModel(packet.analysis);
+
+    expect(packet.kind).toBe("student_learning");
+    expect(surface.timeline.map((item) => item.kind)).toContain("baseline");
+    expect(surface.evidenceChips[0].source).toBe("local preview");
+    expect(surface.prompts.join(" ")).toContain("What changed");
+    expect(surface.actionQueue.length).toBeGreaterThan(0);
+  });
+
+  it("converts BettorsACE AAR content into strict CCOT actions and drift surface", () => {
+    const packet = createBettorsAceAARCCOTPacket({
+      subject: "AAR model adjustment",
+      baselineLabel: "pre-AAR",
+      currentLabel: "post-AAR",
+      aarSource: "Santa Anita AAR",
+      previousModelBehavior: "single-key win labels were too aggressive",
+      currentModelBehavior: "single-key win labels require independent support",
+      stableStrengths: "top-three contender coverage remained useful",
+      recurringFailures: "straight exotics remained brittle",
+      changedContext: "late-surface chaos needs review",
+      actionTaken: "guard brittle lanes through historical-intelligence gate",
+    });
+    const surface = buildCCOTSurfaceModel(packet.analysis);
+
+    expect(packet.kind).toBe("bettorsace_aar");
+    expect(packet.analysis.policyMode).toBe("strict");
+    expect(packet.analysis.actions.some((action) => action.type === "change")).toBe(true);
+    expect(surface.warroomDriftPanel?.aarDeltas.length).toBeGreaterThan(0);
+    expect(surface.warroomDriftPanel?.safetyFlags.join(" ")).toContain("betting advice");
+  });
+
+  it("keeps warroom packets non-predictive with no-pick/no-stake guardrails", () => {
+    const packet = createBettorsAceWarroomCCOTPacket({
+      subject: "War Room drift",
+      baselineLabel: "morning board",
+      currentLabel: "pre-event board",
+      evidence: [
+        {
+          id: "market-log",
+          source: "market log",
+          summary: "Movement exceeded review threshold.",
+          reliability: 0.8,
+        },
+      ],
+      observations: [
+        {
+          id: "drift",
+          label: "Assumption drift",
+          category: "assumption",
+          before: "stable",
+          after: "review threshold exceeded",
+          status: "changed",
+          significance: 0.82,
+          evidenceIds: ["market-log"],
+        },
+      ],
+    });
+
+    expect(packet.analysis.guardrails.join(" ")).toContain("Do not present CCOT as betting advice");
+    expect(packet.analysis.decisionImplications.join(" ")).toContain("avoid certainty");
+  });
+
+  it("seeds polished demo packets for marketing and workflow demos", () => {
+    const packets = createCCOTDemoPackets();
+    expect(packets.map((packet) => packet.id)).toEqual(
+      expect.arrayContaining([
+        "demo-tolani-student-terminal",
+        "demo-debo-release-readiness",
+        "demo-bettorsace-aar-model-adjustment",
+        "demo-bettorsace-warroom-drift",
+        "demo-devbot-stale-claim-scanner",
+      ]),
+    );
+    expect(packets.every((packet) => packet.analysis.actions.length > 0)).toBe(true);
   });
 });
