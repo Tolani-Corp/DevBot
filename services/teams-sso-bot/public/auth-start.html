@@ -1,0 +1,119 @@
+<!-- Used by the Teams Bot authentication flow to retrieve an access token. -->
+<html>
+  <head>
+    <title>Login Start Page</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <script type="text/javascript">
+      popUpSignInWindow();
+
+      async function popUpSignInWindow() {
+        const state = guid();
+        localStorage.setItem("state", state);
+        localStorage.removeItem("codeVerifier");
+
+        const currentUrl = new URL(window.location);
+        const clientId = currentUrl.searchParams.get("clientId");
+        const tenantId = currentUrl.searchParams.get("tenantId");
+        const loginHint = currentUrl.searchParams.get("loginHint") || "";
+        const scope = currentUrl.searchParams.get("scope");
+        const originalCode = guid();
+        const codeChallenge = await pkceChallengeFromVerifier(originalCode);
+
+        localStorage.setItem("codeVerifier", originalCode);
+
+        const queryParams = {
+          client_id: clientId,
+          response_type: "code",
+          response_mode: "fragment",
+          scope: scope,
+          redirect_uri: window.location.origin + "/auth-end.html",
+          nonce: guid(),
+          login_hint: loginHint,
+          state: state,
+          code_challenge: codeChallenge,
+          code_challenge_method: "S256",
+        };
+
+        const authorizeEndpoint =
+          "https://login.microsoftonline.com/" +
+          tenantId +
+          "/oauth2/v2.0/authorize?" +
+          toQueryString(queryParams);
+        window.location.assign(authorizeEndpoint);
+      }
+
+      function toQueryString(queryParams) {
+        const encoded = [];
+        for (const key in queryParams) {
+          encoded.push(key + "=" + encodeURIComponent(queryParams[key]));
+        }
+        return encoded.join("&");
+      }
+
+      function decimalToHex(number) {
+        const hex = number.toString(16);
+        return hex.length < 2 ? "0" + hex : hex;
+      }
+
+      function guid() {
+        const cryptoObj = window.crypto || window.msCrypto;
+        if (cryptoObj && cryptoObj.getRandomValues) {
+          const buffer = new Uint8Array(16);
+          cryptoObj.getRandomValues(buffer);
+          buffer[6] |= 0x40;
+          buffer[6] &= 0x4f;
+          buffer[8] |= 0x80;
+          buffer[8] &= 0xbf;
+          return (
+            decimalToHex(buffer[0]) +
+            decimalToHex(buffer[1]) +
+            decimalToHex(buffer[2]) +
+            decimalToHex(buffer[3]) +
+            "-" +
+            decimalToHex(buffer[4]) +
+            decimalToHex(buffer[5]) +
+            "-" +
+            decimalToHex(buffer[6]) +
+            decimalToHex(buffer[7]) +
+            "-" +
+            decimalToHex(buffer[8]) +
+            decimalToHex(buffer[9]) +
+            "-" +
+            decimalToHex(buffer[10]) +
+            decimalToHex(buffer[11]) +
+            decimalToHex(buffer[12]) +
+            decimalToHex(buffer[13]) +
+            decimalToHex(buffer[14]) +
+            decimalToHex(buffer[15])
+          );
+        }
+
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+          const r = (Math.random() * 16) | 0;
+          const v = c === "x" ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      }
+
+      function sha256(plain) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plain);
+        return window.crypto.subtle.digest("SHA-256", data);
+      }
+
+      function base64urlencode(str) {
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+      }
+
+      async function pkceChallengeFromVerifier(verifier) {
+        const hashed = await sha256(verifier);
+        return base64urlencode(hashed);
+      }
+    </script>
+  </body>
+</html>

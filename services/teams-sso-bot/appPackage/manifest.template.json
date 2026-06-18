@@ -1,0 +1,70 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.27/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.27",
+  "version": "0.1.0",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Tolani Corp",
+    "websiteUrl": "https://debo.ai",
+    "privacyUrl": "https://debo.ai/privacy",
+    "termsOfUseUrl": "https://debo.ai/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "DevBot",
+    "full": "DevBot Teams SSO"
+  },
+  "description": {
+    "short": "Governed DevBot task intake for Microsoft Teams.",
+    "full": "Use Microsoft Teams SSO to show your profile, check DevBot status, and create governed DevBot tasks through the existing DevBot review and approval path."
+  },
+  "accentColor": "#00C853",
+  "supportsChannelFeatures": "tier1",
+  "bots": [
+    {
+      "botId": "${{BOT_ID}}",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal", "team", "groupChat"],
+          "commands": [
+            {
+              "title": "help",
+              "description": "Show supported DevBot commands."
+            },
+            {
+              "title": "show",
+              "description": "Show your Microsoft Graph profile using SSO."
+            },
+            {
+              "title": "status",
+              "description": "Check DevBot runtime health."
+            },
+            {
+              "title": "task",
+              "description": "Create a governed DevBot task."
+            },
+            {
+              "title": "logout",
+              "description": "Sign out of the Teams SSO session."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeExtensions": [],
+  "configurableTabs": [],
+  "staticTabs": [],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["${{BOT_DOMAIN}}", "token.botframework.com"],
+  "webApplicationInfo": {
+    "id": "${{AAD_APP_CLIENT_ID}}",
+    "resource": "api://botid-${{BOT_ID}}"
+  }
+}

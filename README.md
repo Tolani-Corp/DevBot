@@ -101,6 +101,22 @@ APIM_SUBSCRIPTION_KEY=<your_apim_subscription_key>
 
 See [docs/AZURE_INTERNAL_LINKS_AND_LOCAL_OPS.md](./docs/AZURE_INTERNAL_LINKS_AND_LOCAL_OPS.md) for full usage.
 
+## Microsoft Teams SSO Bot
+
+DevBot includes an optional Microsoft Teams SSO bot in `services/teams-sso-bot`, aligned to the pinned Microsoft sample `OfficeDev/microsoft-365-agents-toolkit-samples/tree/v3.3.0/bot-sso`.
+
+```bash
+npm --prefix services/teams-sso-bot install
+npm run teams:sso:build
+npm run teams:sso:smoke
+npm run teams:sso:dev
+```
+
+The Teams bot supports `help`, `show`, `status`, `task <request>`, and `logout`.
+Task creation remains disabled until `DEVBOT_TEAMS_ALLOW_TASKS=true` and `DEVBOT_API_TOKEN` is set to the core DevBot `API_AUTH_TOKEN`.
+
+Setup notes live in [docs/teams-sso-bot.md](./docs/teams-sso-bot.md).
+
 ## Key Business Logic
 
 - sell `request to reviewed PR`
