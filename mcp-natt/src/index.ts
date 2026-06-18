@@ -192,6 +192,11 @@ import {
 } from "./vpn-security.js";
 
 import { loadEthicalRoadmap } from "./ethical-roadmap.js";
+import {
+  PROCUREMENT_REGULATORY_SOURCES,
+  loadFarIndex,
+  loadNaicsDataset,
+} from "./procurement-regulatory.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Server Initialization
@@ -1189,6 +1194,88 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       },
     },
     {
+      name: "search_procurement_regulatory_knowledge",
+      description:
+        "Search procurement regulatory memory for NAICS codes, FAR import/export references, OEM supplier filters, evidence gates, and blocked manual decisions.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "Natural-language procurement query. Example: find suppliers that manufacture OEM NAIC=236823 and all FAR import/export regulations",
+          },
+          naics_code: {
+            type: "string",
+            description: "Optional NAICS code to validate against the official 2022 Census NAICS cache.",
+          },
+          far_citation: {
+            type: "string",
+            description: "Optional FAR part or section citation, such as 25, 25.400, 25.900, or 52.225-5.",
+          },
+          include_far_text: {
+            type: "boolean",
+            description: "If true and far_citation is supplied, fetch a bounded official Acquisition.gov text excerpt.",
+          },
+          limit: {
+            type: "number",
+            description: "Maximum search results to return per category.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_naics_code",
+      description:
+        "Validate or search 2022 NAICS codes from the official Census-derived local cache, including hierarchy and suggestions for invalid codes.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          code: {
+            type: "string",
+            description: "NAICS code to validate, such as 236220.",
+          },
+          query: {
+            type: "string",
+            description: "Text search over NAICS titles, such as commercial building construction or electronics manufacturing.",
+          },
+          limit: {
+            type: "number",
+            description: "Maximum search results to return.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      name: "get_far_reference",
+      description:
+        "Search the complete local FAR Title 48 Chapter 1 index by citation or topic and optionally fetch official text for a specific Acquisition.gov citation.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          citation: {
+            type: "string",
+            description: "FAR citation such as 25, 25.000, 25.400, 25.900, or 52.225-5.",
+          },
+          query: {
+            type: "string",
+            description: "FAR topic search, such as import export customs duties trade agreements.",
+          },
+          include_text: {
+            type: "boolean",
+            description: "If true and citation is supplied, fetch a bounded official Acquisition.gov text excerpt.",
+          },
+          limit: {
+            type: "number",
+            description: "Maximum search results to return.",
+          },
+        },
+        required: [],
+      },
+    },
+    {
       name: "bettorsace_diagnose_issue",
       description:
         "Invoke the BettorsACE platform TypeScript agent to diagnose a platform issue with actionable root causes and next actions.",
@@ -1472,6 +1559,24 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
       description: "Dynamic skills, tools, and resources catalog derived from roadmap stages",
       mimeType: "application/json",
     },
+    {
+      uri: "natt://procurement-regulatory-sources",
+      name: "Procurement Regulatory Source Map",
+      description: "Official source map for NAICS, FAR, eCFR, and Acquisition.gov regulatory access",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://naics-2022-codes",
+      name: "NAICS 2022 Codes",
+      description: "Complete Census-derived 2022 NAICS hierarchy cache for supplier and industry classification",
+      mimeType: "application/json",
+    },
+    {
+      uri: "natt://far-title48-chapter1-index",
+      name: "FAR Title 48 Chapter 1 Index",
+      description: "Complete eCFR-derived FAR part and section index with official citation URLs",
+      mimeType: "application/json",
+    },
   ],
 }));
 
@@ -1591,6 +1696,22 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
             2,
           ),
         }],
+      };
+    }
+    case "natt://procurement-regulatory-sources":
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(PROCUREMENT_REGULATORY_SOURCES, null, 2) }],
+      };
+    case "natt://naics-2022-codes": {
+      const dataset = await loadNaicsDataset();
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(dataset, null, 2) }],
+      };
+    }
+    case "natt://far-title48-chapter1-index": {
+      const index = await loadFarIndex();
+      return {
+        contents: [{ uri, mimeType: "application/json", text: JSON.stringify(index, null, 2) }],
       };
     }
     default:

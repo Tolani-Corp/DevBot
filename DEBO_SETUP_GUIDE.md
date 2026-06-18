@@ -223,6 +223,21 @@ Agents and MCP clients can retrieve the shared ethical hacking roadmap through:
 
 Human manual: [docs/natt-ethical-hacking-roadmap.md](./docs/natt-ethical-hacking-roadmap.md). All roadmap use remains limited to authorized labs, written ROE, and non-destructive-first workflows.
 
+### Procurement Regulatory MCP Context
+
+Agents and MCP clients can retrieve NAICS/FAR procurement context through:
+
+| MCP tool/resource | What it returns |
+|---|---|
+| `search_procurement_regulatory_knowledge` | Supplier-oriented NAICS/FAR memory with OEM filters, evidence gates, warnings, and blocked automation |
+| `get_naics_code` | Census-derived 2022 NAICS validation, hierarchy, children, and invalid-code suggestions |
+| `get_far_reference` | FAR Title 48 Chapter 1 part/section search and optional bounded official text fetch |
+| `natt://procurement-regulatory-sources` | Official source map for Census NAICS, Acquisition.gov, and eCFR |
+| `natt://naics-2022-codes` | Complete local Census-derived 2022 NAICS hierarchy cache |
+| `natt://far-title48-chapter1-index` | Complete local FAR Title 48 Chapter 1 part/section index with official citation URLs |
+
+Use this path for queries such as `find suppliers that manufacture OEM NAIC=236823 and all FAR import/export regulations`. The MCP layer can prepare search memory and evidence packets, but supplier approval, RFQ award, compliance release, shipment authorization, and legal/regulatory determinations remain manual gates.
+
 ---
 
 ## Trigger Patterns
