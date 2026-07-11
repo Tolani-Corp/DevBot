@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "lastUpdated": "2026-07-11",
+  "phase": "MVP",
+  "tasks": [
+    {
+      "id": "MVP-BOOT-001",
+      "title": "Bootstrap readiness artifacts",
+      "status": "done",
+      "evidence": [
+        "docs/DEBO_COMMERCIAL_READINESS_CHECKLIST_V1.md",
+        "docs/DEBO_COMMERCIAL_READINESS_EXECUTION_V1.md",
+        "docs/DEBO_COMMERCIAL_READINESS_TASKS_V1.json"
+      ]
+    }
+  ]
+}
