@@ -45,6 +45,11 @@ assert(
   JSON.stringify(schemaLifecycle) === JSON.stringify(expectedLifecycle),
   "State schema lifecycle enum differs from the canonical lifecycle order",
 );
+assert(Array.isArray(schema.anyOf), "State schema must allow request or execution state through anyOf");
+assert(
+  schema?.$defs?.requestState?.additionalProperties !== false,
+  "requestState cannot block executionState extension fields",
+);
 assert(schema?.$defs?.workerLease, "Worker lease schema is missing");
 assert(schema?.$defs?.executionState, "Execution state schema is missing");
 
