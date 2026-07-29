@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 
+import { getVaultSecret } from "./azure-vault.js";
 import {
   canonicalJson,
   trustedPathfinderKeyIds,
@@ -34,6 +35,11 @@ const manifestSchema = z.object({
     approverId: z.string().min(2),
     approvedAt: z.string().datetime(),
   })).length(2),
+  access: z.object({
+    method: z.enum(["passkey", "vault-code"]),
+    challengeId: z.string().regex(/^bgc-[a-z0-9-]+$/),
+    authenticatedAt: z.string().datetime(),
+  }),
 });
 
 const envelopeSchema = z.object({
@@ -81,14 +87,18 @@ function deploymentEnvironment(): string {
   return (process.env.DEPLOYMENT_ENVIRONMENT ?? process.env.NODE_ENV ?? "development").trim().toLowerCase();
 }
 
-function overridePath(): string {
-  const configured = process.env.NATT_PATHFINDER_OVERRIDE_FILE?.trim();
-  if (!configured) throw new Error("NATT_PATHFINDER_OVERRIDE_FILE is required when Pathfinder is enabled");
-  return path.resolve(configured);
-}
-
 async function readEnvelope(): Promise<z.infer<typeof envelopeSchema>> {
-  const filePath = overridePath();
+  const secretId = process.env.NATT_PATHFINDER_OVERRIDE_SECRET_ID?.trim();
+  if (secretId) return envelopeSchema.parse(JSON.parse(await getVaultSecret(secretId)));
+
+  const configured = process.env.NATT_PATHFINDER_OVERRIDE_FILE?.trim();
+  if (!configured) {
+    throw new Error("NATT_PATHFINDER_OVERRIDE_SECRET_ID is required when Pathfinder is enabled");
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("File-backed Pathfinder overrides are prohibited in production");
+  }
+  const filePath = path.resolve(configured);
   const stat = await fs.stat(filePath);
   if (!stat.isFile()) throw new Error("Pathfinder override path is not a file");
   if (stat.size > 64 * 1024) throw new Error("Pathfinder override file exceeds 64 KiB");
@@ -115,9 +125,13 @@ function validateManifest(manifest: PathfinderOverrideManifest, context: Pathfin
   const now = Date.now();
   const issuedAt = new Date(manifest.issuedAt).getTime();
   const expiresAt = new Date(manifest.expiresAt).getTime();
+  const authenticatedAt = new Date(manifest.access.authenticatedAt).getTime();
   if (issuedAt > now + 5 * 60_000) throw new Error("Pathfinder authorization is issued in the future");
   if (expiresAt <= now) throw new Error("Pathfinder authorization has expired");
   if (expiresAt - issuedAt > 15 * 60_000) throw new Error("Pathfinder authorization lifetime exceeds 15 minutes");
+  if (authenticatedAt > issuedAt || issuedAt - authenticatedAt > 2 * 60_000) {
+    throw new Error("Pathfinder access authentication is not fresh enough");
+  }
 
   const roles = new Set(manifest.approvals.map((approval) => approval.role));
   const approvers = new Set(manifest.approvals.map((approval) => approval.approverId));
@@ -150,6 +164,8 @@ async function audit(result: PathfinderGateResult, context: PathfinderContext): 
     authorized: result.authorized,
     reason: result.reason,
     overrideId: result.manifest?.overrideId,
+    accessMethod: result.manifest?.access.method,
+    challengeId: result.manifest?.access.challengeId,
     authorizationDigest: result.authorizationDigest,
   };
   await fs.appendFile(path.join(auditRoot, "audit.jsonl"), `${JSON.stringify(event)}\n`, { encoding: "utf8", mode: 0o600 });
@@ -164,12 +180,14 @@ async function recordActivation(manifest: PathfinderOverrideManifest, digest: st
     requestId: manifest.requestId,
     nonce: manifest.nonce,
     digest,
+    accessMethod: manifest.access.method,
+    challengeId: manifest.access.challengeId,
     activatedAt: new Date().toISOString(),
     expiresAt: manifest.expiresAt,
   };
   try {
     await fs.writeFile(activationPath, JSON.stringify(record, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
-  } catch (error) {
+  } catch {
     const existing = JSON.parse(await fs.readFile(activationPath, "utf8")) as { digest?: string; nonce?: string };
     if (existing.digest !== digest || existing.nonce !== manifest.nonce) {
       throw new Error("Pathfinder override replay or activation collision detected");
