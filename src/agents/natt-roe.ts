@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { evaluateTargetScope, type NetworkScopePolicy } from "../security/network-scope.js";
+import { evaluatePathfinderGate } from "../security/pathfinder-gate.js";
 
 export type ROEClassification = "public" | "confidential" | "restricted" | "secret";
 
@@ -86,9 +87,9 @@ export interface ROEEngagement {
   maxGhostMode: "passive" | "stealth" | "active";
   validFrom: Date;
   validUntil: Date;
-  /** SHA-256 hash only. Plaintext passphrases are never persisted by this implementation. */
+  /** SHA-256 hash only. Plaintext passphrases are never persisted. */
   missionPassphraseHash: string;
-  /** Deprecated legacy field accepted only while old records are migrated. */
+  /** Legacy input accepted only for migration; removed whenever the record is saved. */
   missionPassphrase?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -145,132 +146,70 @@ export interface PhaseROEGate {
   reason: string;
 }
 
-const MISSION_GUIDANCE_TEMPLATES: Record<string, Omit<MissionGuidance, "brief">> = {
-  "web-app": {
-    objectives: [
-      "Inventory authorized web entry points",
-      "Assess OWASP-aligned controls",
-      "Validate authentication, authorization, session, transport, and browser controls",
-    ],
-    hardLimits: [
-      "Use synthetic data and client-provisioned test identities only",
-      "Do not trigger financial, messaging, deletion, or other irreversible actions",
-      "Do not retain credentials, full tokens, unrelated personal data, or production records",
-      "Stop on instability, unexpected production-user access, or critical uncontrolled access",
-    ],
-    escalationTriggers: [
-      "Critical access-control failure",
-      "Unexpected access to production data",
-      "Evidence of an active third-party intrusion",
-      "Any effect on service availability",
-    ],
-    approvedTechniques: [
-      "Passive crawling within approved paths",
-      "Header and cookie analysis",
-      "Non-destructive input validation with test data",
-      "Authentication and authorization validation using test identities",
-    ],
-    breakGlassProtocol:
-      "Stop the mission, preserve minimum necessary evidence, invoke the engagement emergency contact, and await written restart approval.",
-    evidenceRequirements: [
-      "Timestamped sanitized request and response evidence",
-      "Exact affected asset and approved test identity reference",
-      "Reproduction steps that do not expose secrets or real customer data",
-    ],
-  },
-  "html-analysis": {
-    objectives: ["Review supplied HTML and browser controls", "Identify unsafe DOM patterns", "Assess CSP and transport posture"],
-    hardLimits: ["Analyze only supplied or authorized content", "Do not execute unknown active content outside an isolated sandbox"],
-    escalationTriggers: ["Embedded live credentials or tokens", "Unexpected production connectivity"],
-    approvedTechniques: ["Static analysis", "Sandboxed rendering", "Security-header review"],
-    breakGlassProtocol: "Stop rendering, isolate the artifact, and notify the technical contact.",
-    evidenceRequirements: ["Sanitized code excerpt", "File hash", "Affected line or DOM location"],
-  },
-  "api-recon": {
-    objectives: ["Inventory approved API endpoints", "Assess authentication and authorization", "Validate rate limiting and data minimization"],
-    hardLimits: [
-      "Do not call irreversible endpoints",
-      "Do not cross tenant boundaries except between synthetic test tenants",
-      "Respect the lower of the ROE rate limit or server-provided backoff",
-    ],
-    escalationTriggers: ["Unauthenticated administrative access", "Real cross-tenant data exposure", "Service degradation"],
-    approvedTechniques: ["OpenAPI review", "Method and parameter validation", "Test-identity authorization checks"],
-    breakGlassProtocol: "Stop all requests, retain only the last necessary sanitized exchanges, and contact the technical owner.",
-    evidenceRequirements: ["Endpoint inventory", "Sanitized request-response pair", "Role and tenant test matrix"],
-  },
-  "network-recon": {
-    objectives: ["Map authorized hosts and services", "Assess exposed ports and TLS posture", "Identify configuration weaknesses"],
-    hardLimits: [
-      "Do not scan outside exact domain, IP, CIDR, port, and time scope",
-      "No denial-of-service, flooding, destructive testing, or exploitation without an explicit clause",
-      "Honor approved concurrency and packet-rate limits",
-    ],
-    escalationTriggers: ["Industrial or safety-critical systems", "Unexpected third-party infrastructure", "Availability impact"],
-    approvedTechniques: ["Bounded host discovery", "Approved TCP service discovery", "TLS and banner assessment"],
-    breakGlassProtocol: "Terminate the isolated scanner process and contact the emergency technical owner.",
-    evidenceRequirements: ["Command/profile identifier", "Authorized scope rule", "Sanitized service inventory"],
-  },
-  osint: {
-    objectives: ["Map public digital exposure", "Identify public source risks", "Preserve source provenance"],
-    hardLimits: ["Public sources only", "No deceptive identity, contact, login, or access-control circumvention"],
-    escalationTriggers: ["Leaked live credentials", "Active fraud or intrusion indicators", "Sensitive personal data exposure"],
-    approvedTechniques: ["Public search", "DNS and certificate transparency", "Public repository review"],
-    breakGlassProtocol: "Cease collection and escalate without redistributing sensitive material.",
-    evidenceRequirements: ["Source URL", "Retrieval timestamp", "Classification and redaction record"],
-  },
-  "auth-testing": {
-    objectives: ["Assess password and login controls", "Validate MFA, recovery, OAuth/OIDC, and session controls", "Confirm lockout-safe defenses"],
-    hardLimits: [
-      "Use client-provisioned or synthetic test identities only",
-      "Never collect or retain real passwords, recovery codes, or full session tokens",
-      "Maximum five attempts per test identity unless a lower contract limit applies",
-      "Stop immediately on lockout or unexpected production-user access",
-    ],
-    escalationTriggers: ["Authentication bypass affecting non-test users", "Hardcoded privileged credential", "Session issued outside approved test identity"],
-    approvedTechniques: ["Test-account enumeration resistance", "MFA and recovery-flow validation", "Session lifecycle validation"],
-    breakGlassProtocol: "Stop authentication traffic, revoke test sessions, and notify the identity owner.",
-    evidenceRequirements: ["Test identity reference", "Redacted protocol exchange", "Attempt count and lockout observation"],
-  },
-  "platform-detection": {
-    objectives: ["Identify technologies exposed by approved targets", "Assess version and configuration disclosure"],
-    hardLimits: ["Passive and low-impact fingerprinting only", "No exploit execution"],
-    escalationTriggers: ["Safety-critical platform", "Out-of-scope managed service"],
-    approvedTechniques: ["Header analysis", "Static asset fingerprinting", "TLS metadata review"],
-    breakGlassProtocol: "Stop probes and validate ownership with the client technical contact.",
-    evidenceRequirements: ["Observed fingerprint", "Confidence level", "Source response metadata"],
-  },
-  "code-analysis": {
-    objectives: ["Review client-supplied code and configuration", "Identify secrets and vulnerable dependencies", "Produce remediation guidance"],
-    hardLimits: ["Read only approved repositories and revisions", "Do not copy secrets into findings or prompts"],
-    escalationTriggers: ["Live credential", "Malicious implant", "Evidence of active compromise"],
-    approvedTechniques: ["Static analysis", "Dependency audit", "Secret-pattern detection with redaction"],
-    breakGlassProtocol: "Quarantine the finding metadata and notify the repository owner.",
-    evidenceRequirements: ["Repository and commit", "Redacted location", "Scanner version and rule identifier"],
-  },
-  "racing-recon": {
-    objectives: ["Run bounded comparative reconnaissance", "Measure approved control behavior under controlled concurrency"],
-    hardLimits: ["No uncontrolled concurrency", "No availability degradation", "Stop on rate-limit or instability signal"],
-    escalationTriggers: ["HTTP 429 without recovery", "Latency or error-rate impact", "Scope drift"],
-    approvedTechniques: ["Rate-limited parallel discovery", "Comparative response analysis"],
-    breakGlassProtocol: "Cancel every worker and notify the emergency technical contact.",
-    evidenceRequirements: ["Concurrency profile", "Request rate", "Latency and error observations"],
-  },
-  "full-ghost": {
-    objectives: ["Perform the expressly approved multi-surface assessment", "Identify attack paths", "Prioritize remediation"],
-    hardLimits: [
-      "All mission-specific hard limits apply",
-      "No autonomous scope expansion, persistence, destructive action, denial-of-service, or real-data exfiltration",
-      "Critical findings pause the mission pending written direction",
-    ],
-    escalationTriggers: ["Any critical finding", "Active compromise evidence", "System instability", "Scope ambiguity"],
-    approvedTechniques: ["Only techniques individually permitted by the signed ROE"],
-    breakGlassProtocol: "Stop every isolated execution, preserve the audit trail, and contact all named emergency stakeholders.",
-    evidenceRequirements: ["Complete tested-scope record", "Sanitized finding evidence", "Attack-path and remediation narrative"],
-  },
+const ROE_DIR = path.resolve(process.env.NATT_ROE_DIR?.trim() || path.join(process.cwd(), ".natt", "roe"));
+const MODE_ORDER: Record<"passive" | "stealth" | "active", number> = {
+  passive: 0,
+  stealth: 1,
+  active: 2,
 };
 
-const ROE_DIR = path.join(process.cwd(), ".natt", "roe");
-const MODE_ORDER: Record<"passive" | "stealth" | "active", number> = { passive: 0, stealth: 1, active: 2 };
+const NON_OVERRIDABLE = new Set<ROEViolationType>([
+  "banned-target",
+  "jurisdiction-mismatch",
+  "destructive-action-blocked",
+  "concurrent-mission-limit",
+]);
+
+const ROE_BYPASS_TYPES = new Set<ROEViolationType>([
+  "unauthorized-technique",
+  "outside-time-window",
+  "missing-authorization",
+  "expired-engagement",
+  "operator-unverified",
+]);
+
+function missionGuidance(
+  engagement: ROEEngagement | null,
+  missionType: string,
+  target: string,
+  pathfinderNotes: string[] = [],
+): MissionGuidance {
+  return {
+    brief: engagement
+      ? `Operate only for engagement ${engagement.id}, target ${target}, and mission ${missionType}. ${pathfinderNotes.join(" ")}`.trim()
+      : "No verifiable engagement was loaded; mission is blocked.",
+    objectives: [
+      "Validate approved security controls",
+      "Capture sanitized and reproducible evidence",
+      "Produce remediation and retest guidance",
+    ],
+    hardLimits: [
+      "No destructive action or denial of service",
+      "No production credential capture or real-data exfiltration",
+      "No persistence or autonomous target expansion",
+      "Stop on instability, unexpected personal data, or third-party infrastructure",
+      "Pathfinder never overrides production, destructive-action, restricted-target, or emergency-stop controls",
+      ...(engagement?.forbiddenTechniques.map((item) => `FORBIDDEN: ${item}`) ?? []),
+    ],
+    escalationTriggers: [
+      "Critical uncontrolled access",
+      "Unexpected production-user or cross-tenant data",
+      "System instability or availability impact",
+      "Evidence of an active third-party intrusion",
+    ],
+    approvedTechniques: [
+      "Only the techniques permitted by the signed request, engagement, and active break-glass capability",
+    ],
+    breakGlassProtocol:
+      "Stop the isolated child process, preserve the append-only audit record, contact the named emergency owner, and require a new challenge for any restart.",
+    evidenceRequirements: [
+      "Exact request, engagement, target, and timestamp",
+      "Sanitized finding evidence",
+      "Authorization and break-glass verification digests",
+      "Operator, approver, and access-method audit records",
+    ],
+  };
+}
 
 function passphraseHash(value: string): string {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
@@ -301,20 +240,26 @@ export async function saveEngagement(engagement: ROEEngagement): Promise<void> {
   };
   const target = path.join(ROE_DIR, `${normalized.id}.json`);
   const temporary = `${target}.${crypto.randomUUID()}.tmp`;
-  await fs.writeFile(temporary, JSON.stringify(normalized, null, 2), { encoding: "utf-8", mode: 0o600 });
+  await fs.writeFile(temporary, JSON.stringify(normalized, null, 2), {
+    encoding: "utf8",
+    mode: 0o600,
+  });
   await fs.rename(temporary, target);
 }
 
 export async function loadEngagement(id: string): Promise<ROEEngagement | null> {
   if (!/^roe-[a-z0-9-]+$/i.test(id)) return null;
   try {
-    const raw = await fs.readFile(path.join(ROE_DIR, `${id}.json`), "utf-8");
+    const raw = await fs.readFile(path.join(ROE_DIR, `${id}.json`), "utf8");
     const data = JSON.parse(raw) as ROEEngagement;
     data.validFrom = new Date(data.validFrom);
     data.validUntil = new Date(data.validUntil);
     data.createdAt = new Date(data.createdAt);
     data.updatedAt = new Date(data.updatedAt);
-    data.auditLog = (data.auditLog ?? []).map((entry) => ({ ...entry, timestamp: new Date(entry.timestamp) }));
+    data.auditLog = (data.auditLog ?? []).map((entry) => ({
+      ...entry,
+      timestamp: new Date(entry.timestamp),
+    }));
     data.missionPassphraseHash = engagementPassphraseHash(data) ?? "";
     data.missionPassphrase = undefined;
     return data;
@@ -368,19 +313,6 @@ function isWithinTimeWindow(windows: ROETimeWindow[], now = new Date()): boolean
   });
 }
 
-function guidanceFor(engagement: ROEEngagement | null, missionType: string, target: string): MissionGuidance {
-  const template = MISSION_GUIDANCE_TEMPLATES[missionType] ?? MISSION_GUIDANCE_TEMPLATES["full-ghost"]!;
-  return {
-    ...template,
-    brief: engagement
-      ? `Operate only under engagement ${engagement.id} for ${target}. Scope, authorization, time, test-identity, evidence, and stop controls are mandatory.`
-      : "No valid ROE engagement was loaded. Mission is blocked.",
-    hardLimits: engagement
-      ? [...template.hardLimits, ...engagement.forbiddenTechniques.map((item) => `FORBIDDEN: ${item}`)]
-      : template.hardLimits,
-  };
-}
-
 function addCheck(
   checks: ROECheck[],
   violations: ROEViolation[],
@@ -390,7 +322,78 @@ function addCheck(
   violation?: Omit<ROEViolation, "severity"> & { severity?: ROEViolation["severity"] },
 ): void {
   checks.push({ name, passed, detail });
-  if (!passed && violation) violations.push({ severity: violation.severity ?? "blocking", ...violation });
+  if (!passed && violation) {
+    violations.push({ severity: violation.severity ?? "blocking", ...violation });
+  }
+}
+
+async function applyPathfinderOverrides(input: {
+  engagement: ROEEngagement;
+  target: string;
+  missionType: string;
+  ghostMode: "passive" | "stealth" | "active";
+  checks: ROECheck[];
+  violations: ROEViolation[];
+}): Promise<string[]> {
+  const requestId = process.env.NATT_PATHFINDER_REQUEST_ID?.trim();
+  if (!requestId || process.env.NATT_PATHFINDER !== "true") return [];
+
+  const notes: string[] = [];
+  const context = {
+    requestId,
+    engagementId: input.engagement.id,
+    target: input.target,
+    missionType: input.missionType,
+    ghostMode: input.ghostMode,
+  };
+
+  if (input.violations.some((violation) => violation.severity === "blocking" && violation.type === "out-of-scope-target")) {
+    const scopeOverride = await evaluatePathfinderGate(
+      { ...context, requiredCapability: "scope-override" },
+      { activate: true },
+    );
+    input.checks.push({
+      name: "Pathfinder Scope Override",
+      passed: scopeOverride.authorized,
+      detail: scopeOverride.reason,
+    });
+    if (scopeOverride.authorized) {
+      for (const violation of input.violations) {
+        if (violation.type === "out-of-scope-target") {
+          violation.severity = "warning";
+          violation.remediation = `Break-glass scope override ${scopeOverride.manifest?.overrideId} applied for this exact request and target`;
+        }
+      }
+      notes.push(`Scope override ${scopeOverride.manifest?.overrideId} authenticated by ${scopeOverride.manifest?.access.method}.`);
+    }
+  }
+
+  const overrideCandidates = input.violations.filter(
+    (violation) =>
+      violation.severity === "blocking" &&
+      ROE_BYPASS_TYPES.has(violation.type) &&
+      !NON_OVERRIDABLE.has(violation.type),
+  );
+  if (overrideCandidates.length > 0) {
+    const roeOverride = await evaluatePathfinderGate(
+      { ...context, requiredCapability: "roe-bypass" },
+      { activate: true },
+    );
+    input.checks.push({
+      name: "Pathfinder ROE Override",
+      passed: roeOverride.authorized,
+      detail: roeOverride.reason,
+    });
+    if (roeOverride.authorized) {
+      for (const violation of overrideCandidates) {
+        violation.severity = "warning";
+        violation.remediation = `Break-glass ROE override ${roeOverride.manifest?.overrideId} applied for this exact request and target`;
+      }
+      notes.push(`ROE override ${roeOverride.manifest?.overrideId} authenticated by ${roeOverride.manifest?.access.method}.`);
+    }
+  }
+
+  return notes;
 }
 
 export async function validateROE(
@@ -416,9 +419,9 @@ export async function validateROE(
         type: "missing-authorization",
         severity: "blocking",
         message: "No ROE engagement found",
-        remediation: "Create and independently approve a signed engagement before testing",
+        remediation: "Create and independently approve an engagement before testing",
       }],
-      missionGuidance: guidanceFor(null, missionType, target),
+      missionGuidance: missionGuidance(null, missionType, target),
       operatorBrief: "MISSION BLOCKED: no verifiable Rules of Engagement were loaded.",
     };
   }
@@ -427,15 +430,22 @@ export async function validateROE(
   addCheck(checks, violations, "Engagement Status", statusOk, `Status: ${engagement.status}`, {
     type: "missing-authorization",
     message: `Engagement status ${engagement.status} does not permit testing`,
-    remediation: "Obtain independent approval and set the engagement to approved or active",
+    remediation: "Obtain approval or a fresh break-glass challenge",
   });
 
   const validityOk = now >= engagement.validFrom && now <= engagement.validUntil;
-  addCheck(checks, violations, "Engagement Validity", validityOk, `${engagement.validFrom.toISOString()} to ${engagement.validUntil.toISOString()}`, {
-    type: "expired-engagement",
-    message: now > engagement.validUntil ? "Engagement has expired" : "Engagement has not started",
-    remediation: "Use a currently valid signed authorization window",
-  });
+  addCheck(
+    checks,
+    violations,
+    "Engagement Validity",
+    validityOk,
+    `${engagement.validFrom.toISOString()} to ${engagement.validUntil.toISOString()}`,
+    {
+      type: "expired-engagement",
+      message: now > engagement.validUntil ? "Engagement has expired" : "Engagement has not started",
+      remediation: "Use a current authorization window or a fresh break-glass challenge",
+    },
+  );
 
   const expectedHash = engagementPassphraseHash(engagement);
   const suppliedHash = passphraseHash(passphrase);
@@ -443,28 +453,30 @@ export async function validateROE(
   addCheck(checks, violations, "Mission Secret", passphraseOk, passphraseOk ? "Secret reference validated" : "Mission secret mismatch", {
     type: "operator-unverified",
     message: "Mission secret could not be verified",
-    remediation: "Load the engagement secret from the approved secret manager",
+    remediation: "Load the engagement secret from the approved secret manager or complete a fresh break-glass challenge",
   });
 
   const scopeDecision = evaluateTargetScope(target, engagement.scope);
   addCheck(checks, violations, "Target Scope", scopeDecision.allowed, scopeDecision.reason, {
     type: "out-of-scope-target",
     message: scopeDecision.reason,
-    remediation: "Use an exact signed scope rule or execute a written scope amendment",
+    remediation: "Use signed scope or obtain a passkey/code-authenticated scope override",
   });
 
-  const missionOk = engagement.permittedMissionTypes.includes(missionType) || engagement.permittedMissionTypes.includes("full-ghost");
+  const missionOk =
+    engagement.permittedMissionTypes.includes(missionType) ||
+    engagement.permittedMissionTypes.includes("full-ghost");
   addCheck(checks, violations, "Mission Type", missionOk, missionOk ? `${missionType} permitted` : `${missionType} not permitted`, {
     type: "unauthorized-technique",
     message: `Mission type ${missionType} is not authorized`,
-    remediation: "Use a permitted mission type or obtain a signed amendment",
+    remediation: "Use a permitted mission or obtain a fresh break-glass challenge",
   });
 
   const modeOk = MODE_ORDER[ghostMode] <= MODE_ORDER[engagement.maxGhostMode];
   addCheck(checks, violations, "Ghost Mode", modeOk, `${ghostMode} requested; ${engagement.maxGhostMode} maximum`, {
     type: "unauthorized-technique",
     message: `Requested mode ${ghostMode} exceeds ${engagement.maxGhostMode}`,
-    remediation: "Reduce mode or obtain a signed amendment",
+    remediation: "Reduce mode or obtain a fresh break-glass challenge",
   });
 
   let timeOk = false;
@@ -474,14 +486,14 @@ export async function validateROE(
     addCheck(checks, violations, "Time Window", false, error instanceof Error ? error.message : String(error), {
       type: "outside-time-window",
       message: "Testing window could not be validated",
-      remediation: "Correct the IANA timezone and clock values in the signed ROE",
+      remediation: "Correct the signed window or obtain a fresh break-glass challenge",
     });
   }
   if (!checks.some((check) => check.name === "Time Window")) {
     addCheck(checks, violations, "Time Window", timeOk, timeOk ? "Inside an approved window" : "Outside all approved windows", {
       type: "outside-time-window",
       message: "Current time is outside the authorized testing window",
-      remediation: "Wait for the approved window or obtain a signed amendment",
+      remediation: "Wait for the window or obtain a fresh break-glass challenge",
     });
   }
 
@@ -489,7 +501,7 @@ export async function validateROE(
   addCheck(checks, violations, "Operator Identity", operatorOk, operatorOk ? `Operator ${operator} matched` : `Expected ${engagement.operator.id}`, {
     type: "operator-unverified",
     message: "Mission operator does not match the named ROE operator",
-    remediation: "Use the named operator or execute an operator amendment",
+    remediation: "Use the named operator or authenticate a fresh break-glass challenge",
   });
 
   const signature = engagement.legal.authorizationVerification;
@@ -503,26 +515,40 @@ export async function validateROE(
     violations,
     "Authorization Signature",
     !signatureRequired || signatureFresh,
-    signatureFresh ? `Verified by ${signature!.signerId} using ${signature!.keyId}` : signatureRequired ? "No current verified detached signature" : "Passive mode; signature verification recommended",
+    signatureFresh
+      ? `Verified by ${signature!.signerId} using ${signature!.keyId}`
+      : signatureRequired
+        ? "No current verified detached signature"
+        : "Passive mode; signature verification recommended",
     signatureRequired
       ? {
           type: "missing-authorization",
-          message: "Stealth and active testing require a current verified authorization-document signature",
-          remediation: "Verify the detached signature against a trusted asset-owner or delegated-authorizer key",
+          message: "Stealth and active testing require a current authorization-document signature",
+          remediation: "Verify the client signature or authenticate a fresh break-glass challenge",
         }
       : undefined,
   );
 
-  const contactsOk = engagement.contacts.some((contact) => contact.role === "emergency") && engagement.contacts.some((contact) => contact.role === "technical");
-  addCheck(checks, violations, "Emergency Contacts", contactsOk, contactsOk ? "Technical and emergency contacts present" : "Required contacts missing", {
+  const contactsOk =
+    engagement.contacts.some((contact) => contact.role === "emergency") &&
+    engagement.contacts.some((contact) => contact.role === "technical");
+  addCheck(checks, violations, "Emergency Contacts", contactsOk, contactsOk ? "Required contacts present" : "Required contacts missing", {
     type: "missing-authorization",
     message: "Technical and emergency contacts are required",
-    remediation: "Add named contacts and test the kill-switch process",
+    remediation: "Add named contacts; this control is reviewed before every execution",
   });
 
+  const pathfinderNotes = await applyPathfinderOverrides({
+    engagement,
+    target,
+    missionType,
+    ghostMode,
+    checks,
+    violations,
+  });
   const blocking = violations.filter((violation) => violation.severity === "blocking");
   const approved = blocking.length === 0;
-  const guidance = guidanceFor(engagement, missionType, target);
+  const guidance = missionGuidance(engagement, missionType, target, pathfinderNotes);
   const operatorBrief = [
     `NATT ROE ${approved ? "APPROVED" : "BLOCKED"}`,
     `Engagement: ${engagement.name} [${engagement.id}]`,
@@ -531,16 +557,23 @@ export async function validateROE(
     `Target: ${target}`,
     `Mission: ${missionType}/${ghostMode}`,
     `Authorization signature: ${signatureFresh ? "verified" : "not verified"}`,
-    ...(blocking.length ? blocking.map((violation) => `BLOCK: ${violation.message}`) : []),
+    ...pathfinderNotes.map((note) => `BREAK-GLASS: ${note}`),
+    ...blocking.map((violation) => `BLOCK: ${violation.message}`),
   ].join("\n");
 
   engagement.auditLog.push({
     timestamp: now,
-    event: approved ? "mission_authorized" : "mission_blocked",
+    event: approved
+      ? pathfinderNotes.length > 0
+        ? "mission_authorized_break_glass"
+        : "mission_authorized"
+      : "mission_blocked",
     operator,
     target,
-    detail: approved ? `${missionType}/${ghostMode} authorized` : blocking.map((item) => item.type).join(", "),
-    severity: approved ? "info" : "violation",
+    detail: approved
+      ? `${missionType}/${ghostMode} authorized${pathfinderNotes.length ? `; ${pathfinderNotes.join(" ")}` : ""}`
+      : blocking.map((item) => item.type).join(", "),
+    severity: pathfinderNotes.length > 0 ? "warning" : approved ? "info" : "violation",
   });
   await saveEngagement(engagement);
 
@@ -649,13 +682,25 @@ export async function getOrCreateDefaultEngagement(operator = "local-dev"): Prom
       { role: "technical", name: "Local Operator", email: "security@devbot.invalid", responseTimeMins: 5 },
       { role: "emergency", name: "Local Operator", email: "security@devbot.invalid", responseTimeMins: 5 },
     ],
-    permittedMissionTypes: ["web-app", "html-analysis", "api-recon", "network-recon", "auth-testing", "code-analysis"],
+    permittedMissionTypes: [
+      "web-app",
+      "html-analysis",
+      "api-recon",
+      "network-recon",
+      "auth-testing",
+      "code-analysis",
+    ],
     maxGhostMode: "active",
     missionPassphrase: process.env.NATT_LOCAL_LAB_PASSPHRASE ?? crypto.randomBytes(32).toString("base64url"),
     validDays: 1,
   });
 }
 
+/**
+ * Per-phase gate remains strict and synchronous. Break-glass authorization is
+ * evaluated only once through validateROE before the isolated mission starts;
+ * forbidden techniques are never overridden at phase level.
+ */
 export function checkPhaseROE(
   engagement: ROEEngagement,
   phase: string,
@@ -663,18 +708,44 @@ export function checkPhaseROE(
   target: string,
 ): PhaseROEGate {
   if (!(engagement.status === "approved" || engagement.status === "active")) {
-    return { phase, target, technique, approved: false, reason: `Engagement status ${engagement.status} blocks testing` };
+    return {
+      phase,
+      target,
+      technique,
+      approved: false,
+      reason: `Engagement status ${engagement.status} blocks testing`,
+    };
   }
   if (new Date() < engagement.validFrom || new Date() > engagement.validUntil) {
-    return { phase, target, technique, approved: false, reason: "Engagement validity window is not current" };
+    return {
+      phase,
+      target,
+      technique,
+      approved: false,
+      reason: "Engagement validity window is not current",
+    };
   }
   const scope = evaluateTargetScope(target, engagement.scope);
   if (!scope.allowed) return { phase, target, technique, approved: false, reason: scope.reason };
-  const forbidden = engagement.forbiddenTechniques.some((item) =>
-    technique.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(technique.toLowerCase()),
+  const forbidden = engagement.forbiddenTechniques.some(
+    (item) =>
+      technique.toLowerCase().includes(item.toLowerCase()) ||
+      item.toLowerCase().includes(technique.toLowerCase()),
   );
   if (forbidden) {
-    return { phase, target, technique, approved: false, reason: `Technique ${technique} is forbidden by the signed ROE` };
+    return {
+      phase,
+      target,
+      technique,
+      approved: false,
+      reason: `Technique ${technique} is forbidden by the signed ROE`,
+    };
   }
-  return { phase, target, technique, approved: true, reason: `Phase ${phase} is inside current scope and technique controls` };
+  return {
+    phase,
+    target,
+    technique,
+    approved: true,
+    reason: `Phase ${phase} is inside current scope and technique controls`,
+  };
 }
