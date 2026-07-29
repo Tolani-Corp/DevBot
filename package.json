@@ -75,6 +75,7 @@
     "natt:ops": "tsx .natt/cron/run-offensive-ops.ts",
     "natt:ops:dry": "tsx .natt/cron/run-offensive-ops.ts --dry-run",
     "natt:roadmap": "tsx scripts/natt-roadmap.ts",
+    "natt:packages:check": "node scripts/validate-natt-packages.mjs",
     "mcp:procurement:ingest": "powershell -ExecutionPolicy Bypass -File scripts/ingest-procurement-regulatory-knowledge.ps1",
     "natt:offline:vendor": "node scripts/natt-offline-vendor.mjs build",
     "natt:offline:check": "node scripts/natt-offline-vendor.mjs check",
