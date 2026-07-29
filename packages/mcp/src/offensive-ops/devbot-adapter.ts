@@ -6,12 +6,7 @@ export async function runNattFromProfile(
   profile: OffensiveProfile,
   target: string,
 ): Promise<Record<string, unknown>> {
-  return runNattIsolated(profile, target, {
-    stopFile: new URL(
-      `../../../../.natt/requests/control/${encodeURIComponent(profile.id)}.stop.json`,
-      import.meta.url,
-    ).pathname,
-  });
+  return runNattIsolated(profile, target);
 }
 
 /**
