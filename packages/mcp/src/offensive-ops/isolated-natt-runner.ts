@@ -118,6 +118,7 @@ async function pathfinderEnvironment(profile: OffensiveProfile): Promise<NodeJS.
   }
   return {
     NATT_PATHFINDER: "true",
+    NATT_PATHFINDER_REQUEST_ID: profile.id,
     NATT_PATHFINDER_OVERRIDE_SECRET_ID: reference.overrideSecretId,
   };
 }
