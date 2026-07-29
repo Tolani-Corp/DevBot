@@ -14,6 +14,15 @@ interface ChildResponse {
   error?: string;
 }
 
+interface PathfinderReference {
+  version: "1.0.0";
+  requestId: string;
+  challengeId: string;
+  overrideSecretId: string;
+  expiresAt: string;
+  envelopeDigest: string;
+}
+
 export interface IsolatedNattOptions {
   timeoutMs?: number;
   stopFile?: string;
@@ -42,7 +51,7 @@ function requiredEnvNames(profile: OffensiveProfile): string[] {
   ].filter((value): value is string => Boolean(value));
 }
 
-function childEnvironment(profile: OffensiveProfile): NodeJS.ProcessEnv {
+function childEnvironment(profile: OffensiveProfile, injected: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const allowlist = [
     "PATH",
     "HOME",
@@ -58,8 +67,6 @@ function childEnvironment(profile: OffensiveProfile): NodeJS.ProcessEnv {
     "ANTHROPIC_MODEL",
     "NATT_ROE_DIR",
     "NATT_VAULT_DIR",
-    "NATT_PATHFINDER",
-    "NATT_PATHFINDER_OVERRIDE_SECRET_ID",
     "NATT_PATHFINDER_TRUSTED_KEY_IDS",
     "AZURE_FEDERATED_TOKEN_FILE",
     "AZURE_TENANT_ID",
@@ -74,6 +81,7 @@ function childEnvironment(profile: OffensiveProfile): NodeJS.ProcessEnv {
   for (const name of [...allowlist, ...requiredEnvNames(profile)]) {
     if (process.env[name] !== undefined) env[name] = process.env[name];
   }
+  Object.assign(env, injected);
   env.DEBO_NATT_CHILD = "true";
   return env;
 }
@@ -85,6 +93,33 @@ async function fileExists(filePath: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function pathfinderEnvironment(profile: OffensiveProfile): Promise<NodeJS.ProcessEnv> {
+  const referencePath = path.resolve(
+    process.cwd(),
+    ".natt",
+    "requests-v2",
+    "control",
+    `${profile.id}.pathfinder.json`,
+  );
+  if (!(await fileExists(referencePath))) return {};
+  const reference = JSON.parse(await fs.readFile(referencePath, "utf8")) as Partial<PathfinderReference>;
+  if (reference.version !== "1.0.0") throw new Error("Unsupported Pathfinder reference version");
+  if (reference.requestId !== profile.id) throw new Error("Pathfinder control reference request mismatch");
+  if (!reference.overrideSecretId || !reference.challengeId || !reference.envelopeDigest) {
+    throw new Error("Pathfinder control reference is incomplete");
+  }
+  if (!/^[a-f0-9]{64}$/i.test(reference.envelopeDigest)) {
+    throw new Error("Pathfinder control reference digest is invalid");
+  }
+  if (!reference.expiresAt || new Date(reference.expiresAt).getTime() <= Date.now()) {
+    throw new Error("Pathfinder control reference has expired");
+  }
+  return {
+    NATT_PATHFINDER: "true",
+    NATT_PATHFINDER_OVERRIDE_SECRET_ID: reference.overrideSecretId,
+  };
 }
 
 async function terminate(child: ChildProcess, graceMs: number): Promise<void> {
@@ -112,8 +147,9 @@ export async function runNattIsolated(
   const timeoutMs = options.timeoutMs ?? positiveInteger(process.env.NATT_MISSION_TIMEOUT_MS, 15 * 60_000, 10_000, 3_600_000);
   const memoryMb = options.memoryMb ?? positiveInteger(process.env.NATT_MISSION_MEMORY_MB, 512, 128, 4_096);
   const graceMs = options.terminationGraceMs ?? 5_000;
-  const stopFile = options.stopFile ?? path.resolve(process.cwd(), ".natt", "requests", "control", `${profile.id}.stop.json`);
+  const stopFile = options.stopFile ?? path.resolve(process.cwd(), ".natt", "requests-v2", "control", `${profile.id}.stop.json`);
   const { modulePath, execArgv } = childModule();
+  const injectedEnvironment = await pathfinderEnvironment(profile);
 
   return new Promise<Record<string, unknown>>((resolve, reject) => {
     let settled = false;
@@ -124,7 +160,7 @@ export async function runNattIsolated(
 
     const child = fork(modulePath, [], {
       cwd: process.cwd(),
-      env: childEnvironment(profile),
+      env: childEnvironment(profile, injectedEnvironment),
       execArgv: [`--max-old-space-size=${memoryMb}`, ...execArgv],
       detached: false,
       stdio: ["ignore", "pipe", "pipe", "ipc"],
