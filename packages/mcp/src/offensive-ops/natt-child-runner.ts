@@ -38,6 +38,7 @@ async function execute(request: ChildRequest): Promise<Record<string, unknown>> 
     (profile.ghostMode ?? "stealth") as NATTGhostMode,
     profile.operator ?? "ops-runner",
     {
+      requestId: profile.id,
       engagementId: profile.roe?.engagementIdEnv
         ? process.env[profile.roe.engagementIdEnv]
         : undefined,
