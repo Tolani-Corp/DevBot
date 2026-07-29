@@ -5,7 +5,10 @@ on:
     paths:
       - "packages/natt-ethical-hacker-packages.v1.json"
       - "contracts/natt-ethical-engagement.schema.json"
+      - "contracts/debo-natt-state.schema.json"
       - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-debo-natt-state.mjs"
+      - ".natt/requests/**"
       - "docs/NATT_ETHICAL_HACKER_PACKAGES_V1.md"
       - "docs/contracts/NATT_AUTHORIZATION_ROE_TEMPLATE_V1.md"
       - ".agents/skills/natt-ethical-hacker-packages/SKILL.md"
@@ -15,7 +18,10 @@ on:
     paths:
       - "packages/natt-ethical-hacker-packages.v1.json"
       - "contracts/natt-ethical-engagement.schema.json"
+      - "contracts/debo-natt-state.schema.json"
       - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-debo-natt-state.mjs"
+      - ".natt/requests/**"
 
 permissions:
   contents: read
@@ -30,3 +36,5 @@ jobs:
           node-version: "22"
       - name: Validate NATT package contracts
         run: node scripts/validate-natt-packages.mjs
+      - name: Validate DEBO to NATT execution state contracts
+        run: node scripts/validate-debo-natt-state.mjs
