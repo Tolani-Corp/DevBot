@@ -3,11 +3,24 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import net from "node:net";
+import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
 
 import { runNattFromProfile } from "../../packages/mcp/src/offensive-ops/devbot-adapter";
 import type { OffensiveProfile } from "../../packages/mcp/src/offensive-ops/types";
+import {
+  assertStateIntegrity,
+  createExecutionState,
+  executionResultDigest,
+  executionStateSchema,
+  isTerminal,
+  lifecycleSchema,
+  renewExecutionLease,
+  requestStateSchema,
+  transitionExecutionState,
+  type ExecutionState,
+} from "./state-machine";
 
 const missionTypeSchema = z.enum([
   "web-app",
@@ -26,12 +39,9 @@ const ghostModeSchema = z.enum(["passive", "stealth", "active"]);
 const approvalRoleSchema = z.enum(["client-authorizer", "security-approver"]);
 
 const requestSchema = z.object({
-  version: z.literal("1.0.0"),
+  version: z.literal("1.1.0"),
   requestId: z.string().regex(/^unc-[a-z0-9-]+$/),
   packageId: z.string().min(3),
-  status: z.literal("queued"),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
   requestedBy: z.string().min(2),
   operatorId: z.string().min(2),
   engagementId: z.string().min(3),
@@ -59,9 +69,12 @@ const requestSchema = z.object({
         role: approvalRoleSchema,
         approverId: z.string().min(2),
         approvedAt: z.string().datetime(),
+        requestRevision: z.number().int().positive(),
       }),
     )
     .min(2),
+  state: requestStateSchema,
+  stopReason: z.string().optional(),
 });
 
 const envelopeSchema = z.object({
@@ -87,12 +100,16 @@ interface CliArgs {
   queueRoot: string;
   execute: boolean;
   json: boolean;
+  workerId: string;
+  leaseSeconds: number;
 }
 
 interface ProcessResult {
   requestId: string;
-  status: "validated" | "completed" | "rejected" | "stopped";
+  status: "validated" | "completed" | "rejected" | "stopped" | "failed" | "duplicate";
+  lifecycle: z.infer<typeof lifecycleSchema>;
   message: string;
+  executionState?: ExecutionState;
   output?: Record<string, unknown>;
 }
 
@@ -101,6 +118,8 @@ function parseArgs(argv: string[]): CliArgs {
     queueRoot: path.resolve(process.cwd(), ".natt", "requests"),
     execute: false,
     json: false,
+    workerId: `${os.hostname()}-${process.pid}`,
+    leaseSeconds: 120,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -113,23 +132,22 @@ function parseArgs(argv: string[]): CliArgs {
       args.json = true;
       continue;
     }
-    if (token === "--request") {
+    if (token === "--request" || token === "--queue-root" || token === "--worker-id" || token === "--lease-seconds") {
       const value = argv[index + 1];
-      if (!value || value.startsWith("--")) throw new Error("Missing value for --request");
-      args.requestId = value;
-      index += 1;
-      continue;
-    }
-    if (token === "--queue-root") {
-      const value = argv[index + 1];
-      if (!value || value.startsWith("--")) throw new Error("Missing value for --queue-root");
-      args.queueRoot = path.resolve(value);
+      if (!value || value.startsWith("--")) throw new Error(`Missing value for ${token}`);
+      if (token === "--request") args.requestId = value;
+      if (token === "--queue-root") args.queueRoot = path.resolve(value);
+      if (token === "--worker-id") args.workerId = value;
+      if (token === "--lease-seconds") args.leaseSeconds = Number(value);
       index += 1;
       continue;
     }
     throw new Error(`Unknown argument: ${token}`);
   }
 
+  if (!Number.isInteger(args.leaseSeconds) || args.leaseSeconds < 30 || args.leaseSeconds > 900) {
+    throw new Error("--lease-seconds must be an integer from 30 to 900");
+  }
   return args;
 }
 
@@ -183,6 +201,9 @@ function validateApprovals(request: NattRequest): void {
   if (!roles.has("client-authorizer") || !roles.has("security-approver") || people.size < 2) {
     throw new Error("Separate client-authorizer and security-approver approvals are required");
   }
+  if (request.approvals.some((approval) => approval.requestRevision >= request.state.revision)) {
+    throw new Error("Approval revision must precede the final signed dispatch revision");
+  }
 }
 
 function validateTimeWindow(request: NattRequest): void {
@@ -212,6 +233,16 @@ function validateAuthTesting(request: NattRequest): void {
   }
 }
 
+function validateRequestState(request: NattRequest): void {
+  assertStateIntegrity(request.state);
+  if (request.state.lifecycle !== "queued") {
+    throw new Error(`Signed DEBO request must be queued, found ${request.state.lifecycle}`);
+  }
+  if (!request.state.events.some((event) => event.eventType === "dispatch-signed")) {
+    throw new Error("Signed request state is missing dispatch-signed audit event");
+  }
+}
+
 function validateEnvironment(request: NattRequest, execute: boolean): void {
   if (process.env.NATT_PATHFINDER?.toLowerCase() === "true") {
     throw new Error("NATT_PATHFINDER bypass is incompatible with DEBO requests and must be disabled");
@@ -219,12 +250,13 @@ function validateEnvironment(request: NattRequest, execute: boolean): void {
   if (execute && process.env.DEBO_NATT_EXECUTION_ENABLED?.toLowerCase() !== "true") {
     throw new Error("Execution is disabled; set DEBO_NATT_EXECUTION_ENABLED=true only in the approved NATT runtime");
   }
-  if (!process.env[request.secretRefs.missionPassphraseEnv]) {
+  if (execute && !process.env[request.secretRefs.missionPassphraseEnv]) {
     throw new Error(`Required mission passphrase secret is unavailable: ${request.secretRefs.missionPassphraseEnv}`);
   }
 }
 
 function validateRequest(request: NattRequest, execute: boolean): void {
+  validateRequestState(request);
   validateExactScope(request);
   validateApprovals(request);
   validateTimeWindow(request);
@@ -300,91 +332,297 @@ async function stopRequested(queueRoot: string, requestId: string): Promise<bool
   return exists(path.join(queueRoot, "control", `${requestId}.stop.json`));
 }
 
-async function movePending(queueRoot: string, requestId: string, terminal: string, payload: unknown): Promise<void> {
-  const destination = path.join(queueRoot, terminal, `${requestId}.json`);
-  await writeJsonAtomic(destination, payload);
-  const pending = path.join(queueRoot, "pending", `${requestId}.json`);
-  await fs.rm(pending, { force: true });
+function statePath(queueRoot: string, requestId: string): string {
+  return path.join(queueRoot, "state", `${requestId}.json`);
 }
 
-async function processEnvelope(
+async function saveExecutionState(queueRoot: string, state: ExecutionState): Promise<void> {
+  assertStateIntegrity(state);
+  await writeJsonAtomic(statePath(queueRoot, state.requestId), {
+    requestId: state.requestId,
+    lifecycle: state.lifecycle,
+    revision: state.revision,
+    executionState: state,
+  });
+}
+
+async function loadExecutionState(queueRoot: string, requestId: string): Promise<ExecutionState | undefined> {
+  try {
+    const raw = JSON.parse(await fs.readFile(statePath(queueRoot, requestId), "utf-8")) as {
+      executionState?: unknown;
+    };
+    return executionStateSchema.parse(raw.executionState);
+  } catch {
+    return undefined;
+  }
+}
+
+async function findByIdempotencyKey(
   queueRoot: string,
-  filePath: string,
-  execute: boolean,
+  idempotencyKey: string,
+  requestId: string,
+): Promise<ExecutionState | undefined> {
+  const directory = path.join(queueRoot, "state");
+  await fs.mkdir(directory, { recursive: true });
+  for (const file of (await fs.readdir(directory)).filter((entry) => entry.endsWith(".json"))) {
+    try {
+      const raw = JSON.parse(await fs.readFile(path.join(directory, file), "utf-8")) as {
+        executionState?: unknown;
+      };
+      const state = executionStateSchema.parse(raw.executionState);
+      if (state.requestId !== requestId && state.idempotencyKey === idempotencyKey) return state;
+    } catch {
+      // Ignore malformed unrelated records; their own processing will fail closed.
+    }
+  }
+  return undefined;
+}
+
+async function claimPending(queueRoot: string, requestId: string): Promise<string> {
+  const pending = path.join(queueRoot, "pending", `${requestId}.json`);
+  const processing = path.join(queueRoot, "processing", `${requestId}.json`);
+  await fs.mkdir(path.dirname(processing), { recursive: true });
+  try {
+    await fs.rename(pending, processing);
+    return processing;
+  } catch (error) {
+    throw new Error(`Request ${requestId} could not be atomically claimed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+async function writeTerminal(
+  queueRoot: string,
+  terminal: string,
+  result: ProcessResult,
+): Promise<void> {
+  await writeJsonAtomic(path.join(queueRoot, terminal, `${result.requestId}.json`), result);
+  await fs.rm(path.join(queueRoot, "processing", `${result.requestId}.json`), { force: true });
+  await fs.rm(path.join(queueRoot, "running", `${result.requestId}.json`), { force: true });
+}
+
+async function inspectPending(filePath: string, execute: boolean): Promise<ProcessResult> {
+  const envelope = await readEnvelope(filePath);
+  verifyEnvelope(envelope);
+  validateRequest(envelope.payload, execute);
+  return {
+    requestId: envelope.payload.requestId,
+    status: "validated",
+    lifecycle: "queued",
+    message: "Signature, state chain, scope, approvals, ROE references, time window, and limits validated; no testing executed",
+  };
+}
+
+async function processClaimed(
+  queueRoot: string,
+  processingPath: string,
+  args: CliArgs,
 ): Promise<ProcessResult> {
-  let requestId = path.basename(filePath, ".json");
+  let requestId = path.basename(processingPath, ".json");
+  let executionState: ExecutionState | undefined;
 
   try {
-    const envelope = await readEnvelope(filePath);
+    const envelope = await readEnvelope(processingPath);
     requestId = envelope.payload.requestId;
     verifyEnvelope(envelope);
-    validateRequest(envelope.payload, execute);
+
+    const priorById = await loadExecutionState(queueRoot, requestId);
+    if (priorById) {
+      return {
+        requestId,
+        status: "duplicate",
+        lifecycle: priorById.lifecycle,
+        message: `Request already has execution state ${priorById.lifecycle}@${priorById.revision}`,
+        executionState: priorById,
+      };
+    }
+    const priorIntent = await findByIdempotencyKey(
+      queueRoot,
+      envelope.payload.state.idempotencyKey,
+      requestId,
+    );
+    if (priorIntent) {
+      throw new Error(`Duplicate idempotency key already executed by ${priorIntent.requestId}`);
+    }
+
+    executionState = createExecutionState({
+      requestId,
+      sourceRequestRevision: envelope.payload.state.revision,
+      idempotencyKey: envelope.payload.state.idempotencyKey,
+      workerId: args.workerId,
+      leaseSeconds: args.leaseSeconds,
+    });
+    await saveExecutionState(queueRoot, executionState);
+
+    executionState = transitionExecutionState({
+      state: executionState,
+      to: "validating",
+      workerId: args.workerId,
+      reason: "Independent NATT validation started",
+      expectedRevision: executionState.revision,
+    });
+    await saveExecutionState(queueRoot, executionState);
+
+    validateRequest(envelope.payload, true);
 
     if (await stopRequested(queueRoot, requestId)) {
+      executionState = transitionExecutionState({
+        state: executionState,
+        to: "stop-requested",
+        workerId: args.workerId,
+        reason: "Emergency stop was present before execution",
+        expectedRevision: executionState.revision,
+      });
+      executionState = transitionExecutionState({
+        state: executionState,
+        to: "stopped",
+        workerId: args.workerId,
+        reason: "NATT honored pre-execution emergency stop",
+        expectedRevision: executionState.revision,
+      });
+      await saveExecutionState(queueRoot, executionState);
       const result: ProcessResult = {
         requestId,
         status: "stopped",
+        lifecycle: "stopped",
         message: "Emergency stop was present before NATT execution",
+        executionState,
       };
-      await movePending(queueRoot, requestId, "stopped", result);
+      await writeTerminal(queueRoot, "stopped", result);
       return result;
     }
 
-    if (!execute) {
-      return {
-        requestId,
-        status: "validated",
-        message: "Signature, scope, approvals, ROE references, time window, and limits validated; no testing executed",
-      };
-    }
-
+    executionState = transitionExecutionState({
+      state: executionState,
+      to: "running",
+      workerId: args.workerId,
+      reason: "All NATT validation gates passed; mission execution started",
+      expectedRevision: executionState.revision,
+    });
+    await saveExecutionState(queueRoot, executionState);
     await writeJsonAtomic(path.join(queueRoot, "running", `${requestId}.json`), {
       requestId,
-      status: "running",
-      startedAt: new Date().toISOString(),
+      lifecycle: executionState.lifecycle,
+      revision: executionState.revision,
+      workerId: args.workerId,
+      lease: executionState.lease,
       target: envelope.payload.target,
       missionType: envelope.payload.missionType,
       ghostMode: envelope.payload.ghostMode,
+      executionState,
     });
+
+    let stateWriteChain = Promise.resolve();
+    const heartbeat = setInterval(() => {
+      stateWriteChain = stateWriteChain.then(async () => {
+        if (!executionState || isTerminal(executionState.lifecycle)) return;
+        if (await stopRequested(queueRoot, requestId)) {
+          if (executionState.lifecycle === "running") {
+            executionState = transitionExecutionState({
+              state: executionState,
+              to: "stop-requested",
+              workerId: args.workerId,
+              reason: "Emergency stop detected during mission",
+              expectedRevision: executionState.revision,
+            });
+          }
+        } else {
+          executionState = renewExecutionLease({
+            state: executionState,
+            workerId: args.workerId,
+            expectedRevision: executionState.revision,
+            leaseSeconds: args.leaseSeconds,
+          });
+        }
+        await saveExecutionState(queueRoot, executionState);
+      });
+    }, Math.max(10_000, Math.floor((args.leaseSeconds * 1000) / 3)));
+    heartbeat.unref();
 
     const profile = buildProfile(envelope.payload);
+    let output: Record<string, unknown>;
     try {
-      const output = await runNattFromProfile(profile, envelope.payload.target);
-      if (await stopRequested(queueRoot, requestId)) {
-        const result: ProcessResult = {
-          requestId,
-          status: "stopped",
-          message: "Emergency stop was received during mission; results quarantined for operator review",
-        };
-        await movePending(queueRoot, requestId, "stopped", result);
-        return result;
-      }
-
-      const result: ProcessResult = {
-        requestId,
-        status: "completed",
-        message: "Authorized NATT mission completed",
-        output,
-      };
-      await movePending(queueRoot, requestId, "completed", {
-        ...result,
-        completedAt: new Date().toISOString(),
-      });
-      return result;
+      output = await runNattFromProfile(profile, envelope.payload.target);
     } finally {
       clearTemporaryProfileEnv(profile);
-      await fs.rm(path.join(queueRoot, "running", `${requestId}.json`), { force: true });
+      clearInterval(heartbeat);
+      await stateWriteChain;
     }
-  } catch (error) {
+
+    if (executionState.lifecycle === "stop-requested" || (await stopRequested(queueRoot, requestId))) {
+      if (executionState.lifecycle !== "stop-requested") {
+        executionState = transitionExecutionState({
+          state: executionState,
+          to: "stop-requested",
+          workerId: args.workerId,
+          reason: "Emergency stop detected after mission adapter returned",
+          expectedRevision: executionState.revision,
+        });
+      }
+      executionState = transitionExecutionState({
+        state: executionState,
+        to: "stopped",
+        workerId: args.workerId,
+        reason: "Mission output quarantined after emergency stop",
+        expectedRevision: executionState.revision,
+        resultDigest: executionResultDigest(output),
+      });
+      await saveExecutionState(queueRoot, executionState);
+      const result: ProcessResult = {
+        requestId,
+        status: "stopped",
+        lifecycle: "stopped",
+        message: "Emergency stop received; mission output quarantined for operator review",
+        executionState,
+      };
+      await writeTerminal(queueRoot, "stopped", result);
+      return result;
+    }
+
+    executionState = transitionExecutionState({
+      state: executionState,
+      to: "completed",
+      workerId: args.workerId,
+      reason: "Authorized NATT mission completed",
+      expectedRevision: executionState.revision,
+      resultDigest: executionResultDigest(output),
+      metadata: { findingCount: output.findings },
+    });
+    await saveExecutionState(queueRoot, executionState);
     const result: ProcessResult = {
       requestId,
-      status: "rejected",
-      message: error instanceof Error ? error.message : String(error),
+      status: "completed",
+      lifecycle: "completed",
+      message: "Authorized NATT mission completed",
+      executionState,
+      output,
     };
-    await movePending(queueRoot, requestId, "rejected", {
-      ...result,
-      rejectedAt: new Date().toISOString(),
-    });
+    await writeTerminal(queueRoot, "completed", result);
+    return result;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (executionState && !isTerminal(executionState.lifecycle)) {
+      const terminal = executionState.lifecycle === "running" || executionState.lifecycle === "stop-requested"
+        ? "failed"
+        : "rejected";
+      executionState = transitionExecutionState({
+        state: executionState,
+        to: terminal,
+        workerId: args.workerId,
+        reason: message,
+        expectedRevision: executionState.revision,
+      });
+      await saveExecutionState(queueRoot, executionState);
+    }
+    const lifecycle = executionState?.lifecycle ?? "rejected";
+    const status = lifecycle === "failed" ? "failed" : "rejected";
+    const result: ProcessResult = {
+      requestId,
+      status,
+      lifecycle,
+      message,
+      executionState,
+    };
+    await writeTerminal(queueRoot, status, result);
     return result;
   }
 }
@@ -412,17 +650,42 @@ async function main(): Promise<void> {
   }
 
   const results: ProcessResult[] = [];
-  for (const filePath of files) {
-    results.push(await processEnvelope(args.queueRoot, filePath, args.execute));
+  for (const pendingPath of files) {
+    if (!args.execute) {
+      try {
+        results.push(await inspectPending(pendingPath, false));
+      } catch (error) {
+        results.push({
+          requestId: path.basename(pendingPath, ".json"),
+          status: "rejected",
+          lifecycle: "rejected",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+      continue;
+    }
+
+    const requestId = path.basename(pendingPath, ".json");
+    try {
+      const processingPath = await claimPending(args.queueRoot, requestId);
+      results.push(await processClaimed(args.queueRoot, processingPath, args));
+    } catch (error) {
+      results.push({
+        requestId,
+        status: "duplicate",
+        lifecycle: "claimed",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   if (args.json) {
-    console.log(JSON.stringify({ execute: args.execute, results }, null, 2));
+    console.log(JSON.stringify({ execute: args.execute, workerId: args.workerId, results }, null, 2));
     return;
   }
 
   for (const result of results) {
-    console.log(`[debo-natt] ${result.requestId} -> ${result.status}: ${result.message}`);
+    console.log(`[debo-natt] ${result.requestId} -> ${result.lifecycle}: ${result.message}`);
   }
 }
 
