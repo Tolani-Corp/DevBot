@@ -53,10 +53,22 @@ function childEnvironment(profile: OffensiveProfile): NodeJS.ProcessEnv {
     "SYSTEMROOT",
     "NODE_PATH",
     "NODE_ENV",
+    "DEPLOYMENT_ENVIRONMENT",
     "ANTHROPIC_API_KEY",
     "ANTHROPIC_MODEL",
     "NATT_ROE_DIR",
     "NATT_VAULT_DIR",
+    "NATT_PATHFINDER",
+    "NATT_PATHFINDER_OVERRIDE_SECRET_ID",
+    "NATT_PATHFINDER_TRUSTED_KEY_IDS",
+    "AZURE_FEDERATED_TOKEN_FILE",
+    "AZURE_TENANT_ID",
+    "AZURE_CLIENT_ID",
+    "IDENTITY_ENDPOINT",
+    "IDENTITY_HEADER",
+    "AZURE_DISABLE_IMDS",
+    "AZURE_KEY_VAULT_ACCESS_TOKEN",
+    "DEBO_LOCAL_VAULT_DIR",
   ];
   const env: NodeJS.ProcessEnv = {};
   for (const name of [...allowlist, ...requiredEnvNames(profile)]) {
