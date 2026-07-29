@@ -6,7 +6,7 @@ import {
   executionResultDigest,
   renewExecutionLease,
   transitionExecutionState,
-} from "../.natt/requests/state-machine";
+} from "../.natt/requests/state-machine.js";
 
 function claimedState() {
   return createExecutionState({
