@@ -76,7 +76,6 @@ assert(!worker.includes("createHmac"), "NATT v2 worker must not use HMAC");
 assert(!worker.includes("DEBO_NATT_REQUEST_SECRET"), "Shared request secrets are prohibited");
 assert(!worker.includes("runPentestFromProfile"), "DEBO request worker must dispatch only through NATT");
 assert(!worker.includes("exec("), "NATT request worker must not execute arbitrary shell strings");
-assert(!worker.includes("NATT_PATHFINDER"), "NATT request worker must not recognize an unrestricted bypass");
 
 const signing = read("src/security/managed-signing.ts");
 includesAll(signing, [
@@ -84,6 +83,8 @@ includesAll(signing, [
   "/verify?api-version=2025-07-01",
   "trustedRequestKeyIds",
   "trustedAuthorizationKeyIds",
+  "trustedPathfinderKeyIds",
+  "NATT_PATHFINDER_TRUSTED_KEY_IDS",
   "AZURE_FEDERATED_TOKEN_FILE",
   "IDENTITY_ENDPOINT",
   "versioned Azure Key Vault key ID",
@@ -104,16 +105,39 @@ const roe = read("src/agents/natt-roe.ts");
 includesAll(roe, [
   "authorizationVerification",
   "evaluateTargetScope",
-  "Mission secret",
+  "evaluatePathfinderGate",
+  "NATT_PATHFINDER_REQUEST_ID",
+  "ROE_BYPASS_TYPES",
+  "NON_OVERRIDABLE",
+  "scope-override",
+  "roe-bypass",
+  "Mission Secret",
   "Authorization Signature",
-  "current verified authorization-document signature",
+  "Pathfinder never overrides production, destructive-action, restricted-target, or emergency-stop controls",
 ], "NATT ROE engine");
-assert(!roe.includes("PATHFINDER MODE"), "Legacy unrestricted ROE mode remains documented");
-assert(!roe.includes("process.env.NATT_PATHFINDER"), "Legacy unrestricted ROE bypass remains executable");
+assert(!roe.includes("PATHFINDER MODE — unrestricted access granted"), "Legacy unconditional Pathfinder bypass remains");
+assert(!roe.includes("return { approved: true"), "ROE engine contains an unconditional approval return");
 assert(!roe.includes("CIDR match (basic)"), "Legacy simplified CIDR code remains in ROE engine");
 
+const pathfinder = read("src/security/pathfinder-gate.ts");
+includesAll(pathfinder, [
+  "NATT_PATHFINDER_OVERRIDE_SECRET_ID",
+  "getVaultSecret",
+  "passkey",
+  "vault-code",
+  "client-authorizer",
+  "security-approver",
+  "15 * 60_000",
+  "prohibited in production",
+  "Pathfinder target mismatch",
+  "Pathfinder capability",
+  "recordActivation",
+  "audit.jsonl",
+], "Pathfinder break-glass gate");
+assert(!pathfinder.includes("authorized: true, reason: \"Pathfinder is enabled\""), "Pathfinder contains an environment-only approval path");
+
 const checklist = read("mcp-natt/src/handlers/validate_roe_checklist.ts");
-assert(!checklist.includes("NATT_PATHFINDER"), "MCP checklist still contains the unrestricted bypass");
+assert(!checklist.includes("NATT_PATHFINDER"), "MCP checklist must not bypass the vault ceremony");
 includesAll(checklist, ["Verified Authorization Signature", "Synthetic Test Identities", "Named Operator"], "MCP ROE checklist");
 
 const isolation = `${read("packages/mcp/src/offensive-ops/isolated-natt-runner.ts")}\n${read("packages/mcp/src/offensive-ops/natt-child-runner.ts")}`;
@@ -125,12 +149,24 @@ includesAll(isolation, [
   "NATT mission exceeded isolated runtime limit",
   "emergency stop file",
   "serialization: \"advanced\"",
+  "NATT_PATHFINDER_REQUEST_ID",
+  "NATT_PATHFINDER_OVERRIDE_SECRET_ID",
+  ".pathfinder.json",
+  "Pathfinder control reference has expired",
 ], "Isolated NATT runner");
 assert(!isolation.includes("shell: true"), "Isolated NATT runner must never enable a shell");
+
+const azureVault = read("src/security/azure-vault.ts");
+includesAll(azureVault, [
+  "versioned Azure Key Vault secret ID",
+  "AZURE_FEDERATED_TOKEN_FILE",
+  "IDENTITY_ENDPOINT",
+  "getVaultSecret",
+], "NATT vault reader");
 
 const packageJson = parseJson("package.json");
 assert(packageJson.scripts?.["natt:state:check"] === "node scripts/validate-debo-natt-state.mjs", "package.json is missing natt:state:check");
 assert(packageJson.scripts?.["natt:requests:check"], "package.json is missing dry request validation command");
 assert(packageJson.scripts?.["natt:requests:run"], "package.json is missing guarded request execution command");
 
-console.log("NATT asymmetric request, isolation, ROE, and scope validation passed.");
+console.log("NATT asymmetric request, vault-gated Pathfinder, isolation, ROE, and scope validation passed.");
