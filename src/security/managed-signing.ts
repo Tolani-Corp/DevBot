@@ -182,16 +182,24 @@ export async function verifyManagedPayload(
     : localVerify(value, signature);
 }
 
-export function trustedRequestKeyIds(): ReadonlySet<string> {
-  const trusted = parseCsv(process.env.DEBO_NATT_TRUSTED_REQUEST_KEY_IDS);
-  if (process.env.NODE_ENV !== "production" && process.env.DEBO_NATT_TEST_KEY_ID) trusted.add(process.env.DEBO_NATT_TEST_KEY_ID);
+function trustedFrom(value: string | undefined): Set<string> {
+  const trusted = parseCsv(value);
+  if (process.env.NODE_ENV !== "production" && process.env.DEBO_NATT_TEST_KEY_ID) {
+    trusted.add(process.env.DEBO_NATT_TEST_KEY_ID);
+  }
   return trusted;
 }
 
+export function trustedRequestKeyIds(): ReadonlySet<string> {
+  return trustedFrom(process.env.DEBO_NATT_TRUSTED_REQUEST_KEY_IDS);
+}
+
 export function trustedAuthorizationKeyIds(): ReadonlySet<string> {
-  const trusted = parseCsv(process.env.DEBO_NATT_TRUSTED_AUTH_KEY_IDS);
-  if (process.env.NODE_ENV !== "production" && process.env.DEBO_NATT_TEST_KEY_ID) trusted.add(process.env.DEBO_NATT_TEST_KEY_ID);
-  return trusted;
+  return trustedFrom(process.env.DEBO_NATT_TRUSTED_AUTH_KEY_IDS);
+}
+
+export function trustedPathfinderKeyIds(): ReadonlySet<string> {
+  return trustedFrom(process.env.NATT_PATHFINDER_TRUSTED_KEY_IDS);
 }
 
 export async function verifyAuthorizationSignature(
