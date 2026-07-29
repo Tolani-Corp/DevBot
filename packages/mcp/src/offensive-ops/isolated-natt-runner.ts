@@ -62,8 +62,6 @@ function childEnvironment(profile: OffensiveProfile): NodeJS.ProcessEnv {
   for (const name of [...allowlist, ...requiredEnvNames(profile)]) {
     if (process.env[name] !== undefined) env[name] = process.env[name];
   }
-  // The former unrestricted bypass is intentionally not inherited.
-  delete env.NATT_PATHFINDER;
   env.DEBO_NATT_CHILD = "true";
   return env;
 }
@@ -109,6 +107,9 @@ export async function runNattIsolated(
     let settled = false;
     let stdout = "";
     let stderr = "";
+    let timeout: NodeJS.Timeout | undefined;
+    let stopPoll: NodeJS.Timeout | undefined;
+
     const child = fork(modulePath, [], {
       cwd: process.cwd(),
       env: childEnvironment(profile),
@@ -121,12 +122,13 @@ export async function runNattIsolated(
     const settle = async (error?: Error, output?: Record<string, unknown>) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timeout);
-      clearInterval(stopPoll);
+      if (timeout) clearTimeout(timeout);
+      if (stopPoll) clearInterval(stopPoll);
       if (error) {
         await terminate(child, graceMs);
         reject(error);
       } else {
+        if (child.connected) child.disconnect();
         resolve(output ?? {});
       }
     };
@@ -158,18 +160,20 @@ export async function runNattIsolated(
       );
     });
 
-    const timeout = setTimeout(() => {
+    timeout = setTimeout(() => {
       void settle(new Error(`NATT mission exceeded isolated runtime limit of ${timeoutMs}ms`));
     }, timeoutMs);
     timeout.unref();
 
-    const stopPoll = setInterval(() => {
+    stopPoll = setInterval(() => {
       void fileExists(stopFile).then((stopped) => {
         if (stopped) void settle(new Error(`NATT mission cancelled by emergency stop file ${stopFile}`));
       });
     }, 250);
     stopPoll.unref();
 
-    child.send({ requestId, profile, target });
+    child.send({ requestId, profile, target }, (error) => {
+      if (error) void settle(error);
+    });
   });
 }
