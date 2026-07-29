@@ -9,7 +9,9 @@ on:
       - "scripts/validate-natt-packages.mjs"
       - "scripts/validate-debo-natt-state.mjs"
       - ".natt/requests/**"
+      - "tests/natt-request-state.test.ts"
       - "docs/NATT_ETHICAL_HACKER_PACKAGES_V1.md"
+      - "docs/DEBO_NATT_REQUEST_WORKER_V1.md"
       - "docs/contracts/NATT_AUTHORIZATION_ROE_TEMPLATE_V1.md"
       - ".agents/skills/natt-ethical-hacker-packages/SKILL.md"
       - ".github/workflows/natt-packages.yml"
@@ -22,6 +24,7 @@ on:
       - "scripts/validate-natt-packages.mjs"
       - "scripts/validate-debo-natt-state.mjs"
       - ".natt/requests/**"
+      - "tests/natt-request-state.test.ts"
 
 permissions:
   contents: read
