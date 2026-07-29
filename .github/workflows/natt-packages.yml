@@ -1,0 +1,32 @@
+name: NATT Package Contracts
+
+on:
+  pull_request:
+    paths:
+      - "packages/natt-ethical-hacker-packages.v1.json"
+      - "contracts/natt-ethical-engagement.schema.json"
+      - "scripts/validate-natt-packages.mjs"
+      - "docs/NATT_ETHICAL_HACKER_PACKAGES_V1.md"
+      - "docs/contracts/NATT_AUTHORIZATION_ROE_TEMPLATE_V1.md"
+      - ".agents/skills/natt-ethical-hacker-packages/SKILL.md"
+      - ".github/workflows/natt-packages.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/natt-ethical-hacker-packages.v1.json"
+      - "contracts/natt-ethical-engagement.schema.json"
+      - "scripts/validate-natt-packages.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate NATT package contracts
+        run: node scripts/validate-natt-packages.mjs
