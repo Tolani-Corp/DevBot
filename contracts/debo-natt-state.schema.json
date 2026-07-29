@@ -3,7 +3,7 @@
   "$id": "https://debo.ai/schemas/debo-natt-state-v1.json",
   "title": "DEBO to NATT Request and Execution State",
   "type": "object",
-  "oneOf": [
+  "anyOf": [
     { "$ref": "#/$defs/requestState" },
     { "$ref": "#/$defs/executionState" }
   ],
@@ -96,7 +96,6 @@
     },
     "requestState": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "schemaVersion",
         "lifecycle",
