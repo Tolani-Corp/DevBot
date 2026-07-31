@@ -1,0 +1,189 @@
+{
+  "schema": "taskstaff.adoption.v1",
+  "repository": "Tolani-Corp/DevBot",
+  "productName": "DevBot",
+  "domain": "agent_operations",
+  "tier": "tier_1_operational_pilot",
+  "status": "pilot",
+  "evidenceLevel": "repository_reviewed",
+  "reviewedRef": "main@2026-07-30",
+  "reviewedAt": "2026-07-31T01:15:00.000Z",
+  "systemOfRecordFor": [
+    "engineering request journeys",
+    "agent execution and pull-request evidence",
+    "governance proof and correction records"
+  ],
+  "taskstaffAuthorityFor": [
+    "human and agent role requirements",
+    "agent capability and workload readiness",
+    "reviewer separation and release authority",
+    "delivery shortfalls, gaps, and work acceptance"
+  ],
+  "nonAuthoritativeFor": [
+    "GitHub repository state",
+    "production deployment state",
+    "security or compliance certification",
+    "unilateral code merge or release authority"
+  ],
+  "missions": [
+    {
+      "id": "devbot.request-to-accepted-pr",
+      "name": "Governed request-to-accepted-PR delivery",
+      "objective": "Assemble the correct agent and human reviewer team for a scoped engineering request, preserve implementation and test evidence, and deliver a reviewed and accepted pull request.",
+      "why": "Fast agent execution is only valuable when scope, corrections, security review, tests, authority, rollback posture, and acceptance remain visible and controlled.",
+      "sourceRecords": [
+        "engineering request",
+        "journey or work package",
+        "agent execution trace",
+        "commit and pull request",
+        "test and CI result",
+        "review comment",
+        "release and rollback record"
+      ],
+      "lifecycle": [
+        "request_intake",
+        "scouting",
+        "requirements_approved",
+        "team_composed",
+        "implementing",
+        "verifying",
+        "reviewing",
+        "release_decision",
+        "accepted",
+        "closed"
+      ],
+      "roles": [
+        {
+          "code": "request_owner",
+          "title": "Request owner",
+          "responsibility": "Define the desired outcome, constraints, acceptance criteria, and business priority.",
+          "authorityCodes": ["approve_scope", "accept_outcome"],
+          "evidenceRequired": ["approved request", "acceptance criteria"],
+          "backupRequired": false
+        },
+        {
+          "code": "planner_agent",
+          "title": "Planner or scout agent",
+          "responsibility": "Inspect the repository and evidence, identify dependencies and uncertainty, and prepare a reviewable implementation plan.",
+          "authorityCodes": ["propose_plan"],
+          "evidenceRequired": ["repository context", "plan", "assumptions"],
+          "backupRequired": true
+        },
+        {
+          "code": "implementer_agent",
+          "title": "Implementer agent",
+          "responsibility": "Produce bounded code changes and attach provenance, test, and limitation evidence without self-approving the result.",
+          "authorityCodes": ["propose_change"],
+          "evidenceRequired": ["diff", "test output", "execution trace"],
+          "backupRequired": true
+        },
+        {
+          "code": "independent_code_reviewer",
+          "title": "Independent code reviewer",
+          "responsibility": "Review correctness, maintainability, tests, regressions, and requested-change closure independently from implementation.",
+          "authorityCodes": ["approve_review", "request_changes"],
+          "evidenceRequired": ["review record", "resolved findings"],
+          "backupRequired": true
+        },
+        {
+          "code": "release_authority",
+          "title": "Release authority",
+          "responsibility": "Approve merge or deployment only after required evidence, reviewer separation, and rollback readiness are complete.",
+          "authorityCodes": ["approve_release", "reject_release", "approve_rollback"],
+          "evidenceRequired": ["CI result", "review approval", "release packet", "rollback plan"],
+          "backupRequired": false
+        }
+      ],
+      "controls": [
+        {
+          "code": "agent_human_separation",
+          "title": "Agent implementation and human acceptance separation",
+          "controlType": "segregation_of_duties",
+          "description": "Prevent the same agent execution result from serving as implementation, verification, review, release, and business acceptance evidence.",
+          "evidenceTypes": ["agent identity", "review identity", "acceptance authority"],
+          "humanAuthorityRequired": true
+        },
+        {
+          "code": "evidence_gated_release",
+          "title": "Evidence-gated release",
+          "controlType": "release",
+          "description": "Require scoped diff, tests, review closure, security checks where applicable, deployment plan, and rollback evidence before release approval.",
+          "evidenceTypes": ["diff", "test", "review", "security check", "rollback plan"],
+          "humanAuthorityRequired": true
+        },
+        {
+          "code": "claim_integrity",
+          "title": "Engineering claim integrity",
+          "controlType": "quality_assurance",
+          "description": "Require high-risk claims about production, security, customers, compliance, cost, and external systems to cite evidence or remain explicitly unverified.",
+          "evidenceTypes": ["source reference", "runtime result", "approval record"],
+          "humanAuthorityRequired": true
+        }
+      ],
+      "expectedShortfalls": [
+        "The requested skill, reviewer, environment access, or test infrastructure may be unavailable.",
+        "An agent may produce a change without sufficient repository context or acceptance criteria.",
+        "Release evidence or rollback proof may be incomplete."
+      ],
+      "resultingGaps": [
+        "A pull request may be delayed, returned, or released with unresolved risk.",
+        "Reviewers may spend excessive time reconstructing scope and evidence.",
+        "The organization may overstate autonomous-delivery capability."
+      ],
+      "integrationEvents": [
+        "engineering.request_created",
+        "agent.assigned",
+        "implementation.completed",
+        "verification.completed",
+        "review.approved",
+        "release.approved",
+        "outcome.accepted"
+      ],
+      "prohibitedAutomation": [
+        "No agent may unilaterally merge, deploy, approve security risk, waive tests, or accept the business outcome.",
+        "No agent-generated summary may replace source diff, test, review, or runtime evidence."
+      ],
+      "kpis": [
+        "request-to-reviewed-PR cycle time",
+        "first-pass test success",
+        "review correction count",
+        "evidence completeness",
+        "returned PR rate",
+        "unauthorized transition rejection",
+        "rollback readiness"
+      ]
+    }
+  ],
+  "marketingProof": {
+    "caseStudyEligible": false,
+    "proofStatement": "Demonstrate that TaskStaff can govern a mixed human-and-agent engineering team from scoped request through reviewed and accepted pull request.",
+    "baselineEvidence": [
+      "sample DevBot journeys",
+      "review correction history",
+      "baseline request-to-PR cycle time"
+    ],
+    "targetEvidence": [
+      "validated role composition",
+      "agent and reviewer separation evidence",
+      "replay-safe delivery events",
+      "accepted PR outcome record"
+    ],
+    "proofGates": [
+      "Run only against a test repository until scopes and credentials are approved.",
+      "A human must approve consequential repository and release actions.",
+      "Outcome claims require comparable baseline and pilot work classes."
+    ],
+    "prohibitedClaims": [
+      "Do not claim autonomous software delivery, zero review, or production deployment without verified evidence.",
+      "Do not claim faster delivery or fewer defects without outcome-verified measurements."
+    ]
+  },
+  "implementation": {
+    "mode": "event_adapter",
+    "taskstaffEndpoint": null,
+    "authentication": "not_configured",
+    "dataClassification": "confidential",
+    "realDataAllowed": false,
+    "nextAction": "Validate the manifest and run a synthetic request-to-PR mission with planner, implementer, reviewer, release authority, evidence gates, and acceptance."
+  }
+}
