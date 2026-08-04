@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolanicorp.us/schemas/devbot/web-acquisition-harness-episode.v1.json",
+  "title": "DevBot Web Acquisition Harness Episode",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "missionId",
+    "taskContractId",
+    "harnessVersion",
+    "modelConfigurationId",
+    "retrievalPolicyVersion",
+    "memoryPolicyVersion",
+    "toolBundleId",
+    "sandboxProfileId",
+    "verificationContractId",
+    "skillVersions",
+    "executionPattern",
+    "attemptCount",
+    "checkpointCount",
+    "compactionCount",
+    "criticIterationCount",
+    "verifiedOutcome",
+    "qualityScore",
+    "actualCostUsd",
+    "inputTokens",
+    "outputTokens",
+    "toolCalls",
+    "retrievalQueries",
+    "humanInterventions",
+    "artifactIds",
+    "startedAt"
+  ],
+  "properties": {
+    "schema": { "const": "devbot.natt.web-acquisition-harness-episode.v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "taskContractId": { "type": "string", "minLength": 1 },
+    "harnessVersion": { "type": "string", "minLength": 1 },
+    "modelConfigurationId": { "type": "string", "minLength": 1 },
+    "retrievalPolicyVersion": { "type": "string", "minLength": 1 },
+    "memoryPolicyVersion": { "type": "string", "minLength": 1 },
+    "toolBundleId": { "type": "string", "minLength": 1 },
+    "sandboxProfileId": { "type": "string", "minLength": 1 },
+    "verificationContractId": { "type": "string", "minLength": 1 },
+    "skillVersions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "executionPattern": {
+      "enum": ["single-agent", "single-agent-plus-critic", "approved-parallel-agents"]
+    },
+    "provider": {
+      "enum": ["native-http", "crawlee", "firecrawl", "browserless", "manual-review"]
+    },
+    "attemptCount": { "type": "integer", "minimum": 1 },
+    "checkpointCount": { "type": "integer", "minimum": 0 },
+    "compactionCount": { "type": "integer", "minimum": 0 },
+    "criticIterationCount": { "type": "integer", "minimum": 0 },
+    "failureSignature": { "type": ["string", "null"] },
+    "verifiedOutcome": { "type": "boolean" },
+    "qualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "actualCostUsd": { "type": "number", "minimum": 0 },
+    "costPerVerifiedOutcomeUsd": { "type": ["number", "null"], "minimum": 0 },
+    "inputTokens": { "type": "integer", "minimum": 0 },
+    "outputTokens": { "type": "integer", "minimum": 0 },
+    "toolCalls": { "type": "integer", "minimum": 0 },
+    "retrievalQueries": { "type": "integer", "minimum": 0 },
+    "humanInterventions": { "type": "integer", "minimum": 0 },
+    "artifactIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" }
+  }
+}
