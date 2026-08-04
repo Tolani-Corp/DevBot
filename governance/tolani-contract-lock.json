@@ -15,19 +15,19 @@
   "contracts": [
     {
       "path": "platform/agentic/registry/agents.json",
-      "gitBlobSha": "f6809add645a089882a25f900c86d058a7047f5f"
+      "gitBlobSha": "171d1858f27b1a4a9c20502d4f895252412fe0eb"
     },
     {
       "path": "platform/agentic/manifests/devbot-developer.agent.json",
-      "gitBlobSha": "manifest-devbot-v1-pinned-at-authority-commit"
+      "gitBlobSha": "304557c3a6e41be4141dcb3d5c2305d292f830a6"
     },
     {
       "path": "platform/agentic/reliability/standard-v1.json",
-      "gitBlobSha": "reliability-standard-v1-pinned-at-authority-commit"
+      "gitBlobSha": "6446c6377df290799294679b5c53fc5b35a5de3f"
     },
     {
       "path": "platform/agentic/policies/autonomy-policy.v1.json",
-      "gitBlobSha": "autonomy-policy-v1-pinned-at-authority-commit"
+      "gitBlobSha": "e83d6df75632be70ad0eb0194e9ed712dc2c8062"
     }
   ],
   "requiredContext": [
