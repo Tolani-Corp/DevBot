@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tolani.dev/natt-capability-execution-request.v1.json",
+  "title": "NATT Capability Execution Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "missionId",
+    "capabilityId",
+    "capabilityVersion",
+    "environmentClass",
+    "targetIdentifiers",
+    "targetAllowlisted",
+    "authorizationArtifactValid",
+    "namedOperatorId",
+    "emergencyStopContact",
+    "approvals",
+    "usesSyntheticIdentity",
+    "credentialSource",
+    "runnerEphemeral",
+    "runnerEgressRestricted",
+    "telemetryReady",
+    "cleanupReady",
+    "explicitDenyObserved",
+    "requestedRuntimeSeconds",
+    "requestedConcurrentActions",
+    "requestedEstimatedCostUsd",
+    "requestedAt"
+  ],
+  "properties": {
+    "requestId": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "capabilityId": { "type": "string", "pattern": "^natt\\.[a-z0-9-]+\\.v[0-9]+$" },
+    "capabilityVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "environmentClass": {
+      "enum": [
+        "tolani-cyber-range",
+        "deliberately-vulnerable-lab",
+        "synthetic-identity-lab",
+        "owned-staging",
+        "owned-production",
+        "client-authorized"
+      ]
+    },
+    "targetIdentifiers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "targetAllowlisted": { "type": "boolean" },
+    "authorizationArtifactValid": { "type": "boolean" },
+    "authorizationExpiresAt": { "type": "string", "format": "date-time" },
+    "namedOperatorId": { "type": "string", "minLength": 1 },
+    "emergencyStopContact": { "type": "string", "minLength": 1 },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "subjectId", "approvedAt", "expiresAt"],
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "subjectId": { "type": "string", "minLength": 1 },
+          "approvedAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "usesSyntheticIdentity": { "type": "boolean" },
+    "credentialSource": {
+      "enum": [
+        "none",
+        "synthetic-vault",
+        "range-issuer",
+        "engagement-test-vault",
+        "external-or-unknown"
+      ]
+    },
+    "runnerEphemeral": { "type": "boolean" },
+    "runnerEgressRestricted": { "type": "boolean" },
+    "telemetryReady": { "type": "boolean" },
+    "cleanupReady": { "type": "boolean" },
+    "explicitDenyObserved": { "type": "boolean" },
+    "requestedRuntimeSeconds": { "type": "integer", "minimum": 1 },
+    "requestedConcurrentActions": { "type": "integer", "minimum": 1 },
+    "requestedEstimatedCostUsd": { "type": "number", "minimum": 0 },
+    "requestedAt": { "type": "string", "format": "date-time" }
+  }
+}
