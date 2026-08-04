@@ -1,0 +1,39 @@
+name: DevBot Governed Runtime Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'governance/**'
+      - 'scripts/validate-governed-runtime.mjs'
+      - 'tests/governed-runtime.test.mjs'
+      - '.github/workflows/devbot-level3-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'governance/**'
+      - 'scripts/validate-governed-runtime.mjs'
+      - 'tests/governed-runtime.test.mjs'
+      - '.github/workflows/devbot-level3-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governed-runtime:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate immutable contract and autonomy boundaries
+        run: node scripts/validate-governed-runtime.mjs
+      - name: Run fail-closed boundary tests
+        run: node --test tests/governed-runtime.test.mjs
+      - name: Assert Level 4 remains disabled
+        run: |
+          node -e "const l=require('./governance/tolani-contract-lock.json'); if(l.agent.level4Enabled!==false) process.exit(1); if(l.agent.level3Active!==false) process.exit(1)"
