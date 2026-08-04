@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tolani.dev/natt-capability-registry.v1.json",
+  "title": "NATT Capability Registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$id",
+    "version",
+    "status",
+    "owner",
+    "defaultPolicy",
+    "capabilities"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$id": { "const": "tolani.natt.capability-registry.v1" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "enum": ["draft", "approved", "retired"] },
+    "owner": { "type": "string", "minLength": 1 },
+    "defaultPolicy": { "const": "fail-closed" },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/capability" }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "name",
+        "owner",
+        "checksum",
+        "status",
+        "executionClass",
+        "riskTier",
+        "toolAdapter",
+        "attackTechniques",
+        "allowedEnvironmentClasses",
+        "requiredApprovalRoles",
+        "minimumDistinctApprovers",
+        "credentialPolicy",
+        "syntheticIdentityRequired",
+        "telemetryRequired",
+        "cleanupRequired",
+        "targetAllowlistRequired",
+        "limits",
+        "prohibitedContexts"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^natt\\.[a-z0-9-]+\\.v[0-9]+$" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "name": { "type": "string", "minLength": 3 },
+        "owner": { "type": "string", "minLength": 1 },
+        "checksum": { "type": "string", "pattern": "^sha256:.+" },
+        "status": {
+          "enum": [
+            "proposed",
+            "generated",
+            "static-reviewed",
+            "lab-tested",
+            "detection-mapped",
+            "cleanup-verified",
+            "approved",
+            "suspended",
+            "retired"
+          ]
+        },
+        "executionClass": {
+          "enum": ["knowledge-only", "lab-executable", "mission-authorized"]
+        },
+        "riskTier": { "enum": ["low", "moderate", "high", "critical"] },
+        "toolAdapter": {
+          "enum": [
+            "natt",
+            "caldera",
+            "atomic-red-team",
+            "owasp-zap",
+            "burp-manual",
+            "playwright"
+          ]
+        },
+        "attackTechniques": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^T[0-9]{4}(?:\\.[0-9]{3})?$" }
+        },
+        "allowedEnvironmentClasses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "tolani-cyber-range",
+              "deliberately-vulnerable-lab",
+              "synthetic-identity-lab",
+              "owned-staging",
+              "owned-production",
+              "client-authorized"
+            ]
+          }
+        },
+        "requiredApprovalRoles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "minimumDistinctApprovers": { "type": "integer", "minimum": 0 },
+        "credentialPolicy": {
+          "enum": [
+            "none",
+            "synthetic-only",
+            "lab-issued-only",
+            "engagement-scoped-test-credentials"
+          ]
+        },
+        "syntheticIdentityRequired": { "type": "boolean" },
+        "telemetryRequired": { "const": true },
+        "cleanupRequired": { "const": true },
+        "targetAllowlistRequired": { "const": true },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxRuntimeSeconds",
+            "maxConcurrentActions",
+            "maxTargets",
+            "maxEstimatedCostUsd"
+          ],
+          "properties": {
+            "maxRuntimeSeconds": { "type": "integer", "minimum": 1 },
+            "maxConcurrentActions": { "type": "integer", "minimum": 1 },
+            "maxTargets": { "type": "integer", "minimum": 1 },
+            "maxEstimatedCostUsd": { "type": "number", "minimum": 0 }
+          }
+        },
+        "prohibitedContexts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 3 }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "riskTier": { "const": "critical" } },
+            "required": ["riskTier"]
+          },
+          "then": {
+            "properties": { "minimumDistinctApprovers": { "minimum": 2 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "executionClass": { "const": "knowledge-only" } },
+            "required": ["executionClass"]
+          },
+          "then": {
+            "properties": { "minimumDistinctApprovers": { "const": 0 } }
+          }
+        }
+      ]
+    }
+  }
+}
