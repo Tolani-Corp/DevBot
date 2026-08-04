@@ -9,12 +9,12 @@ import {
 } from "../src/security/managed-signing.js";
 import {
   capabilityBrokerRequestSha256,
-  InMemoryReplayGuard,
   targetIdentifiersSha256,
   verifyCapabilityGrant,
   type CapabilityBrokerRequestBinding,
   type CapabilityGrantClaims,
   type MissionAuthorizationClaims,
+  type ReplayGuard,
   type SignedCapabilityGrant,
   type SignedMissionAuthorization,
 } from "../src/security/natt-capability-signatures.js";
@@ -24,6 +24,16 @@ const missionKeyId = "local-test://natt-mission-key/v1";
 const grantKeyId = "local-test://natt-capability-key/v1";
 let directory = "";
 let privateKey: crypto.KeyObject;
+
+class FixedReplayGuard implements ReplayGuard {
+  readonly #claims = new Set<string>();
+
+  async claim(key: string, expiresAt: string): Promise<boolean> {
+    if (Date.parse(expiresAt) <= now.getTime() || this.#claims.has(key)) return false;
+    this.#claims.add(key);
+    return true;
+  }
+}
 
 function sha256(value: unknown): string {
   return crypto.createHash("sha256").update(canonicalJson(value)).digest("hex");
@@ -170,7 +180,7 @@ describe("NATT signed capability artifacts", () => {
       grant,
       mission,
       request,
-      new InMemoryReplayGuard(),
+      new FixedReplayGuard(),
       now,
     );
 
@@ -183,7 +193,7 @@ describe("NATT signed capability artifacts", () => {
     const mission = signedMission();
     const request = brokerRequest();
     const grant = signedGrant(mission, request);
-    const replayGuard = new InMemoryReplayGuard();
+    const replayGuard = new FixedReplayGuard();
 
     expect((await verifyCapabilityGrant(grant, mission, request, replayGuard, now)).verified).toBe(true);
     const replay = await verifyCapabilityGrant(grant, mission, request, replayGuard, now);
@@ -201,7 +211,7 @@ describe("NATT signed capability artifacts", () => {
       grant,
       mission,
       changedRequest,
-      new InMemoryReplayGuard(),
+      new FixedReplayGuard(),
       now,
     );
     expect(decision.verified).toBe(false);
@@ -223,7 +233,7 @@ describe("NATT signed capability artifacts", () => {
       grant,
       mission,
       request,
-      new InMemoryReplayGuard(),
+      new FixedReplayGuard(),
       now,
     );
     expect(decision.verified).toBe(false);
@@ -239,7 +249,7 @@ describe("NATT signed capability artifacts", () => {
       grant,
       mission,
       request,
-      new InMemoryReplayGuard(),
+      new FixedReplayGuard(),
       now,
     );
     expect(decision.verified).toBe(false);
