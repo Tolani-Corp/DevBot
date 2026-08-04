@@ -67,7 +67,7 @@ describe("web acquisition policy", () => {
       buildMission({
         resilience: {
           ...DEFAULT_ACCESS_RESILIENCE_POLICY,
-          stopOnCaptcha: false as true,
+          stopOnCaptcha: false as unknown as true,
         },
       }),
     );
