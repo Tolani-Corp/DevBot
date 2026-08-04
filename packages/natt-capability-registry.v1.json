@@ -1,0 +1,223 @@
+{
+  "$schema": "../contracts/natt-capability-registry.schema.json",
+  "$id": "tolani.natt.capability-registry.v1",
+  "version": "1.0.0",
+  "status": "draft",
+  "owner": "Tolani Labs / NATT",
+  "defaultPolicy": "fail-closed",
+  "capabilities": [
+    {
+      "id": "natt.challenge-resilience-lab.v1",
+      "version": "1.0.0",
+      "name": "Challenge and CAPTCHA Resilience Laboratory",
+      "owner": "Tolani Labs",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "lab-executable",
+      "riskTier": "moderate",
+      "toolAdapter": "playwright",
+      "attackTechniques": [],
+      "allowedEnvironmentClasses": [
+        "tolani-cyber-range",
+        "deliberately-vulnerable-lab",
+        "synthetic-identity-lab"
+      ],
+      "requiredApprovalRoles": ["range-controller"],
+      "minimumDistinctApprovers": 1,
+      "credentialPolicy": "lab-issued-only",
+      "syntheticIdentityRequired": true,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 1800,
+        "maxConcurrentActions": 2,
+        "maxTargets": 3,
+        "maxEstimatedCostUsd": 10
+      },
+      "prohibitedContexts": [
+        "real-service CAPTCHA solving",
+        "challenge bypass against third-party systems",
+        "concealment of automation after an explicit deny signal"
+      ]
+    },
+    {
+      "id": "natt.synthetic-identity-abuse-lab.v1",
+      "version": "1.0.0",
+      "name": "Synthetic Identity and Account-Abuse Simulation",
+      "owner": "Tolani Labs",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "lab-executable",
+      "riskTier": "high",
+      "toolAdapter": "natt",
+      "attackTechniques": ["T1078"],
+      "allowedEnvironmentClasses": [
+        "tolani-cyber-range",
+        "synthetic-identity-lab"
+      ],
+      "requiredApprovalRoles": ["range-controller", "identity-lab-owner"],
+      "minimumDistinctApprovers": 2,
+      "credentialPolicy": "synthetic-only",
+      "syntheticIdentityRequired": true,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 1800,
+        "maxConcurrentActions": 2,
+        "maxTargets": 2,
+        "maxEstimatedCostUsd": 15
+      },
+      "prohibitedContexts": [
+        "real-person impersonation",
+        "use of customer identity records",
+        "creation of accounts on external services"
+      ]
+    },
+    {
+      "id": "natt.session-replay-detection-lab.v1",
+      "version": "1.0.0",
+      "name": "Session Replay Detection Laboratory",
+      "owner": "Tolani Labs",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "lab-executable",
+      "riskTier": "high",
+      "toolAdapter": "playwright",
+      "attackTechniques": ["T1539", "T1550"],
+      "allowedEnvironmentClasses": [
+        "tolani-cyber-range",
+        "synthetic-identity-lab"
+      ],
+      "requiredApprovalRoles": ["range-controller", "identity-lab-owner"],
+      "minimumDistinctApprovers": 2,
+      "credentialPolicy": "lab-issued-only",
+      "syntheticIdentityRequired": true,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 1200,
+        "maxConcurrentActions": 1,
+        "maxTargets": 2,
+        "maxEstimatedCostUsd": 10
+      },
+      "prohibitedContexts": [
+        "imported browser sessions",
+        "real customer tokens",
+        "stolen or externally obtained credentials"
+      ]
+    },
+    {
+      "id": "natt.zap-authorized-web-assessment.v1",
+      "version": "1.0.0",
+      "name": "Authorized OWASP ZAP Web Assessment",
+      "owner": "NATT Engagement Operations",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "mission-authorized",
+      "riskTier": "high",
+      "toolAdapter": "owasp-zap",
+      "attackTechniques": ["T1190"],
+      "allowedEnvironmentClasses": [
+        "owned-staging",
+        "owned-production",
+        "client-authorized"
+      ],
+      "requiredApprovalRoles": ["client-authorizer", "natt-engagement-lead"],
+      "minimumDistinctApprovers": 2,
+      "credentialPolicy": "engagement-scoped-test-credentials",
+      "syntheticIdentityRequired": false,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 7200,
+        "maxConcurrentActions": 3,
+        "maxTargets": 10,
+        "maxEstimatedCostUsd": 100
+      },
+      "prohibitedContexts": [
+        "unapproved active-scan rules",
+        "availability-impact testing",
+        "targets outside the signed engagement scope"
+      ]
+    },
+    {
+      "id": "natt.atomic-detection-validation.v1",
+      "version": "1.0.0",
+      "name": "Atomic Detection Validation",
+      "owner": "Tolani Labs Purple Team",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "lab-executable",
+      "riskTier": "high",
+      "toolAdapter": "atomic-red-team",
+      "attackTechniques": ["T1059", "T1087", "T1105"],
+      "allowedEnvironmentClasses": [
+        "tolani-cyber-range",
+        "deliberately-vulnerable-lab"
+      ],
+      "requiredApprovalRoles": ["range-controller", "detection-owner"],
+      "minimumDistinctApprovers": 2,
+      "credentialPolicy": "lab-issued-only",
+      "syntheticIdentityRequired": false,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 3600,
+        "maxConcurrentActions": 2,
+        "maxTargets": 5,
+        "maxEstimatedCostUsd": 25
+      },
+      "prohibitedContexts": [
+        "unreviewed tests",
+        "tests without cleanup definitions",
+        "public or production endpoints"
+      ]
+    },
+    {
+      "id": "natt.caldera-adversary-emulation.v1",
+      "version": "1.0.0",
+      "name": "CALDERA Threat-Informed Adversary Emulation",
+      "owner": "NATT Engagement Operations",
+      "checksum": "sha256:pending-build-artifact",
+      "status": "approved",
+      "executionClass": "mission-authorized",
+      "riskTier": "critical",
+      "toolAdapter": "caldera",
+      "attackTechniques": ["T1059", "T1078", "T1087", "T1105"],
+      "allowedEnvironmentClasses": [
+        "tolani-cyber-range",
+        "owned-staging",
+        "client-authorized"
+      ],
+      "requiredApprovalRoles": [
+        "client-authorizer",
+        "natt-engagement-lead",
+        "security-approver"
+      ],
+      "minimumDistinctApprovers": 3,
+      "credentialPolicy": "engagement-scoped-test-credentials",
+      "syntheticIdentityRequired": false,
+      "telemetryRequired": true,
+      "cleanupRequired": true,
+      "targetAllowlistRequired": true,
+      "limits": {
+        "maxRuntimeSeconds": 14400,
+        "maxConcurrentActions": 3,
+        "maxTargets": 25,
+        "maxEstimatedCostUsd": 250
+      },
+      "prohibitedContexts": [
+        "unreviewed LLM-generated abilities",
+        "public CALDERA exposure",
+        "persistence without an explicit signed clause",
+        "real-data exfiltration",
+        "execution after emergency stop or explicit deny"
+      ]
+    }
+  ]
+}
