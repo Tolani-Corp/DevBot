@@ -62,7 +62,7 @@ includesAll(worker, [
   "verifyManagedPayload",
   "trustedRequestKeyIds",
   "verifyAuthorizationSignature",
-  "authorization scope hash mismatch",
+  "Authorization scope hash mismatch",
   "DEBO_NATT_EXECUTION_ENABLED",
   "claimPending",
   "fs.rename",
