@@ -79,7 +79,7 @@ The NATT runtime also requires one supported Azure managed-identity path for Key
 ## Validation
 
 ```bash
-pnpm natt:signatures:check
+node scripts/validate-natt-capability-signatures.mjs
 pnpm exec vitest run tests/natt-capability-signatures.test.ts
 pnpm check
 ```
