@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolani.dev/contracts/natt-signed-capability-artifact.schema.json",
+  "title": "Signed NATT Capability Artifact",
+  "oneOf": [
+    { "$ref": "#/$defs/missionEnvelope" },
+    { "$ref": "#/$defs/capabilityGrantEnvelope" }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "keyId", "value", "signedAt", "provider"],
+      "properties": {
+        "algorithm": { "const": "PS256" },
+        "keyId": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 32 },
+        "signedAt": { "$ref": "#/$defs/timestamp" },
+        "provider": { "enum": ["azure-key-vault", "local-test"] }
+      }
+    },
+    "baseClaims": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "artifactId",
+        "artifactType",
+        "issuer",
+        "audience",
+        "missionId",
+        "environmentClass",
+        "targetIdentifiers",
+        "targetSha256",
+        "nonce",
+        "issuedAt",
+        "notBefore",
+        "expiresAt"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "artifactId": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "artifactType": { "enum": ["mission-authorization", "capability-grant"] },
+        "issuer": { "const": "devbot-natt" },
+        "audience": { "const": "tolani-capability-broker" },
+        "missionId": { "type": "string", "minLength": 8, "maxLength": 160 },
+        "environmentClass": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "targetIdentifiers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+        },
+        "targetSha256": { "$ref": "#/$defs/sha256" },
+        "nonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{16,160}$" },
+        "issuedAt": { "$ref": "#/$defs/timestamp" },
+        "notBefore": { "$ref": "#/$defs/timestamp" },
+        "expiresAt": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "missionClaims": {
+      "allOf": [
+        { "$ref": "#/$defs/baseClaims" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scopeSha256", "maximumGrantLifetimeSeconds"],
+          "properties": {
+            "schemaVersion": true,
+            "artifactId": true,
+            "artifactType": { "const": "mission-authorization" },
+            "issuer": true,
+            "audience": true,
+            "missionId": true,
+            "environmentClass": true,
+            "targetIdentifiers": true,
+            "targetSha256": true,
+            "nonce": true,
+            "issuedAt": true,
+            "notBefore": true,
+            "expiresAt": true,
+            "scopeSha256": { "$ref": "#/$defs/sha256" },
+            "maximumGrantLifetimeSeconds": { "type": "integer", "minimum": 60, "maximum": 3600 }
+          }
+        }
+      ]
+    },
+    "capabilityGrantClaims": {
+      "allOf": [
+        { "$ref": "#/$defs/baseClaims" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "grantId",
+            "capabilityId",
+            "capabilityVersion",
+            "adapterId",
+            "brokerRequestSha256",
+            "missionClaimsSha256",
+            "maximumRuntimeSeconds",
+            "maximumEventCount"
+          ],
+          "properties": {
+            "schemaVersion": true,
+            "artifactId": true,
+            "artifactType": { "const": "capability-grant" },
+            "issuer": true,
+            "audience": true,
+            "missionId": true,
+            "environmentClass": true,
+            "targetIdentifiers": true,
+            "targetSha256": true,
+            "nonce": true,
+            "issuedAt": true,
+            "notBefore": true,
+            "expiresAt": true,
+            "grantId": { "type": "string", "minLength": 8, "maxLength": 160 },
+            "capabilityId": { "type": "string", "minLength": 8, "maxLength": 200 },
+            "capabilityVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "adapterId": { "type": "string", "minLength": 3, "maxLength": 120 },
+            "brokerRequestSha256": { "$ref": "#/$defs/sha256" },
+            "missionClaimsSha256": { "$ref": "#/$defs/sha256" },
+            "maximumRuntimeSeconds": { "type": "integer", "minimum": 1, "maximum": 3600 },
+            "maximumEventCount": { "type": "integer", "minimum": 1, "maximum": 10000 }
+          }
+        }
+      ]
+    },
+    "missionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "claims", "claimsSha256", "signature"],
+      "properties": {
+        "schema": { "const": "natt.signed-mission-authorization.v1" },
+        "claims": { "$ref": "#/$defs/missionClaims" },
+        "claimsSha256": { "$ref": "#/$defs/sha256" },
+        "signature": { "$ref": "#/$defs/signature" }
+      }
+    },
+    "capabilityGrantEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "claims", "claimsSha256", "signature"],
+      "properties": {
+        "schema": { "const": "natt.signed-capability-grant.v1" },
+        "claims": { "$ref": "#/$defs/capabilityGrantClaims" },
+        "claimsSha256": { "$ref": "#/$defs/sha256" },
+        "signature": { "$ref": "#/$defs/signature" }
+      }
+    }
+  }
+}
