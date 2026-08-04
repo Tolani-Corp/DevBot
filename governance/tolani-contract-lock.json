@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "authority": {
+    "repository": "Tolani-Corp/TolaniLabs",
+    "commit": "072bc74fc72e3f462293d8b293b88cde184d7190"
+  },
+  "agent": {
+    "name": "devbot-developer",
+    "version": "1.0.0",
+    "serviceAccount": "agent-devbot-developer",
+    "maximumAutonomyLevel": 3,
+    "level3Active": false,
+    "level4Enabled": false
+  },
+  "contracts": [
+    {
+      "path": "platform/agentic/registry/agents.json",
+      "gitBlobSha": "f6809add645a089882a25f900c86d058a7047f5f"
+    },
+    {
+      "path": "platform/agentic/manifests/devbot-developer.agent.json",
+      "gitBlobSha": "manifest-devbot-v1-pinned-at-authority-commit"
+    },
+    {
+      "path": "platform/agentic/reliability/standard-v1.json",
+      "gitBlobSha": "reliability-standard-v1-pinned-at-authority-commit"
+    },
+    {
+      "path": "platform/agentic/policies/autonomy-policy.v1.json",
+      "gitBlobSha": "autonomy-policy-v1-pinned-at-authority-commit"
+    }
+  ],
+  "requiredContext": [
+    "AGENTS.md",
+    "architecture-decisions",
+    "engineering-standards",
+    "dependency-graph",
+    "policy-registry"
+  ],
+  "deniedActions": [
+    "production.write",
+    "deployment.production.execute",
+    "github.pull_request.merge",
+    "github.branch.protected.modify",
+    "identity.role.modify",
+    "secret.read.raw",
+    "policy.modify.direct",
+    "payment.execute",
+    "contract.execute"
+  ],
+  "promotion": {
+    "requiredPassingWindows": 3,
+    "minimumCasesPerWindow": 100,
+    "requiredApprovals": ["founder", "platform-owner", "independent-security"],
+    "productionCanaryRequired": true
+  }
+}
