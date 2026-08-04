@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.tolanicorp.us/natt/web-acquisition-mission.v1.json",
+  "title": "NATT Web Acquisition Mission",
+  "description": "A governed, cooperative web acquisition mission. The schema forbids access-control circumvention and requires domain, robots, rate, budget, and approval controls.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "missionId",
+    "tenantId",
+    "requestedBy",
+    "purpose",
+    "startUrls",
+    "allowedDomains",
+    "deniedDomains",
+    "domainPolicies",
+    "dataClassification",
+    "allowAuthenticatedContent",
+    "allowBrowserInteraction",
+    "publicationAllowed",
+    "humanApprovalRequired",
+    "outputFormats",
+    "cost",
+    "createdAt",
+    "expiresAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "tolani.natt.web-acquisition-mission.v1"
+    },
+    "missionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "tenantId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "requestedBy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "purpose": {
+      "enum": [
+        "research",
+        "supplier-validation",
+        "regulatory-monitoring",
+        "competitive-intelligence",
+        "dataset-development",
+        "security-assessment"
+      ]
+    },
+    "startUrls": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      }
+    },
+    "allowedDomains": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/domain"
+      }
+    },
+    "deniedDomains": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/domain"
+      }
+    },
+    "domainPolicies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/domainPolicy"
+      }
+    },
+    "dataClassification": {
+      "enum": ["public", "internal", "confidential", "restricted"]
+    },
+    "allowAuthenticatedContent": {
+      "type": "boolean"
+    },
+    "allowBrowserInteraction": {
+      "type": "boolean"
+    },
+    "publicationAllowed": {
+      "type": "boolean"
+    },
+    "humanApprovalRequired": {
+      "type": "boolean"
+    },
+    "outputFormats": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["markdown", "html", "json", "screenshot", "links"]
+      }
+    },
+    "cost": {
+      "$ref": "#/$defs/costEnvelope"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253,
+      "pattern": "^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,63}$"
+    },
+    "domainPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "allowed",
+        "respectRobotsTxt",
+        "termsReviewed",
+        "lawfulBasis",
+        "requestsPerMinute",
+        "maxConcurrency",
+        "minDelayMs"
+      ],
+      "properties": {
+        "domain": {
+          "$ref": "#/$defs/domain"
+        },
+        "allowed": {
+          "type": "boolean"
+        },
+        "respectRobotsTxt": {
+          "const": true
+        },
+        "termsReviewed": {
+          "type": "boolean"
+        },
+        "lawfulBasis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "requestsPerMinute": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600
+        },
+        "maxConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "minDelayMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600000
+        },
+        "allowedPaths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "deniedPaths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "approvedProviders": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "native-http",
+              "crawlee",
+              "firecrawl",
+              "browserless",
+              "apify",
+              "custom"
+            ]
+          }
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "costEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxCostUsd",
+        "maxPages",
+        "maxProviderCredits",
+        "maxBrowserMinutes",
+        "maxToolCalls",
+        "maxRuntimeSeconds",
+        "budgetAction"
+      ],
+      "properties": {
+        "maxCostUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maxPages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxProviderCredits": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maxBrowserMinutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maxToolCalls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxRuntimeSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "budgetAction": {
+          "enum": [
+            "stop",
+            "request-approval",
+            "downgrade-provider",
+            "return-partial-result"
+          ]
+        }
+      }
+    }
+  }
+}
