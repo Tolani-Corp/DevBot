@@ -11,14 +11,17 @@ interface SelectProviderArgs {
   providerAvailability?: Partial<Record<AcquisitionProvider, boolean>>;
 }
 
+const DEFAULT_PROVIDER_PREFERENCE: AcquisitionProvider[] = [
+  "native-http",
+  "crawlee",
+  "firecrawl",
+  "browserless",
+  "manual-review",
+];
+
 export async function handle(args: SelectProviderArgs | undefined) {
-  const providerPreference = args?.providerPreference ?? [
-    "native-http",
-    "crawlee",
-    "firecrawl",
-    "browserless",
-    "manual-review",
-  ];
+  const providerPreference: AcquisitionProvider[] =
+    args?.providerPreference ?? DEFAULT_PROVIDER_PREFERENCE;
 
   const provider = selectAcquisitionProvider({
     requiresJavascript: args?.requiresJavascript === true,
