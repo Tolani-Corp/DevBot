@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolanicorp.us/schemas/devbot/web-acquisition-task-contract.v1.json",
+  "title": "DevBot Web Acquisition Task Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "missionId",
+    "tenantId",
+    "objective",
+    "acceptanceCriteria",
+    "prohibitedSideEffects",
+    "requiredArtifacts",
+    "minimumQualityScore",
+    "rollbackConditions",
+    "requiresIndependentCritic"
+  ],
+  "properties": {
+    "schema": { "const": "devbot.natt.web-acquisition-task-contract.v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "tenantId": { "type": "string", "minLength": 1 },
+    "objective": { "type": "string", "minLength": 1 },
+    "acceptanceCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "verificationMethod", "required"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "verificationMethod": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "prohibitedSideEffects": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "requiredArtifacts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "minimumQualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rollbackConditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "requiresIndependentCritic": { "type": "boolean" }
+  }
+}
