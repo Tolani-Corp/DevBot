@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - "packages/natt-ethical-hacker-packages.v1.json"
+      - "packages/natt-capability-registry.v1.json"
       - "contracts/**"
       - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-natt-capability-vault.mjs"
       - "scripts/validate-debo-natt-state.mjs"
       - ".natt/requests/**"
       - "src/agents/natt-roe.ts"
@@ -17,13 +19,16 @@ on:
       - "tests/managed-signing.test.ts"
       - "tests/natt-roe-hardening.test.ts"
       - "tests/pathfinder-gate.test.ts"
+      - "tests/capability-vault.test.ts"
       - ".github/workflows/natt-packages.yml"
   push:
     branches: [main]
     paths:
       - "packages/natt-ethical-hacker-packages.v1.json"
+      - "packages/natt-capability-registry.v1.json"
       - "contracts/**"
       - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-natt-capability-vault.mjs"
       - "scripts/validate-debo-natt-state.mjs"
       - ".natt/requests/**"
       - "src/agents/natt-roe.ts"
@@ -35,6 +40,7 @@ on:
       - "tests/managed-signing.test.ts"
       - "tests/natt-roe-hardening.test.ts"
       - "tests/pathfinder-gate.test.ts"
+      - "tests/capability-vault.test.ts"
 
 permissions:
   contents: read
@@ -55,6 +61,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Validate NATT package contracts
         run: pnpm natt:packages:check
+      - name: Validate NATT capability vault
+        run: pnpm natt:capabilities:check
       - name: Validate asymmetric request, vault, Pathfinder, ROE, and state contracts
         run: pnpm natt:state:check
       - name: Run focused security tests
@@ -65,5 +73,6 @@ jobs:
           tests/managed-signing.test.ts
           tests/natt-roe-hardening.test.ts
           tests/pathfinder-gate.test.ts
+          tests/capability-vault.test.ts
       - name: TypeScript check
         run: pnpm check
