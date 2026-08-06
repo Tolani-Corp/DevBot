@@ -1,6 +1,8 @@
 -- DevBot tenant-safe retrieval migration.
 -- Existing rows are quarantined under the legacy-unassigned tenant until an explicit workspace mapping is approved.
 
+create extension if not exists pgcrypto;
+
 create table if not exists embedding_profiles (
   profile_id text primary key,
   provider text not null,
@@ -136,10 +138,12 @@ create unique index if not exists idx_document_embeddings_versioned_chunk on doc
 alter table documents enable row level security;
 alter table document_embeddings enable row level security;
 
+drop policy if exists documents_tenant_isolation on documents;
 create policy documents_tenant_isolation on documents
   using (tenant_id = nullif(current_setting('app.tenant_id', true), ''))
   with check (tenant_id = nullif(current_setting('app.tenant_id', true), ''));
 
+drop policy if exists document_embeddings_tenant_isolation on document_embeddings;
 create policy document_embeddings_tenant_isolation on document_embeddings
   using (tenant_id = nullif(current_setting('app.tenant_id', true), ''))
   with check (tenant_id = nullif(current_setting('app.tenant_id', true), ''));
