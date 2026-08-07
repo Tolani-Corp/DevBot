@@ -1,0 +1,45 @@
+name: DevBot Retrieval v2
+
+on:
+  push:
+    branches:
+      - agent/tenant-safe-retrieval
+    paths:
+      - 'src/db/schema.ts'
+      - 'src/retrieval/**'
+      - 'tests/retrieval-isolation.test.ts'
+      - 'drizzle/0004_tenant_safe_retrieval.sql'
+      - 'drizzle/0005_embedding_profile_governance.sql'
+      - 'docs/RETRIEVAL_MIGRATION_RUNBOOK.md'
+      - '.github/workflows/retrieval-v2.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/db/schema.ts'
+      - 'src/retrieval/**'
+      - 'tests/retrieval-isolation.test.ts'
+      - 'drizzle/0004_tenant_safe_retrieval.sql'
+      - 'drizzle/0005_embedding_profile_governance.sql'
+      - 'docs/RETRIEVAL_MIGRATION_RUNBOOK.md'
+      - '.github/workflows/retrieval-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test -- tests/retrieval-isolation.test.ts
+      - run: pnpm run check --pretty false
