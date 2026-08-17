@@ -1,0 +1,46 @@
+name: NATT Capability Cryptographic Verification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/natt-signed-capability-artifact.schema.json"
+      - "src/security/managed-signing.ts"
+      - "src/security/natt-capability-signatures.ts"
+      - "tests/natt-capability-signatures.test.ts"
+      - "scripts/validate-natt-capability-signatures.mjs"
+      - "docs/NATT_CAPABILITY_CRYPTOGRAPHIC_VERIFICATION_V1.md"
+      - ".env.natt-signatures.example"
+      - ".github/workflows/natt-capability-signatures.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/natt-signed-capability-artifact.schema.json"
+      - "src/security/managed-signing.ts"
+      - "src/security/natt-capability-signatures.ts"
+      - "tests/natt-capability-signatures.test.ts"
+      - "scripts/validate-natt-capability-signatures.mjs"
+      - "docs/NATT_CAPABILITY_CRYPTOGRAPHIC_VERIFICATION_V1.md"
+      - ".env.natt-signatures.example"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate signature contracts
+        run: node scripts/validate-natt-capability-signatures.mjs
+      - name: Run focused cryptographic tests
+        run: pnpm exec vitest run tests/natt-capability-signatures.test.ts
+      - name: TypeScript check
+        run: pnpm check
