@@ -1,0 +1,69 @@
+name: NATT Security Contracts
+
+on:
+  pull_request:
+    paths:
+      - "packages/natt-ethical-hacker-packages.v1.json"
+      - "contracts/**"
+      - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-debo-natt-state.mjs"
+      - ".natt/requests/**"
+      - "src/agents/natt-roe.ts"
+      - "src/security/**"
+      - "packages/mcp/src/offensive-ops/**"
+      - "mcp-natt/src/handlers/validate_roe_checklist.ts"
+      - "tests/natt-request-state.test.ts"
+      - "tests/network-scope.test.ts"
+      - "tests/managed-signing.test.ts"
+      - "tests/natt-roe-hardening.test.ts"
+      - "tests/pathfinder-gate.test.ts"
+      - ".github/workflows/natt-packages.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/natt-ethical-hacker-packages.v1.json"
+      - "contracts/**"
+      - "scripts/validate-natt-packages.mjs"
+      - "scripts/validate-debo-natt-state.mjs"
+      - ".natt/requests/**"
+      - "src/agents/natt-roe.ts"
+      - "src/security/**"
+      - "packages/mcp/src/offensive-ops/**"
+      - "mcp-natt/src/handlers/validate_roe_checklist.ts"
+      - "tests/natt-request-state.test.ts"
+      - "tests/network-scope.test.ts"
+      - "tests/managed-signing.test.ts"
+      - "tests/natt-roe-hardening.test.ts"
+      - "tests/pathfinder-gate.test.ts"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate NATT package contracts
+        run: pnpm natt:packages:check
+      - name: Validate asymmetric request, vault, Pathfinder, ROE, and state contracts
+        run: pnpm natt:state:check
+      - name: Run focused security tests
+        run: >-
+          pnpm exec vitest run
+          tests/natt-request-state.test.ts
+          tests/network-scope.test.ts
+          tests/managed-signing.test.ts
+          tests/natt-roe-hardening.test.ts
+          tests/pathfinder-gate.test.ts
+      - name: TypeScript check
+        run: pnpm check

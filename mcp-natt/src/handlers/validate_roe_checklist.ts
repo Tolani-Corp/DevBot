@@ -1,180 +1,91 @@
+interface RoeChecklistArgs {
+  target?: unknown;
+  mission_type?: unknown;
+  ghost_mode?: unknown;
+  has_authorization?: unknown;
+  has_scope_document?: unknown;
+  has_emergency_contact?: unknown;
+  has_verified_authorization_signature?: unknown;
+  has_named_operator?: unknown;
+  has_test_identities?: unknown;
+}
 
-import {
-  formatJwtAttack,
-  formatJwtDefense,
-  formatScraperPattern,
-  formatDefensePlaybook,
-  formatROETemplate,
-  formatAuthBypassTechnique,
-  buildMissionGuidanceText,
-  identifyHashLocal,
-  scanContentLocal,
-  formatVpnProtocol,
-  formatVpnLeak,
-  formatVpnDefense,
-  formatVpnProvider,
-  DEFAULT_CREDS,
-  formatPasswordAttackTechnique,
-} from "../formatters.js";
+export async function handle(args: RoeChecklistArgs) {
+  const target = String(args.target ?? "").trim();
+  const missionType = String(args.mission_type ?? "web-app").trim();
+  const ghostMode = String(args.ghost_mode ?? "passive").trim();
+  const hasAuth = Boolean(args.has_authorization);
+  const hasScope = Boolean(args.has_scope_document);
+  const hasContact = Boolean(args.has_emergency_contact);
+  const hasVerifiedSignature = Boolean(args.has_verified_authorization_signature);
+  const hasNamedOperator = Boolean(args.has_named_operator);
+  const hasTestIdentities = Boolean(args.has_test_identities);
+  const activeTesting = ghostMode === "stealth" || ghostMode === "active";
 
+  const checks = [
+    {
+      name: "Written Authorization",
+      passed: hasAuth,
+      required: true,
+      detail: "A signed authorization artifact is required for every NATT package.",
+    },
+    {
+      name: "Verified Authorization Signature",
+      passed: hasVerifiedSignature,
+      required: activeTesting,
+      detail: "Stealth and active testing require a verified detached signature from a trusted authorizer key.",
+    },
+    {
+      name: "Scope Document",
+      passed: hasScope && target.length > 0,
+      required: true,
+      detail: "Scope must identify exact domains, IPs, CIDRs, ports, paths, exclusions, and testing windows.",
+    },
+    {
+      name: "Named Operator",
+      passed: hasNamedOperator,
+      required: true,
+      detail: "Anonymous or inferred operators are not permitted.",
+    },
+    {
+      name: "Emergency Contact",
+      passed: hasContact,
+      required: missionType !== "osint",
+      detail: "Technical and emergency stop contacts are required for technical testing.",
+    },
+    {
+      name: "Synthetic Test Identities",
+      passed: hasTestIdentities,
+      required: missionType === "auth-testing" && activeTesting,
+      detail: "Active authentication testing uses client-provisioned or synthetic identities only.",
+    },
+    {
+      name: "Restricted Infrastructure",
+      passed: !/(?:^|\.)(gov|mil)$/i.test(target),
+      required: true,
+      detail: "Restricted infrastructure requires a separately reviewed government authorization path.",
+    },
+    {
+      name: "Mode Authorization",
+      passed: !activeTesting || (hasAuth && hasVerifiedSignature),
+      required: true,
+      detail: "Higher-impact modes require both the signed document and cryptographic signature verification.",
+    },
+  ];
 
-import {
-  ROE_TEMPLATES,
-  PASSWORD_ATTACK_TECHNIQUES,
-  AUTH_BYPASS_TECHNIQUES,
-  MISSION_CHECKLISTS,
-  REVERSE_ENGINEERING_KNOWLEDGE,
-  type ROETemplate,
-  type PasswordAttackTechnique,
-  type AuthBypassTechnique,
-  type ReverseEngineeringKnowledge,
-} from "../knowledge.js";
+  const blocked = checks.filter((check) => check.required && !check.passed);
+  const result = {
+    approved: blocked.length === 0,
+    target,
+    missionType,
+    ghostMode,
+    checks,
+    blockers: blocked.map((check) => check.name),
+    summary:
+      blocked.length === 0
+        ? `ROE checklist passed for ${missionType}/${ghostMode} on ${target}`
+        : `${blocked.length} blocking control(s): ${blocked.map((check) => check.name).join(", ")}`,
+  };
 
-import { generatePassword, generatePassphrase } from "../password-generator.js";
-
-import {
-  VULNERABILITY_CLASSES,
-  BUG_BOUNTY_METHODOLOGY,
-  DEVSECOPS_PIPELINE_STAGES,
-  PENTEST_METHODOLOGY,
-  DAST_SCAN_PROFILES,
-  COMPLIANCE_FRAMEWORKS,
-  getVulnByCategory,
-  getVulnBySeverity,
-  getVulnById,
-  getComplianceFramework,
-  getDASTProfile,
-  type VulnerabilityClass,
-  type WebSecurityCategory,
-} from "../portswigger.js";
-
-import {
-  SCRAPER_PATTERNS,
-  DEFENSE_PLAYBOOKS,
-  PLATFORM_DEFENSE_PROFILES,
-  CONTENT_INTEGRITY_CHECKS,
-  getScraperPattern,
-  getScrapersByTechnique,
-  getScrapersBySeverity,
-  getDefensePlaybook,
-  getDefensesByCategory,
-  getDefensesForTechnique,
-  getPlatformProfile,
-  getContentIntegrityCheck,
-  getAllTestCases,
-  getAutomatableTests,
-  scoreDefensePosture,
-  type ScraperTechnique,
-  type DefenseCategory,
-} from "../media-security.js";
-
-import {
-  JWT_ATTACK_PATTERNS,
-  JWT_DEFENSE_PLAYBOOKS,
-  JWT_LIBRARY_VULNS,
-  decodeJwt,
-  analyzeJwtConfig,
-  getJwtAttack,
-  getJwtAttacksByType,
-  getJwtAttacksBySeverity,
-  getAutomatableJwtAttacks,
-  getJwtDefense,
-  getJwtDefensesByCategory,
-  getJwtDefensesForAttack,
-  getAllJwtTestCases,
-  getJwtLibraryVulnsByLanguage,
-  getJwtLibraryVulnsBySeverity,
-  scoreJwtPosture,
-  type JwtAttackType,
-  type JwtDefenseCategory,
-  type JwtSeverity,
-  type JwtAttackPattern,
-  type JwtDefensePlaybook,
-} from "../jwt-security.js";
-
-import {
-  VPN_PROTOCOL_ANALYSIS,
-  VPN_LEAK_PATTERNS,
-  VPN_DEFENSE_PLAYBOOKS,
-  VPN_PROVIDER_PROFILES,
-  analyzeVpnConfig,
-  analyzeIpReputation,
-  buildOperationalConfig,
-  getVpnProtocol,
-  getSecureProtocols,
-  getVpnLeak,
-  getVpnLeaksByType,
-  getVpnLeaksBySeverity,
-  getAutomatableVpnLeakTests,
-  getVpnDefense,
-  getVpnDefensesByCategory,
-  getVpnDefensesForLeak,
-  getVpnProvider,
-  getVpnProvidersWithApi,
-  getVpnProvidersByProtocol,
-  getNoLogVpnProviders,
-  getAllVpnTestCases,
-  getAutomatableVpnTests,
-  scoreVpnPosture,
-  type VpnProtocol,
-  type VpnLeakType,
-  type VpnDefenseCategory,
-  type VpnProvider,
-  type VpnSeverity,
-  type VpnLeakPattern,
-  type VpnDefensePlaybook as VpnDefensePlaybookType,
-  type VpnProviderProfile,
-} from "../vpn-security.js";
-
-export async function handle(args: any) {
-{
-        const target = String(args?.["target"] ?? "");
-        const missionType = String(args?.["mission_type"] ?? "web-app");
-        const ghostMode = String(args?.["ghost_mode"] ?? "passive");
-        const hasAuth = Boolean(args?.["has_authorization"]);
-        const hasScope = Boolean(args?.["has_scope_document"]);
-        const hasContact = Boolean(args?.["has_emergency_contact"]);
-
-        // ── PATHFINDER MODE ──────────────────────────────────────
-        if (process.env.NATT_PATHFINDER === "true") {
-          return {
-            content: [{
-              type: "text",
-              text: JSON.stringify({
-                approved: true,
-                target,
-                missionType,
-                ghostMode,
-                checks: [{ name: "PATHFINDER", passed: true, required: false }],
-                blockers: [],
-                summary: `✅ PATHFINDER: ${missionType}/${ghostMode} on ${target} — all checks bypassed`,
-              }, null, 2),
-            }],
-          };
-        }
-
-        const checks = [
-          { name: "Written Authorization", passed: hasAuth || ghostMode === "passive", required: ghostMode !== "passive" },
-          { name: "Scope Document", passed: hasScope, required: true },
-          { name: "Emergency Contact", passed: hasContact, required: missionType !== "osint" },
-          { name: "Target Not Restricted", passed: !/(\.gov|\.mil)$/i.test(target), required: true },
-          { name: "Mode Level Appropriate", passed: ghostMode !== "active" || hasAuth, required: true },
-        ];
-
-        const blocked = checks.filter((c) => c.required && !c.passed);
-        const result = {
-          approved: blocked.length === 0,
-          target,
-          missionType,
-          ghostMode,
-          checks,
-          blockers: blocked.map((c) => c.name),
-          summary:
-            blocked.length === 0
-              ? `✅ ROE checklist passed for ${missionType}/${ghostMode} on ${target}`
-              : `❌ ${blocked.length} blocker(s): ${blocked.map((c) => c.name).join(", ")}`,
-        };
-
-        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-      }
+  return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
 }

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://debo.ai/schemas/debo-natt-state-v1.json",
+  "title": "DEBO to NATT Request and Execution State",
+  "type": "object",
+  "anyOf": [
+    { "$ref": "#/$defs/requestState" },
+    { "$ref": "#/$defs/executionState" }
+  ],
+  "$defs": {
+    "lifecycle": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending-approval",
+        "approved",
+        "queued",
+        "claimed",
+        "validating",
+        "running",
+        "pause-requested",
+        "paused",
+        "stop-requested",
+        "stopped",
+        "completed",
+        "rejected",
+        "failed",
+        "expired"
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 2 },
+        "type": {
+          "type": "string",
+          "enum": [
+            "operator",
+            "client-authorizer",
+            "security-approver",
+            "debo",
+            "natt-worker",
+            "system"
+          ]
+        }
+      }
+    },
+    "stateEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "eventId",
+        "eventType",
+        "from",
+        "to",
+        "actor",
+        "occurredAt",
+        "reason",
+        "metadata",
+        "previousHash",
+        "hash"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "eventId": { "type": "string", "format": "uuid" },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "created",
+            "transition",
+            "approval-recorded",
+            "approval-invalidated",
+            "dispatch-signed",
+            "stop-requested",
+            "state-synchronized",
+            "lease-heartbeat"
+          ]
+        },
+        "from": { "$ref": "#/$defs/lifecycle" },
+        "to": { "$ref": "#/$defs/lifecycle" },
+        "actor": { "$ref": "#/$defs/actor" },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "reason": { "type": "string", "minLength": 1 },
+        "metadata": { "type": "object" },
+        "previousHash": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+          ]
+        },
+        "hash": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+      }
+    },
+    "requestState": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "lifecycle",
+        "revision",
+        "idempotencyKey",
+        "createdAt",
+        "updatedAt",
+        "events"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "lifecycle": { "$ref": "#/$defs/lifecycle" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "idempotencyKey": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "terminalAt": { "type": "string", "format": "date-time" },
+        "blockedReason": { "type": "string" },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stateEvent" }
+        }
+      }
+    },
+    "workerLease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["leaseId", "workerId", "acquiredAt", "heartbeatAt", "expiresAt"],
+      "properties": {
+        "leaseId": { "type": "string", "format": "uuid" },
+        "workerId": { "type": "string", "minLength": 2 },
+        "acquiredAt": { "type": "string", "format": "date-time" },
+        "heartbeatAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "executionState": {
+      "allOf": [
+        { "$ref": "#/$defs/requestState" },
+        {
+          "type": "object",
+          "required": ["requestId", "sourceRequestRevision"],
+          "properties": {
+            "requestId": { "type": "string", "pattern": "^unc-[a-z0-9-]+$" },
+            "sourceRequestRevision": { "type": "integer", "minimum": 1 },
+            "lease": { "$ref": "#/$defs/workerLease" },
+            "resultDigest": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+          }
+        }
+      ]
+    }
+  },
+  "x-state-invariants": [
+    "revision equals the number of events",
+    "event sequence is contiguous and starts at one",
+    "each event previousHash equals the prior event hash",
+    "the final event to value equals lifecycle",
+    "terminalAt exists if and only if lifecycle is terminal",
+    "terminal states cannot transition",
+    "request and execution states use separate journals",
+    "only the current lease owner may mutate execution state",
+    "idempotency keys prevent duplicate mission intent",
+    "stale running leases are never automatically replayed"
+  ]
+}

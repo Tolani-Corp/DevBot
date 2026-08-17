@@ -1,0 +1,218 @@
+{
+  "$schema": "../contracts/natt-ethical-engagement.schema.json",
+  "$id": "tolani.natt.ethical-hacker-packages.v1",
+  "version": "1.0.0",
+  "status": "draft-commercial",
+  "owner": "Tolani Labs / NATT",
+  "purpose": "Authorization-gated ethical-hacking training and professional security assessment packages.",
+  "governance": {
+    "defaultMode": "fail-closed",
+    "requiresWrittenAuthorization": true,
+    "requiresRulesOfEngagement": true,
+    "requiresNamedOperator": true,
+    "requiresEmergencyStopContact": true,
+    "requiresEvidenceClassification": true,
+    "allowsUnrestrictedBypass": false,
+    "productionCredentialCaptureAllowed": false,
+    "productionPasswordGuessingAllowed": false,
+    "destructiveTestingAllowed": false,
+    "realDataExfiltrationAllowed": false,
+    "references": [
+      "NIST SP 800-115",
+      "NIST SP 800-63B-4",
+      "NIST NICE Framework Components 2.2.0",
+      "OWASP Web Security Testing Guide"
+    ]
+  },
+  "skillContracts": [
+    {
+      "id": "natt.network-foundations.v1",
+      "name": "TCP/IP and Network Foundations",
+      "risk": "low",
+      "modes": ["lab", "passive"],
+      "skills": [
+        "TCP/IP layering and packet flow",
+        "IPv4 and IPv6 addressing fundamentals",
+        "DNS and DHCP behavior",
+        "Ports and common protocols",
+        "OSI-to-TCP/IP mapping",
+        "Packet-capture interpretation",
+        "TLS transport posture review"
+      ],
+      "allowedTools": ["Wireshark", "tcpdump", "Nmap in owned labs or authorized scope"],
+      "inputs": ["owned lab target or signed scope", "learning objective", "approved time window"],
+      "outputs": ["network map", "protocol observations", "sanitized evidence", "remediation notes"],
+      "hardLimits": [
+        "No scanning outside the approved IP, domain, port, and time scope",
+        "No denial-of-service, flooding, or availability-impact testing",
+        "No exploitation without a separately approved active-testing clause"
+      ]
+    },
+    {
+      "id": "natt.authentication-assurance.v1",
+      "name": "Password, Login, MFA, and Session Assurance",
+      "risk": "high",
+      "modes": ["lab", "authorized-active"],
+      "skills": [
+        "Password-policy assessment",
+        "Login transport and TLS validation",
+        "Account-enumeration resistance review",
+        "MFA enrollment, recovery, and bypass-resistance review",
+        "Session fixation, rotation, expiry, and revocation review",
+        "OAuth and OIDC configuration review",
+        "Password-reset and account-recovery workflow review",
+        "Rate-limit and lockout-control validation"
+      ],
+      "allowedTools": ["Burp Suite", "browser developer tools", "test identity provider", "synthetic test accounts"],
+      "inputs": ["signed authorization", "test accounts", "approved login endpoints", "attempt budget", "lockout-safe test plan"],
+      "outputs": ["authentication control matrix", "sanitized request-response evidence", "risk-ranked findings", "retest plan"],
+      "hardLimits": [
+        "Use only client-provisioned or synthetic test accounts",
+        "Never collect, retain, replay, or export real user passwords, backup codes, recovery tokens, or session cookies",
+        "No credential stuffing, broad password spraying, phishing, or social engineering unless separately contracted and approved",
+        "Stop immediately on account lockout, unexpected production-user access, or system instability"
+      ]
+    },
+    {
+      "id": "natt.web-api-assessment.v1",
+      "name": "Web and API Security Assessment",
+      "risk": "high",
+      "modes": ["passive", "authorized-active"],
+      "skills": [
+        "Attack-surface inventory",
+        "OWASP-aligned web testing",
+        "API authorization and tenant-isolation review",
+        "Input-validation and error-handling review",
+        "Security-header and TLS review",
+        "Secrets exposure review",
+        "Business-logic abuse review using test data"
+      ],
+      "allowedTools": ["Burp Suite", "OWASP ZAP", "Nuclei with approved templates", "Firecrawl for public and authorized discovery"],
+      "inputs": ["signed scope", "approved endpoints", "test data", "rate limits", "forbidden actions"],
+      "outputs": ["asset inventory", "finding register", "evidence bundle", "executive report", "technical remediation backlog"],
+      "hardLimits": [
+        "No irreversible transactions",
+        "No cross-tenant access beyond synthetic test tenants",
+        "No malware, persistence, destructive payloads, or real-data exfiltration",
+        "Automated tools must honor the engagement rate limit and stop conditions"
+      ]
+    },
+    {
+      "id": "natt.adversary-simulation.v1",
+      "name": "Enterprise Adversary Simulation",
+      "risk": "critical",
+      "modes": ["authorized-active"],
+      "skills": [
+        "Threat-informed scenario planning",
+        "External attack-path validation",
+        "Identity and access-control validation",
+        "Segmentation and privilege-boundary validation",
+        "Detection and response-control validation",
+        "Executive tabletop coordination",
+        "Remediation verification"
+      ],
+      "allowedTools": ["ROE-approved NATT tools", "client-approved scanners", "client-approved test identities", "synthetic canary data"],
+      "inputs": ["executed MSA and SOW", "authorization to test", "approved scenario", "named targets", "emergency contacts", "kill-switch procedure"],
+      "outputs": ["attack-path narrative", "control validation results", "detection timeline", "executive report", "retest evidence"],
+      "hardLimits": [
+        "No activity before dual approval by the client authorizing officer and NATT engagement lead",
+        "No unrestricted or environment-variable bypass of ROE gates",
+        "No persistence, destructive action, denial-of-service, or real-data exfiltration unless a separate clause expressly authorizes a bounded simulation",
+        "Critical findings trigger an immediate pause and escalation"
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "id": "natt-academy-foundations",
+      "name": "NATT Ethical Hacker Foundations",
+      "audience": "Students, junior analysts, internal IT teams, and supervised apprentices",
+      "deliveryModel": "cohort-or-self-paced-lab",
+      "pricingModel": "per-seat-or-cohort",
+      "includedSkillContracts": ["natt.network-foundations.v1", "natt.authentication-assurance.v1"],
+      "scope": [
+        "TCP/IP, DNS, DHCP, ports, protocols, and packet analysis",
+        "HTTP and HTTPS fundamentals",
+        "Password-policy and login-control assessment using synthetic accounts",
+        "Linux and Windows security fundamentals",
+        "Evidence handling, ethics, authorization, and reporting"
+      ],
+      "deliverables": ["lab workbook", "skills assessment", "sanitized portfolio report", "completion evidence"],
+      "requiredContracts": ["acceptable-use-acknowledgement", "lab-scope-acknowledgement", "evidence-handling-acknowledgement"]
+    },
+    {
+      "id": "natt-auth-login-assurance",
+      "name": "NATT Auth and Login Assurance",
+      "audience": "SaaS, fintech, healthcare, education, and enterprise application teams",
+      "deliveryModel": "fixed-scope-assessment",
+      "pricingModel": "custom-quote",
+      "includedSkillContracts": ["natt.authentication-assurance.v1"],
+      "scope": [
+        "Password policy",
+        "Login and credential transport",
+        "MFA and account recovery",
+        "Session management",
+        "OAuth and OIDC",
+        "Rate limiting and lockout safety",
+        "Role and tenant authorization using test identities"
+      ],
+      "deliverables": ["authentication control matrix", "risk-ranked report", "sanitized evidence", "remediation workshop", "one retest window"],
+      "requiredContracts": ["master-services-agreement", "statement-of-work", "authorization-to-test", "rules-of-engagement", "data-handling-addendum"]
+    },
+    {
+      "id": "natt-network-web-assessment",
+      "name": "NATT Network, Web, and API Assessment",
+      "audience": "Small and midsize enterprises, cloud teams, and regulated organizations",
+      "deliveryModel": "fixed-scope-or-time-boxed-assessment",
+      "pricingModel": "custom-quote",
+      "includedSkillContracts": ["natt.network-foundations.v1", "natt.web-api-assessment.v1", "natt.authentication-assurance.v1"],
+      "scope": [
+        "External network exposure",
+        "TLS and service posture",
+        "Web and API attack surface",
+        "Authentication and authorization controls",
+        "Secrets and configuration exposure",
+        "Remediation validation"
+      ],
+      "deliverables": ["asset inventory", "executive report", "technical report", "evidence bundle", "remediation backlog", "one retest window"],
+      "requiredContracts": ["master-services-agreement", "statement-of-work", "authorization-to-test", "rules-of-engagement", "data-handling-addendum", "emergency-stop-plan"]
+    },
+    {
+      "id": "natt-enterprise-adversary-simulation",
+      "name": "NATT Enterprise Adversary Simulation",
+      "audience": "Mature security programs requiring threat-informed control validation",
+      "deliveryModel": "custom-engagement",
+      "pricingModel": "custom-quote",
+      "includedSkillContracts": ["natt.adversary-simulation.v1", "natt.authentication-assurance.v1", "natt.web-api-assessment.v1"],
+      "scope": [
+        "Threat-informed scenario design",
+        "External attack-path validation",
+        "Identity and privilege-boundary validation",
+        "Detection and response validation",
+        "Executive tabletop and after-action review"
+      ],
+      "deliverables": ["scenario plan", "ROE-approved evidence", "detection timeline", "executive and technical reports", "after-action review", "retest plan"],
+      "requiredContracts": ["master-services-agreement", "statement-of-work", "authorization-to-test", "rules-of-engagement", "data-handling-addendum", "emergency-stop-plan", "executive-approval-record"]
+    },
+    {
+      "id": "natt-retest-validation",
+      "name": "NATT Remediation Retest and Validation",
+      "audience": "Prior NATT assessment clients",
+      "deliveryModel": "fixed-scope-retest",
+      "pricingModel": "custom-quote",
+      "includedSkillContracts": [],
+      "scope": ["Previously reported findings only", "Control regression checks", "Evidence update"],
+      "deliverables": ["retest status matrix", "updated evidence", "closure or residual-risk statement"],
+      "requiredContracts": ["retest-authorization", "scope-confirmation", "data-handling-addendum"]
+    }
+  ],
+  "requiredContractArtifacts": [
+    "master-services-agreement",
+    "statement-of-work",
+    "authorization-to-test",
+    "rules-of-engagement",
+    "data-handling-addendum",
+    "emergency-stop-plan",
+    "retest-acceptance"
+  ]
+}
