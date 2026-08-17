@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolanicorp.us/schemas/devbot/web-acquisition-action-request.v1.json",
+  "title": "DevBot Web Acquisition Action Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "missionId",
+    "objective",
+    "hypothesis",
+    "expectedSignal",
+    "action",
+    "verificationPlan"
+  ],
+  "properties": {
+    "schema": { "const": "devbot.natt.web-acquisition-action-request.v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "objective": { "type": "string", "minLength": 1 },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "expectedSignal": { "type": "string", "minLength": 1 },
+    "priorFailureSignature": { "type": ["string", "null"] },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "arguments", "irreversible"],
+      "properties": {
+        "tool": { "type": "string", "minLength": 1 },
+        "arguments": { "type": "object" },
+        "irreversible": { "type": "boolean" }
+      }
+    },
+    "verificationPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["successCondition", "failureCondition"],
+      "properties": {
+        "successCondition": { "type": "string", "minLength": 1 },
+        "failureCondition": { "type": "string", "minLength": 1 },
+        "verificationTool": { "type": "string" }
+      }
+    },
+    "rollbackPlan": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["description"],
+          "properties": {
+            "description": { "type": "string", "minLength": 1 },
+            "tool": { "type": "string" },
+            "arguments": { "type": "object" }
+          }
+        }
+      ]
+    }
+  }
+}

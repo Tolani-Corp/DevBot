@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolanicorp.us/schemas/devbot/web-acquisition-dry-run.v1.json",
+  "title": "DevBot Web Acquisition Dry-Run Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "missionId",
+    "taskContractId",
+    "approved",
+    "willContactTarget",
+    "missionViolations",
+    "taskContractViolations",
+    "requiredApprovals",
+    "proposedProvider",
+    "executionPattern",
+    "maxParallelAgents",
+    "toolBundleId",
+    "retrievalPolicyVersion",
+    "memoryPolicyVersion",
+    "harnessVersion",
+    "modelConfigurationId"
+  ],
+  "properties": {
+    "schema": { "const": "devbot.natt.web-acquisition-dry-run.v1" },
+    "missionId": { "type": "string", "minLength": 1 },
+    "taskContractId": { "type": "string", "minLength": 1 },
+    "approved": { "type": "boolean" },
+    "willContactTarget": { "const": false },
+    "missionViolations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "taskContractViolations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "requiredApprovals": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "proposedProvider": {
+      "enum": ["native-http", "crawlee", "firecrawl", "browserless", "manual-review"]
+    },
+    "executionPattern": { "const": "single-agent-plus-critic" },
+    "maxParallelAgents": { "const": 1 },
+    "toolBundleId": { "const": "web-acquisition-v1" },
+    "retrievalPolicyVersion": { "const": "lexical-first-v1" },
+    "memoryPolicyVersion": { "const": "three-layer-file-backed-v1" },
+    "harnessVersion": { "type": "string", "minLength": 1 },
+    "modelConfigurationId": { "type": "string", "minLength": 1 }
+  }
+}
