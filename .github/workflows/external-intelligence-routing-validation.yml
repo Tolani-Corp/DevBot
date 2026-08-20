@@ -6,6 +6,7 @@ on:
       - "mcp-natt/src/external-intelligence-routing.ts"
       - "mcp-natt/src/handlers/select_acquisition_provider.ts"
       - "mcp-natt/src/web-acquisition-policy.ts"
+      - "mcp-natt/scripts/external-intelligence-routing-smoke.mjs"
       - "mcp-natt/package.json"
       - "mcp-natt/package-lock.json"
       - ".github/workflows/external-intelligence-routing-validation.yml"
@@ -17,6 +18,7 @@ on:
       - "mcp-natt/src/external-intelligence-routing.ts"
       - "mcp-natt/src/handlers/select_acquisition_provider.ts"
       - "mcp-natt/src/web-acquisition-policy.ts"
+      - "mcp-natt/scripts/external-intelligence-routing-smoke.mjs"
       - "mcp-natt/package.json"
       - "mcp-natt/package-lock.json"
       - ".github/workflows/external-intelligence-routing-validation.yml"
@@ -42,3 +44,6 @@ jobs:
       - name: Type-check and build governed routing
         working-directory: mcp-natt
         run: npm run build
+      - name: Run governed routing smoke test
+        working-directory: mcp-natt
+        run: node scripts/external-intelligence-routing-smoke.mjs
