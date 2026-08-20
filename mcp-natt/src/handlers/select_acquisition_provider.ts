@@ -1,12 +1,12 @@
-import {
-  selectAcquisitionProvider,
-  type AcquisitionProvider,
-} from "../web-acquisition-policy.js";
+import { type AcquisitionProvider } from "../web-acquisition-policy.js";
+import { selectExternalIntelligenceProvider } from "../external-intelligence-routing.js";
 
 interface SelectProviderArgs {
   requiresJavascript?: boolean;
   requiresStatefulBrowser?: boolean;
   knownStaticSource?: boolean;
+  requiresSiteMapping?: boolean;
+  requiresManagedMonitoring?: boolean;
   providerPreference?: AcquisitionProvider[];
   providerAvailability?: Partial<Record<AcquisitionProvider, boolean>>;
 }
@@ -23,10 +23,12 @@ export async function handle(args: SelectProviderArgs | undefined) {
   const providerPreference: AcquisitionProvider[] =
     args?.providerPreference ?? DEFAULT_PROVIDER_PREFERENCE;
 
-  const provider = selectAcquisitionProvider({
+  const decision = selectExternalIntelligenceProvider({
     requiresJavascript: args?.requiresJavascript === true,
     requiresStatefulBrowser: args?.requiresStatefulBrowser === true,
     knownStaticSource: args?.knownStaticSource === true,
+    requiresSiteMapping: args?.requiresSiteMapping === true,
+    requiresManagedMonitoring: args?.requiresManagedMonitoring === true,
     providerPreference,
     providerAvailability: args?.providerAvailability ?? {},
   });
@@ -37,18 +39,10 @@ export async function handle(args: SelectProviderArgs | undefined) {
         type: "text",
         text: JSON.stringify(
           {
-            provider,
-            requiresApproval: provider === "manual-review",
-            rationale:
-              provider === "native-http"
-                ? "Static public source can use the lowest-cost acquisition lane."
-                : provider === "crawlee"
-                  ? "JavaScript-capable self-managed crawling is sufficient."
-                  : provider === "firecrawl"
-                    ? "Managed extraction or stateful browser capability is required."
-                    : provider === "browserless"
-                      ? "Managed browser execution is required."
-                      : "No approved automated provider is available.",
+            provider: decision.provider,
+            capability: decision.capability,
+            requiresApproval: decision.requiresApproval,
+            rationale: decision.rationale,
           },
           null,
           2,
