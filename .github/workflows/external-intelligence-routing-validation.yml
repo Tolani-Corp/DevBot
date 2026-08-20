@@ -1,0 +1,44 @@
+name: External Intelligence Routing Validation
+
+on:
+  pull_request:
+    paths:
+      - "mcp-natt/src/external-intelligence-routing.ts"
+      - "mcp-natt/src/handlers/select_acquisition_provider.ts"
+      - "mcp-natt/src/web-acquisition-policy.ts"
+      - "mcp-natt/package.json"
+      - "mcp-natt/package-lock.json"
+      - ".github/workflows/external-intelligence-routing-validation.yml"
+  push:
+    branches:
+      - main
+      - "agent/**"
+    paths:
+      - "mcp-natt/src/external-intelligence-routing.ts"
+      - "mcp-natt/src/handlers/select_acquisition_provider.ts"
+      - "mcp-natt/src/web-acquisition-policy.ts"
+      - "mcp-natt/package.json"
+      - "mcp-natt/package-lock.json"
+      - ".github/workflows/external-intelligence-routing-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-routing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mcp-natt/package-lock.json
+      - name: Install NATT MCP dependencies
+        working-directory: mcp-natt
+        run: npm ci
+      - name: Type-check and build governed routing
+        working-directory: mcp-natt
+        run: npm run build
