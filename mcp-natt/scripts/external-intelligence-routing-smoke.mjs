@@ -65,7 +65,7 @@ const statefulSource = selectExternalIntelligenceProvider({
   requiresJavascript: true,
   requiresStatefulBrowser: true,
 });
-assert.equal(statefulSource.provider, "browserless");
+assert.equal(statefulSource.provider, "firecrawl");
 
 console.log(JSON.stringify({
   ok: true,
