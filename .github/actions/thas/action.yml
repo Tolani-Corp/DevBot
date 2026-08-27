@@ -1,0 +1,117 @@
+name: "Tolani HTTP Acceptance Standard v1.1"
+description: "Execute schema-validated THAS HTTP acceptance with optional GitHub OIDC identity and exact deployed-SHA binding."
+inputs:
+  manifest:
+    description: "Consumer-repository path to a THAS v1.1 manifest."
+    required: true
+  base-url:
+    description: "Exact deployed base URL. Optional when the manifest uses a populated baseUrlEnv."
+    required: false
+    default: ""
+  receipt:
+    description: "Receipt output path."
+    required: false
+    default: ""
+  offline:
+    description: "Render the request through HTTPie without network execution."
+    required: false
+    default: "false"
+  allow-mutation:
+    description: "Explicitly permit a non-READ_ONLY manifest."
+    required: false
+    default: "false"
+  oidc-audience:
+    description: "When non-empty, mint a short-lived GitHub Actions OIDC token and expose THAS_AUTHORIZATION='Bearer <token>'."
+    required: false
+    default: ""
+  expected-deployed-sha:
+    description: "Expected exact deployment commit SHA. The manifest binds this to a response JSON path."
+    required: false
+    default: ""
+  deployment-id:
+    description: "Deployment identifier included in the receipt."
+    required: false
+    default: ""
+outputs:
+  receipt:
+    description: "Resolved receipt path."
+    value: ${{ steps.execute.outputs.receipt }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set up pinned Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "3.12"
+
+    - name: Install pinned THAS reference dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        python -m pip install --disable-pip-version-check "httpie==3.2.4" "jsonschema==4.25.1"
+        test "$(http --version)" = "3.2.4"
+
+    - name: Validate manifest schema
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        MANIFEST: ${{ inputs.manifest }}
+      run: |
+        set -euo pipefail
+        python "$ACTION_PATH/validate-jsonschema.py" \
+          --schema "$ACTION_PATH/http-acceptance-manifest-v1.1.schema.json" \
+          --document "$MANIFEST"
+
+    - name: Mint ephemeral GitHub OIDC service identity
+      if: ${{ inputs.oidc-audience != '' }}
+      shell: bash
+      env:
+        AUDIENCE: ${{ inputs.oidc-audience }}
+      run: |
+        set -euo pipefail
+        : "${ACTIONS_ID_TOKEN_REQUEST_URL:?id-token: write permission is required}"
+        : "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:?id-token: write permission is required}"
+        encoded_audience="$(python -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["AUDIENCE"], safe=""))')"
+        response="$(curl --fail --silent --show-error \
+          -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${encoded_audience}")"
+        token="$(RESPONSE="$response" python -c 'import json, os; print(json.loads(os.environ["RESPONSE"])["value"])')"
+        test -n "$token"
+        printf '::add-mask::%s\n' "$token"
+        printf 'THAS_AUTHORIZATION=Bearer %s\n' "$token" >> "$GITHUB_ENV"
+
+    - name: Execute THAS
+      id: execute
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        MANIFEST: ${{ inputs.manifest }}
+        BASE_URL: ${{ inputs.base-url }}
+        RECEIPT_INPUT: ${{ inputs.receipt }}
+        OFFLINE: ${{ inputs.offline }}
+        ALLOW_MUTATION: ${{ inputs.allow-mutation }}
+        THAS_EXPECT_DEPLOYED_SHA: ${{ inputs.expected-deployed-sha }}
+        THAS_DEPLOYMENT_ID: ${{ inputs.deployment-id }}
+        THAS_RUNNER_REPOSITORY: Tolani-Corp/DevBot
+        THAS_RUNNER_COMMIT_SHA: ${{ github.action_ref }}
+      run: |
+        set -euo pipefail
+        receipt="${RECEIPT_INPUT:-.artifacts/http-acceptance/$(basename "$MANIFEST" .json).receipt.json}"
+        args=(--manifest "$MANIFEST" --receipt "$receipt")
+        if [ -n "$BASE_URL" ]; then args+=(--base-url "$BASE_URL"); fi
+        if [ "$OFFLINE" = "true" ]; then args+=(--offline); fi
+        if [ "$ALLOW_MUTATION" = "true" ]; then args+=(--allow-mutation); fi
+        node "$ACTION_PATH/http-acceptance.mjs" "${args[@]}"
+        echo "receipt=$receipt" >> "$GITHUB_OUTPUT"
+
+    - name: Validate receipt schema
+      if: ${{ inputs.offline != 'true' }}
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        RECEIPT: ${{ steps.execute.outputs.receipt }}
+      run: |
+        set -euo pipefail
+        python "$ACTION_PATH/validate-jsonschema.py" \
+          --schema "$ACTION_PATH/http-acceptance-receipt-v1.1.schema.json" \
+          --document "$RECEIPT"
