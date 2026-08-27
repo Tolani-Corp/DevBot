@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "tolani.http.acceptance/v1.1",
+  "id": "thas-org-action-offline",
+  "service": "tolani-devbot-thas",
+  "environment": "preview",
+  "risk": "READ_ONLY",
+  "authClass": "none",
+  "request": {
+    "method": "GET",
+    "url": "https://example.invalid/health",
+    "timeoutMs": 3000
+  },
+  "expect": {
+    "status": [200]
+  }
+}

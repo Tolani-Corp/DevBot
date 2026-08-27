@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolani.dev/schemas/thas/http-acceptance-receipt-v1.1.schema.json",
+  "title": "Tolani HTTP Acceptance Receipt v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "testId", "service", "environment", "runner", "identity", "deployment", "risk", "method", "requestTarget", "requestBodySha256", "responseStatus", "responseHeaders", "responseBodySha256", "startedAt", "durationMs", "httpieVersion", "assertions", "result", "runnerExitCode"],
+  "properties": {
+    "schemaVersion": { "const": "tolani.http.acceptance.receipt/v1.1" },
+    "testId": { "type": "string", "minLength": 1 },
+    "service": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "minLength": 1 },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commitSha"],
+      "properties": {
+        "repository": { "type": ["string", "null"] },
+        "commitSha": { "type": ["string", "null"] }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authClass", "sourceRepository", "workflowRef", "runId"],
+      "properties": {
+        "authClass": { "type": "string" },
+        "sourceRepository": { "type": ["string", "null"] },
+        "workflowRef": { "type": ["string", "null"] },
+        "runId": { "type": ["string", "null"] }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "expectedCommitSha", "observedCommitSha", "exactShaVerified"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "expectedCommitSha": { "type": ["string", "null"] },
+        "observedCommitSha": { "type": ["string", "null"] },
+        "exactShaVerified": { "type": ["boolean", "null"] }
+      }
+    },
+    "risk": { "enum": ["READ_ONLY", "SAFE_MUTATION", "DESTRUCTIVE_TEST", "PRODUCTION_PROHIBITED"] },
+    "method": { "enum": ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] },
+    "requestTarget": { "type": "string", "format": "uri" },
+    "requestBodySha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "responseStatus": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+    "responseHeaders": { "type": "object", "additionalProperties": { "type": "string" } },
+    "responseBodySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "httpieVersion": { "type": ["string", "null"] },
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "pass", "detail"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "pass": { "type": "boolean" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "result": { "enum": ["PASS", "FAIL"] },
+    "runnerExitCode": { "type": "integer" }
+  }
+}
