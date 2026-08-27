@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolani.dev/schemas/thas/http-acceptance-manifest-v1.1.schema.json",
+  "title": "Tolani HTTP Acceptance Manifest v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "service", "environment", "risk", "request", "expect"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "tolani.http.acceptance/v1.1" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 160, "pattern": "^[A-Za-z0-9._:-]+$" },
+    "service": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "environment": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "risk": { "enum": ["READ_ONLY", "SAFE_MUTATION", "DESTRUCTIVE_TEST", "PRODUCTION_PROHIBITED"] },
+    "authClass": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": { "enum": ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] },
+        "url": { "type": "string", "minLength": 1 },
+        "baseUrlEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "path": { "type": "string" },
+        "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+        "headers": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "value": { "type": "string" },
+              "valueFromEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+              "redact": { "type": "boolean" }
+            },
+            "oneOf": [{ "required": ["value"] }, { "required": ["valueFromEnv"] }]
+          }
+        },
+        "json": {}
+      },
+      "oneOf": [{ "required": ["url"] }, { "required": ["baseUrlEnv"] }]
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "integer", "minimum": 100, "maximum": 599 } },
+        "contentTypeIncludes": { "type": "string", "minLength": 1 },
+        "jsonEquals": { "type": "object", "additionalProperties": true },
+        "jsonHasPaths": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "maxDurationMs": { "type": "integer", "minimum": 1 },
+        "deployedCommitSha": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "expectedFromEnv"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "expectedFromEnv": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "responseHeaderAllowlist": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}
