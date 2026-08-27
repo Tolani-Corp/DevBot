@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - ".github/actions/thas/**"
+      - "governance/thas/**"
+      - "scripts/validate-thas-acceptance-ledger.py"
       - ".github/workflows/thas-v1-1-action-ci.yml"
+      - ".github/workflows/thas-acceptance-ledger-ci.yml"
   workflow_dispatch:
 
 permissions:
@@ -17,8 +20,24 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Validate shared action offline
         uses: ./.github/actions/thas
         with:
           manifest: .github/actions/thas/offline-fixture.json
           offline: "true"
+
+      - name: Validate immutable THAS acceptance ledger
+        run: |
+          python scripts/validate-thas-acceptance-ledger.py \
+            --schema governance/thas/acceptance-ledger-v1.schema.json \
+            --ledger governance/thas/acceptance-ledger-v1.json
+
+      - name: Reject mutable action references in the THAS governance plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE 'Tolani-Corp/DevBot/.github/actions/thas@(main|master|v[0-9]+([.][0-9]+)*)' governance/thas; then
+            echo "Mutable THAS action reference detected." >&2
+            exit 1
+          fi
