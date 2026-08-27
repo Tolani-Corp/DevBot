@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tolanicorp.us/schemas/thas-acceptance-ledger-v1.schema.json",
+  "title": "Tolani THAS Acceptance Ledger v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "standard", "organization", "services", "acceptances"],
+  "properties": {
+    "schemaVersion": {"const": "tolani.thas.acceptance-ledger/v1"},
+    "standard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "executionAction", "manifestSchemaVersion", "receiptSchemaVersion"],
+      "properties": {
+        "version": {"const": "1.1"},
+        "executionAction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository", "path", "commitSha", "mergedAuthorityCommitSha"],
+          "properties": {
+            "repository": {"const": "Tolani-Corp/DevBot"},
+            "path": {"const": ".github/actions/thas"},
+            "commitSha": {"$ref": "#/$defs/sha"},
+            "mergedAuthorityCommitSha": {"$ref": "#/$defs/sha"}
+          }
+        },
+        "manifestSchemaVersion": {"const": "tolani.http.acceptance/v1.1"},
+        "receiptSchemaVersion": {"const": "tolani.http.acceptance.receipt/v1.1"}
+      }
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repositoryOwner", "repositoryOwnerId"],
+      "properties": {
+        "repositoryOwner": {"const": "Tolani-Corp"},
+        "repositoryOwnerId": {"type": "string", "pattern": "^[0-9]+$"}
+      }
+    },
+    "services": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/service"}
+    },
+    "acceptances": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/acceptance"}
+    }
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "httpsUrl": {"type": "string", "pattern": "^https://[^?#]+$"},
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serviceId", "repository", "repositoryId", "acceptedMainSha", "oidcAudience", "authorityPath"],
+      "properties": {
+        "serviceId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "repository": {"type": "string", "pattern": "^Tolani-Corp/[A-Za-z0-9._-]+$"},
+        "repositoryId": {"type": "string", "pattern": "^[0-9]+$"},
+        "acceptedMainSha": {"$ref": "#/$defs/sha"},
+        "oidcAudience": {"type": "string", "pattern": "^tolani:thas:[a-z0-9-]+$"},
+        "authorityPath": {"type": "string", "pattern": "^/[A-Za-z0-9_./-]+$"}
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "authenticated", "authorized"],
+      "properties": {
+        "status": {"const": 401},
+        "authenticated": {"const": false},
+        "authorized": {"const": false}
+      }
+    },
+    "denial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "authenticated", "authorized", "receiptSchemaValid"],
+      "properties": {
+        "status": {"const": 403},
+        "authenticated": {"const": true},
+        "authorized": {"const": false},
+        "receiptSchemaValid": {"const": true}
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url", "commitSha"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "url": {"$ref": "#/$defs/httpsUrl"},
+        "commitSha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commitSha"],
+      "properties": {
+        "repository": {"const": "Tolani-Corp/DevBot"},
+        "commitSha": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "workflowRunId", "artifactId", "artifactName", "digest", "expiresAt"],
+      "properties": {
+        "repository": {"type": "string", "pattern": "^Tolani-Corp/[A-Za-z0-9._-]+$"},
+        "workflowRunId": {"type": "string", "pattern": "^[0-9]+$"},
+        "artifactId": {"type": "string", "pattern": "^[0-9]+$"},
+        "artifactName": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "expiresAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acceptanceId", "acceptedAt", "callerServiceId", "targetServiceId", "callerMainSha", "targetMainSha", "oidcAudience", "targetDeployment", "baseline", "denial", "runner", "evidence"],
+      "properties": {
+        "acceptanceId": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "acceptedAt": {"type": "string", "format": "date-time"},
+        "callerServiceId": {"type": "string", "minLength": 1},
+        "targetServiceId": {"type": "string", "minLength": 1},
+        "callerMainSha": {"$ref": "#/$defs/sha"},
+        "targetMainSha": {"$ref": "#/$defs/sha"},
+        "oidcAudience": {"type": "string", "minLength": 1},
+        "targetDeployment": {"$ref": "#/$defs/deployment"},
+        "baseline": {"$ref": "#/$defs/baseline"},
+        "denial": {"$ref": "#/$defs/denial"},
+        "runner": {"$ref": "#/$defs/runner"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    }
+  }
+}

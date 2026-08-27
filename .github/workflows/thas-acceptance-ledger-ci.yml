@@ -1,12 +1,17 @@
-name: THAS v1.1 Organization Action CI
+name: THAS Acceptance Ledger CI
 
 on:
   pull_request:
     paths:
-      - ".github/actions/thas/**"
       - "governance/thas/**"
       - "scripts/validate-thas-acceptance-ledger.py"
-      - ".github/workflows/thas-v1-1-action-ci.yml"
+      - ".github/workflows/thas-acceptance-ledger-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "governance/thas/**"
+      - "scripts/validate-thas-acceptance-ledger.py"
       - ".github/workflows/thas-acceptance-ledger-ci.yml"
   workflow_dispatch:
 
@@ -14,20 +19,23 @@ permissions:
   contents: read
 
 jobs:
-  contract:
+  validate:
+    name: Validate immutable THAS authority ledger
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Validate shared action offline
-        uses: ./.github/actions/thas
+      - name: Set up pinned Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          manifest: .github/actions/thas/offline-fixture.json
-          offline: "true"
+          python-version: "3.12"
 
-      - name: Validate immutable THAS acceptance ledger
+      - name: Install pinned validator
+        run: python -m pip install --disable-pip-version-check "jsonschema==4.25.1"
+
+      - name: Validate THAS acceptance ledger
         run: |
           python scripts/validate-thas-acceptance-ledger.py \
             --schema governance/thas/acceptance-ledger-v1.schema.json \

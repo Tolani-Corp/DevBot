@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "tolani.thas.acceptance-ledger/v1",
+  "standard": {
+    "version": "1.1",
+    "executionAction": {
+      "repository": "Tolani-Corp/DevBot",
+      "path": ".github/actions/thas",
+      "commitSha": "e52d2ebd22d92d6c1feab570f3da1be1214cbdba",
+      "mergedAuthorityCommitSha": "da14812500cdfaea8b0f37b73f73e3cb880b4be9"
+    },
+    "manifestSchemaVersion": "tolani.http.acceptance/v1.1",
+    "receiptSchemaVersion": "tolani.http.acceptance.receipt/v1.1"
+  },
+  "organization": {
+    "repositoryOwner": "Tolani-Corp",
+    "repositoryOwnerId": "173644642"
+  },
+  "services": [
+    {
+      "serviceId": "bettorsace-agent-memory",
+      "repository": "Tolani-Corp/bettorsace",
+      "repositoryId": "1186673222",
+      "acceptedMainSha": "898658259b767fa314e81488eb89eb9e5aa4ae1c",
+      "oidcAudience": "tolani:thas:bettorsace",
+      "authorityPath": "/thas/authority"
+    },
+    {
+      "serviceId": "gc-mastery",
+      "repository": "Tolani-Corp/florida-gc-mastery",
+      "repositoryId": "1310404208",
+      "acceptedMainSha": "3f20081fc1a2774cffdd5e8e30e98417f5f44b30",
+      "oidcAudience": "tolani:thas:gc-mastery",
+      "authorityPath": "/api/thas/authority"
+    }
+  ],
+  "acceptances": [
+    {
+      "acceptanceId": "gc-mastery-to-bettorsace-agent-memory-2026-08-27",
+      "acceptedAt": "2026-08-27T22:54:14Z",
+      "callerServiceId": "gc-mastery",
+      "targetServiceId": "bettorsace-agent-memory",
+      "callerMainSha": "3f20081fc1a2774cffdd5e8e30e98417f5f44b30",
+      "targetMainSha": "898658259b767fa314e81488eb89eb9e5aa4ae1c",
+      "oidcAudience": "tolani:thas:bettorsace",
+      "targetDeployment": {
+        "id": "a6372160-098f-4fd4-b7ca-79e62b76bc17",
+        "url": "https://bettorsace-agent-memory-thas-final-8986582.little-salad-9ac3.workers.dev",
+        "commitSha": "898658259b767fa314e81488eb89eb9e5aa4ae1c"
+      },
+      "baseline": {
+        "status": 401,
+        "authenticated": false,
+        "authorized": false
+      },
+      "denial": {
+        "status": 403,
+        "authenticated": true,
+        "authorized": false,
+        "receiptSchemaValid": true
+      },
+      "runner": {
+        "repository": "Tolani-Corp/DevBot",
+        "commitSha": "e52d2ebd22d92d6c1feab570f3da1be1214cbdba"
+      },
+      "evidence": {
+        "repository": "Tolani-Corp/florida-gc-mastery",
+        "workflowRunId": "33124283442",
+        "artifactId": "9667705574",
+        "artifactName": "thas-v1-1-final-gc-to-bettorsace-current-main",
+        "digest": "sha256:be79da366934a0c081d3497da230f24334cc04d2b730fe653582f360a8b3bb4f",
+        "expiresAt": "2026-11-25T22:53:57Z"
+      }
+    },
+    {
+      "acceptanceId": "bettorsace-agent-memory-to-gc-mastery-2026-08-27",
+      "acceptedAt": "2026-08-27T22:56:19Z",
+      "callerServiceId": "bettorsace-agent-memory",
+      "targetServiceId": "gc-mastery",
+      "callerMainSha": "898658259b767fa314e81488eb89eb9e5aa4ae1c",
+      "targetMainSha": "3f20081fc1a2774cffdd5e8e30e98417f5f44b30",
+      "oidcAudience": "tolani:thas:gc-mastery",
+      "targetDeployment": {
+        "id": "dpl_g91JJ6sMjGgaUESpexNuWZGUo5x3",
+        "url": "https://florida-gc-mastery-gqciy3ub4-tolani-labs1.vercel.app",
+        "commitSha": "3f20081fc1a2774cffdd5e8e30e98417f5f44b30"
+      },
+      "baseline": {
+        "status": 401,
+        "authenticated": false,
+        "authorized": false
+      },
+      "denial": {
+        "status": 403,
+        "authenticated": true,
+        "authorized": false,
+        "receiptSchemaValid": true
+      },
+      "runner": {
+        "repository": "Tolani-Corp/DevBot",
+        "commitSha": "e52d2ebd22d92d6c1feab570f3da1be1214cbdba"
+      },
+      "evidence": {
+        "repository": "Tolani-Corp/bettorsace",
+        "workflowRunId": "33124371042",
+        "artifactId": "9667758605",
+        "artifactName": "thas-v1-1-final-bettorsace-to-gc-current-main",
+        "digest": "sha256:e1b00a18918c2a2d7856ac7c30f45284bc018a1321b864162cf8e2ee09a537ae",
+        "expiresAt": "2026-11-25T22:55:22Z"
+      }
+    }
+  ]
+}
