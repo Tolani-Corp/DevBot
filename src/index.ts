@@ -8,6 +8,7 @@ import { createServer, type Server } from "http";
 import { app } from "./slack/bot";
 import { getStartupSummary, loadRuntimeConfig } from "./config";
 import { startDiscordBot, stopDiscordBot } from "./discord/bot";
+import { handleEnterpriseAccessProbe } from "./services/enterprise-access-probe";
 
 let stopCronWorker: (() => Promise<void>) | null = null;
 let webhookServer: Server | null = null;
@@ -88,6 +89,9 @@ async function main(): Promise<void> {
 
   webhookServer = createServer(async (req, res) => {
     try {
+      if (await handleEnterpriseAccessProbe(req, res)) {
+        return;
+      }
       if (req.method === "POST" && req.url === "/webhooks/github") {
         if (!selfUpdateQueue) {
           res.writeHead(503, { "Content-Type": "application/json" });
