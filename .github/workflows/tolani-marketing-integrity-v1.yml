@@ -1,15 +1,27 @@
 name: Tolani Marketing Integrity v1
+
 on:
   pull_request:
-    paths: ['config/**','src/**','app/**','client/src/**','pages/**','.github/workflows/tolani-marketing-integrity-v1.yml']
-permissions: { contents: read }
+    paths:
+      - 'config/**'
+      - 'public-site/**'
+      - 'scripts/validate-public-conversion.mjs'
+      - 'docs/PUBLIC_EVALUATION_SURFACE.md'
+      - '.github/workflows/tolani-marketing-integrity-v1.yml'
+
+permissions:
+  contents: read
+
 jobs:
   marketing-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - name: marketing:check
+        with:
+          node-version: 22
+      - name: Validate commercial context
         run: |
-          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('config/public-product-context.json','utf8'));const f=[];for(const k of ['schemaVersion','entityId','classification','publicStatus','commercialAuthority','primaryCTA','operationalHandoff','analytics','contentOwner','evidenceOwner'])if(!c[k])f.push(k);if(c.reviewExpiresAt&&Date.parse(c.reviewExpiresAt)<Date.now())f.push('expired review');if(!c.primaryCTA?.owner||!c.primaryCTA?.downstreamState||!c.primaryCTA?.event)f.push('CTA binding');if(f.length){console.error('marketing:check failed',f);process.exit(1)}console.log('marketing:check passed')"
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('config/public-product-context.json','utf8'));const f=[];for(const k of ['schemaVersion','entityId','classification','publicStatus','commercialAuthority','primaryCTA','operationalHandoff','analytics','contentOwner','evidenceOwner'])if(!c[k])f.push(k);if(c.reviewExpiresAt&&Date.parse(c.reviewExpiresAt)<Date.now())f.push('expired review');if(!c.primaryCTA?.route||!c.primaryCTA?.owner||!c.primaryCTA?.downstreamState||!c.primaryCTA?.event)f.push('CTA binding');if(!c.secondaryCTA?.route||!c.secondaryCTA?.event)f.push('secondary CTA binding');if(f.length){console.error('marketing:check failed',f);process.exit(1)}console.log('commercial context passed')"
+      - name: Validate public evaluation surface
+        run: node scripts/validate-public-conversion.mjs

@@ -1,30 +1,90 @@
 {
-  "schemaVersion":"1.0.0",
-  "entityId":"tolani.devbot",
-  "canonicalRepo":"Tolani-Corp/DevBot",
-  "canonicalDomain":null,
-  "classification":"commercial_product",
-  "publicStatus":"G2",
-  "commercialAuthority":"local_with_portfolio_governance",
-  "inheritsProtocolFrom":"Tolani-Corp/TolaniCorp-HQ:tolani.portfolio.commercial_context.v1",
-  "audiences":[{"id":"engineering_teams","jobToBeDone":"Convert scoped engineering requests into governed, reviewable pull requests with lower review drag."},{"id":"platform_leads","jobToBeDone":"Evaluate controlled AI engineering execution with evidence, approval and memory boundaries."}],
-  "offers":[{"id":"request_to_pr","status":"beta","description":"Governed request-to-reviewed-PR engineering execution."}],
-  "valueProposition":"A governed engineering teammate that turns bounded requests into reviewable code changes with human approval and evidence.",
-  "differentiators":["Request-to-PR wedge","Human approval for high-risk actions","Conservative memory and evidence model"],
-  "approvedClaims":[],
-  "conditionalClaims":[],
-  "prohibitedClaims":["Fully autonomous engineering guarantees","Guaranteed bug-free code","Unreviewed production-write authority","Unsupported productivity or cost-savings claims"],
-  "proof":[],
-  "primaryCTA":{"label":"Start an engineering evaluation","route":null,"owner":"DevBot Product Operations","downstreamState":"engineering_evaluation","event":"devbot_evaluation_started"},
-  "secondaryCTA":null,
-  "operationalHandoff":{"owner":"DevBot Product Operations","state":"qualified_engineering_evaluation","system":null},
-  "pricing":null,
-  "serviceArea":null,
-  "legalAndCompliance":{"rule":"Public autonomy, security, performance and productivity claims require evaluation evidence; high-risk execution remains human-gated."},
-  "seo":{},
-  "analytics":{"events":["public_page_viewed","devbot_evaluation_started","first_value_reached","commercial_commitment"],"funnel":["visitor","qualified_evaluation","first_reviewed_pr","commercial_outcome"]},
-  "contentOwner":"DevBot Product Operations",
-  "evidenceOwner":"DevBot Evaluation + Security Operations",
-  "reviewedAt":"2026-08-19T19:00:00Z",
-  "reviewExpiresAt":"2026-11-19T19:00:00Z"
+  "schemaVersion": "1.0.0",
+  "entityId": "tolani.devbot",
+  "canonicalRepo": "Tolani-Corp/DevBot",
+  "canonicalDomain": null,
+  "classification": "commercial_product",
+  "publicStatus": "G2",
+  "commercialAuthority": "local_with_portfolio_governance",
+  "inheritsProtocolFrom": "Tolani-Corp/TolaniCorp-HQ:tolani.portfolio.commercial_context.v1",
+  "audiences": [
+    {
+      "id": "engineering_teams",
+      "jobToBeDone": "Convert scoped engineering requests into governed, reviewable pull requests with lower review drag."
+    },
+    {
+      "id": "platform_leads",
+      "jobToBeDone": "Evaluate controlled AI engineering execution with evidence, approval and memory boundaries."
+    }
+  ],
+  "offers": [
+    {
+      "id": "request_to_pr",
+      "status": "beta",
+      "description": "Governed request-to-reviewed-PR engineering execution."
+    }
+  ],
+  "valueProposition": "A governed engineering teammate that turns bounded requests into reviewable code changes with human approval and evidence.",
+  "differentiators": [
+    "Request-to-PR wedge",
+    "Human approval for high-risk actions",
+    "Conservative memory and evidence model"
+  ],
+  "approvedClaims": [],
+  "conditionalClaims": [],
+  "prohibitedClaims": [
+    "Fully autonomous engineering guarantees",
+    "Guaranteed bug-free code",
+    "Unreviewed production-write authority",
+    "Unsupported productivity or cost-savings claims"
+  ],
+  "proof": [],
+  "primaryCTA": {
+    "label": "Start an engineering evaluation",
+    "route": "/evaluation/",
+    "owner": "DevBot Product Operations",
+    "downstreamState": "engineering_evaluation_started",
+    "event": "devbot_evaluation_started"
+  },
+  "secondaryCTA": {
+    "label": "Review the execution model",
+    "route": "/#workflow",
+    "owner": "DevBot Product Operations",
+    "downstreamState": "execution_model_reviewed",
+    "event": "devbot_execution_model_reviewed"
+  },
+  "operationalHandoff": {
+    "owner": "DevBot Product Operations",
+    "state": "engineering_evaluation_handoff",
+    "system": "TolaniCorp-HQ public contact and human qualification"
+  },
+  "pricing": null,
+  "serviceArea": null,
+  "legalAndCompliance": {
+    "rule": "Public autonomy, security, performance and productivity claims require evaluation evidence; high-risk execution remains human-gated."
+  },
+  "seo": {},
+  "analytics": {
+    "events": [
+      "public_page_viewed",
+      "devbot_evaluation_started",
+      "devbot_execution_model_reviewed",
+      "devbot_evaluation_brief_prepared",
+      "devbot_evaluation_handoff",
+      "first_value_reached",
+      "commercial_commitment"
+    ],
+    "funnel": [
+      "visitor",
+      "evaluation_started",
+      "evaluation_brief_prepared",
+      "human_qualification",
+      "first_reviewed_pr",
+      "commercial_outcome"
+    ]
+  },
+  "contentOwner": "DevBot Product Operations",
+  "evidenceOwner": "DevBot Evaluation + Security Operations",
+  "reviewedAt": "2026-08-19T19:00:00Z",
+  "reviewExpiresAt": "2026-11-19T19:00:00Z"
 }
