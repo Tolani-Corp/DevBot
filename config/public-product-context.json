@@ -69,6 +69,7 @@
       "public_page_viewed",
       "devbot_evaluation_started",
       "devbot_execution_model_reviewed",
+      "devbot_evaluation_brief_prepared",
       "devbot_evaluation_handoff",
       "first_value_reached",
       "commercial_commitment"
@@ -76,6 +77,7 @@
     "funnel": [
       "visitor",
       "evaluation_started",
+      "evaluation_brief_prepared",
       "human_qualification",
       "first_reviewed_pr",
       "commercial_outcome"
