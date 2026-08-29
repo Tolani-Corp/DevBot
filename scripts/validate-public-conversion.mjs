@@ -50,22 +50,26 @@ require(!publicSource.includes("DEVBOT_API_TOKEN"), "public surface must not ref
 require(!publicSource.includes("/api/"), "public surface must not expose runtime API routes");
 require(!publicSource.includes("/mcp"), "public surface must not expose MCP invocation routes");
 
-// Match affirmative promotional guarantees only. Explicit denials such as
-// "not marketed as a fully autonomous engineer" are required safety copy and
-// must not be treated as the prohibited claim itself.
+// These are affirmative promotional formulations only. Safety copy such as
+// "No bug-free guarantee" and "not marketed as a fully autonomous engineer"
+// is intentionally allowed and is separately required below.
 for (const unsupportedClaim of [
-  "fully autonomous engineering guarantee",
+  "we guarantee autonomous engineering",
   "guaranteed autonomous engineering",
-  "guaranteed bug-free",
-  "bug-free guarantee",
-  "guaranteed productivity",
+  "we guarantee bug-free code",
+  "guaranteed bug-free code",
+  "we guarantee productivity",
+  "guaranteed productivity gains",
+  "we guarantee cost savings",
   "guaranteed cost savings",
-  "unreviewed production-write authority granted",
-  "automatic production deployment guaranteed",
+  "production-write authority is granted",
+  "automatic production deployment is guaranteed",
 ]) {
   require(!publicSourceLower.includes(unsupportedClaim), `unsupported public claim detected: ${unsupportedClaim}`);
 }
 
+require(index.includes("not marketed as a fully autonomous engineer"), "landing page must explicitly deny fully autonomous engineering positioning");
+require(index.includes("No bug-free guarantee"), "landing page must explicitly deny a bug-free guarantee");
 require(publicSource.includes("No direct production-write authority"), "evaluation controls must explicitly deny production-write authority");
 require(publicSource.includes("Human pull-request review required"), "evaluation controls must preserve human PR review");
 require(app.includes("productionWriteGranted: false"), "generated evaluation brief must deny production write");
