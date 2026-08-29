@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "tolani.enterprise-service.v1",
+  "serviceId": "devbot",
+  "registryAuthority": "Tolani-Corp/TolaniLabs:platform/enterprise-access/service-registry.json",
+  "domain": "governed-engineering-execution",
+  "interfaces": [
+    { "kind": "api", "internal": { "access": "open-controlled", "scope": "devbot.api.invoke", "billing": "exempt" }, "external": { "access": "disabled" } },
+    { "kind": "mcp", "internal": { "access": "open-controlled", "scope": "devbot.mcp.invoke", "billing": "exempt" }, "external": { "access": "disabled" } }
+  ],
+  "gatewayBypassProtection": { "required": true, "mode": "private-network-or-gateway-auth", "state": "PENDING_VERIFICATION" },
+  "targetDataAuthority": { "structured": "postgresql-18", "cache": "redis-compatible-disposable-only" },
+  "productionAuthority": false,
+  "notes": "DevBot remains internal-only. No paid/external route may be generated from this manifest."
+}
