@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Prepare a bounded DevBot engineering evaluation brief without transmitting repository data or credentials." />
+  <meta name="robots" content="index,follow" />
+  <title>Engineering Evaluation | DevBot</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="../" aria-label="DevBot home">
+        <span class="brand-mark">DB</span>
+        <span>DevBot<small>Engineering evaluation</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Evaluation navigation">
+        <a href="../#workflow">Execution model</a>
+        <a href="../#boundaries">Boundaries</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell" style="padding-bottom:48px">
+      <p class="eyebrow">Bounded evaluation intake</p>
+      <h1>Prepare the control brief before you ask DevBot to touch a repository.</h1>
+      <p class="lede">This page creates a structured, non-PII evaluation brief entirely in your browser. It does not upload code, connect to GitHub, invoke DevBot, create a customer record, or grant production authority.</p>
+    </section>
+
+    <section class="section">
+      <div class="shell eval-layout">
+        <div class="card">
+          <form class="eval-form" data-evaluation-form>
+            <div class="field">
+              <label for="teamContext">Team context</label>
+              <select id="teamContext" name="teamContext" required>
+                <option value="product_engineering">Product engineering</option>
+                <option value="platform_engineering">Platform engineering</option>
+                <option value="internal_tools">Internal tools</option>
+                <option value="evaluation_only">Evaluation / architecture review</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="requestClass">Request class</label>
+              <select id="requestClass" name="requestClass" required>
+                <option value="bug_fix">Bug fix</option>
+                <option value="test_coverage">Test coverage</option>
+                <option value="bounded_refactor">Bounded refactor</option>
+                <option value="documentation">Documentation</option>
+                <option value="integration_change">Integration change</option>
+                <option value="release_support">Release support</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="repositoryAccess">Repository posture</label>
+              <select id="repositoryAccess" name="repositoryAccess" required>
+                <option value="private_github">Private GitHub repository</option>
+                <option value="public_github">Public GitHub repository</option>
+                <option value="sandbox_fixture">Sandbox / fixture repository</option>
+                <option value="not_ready">Repository access not ready</option>
+              </select>
+              <small>Do not paste a repository URL, token, branch secret, or customer data into this page.</small>
+            </div>
+
+            <div class="field">
+              <label for="riskLevel">Requested risk posture</label>
+              <select id="riskLevel" name="riskLevel" required>
+                <option value="low">Low — documentation, tests, or isolated change</option>
+                <option value="moderate">Moderate — multi-file code change with bounded permissions</option>
+                <option value="high">High — security, infrastructure, release, or production-adjacent review</option>
+              </select>
+            </div>
+
+            <fieldset class="field" style="border:0;padding:0;margin:0">
+              <legend style="font-weight:800;margin-bottom:8px">Required controls</legend>
+              <div class="checks">
+                <label class="check"><input type="checkbox" name="controls" value="branch_only" checked /> Branch-only changes before human review</label>
+                <label class="check"><input type="checkbox" name="controls" value="tests_required" checked /> Tests or explicit evidence required before acceptance</label>
+                <label class="check"><input type="checkbox" name="controls" value="human_pr_review" checked /> Human pull-request review required</label>
+                <label class="check"><input type="checkbox" name="controls" value="no_production_write" checked /> No direct production-write authority</label>
+              </div>
+            </fieldset>
+
+            <button class="button button-primary" type="submit">Prepare evaluation brief</button>
+          </form>
+        </div>
+
+        <aside>
+          <div class="notice"><strong>Local-only by design.</strong> The structured selections above stay in this browser until you choose to copy the generated brief. DevBot runtime APIs are not reachable from this public evaluation surface.</div>
+          <pre class="output" data-evaluation-output hidden aria-live="polite"></pre>
+          <div class="actions" style="margin-top:12px">
+            <button class="button button-secondary" type="button" data-copy-brief hidden>Copy brief</button>
+          </div>
+          <div class="handoff card">
+            <p class="eyebrow">Human qualification</p>
+            <h2 style="font-size:30px">Ready to request the evaluation?</h2>
+            <p>Use Tolani Corp’s governed public intake to request a DevBot evaluation. Re-enter only the business information you intend to submit there. The brief generated here does not transfer automatically.</p>
+            <a class="button button-primary" href="https://tolanicorp.us/#contact" target="_blank" rel="noreferrer" data-event="devbot_evaluation_handoff" data-state="engineering_evaluation_handoff">Continue to human intake</a>
+            <p style="font-size:12px;margin-top:14px">Submitting a request does not guarantee acceptance, delivery timing, production access, pricing, or a commercial commitment.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row"><span>DevBot · Evaluation brief</span><span>No credentials · No code upload · No runtime invocation</span></div>
+  </footer>
+  <script src="../app.js" defer></script>
+</body>
+</html>
