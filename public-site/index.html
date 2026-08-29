@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="DevBot is a governed engineering teammate for bounded request-to-reviewed-PR evaluations with human approval and evidence." />
+  <meta name="robots" content="index,follow" />
+  <title>DevBot | Governed Request-to-PR Engineering</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="./" aria-label="DevBot home">
+        <span class="brand-mark">DB</span>
+        <span>DevBot<small>Governed engineering teammate</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#workflow" data-event="devbot_execution_model_reviewed" data-state="execution_model_reviewed">Execution model</a>
+        <a href="#boundaries">Boundaries</a>
+        <a class="button button-primary" href="./evaluation/" data-event="devbot_evaluation_started" data-state="engineering_evaluation_started">Start evaluation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <p class="eyebrow">Request → governed execution → reviewed PR</p>
+      <h1>A governed engineering teammate that turns bounded requests into reviewable code changes with human approval and evidence.</h1>
+      <p class="lede">DevBot is the execution wedge for engineering teams that want to evaluate AI-assisted delivery without handing a model silent production authority. Start with one bounded request, explicit controls, and a reviewable acceptance path.</p>
+      <div class="actions">
+        <a class="button button-primary" href="./evaluation/" data-event="devbot_evaluation_started" data-state="engineering_evaluation_started">Start an engineering evaluation</a>
+        <a class="button button-secondary" href="#workflow" data-event="devbot_execution_model_reviewed" data-state="execution_model_reviewed">Review the execution model</a>
+      </div>
+
+      <div class="boundary-strip" aria-label="DevBot evaluation principles">
+        <article><strong>Bounded scope</strong><span>Evaluation starts with a defined request, repository boundary, risk level, and acceptance controls.</span></article>
+        <article><strong>Human authority</strong><span>Higher-risk actions remain review- and approval-gated. This public surface grants no runtime or production authority.</span></article>
+        <article><strong>Evidence first</strong><span>Code changes, tests, review state, and delivery evidence are evaluated before commercial claims or broader autonomy.</span></article>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="eyebrow">Evaluation model</p><h2>Prove the request-to-PR path before expanding authority.</h2></div>
+          <p>The commercial wedge is deliberately narrow: evaluate how DevBot handles a scoped engineering request, what evidence it produces, where human review intervenes, and whether the resulting change is acceptable.</p>
+        </div>
+        <div class="flow">
+          <article class="card"><span class="step-number">01</span><h3>Request</h3><p>Define the work class and the result that needs review.</p></article>
+          <article class="card"><span class="step-number">02</span><h3>Scope</h3><p>Bind repository, branch, permissions, risk, and acceptance controls.</p></article>
+          <article class="card"><span class="step-number">03</span><h3>Execute</h3><p>Perform only the authorized engineering work inside the bounded evaluation posture.</p></article>
+          <article class="card"><span class="step-number">04</span><h3>Verify</h3><p>Surface code, tests, provenance, exceptions, and reviewer-relevant evidence.</p></article>
+          <article class="card"><span class="step-number">05</span><h3>Review</h3><p>Humans decide whether the change is acceptable and whether any authority should expand.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="boundaries">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="eyebrow">Public truth boundary</p><h2>What this evaluation does not promise.</h2></div>
+          <p>DevBot is not marketed as a fully autonomous engineer. Security, production, performance, productivity, and cost claims remain evidence-gated, and higher-risk execution remains human-controlled.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><span class="step-number">NO</span><h3>No bug-free guarantee</h3><p>Generated code remains subject to testing, review, and acceptance like any other engineering change.</p></article>
+          <article class="card"><span class="step-number">NO</span><h3>No silent production writes</h3><p>The public evaluation surface does not grant deployment, merge, credential, infrastructure, or production-write authority.</p></article>
+          <article class="card"><span class="step-number">NO</span><h3>No invented ROI</h3><p>Productivity, cycle-time, quality, and cost improvements require measured evaluation evidence before publication.</p></article>
+        </div>
+        <div class="notice safe" style="margin-top:20px"><strong>Upmarket path:</strong> when an approved evaluation needs broader workstation, governance, or organizational control, the commercial handoff may advance to DEBO after human qualification.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="eyebrow">Next action</p><h2>Start with one bounded engineering evaluation.</h2></div>
+          <p>The evaluation page prepares a non-PII control brief locally in your browser. It does not submit code, credentials, repository content, or a commercial commitment.</p>
+        </div>
+        <a class="button button-primary" href="./evaluation/" data-event="devbot_evaluation_started" data-state="engineering_evaluation_started">Start an engineering evaluation</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row"><span>DevBot · Tolani ecosystem engineering product</span><span>Evaluation surface only · Human qualification required</span></div>
+  </footer>
+  <script src="./app.js" defer></script>
+</body>
+</html>
