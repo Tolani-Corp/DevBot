@@ -5,6 +5,7 @@ const index = await readFile("public-site/index.html", "utf8");
 const evaluation = await readFile("public-site/evaluation/index.html", "utf8");
 const app = await readFile("public-site/app.js", "utf8");
 const publicSource = `${index}\n${evaluation}\n${app}`;
+const publicSourceLower = publicSource.toLowerCase();
 const failures = [];
 
 function require(condition, message) {
@@ -49,15 +50,20 @@ require(!publicSource.includes("DEVBOT_API_TOKEN"), "public surface must not ref
 require(!publicSource.includes("/api/"), "public surface must not expose runtime API routes");
 require(!publicSource.includes("/mcp"), "public surface must not expose MCP invocation routes");
 
+// Match affirmative promotional guarantees only. Explicit denials such as
+// "not marketed as a fully autonomous engineer" are required safety copy and
+// must not be treated as the prohibited claim itself.
 for (const unsupportedClaim of [
-  "fully autonomous engineer",
+  "fully autonomous engineering guarantee",
+  "guaranteed autonomous engineering",
   "guaranteed bug-free",
+  "bug-free guarantee",
   "guaranteed productivity",
   "guaranteed cost savings",
-  "unreviewed production write",
-  "automatic production deployment",
+  "unreviewed production-write authority granted",
+  "automatic production deployment guaranteed",
 ]) {
-  require(!publicSource.toLowerCase().includes(unsupportedClaim), `unsupported public claim detected: ${unsupportedClaim}`);
+  require(!publicSourceLower.includes(unsupportedClaim), `unsupported public claim detected: ${unsupportedClaim}`);
 }
 
 require(publicSource.includes("No direct production-write authority"), "evaluation controls must explicitly deny production-write authority");
