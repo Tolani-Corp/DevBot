@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "tolani.repository-data-profile.v1",
+  "repository": "Tolani-Corp/DevBot",
+  "repositoryId": "devbot",
+  "tenantId": "tolani-corp",
+  "domain": "governed-engineering-execution",
+  "owner": "Tolani Labs",
+  "lifecycleStatus": "draft",
+  "productionEligible": false,
+  "classificationReviewRequired": true,
+  "statelessControlPlane": false,
+  "environments": [
+    "development",
+    "preview",
+    "staging",
+    "production"
+  ],
+  "dataDomains": [
+    {
+      "id": "devbot.operational",
+      "classification": "CONFIDENTIAL",
+      "accessMode": "service-api-only",
+      "schemaContractRef": "devbot.schema.operational.v1",
+      "retentionPolicyRef": "tolani.retention.pending-owner-approval.v1"
+    }
+  ],
+  "datastores": [
+    {
+      "id": "devbot-target",
+      "engine": "postgresql",
+      "provider": "neon-initial",
+      "role": "authoritative",
+      "connectionAuthority": "repo-runtime-only",
+      "environments": [
+        "development",
+        "preview",
+        "staging",
+        "production"
+      ],
+      "authoritativeFor": [
+        "devbot.operational"
+      ]
+    }
+  ],
+  "crossRepositoryAccess": {
+    "directDatabaseAllowed": false,
+    "apiFabricRequired": true
+  },
+  "migrationState": "postgres-standardization-planned",
+  "evidenceRefs": [
+    "enterprise-access:service-registry:devbot"
+  ]
+}
