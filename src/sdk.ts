@@ -16,6 +16,9 @@ export * from "./reasoning/index.js";
 // Re-export Tolani Harness contracts and governed web acquisition controls
 export * from "./harness/index.js";
 
+// Enterprise reuse-first handoff guard
+export * from "./governance/reuse-handoff.js";
+
 // Version
 export const VERSION = "0.2.0";
 
