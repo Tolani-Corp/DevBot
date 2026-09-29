@@ -240,3 +240,13 @@ export type {
   SupervisionReport,
   CLLMConfig,
 } from "./cllm.js";
+
+// Reuse-first enterprise handoff
+export {
+  assertGovernedReuseForImplementation,
+  validateDevBotReuseHandoff,
+} from "../governance/reuse-handoff.js";
+export type {
+  DevBotReuseHandoff,
+  ReuseDecision,
+} from "../governance/reuse-handoff.js";
