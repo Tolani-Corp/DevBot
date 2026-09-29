@@ -6,6 +6,7 @@
 // ──────────────────────────────────────────────────────────────
 
 import type { AgentRole, AgentResult, AgentTask, VerificationResult } from "../agents/types.js";
+import type { DevBotReuseHandoff } from "../governance/reuse-handoff.js";
 
 // ─── Town ─────────────────────────────────────────────────────
 
@@ -273,6 +274,7 @@ export interface MayorPlan {
   readonly estimatedPolecats: number;
   readonly estimatedTimeMinutes: number;
   readonly riskAssessment: "low" | "medium" | "high";
+  readonly reuseHandoff?: DevBotReuseHandoff;
 }
 
 // ─── Fleet Events ─────────────────────────────────────────────
