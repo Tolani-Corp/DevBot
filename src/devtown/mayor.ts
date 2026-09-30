@@ -31,6 +31,10 @@ import type {
 import { createBead, transitionBead, createConvoy, ConvoyStore } from "./convoy.js";
 import { FleetManager } from "./fleet.js";
 import { createCheckpoint } from "./hooks.js";
+import {
+  assertGovernedReuseForImplementation,
+  type DevBotReuseHandoff,
+} from "../governance/reuse-handoff.js";
 
 // ─── Mayor ────────────────────────────────────────────────────
 
@@ -182,6 +186,25 @@ export class Mayor {
     this.emit({ type: "mayor_plan_created", convoyId: convoy.id, beadCount: beads.length });
 
     return plan;
+  }
+
+  /**
+   * Enterprise-governed planning entry point.
+   *
+   * DEBO / Program Design owns reuse discovery. DevBot consumes that exact
+   * decision and refuses malformed, unapproved, or authority-widening handoffs.
+   */
+  async planGoverned(
+    request: string,
+    repository: string,
+    reuseHandoff: DevBotReuseHandoff,
+  ): Promise<MayorPlan> {
+    const validatedReuse = assertGovernedReuseForImplementation(reuseHandoff);
+    const plan = await this.plan(request, repository);
+    return {
+      ...plan,
+      reuseHandoff: validatedReuse,
+    };
   }
 
   // ─── Execution (MEOW Pipeline) ─────────────────────
