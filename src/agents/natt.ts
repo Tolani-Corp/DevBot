@@ -263,7 +263,7 @@ async function probeHTTP(url: string): Promise<{
           "User-Agent": "Mozilla/5.0 (compatible; SecurityScanner/1.0; +https://devbot.internal/natt)",
           "Accept": "text/html,application/xhtml+xml,application/json,*/*",
         },
-        rejectUnauthorized: false, // needed for TLS analysis
+        rejectUnauthorized: true, // HTTP reconnaissance never bypasses certificate verification
       },
       (res) => {
         let body = "";
