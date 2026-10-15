@@ -1,0 +1,51 @@
+name: Security Lockfile Candidate (read-only)
+on:
+  push:
+    branches:
+      - security/devbot-p0-lockfile-refresh-20261014
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resolution:
+    runs-on:
+      group: tolani-secure-runners
+      labels: ubuntu-latest-m
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact branch SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Establish pinned package manager
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.9 --activate
+          pnpm --version
+      - name: Canonical read-only resolution
+        run: pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
+      - name: Print structured patch for authorized review
+        run: |
+          node <<'NODE'
+          const {execFileSync} = require('node:child_process');
+          const diff = execFileSync('git',['diff','--no-ext-diff','--unified=3','--','pnpm-lock.yaml'],{encoding:'utf8',maxBuffer:12*1024*1024});
+          const encoded = Buffer.from(diff,'utf8').toString('base64');
+          const blocks = encoded.match(/.{1,4000}/g) || [];
+          console.log('TOLANI_LOCK_PATCH_BLOCK_COUNT=' + blocks.length);
+          blocks.forEach((b,i)=>console.log('TOLANI_LOCK_PATCH_BLOCK_' + String(i).padStart(4,'0') + '=' + b));
+          NODE
+      - name: Verify candidate frozen resolution
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Security audit (never bypass)
+        run: pnpm audit --prod --audit-level=moderate
+      - name: Upload canonical candidate lockfile
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: devbot-canonical-security-lockfile-${{ github.sha }}
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 14
