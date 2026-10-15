@@ -516,7 +516,7 @@ async function enumerateSubdomains(domain: string): Promise<string[]> {
 async function probeTLSInfo(hostname: string): Promise<NATTReconData["tlsInfo"]> {
   return new Promise((resolve) => {
     const req = https.request(
-      { hostname, port: 443, method: "HEAD", timeout: 5000, rejectUnauthorized: false },
+      { hostname, port: 443, method: "HEAD", timeout: 5000, rejectUnauthorized: true },
       (res) => {
         const socket = res.socket as import("tls").TLSSocket;
         const cert = socket.getPeerCertificate?.();
@@ -540,8 +540,22 @@ async function probeTLSInfo(hostname: string): Promise<NATTReconData["tlsInfo"]>
         req.destroy();
       }
     );
-    req.on("error", () => resolve(undefined));
-    req.on("timeout", () => { req.destroy(); resolve(undefined); });
+    req.on("error", (error: NodeJS.ErrnoException) => {
+      // Never trust response metadata from an unverified TLS connection.
+      const certificateError = error.code === "ERR_TLS_CERT_ALTNAME_INVALID" ||
+        error.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
+        error.code === "DEPTH_ZERO_SELF_SIGNED_CERT" ||
+        error.code === "SELF_SIGNED_CERT_IN_CHAIN" ||
+        error.code === "CERT_HAS_EXPIRED";
+      resolve({
+        protocol: "unknown", cipher: "unknown", expiry: null,
+        issues: [certificateError ? "TLS certificate validation failed" : "TLS probe failed"],
+      });
+    });
+    req.on("timeout", () => {
+      req.destroy();
+      resolve({ protocol: "unknown", cipher: "unknown", expiry: null, issues: ["TLS probe timed out"] });
+    });
     req.end();
   });
 }
