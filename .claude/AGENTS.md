@@ -1,3 +1,5 @@
+> **Authority precedence (TOLANI-SPEC-SKILLS-GOVERNANCE-V1):** The repository-root `AGENTS.md` governs all coding agents, including Claude, Copilot and Codex. This nested guidance is a convenience, not an override of human review, DEBO authority, independent Z4 or merchant/rights/finance/production release controls. Parallel subtasks are allowed only within independently isolated, scoped branches; no background work may be described as complete until exact-commit tests, security review and receipts have actually been verified. If guidance conflicts, apply the more restrictive rule and escalate to the operator. Skill imports are discovery-only until provenance and human review; never execute untrusted catalog entries.
+
 # Agent Workflow Rules
 
 ## 📋 Task Management Protocol (READ FIRST)
