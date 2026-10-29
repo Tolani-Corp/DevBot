@@ -1,0 +1,50 @@
+{
+  "schema": "tolani.github-app-readonly-pilot.v1",
+  "status": "PENDING_APP_REGISTRATION_AND_CREDENTIALS",
+  "application": {
+    "name": "Tolani Development Automation",
+    "owner": "Tolani-Corp",
+    "registration": "organization_owned_private",
+    "clientIdVariable": "TOLANI_GITHUB_APP_CLIENT_ID",
+    "privateKeySecret": "TOLANI_GITHUB_APP_PRIVATE_KEY"
+  },
+  "installation": {
+    "owner": "Tolani-Corp",
+    "repositorySelection": "selected",
+    "repositories": [
+      "DevBot"
+    ],
+    "permissions": {
+      "metadata": "read",
+      "contents": "read"
+    },
+    "requestedTokenPermissions": {
+      "contents": "read"
+    }
+  },
+  "execution": {
+    "workflow": ".github/workflows/github-app-readonly-canary.yml",
+    "event": "workflow_dispatch",
+    "sourceBranch": "main",
+    "appAction": "actions/create-github-app-token",
+    "appActionSha": "64ab729a6294000f5aa4a4bc0b73d1f32bc45510",
+    "secretLogExposureAllowed": false,
+    "tokenPersistenceAllowed": false,
+    "tokenPrintedAllowed": false,
+    "externalProviderWriteAllowed": false
+  },
+  "authority": {
+    "repositoryWritesAllowed": false,
+    "pullRequestWritesAllowed": false,
+    "automatedApprovalAllowed": false,
+    "autoMergeAllowed": false,
+    "organizationAdminAllowed": false,
+    "productionDeploymentAllowed": false
+  },
+  "activation": {
+    "requiresHumanOwner": true,
+    "hasVerifiedInstallationReceipt": false,
+    "hasVerifiedTokenCanaryReceipt": false,
+    "credentialProvisioned": false
+  }
+}
