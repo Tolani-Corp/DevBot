@@ -1,0 +1,7 @@
+# Security-sensitive DevBot app identities require independent human review.
+# CODEOWNERS must also be enforced by a separately configured branch ruleset.
+/.github/CODEOWNERS @TolaniCorp
+/.github/workflows/github-app-readonly-canary.yml @TolaniCorp
+/config/security/ @TolaniCorp
+/scripts/security/ @TolaniCorp
+/docs/security/GITHUB_APP_READONLY_PILOT_V1.md @TolaniCorp
