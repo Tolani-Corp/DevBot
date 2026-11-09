@@ -1,0 +1,79 @@
+name: Tolani GitHub App Read-Only Canary
+on:
+  pull_request:
+    paths:
+      - config/security/github-app-readonly-pilot.v1.json
+      - scripts/security/validate-github-app-pilot.mjs
+      - scripts/security/validate-github-app-pilot.test.mjs
+      - .github/workflows/github-app-readonly-canary.yml
+  push:
+    branches: [main]
+    paths:
+      - config/security/github-app-readonly-pilot.v1.json
+      - scripts/security/validate-github-app-pilot.mjs
+      - scripts/security/validate-github-app-pilot.test.mjs
+      - .github/workflows/github-app-readonly-canary.yml
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Enter VERIFY_READ_ONLY_APP to test an installed organization-owned GitHub App on trusted main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify explicit non-production read-only scope
+        run: |
+          node scripts/security/validate-github-app-pilot.mjs
+          node --test scripts/security/validate-github-app-pilot.test.mjs
+
+  read-only-token-canary:
+    name: read-only-token-canary
+    needs: policy
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.confirmation == 'VERIFY_READ_ONLY_APP' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - name: Require manually provisioned GitHub App metadata
+        env:
+          APP_CLIENT_ID: ${{ vars.TOLANI_GITHUB_APP_CLIENT_ID }}
+          APP_PRIVATE_KEY_PRESENT: ${{ secrets.TOLANI_GITHUB_APP_PRIVATE_KEY != '' }}
+        run: |
+          test "${GITHUB_REPOSITORY}" = 'Tolani-Corp/DevBot'
+          test -n "${APP_CLIENT_ID}"
+          test "${APP_PRIVATE_KEY_PRESENT}" = 'true'
+      - name: Request short-lived installation token for DevBot only
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510
+        id: app-token
+        with:
+          client-id: ${{ vars.TOLANI_GITHUB_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TOLANI_GITHUB_APP_PRIVATE_KEY }}
+          repositories: DevBot
+          permission-contents: read
+      - name: Validate token installation scope with read-only GitHub API
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(gh api --method GET /installation/repositories --jq '.total_count')"
+          test "$count" = '1'
+          target="$(gh api --method GET /installation/repositories --jq '.repositories[0].full_name')"
+          test "$target" = 'Tolani-Corp/DevBot'
+          metadata="$(gh api --method GET /repos/Tolani-Corp/DevBot --jq '.full_name')"
+          test "$metadata" = 'Tolani-Corp/DevBot'
+          echo "GitHub App read-only repository scope verified; no writes or deployments performed." >> "$GITHUB_STEP_SUMMARY"
