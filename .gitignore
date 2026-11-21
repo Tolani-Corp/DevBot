@@ -29,3 +29,5 @@ build/
 .vscode/
 .idea/
 
+# Optional editor research checkout lives outside the build.
+/vendor/open-pencil/

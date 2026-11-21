@@ -30,6 +30,10 @@ The settings exclude high-churn and heavyweight folders from Zed file scans: `no
 
 The TypeScript language server is given a larger memory budget and code lens is enabled for reference and implementation navigation across the larger DevBot/DEBO codebase.
 
+The Open Pencil checkout is optional editor research. Team members with access
+can keep a separate checkout at `vendor/open-pencil`. DevBot's build and CI
+checkout do not clone that directory.
+
 ## First Use
 
 1. Open this repository in Zed.
